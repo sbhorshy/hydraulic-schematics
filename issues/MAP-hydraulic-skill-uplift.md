@@ -9,14 +9,14 @@
 
 `.agents/skills/hydraulic-schematic/` 补齐参照 fireworks-tech-graph 分析出的五项机制缺口：
 出图质量有**量化构图预算**可判、输入定义在**布局前即被机器校验**（fail-closed）、
-校验闭环带**轮数上限与修法处方**、技能自带**金样回归自测试**、文档写明**冲突次序与运行纪律**。
+校验闭环带**轮数上限与修法处方**、技能自带**基准图回归自测试**、文档写明**冲突次序与运行纪律**。
 五者全部定型（决策关闭 + 实现路径清晰）即为抵达—— implementations 可随后另行执行。
 
 ## Notes
 
 - 领域：航空液压系统原理图绘制工作流（见该 skill 的 SKILL.md 四条不变式，任何决议不得违反）。
 - 参考系：上游 fireworks-tech-graph 的机制名——composition-quality-contract（数值构图契约）、
-  validate before layout（语义预检）、two focused correction passes（有界收敛）、tests/ 套件（金样回归）、rule precedence。
+  validate before layout（语义预检）、two focused correction passes（有界收敛）、tests/ 套件（基准图回归）、rule precedence。
 - tracker **已切换为 GitHub Issues**（本 effort 的票在 #2–#6，地图 #1）：认领改填 assignee 字段，
   阻塞/父子用原生子任务表达；本地 `issues/` 目录自 2026-08-27 起仅为只读存档。
   `.gitattributes` 已禁用换行转换以保字节一致性。
@@ -31,7 +31,7 @@
 
 - 把「构图预算定档」产出的数值接进几何校核输出**度量面板**（穿越/折返/绕行比实测值）——等阈值冻结后才可立票。
 - 「输入契约前置」定型后的正式**预检器实现**及其报告格式——形态二选一未决，不可提前切票。
-- 若源图纸侧修复了油箱方言漂移，为 L0 链路补第二批金样——依赖外部动作，先不入列。
+- 若源图纸侧修复了油箱方言漂移，为 L0 链路补第二批基准图——依赖外部动作，先不入列。
 - 是否需要一个 doctor 类体检工具（引用文件存在性/frontmatter 完整性巡检）——价值待前几项落地后再议。
 
 ## Out of scope

@@ -14,6 +14,20 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 3. **确定性优先**：布局坐标显式给定，不做自动布局；端口坐标从符号 SVG 的 `connection-points` 实读，不硬编码。
 4. **校验不过即是失败**：结构自检失败以退出码 1 终止并报告缺项；无回读图的校核项记为"未校核"，不许静默放过。
 
+## 规则优先级
+
+要求冲突时从高到低裁决：用户显式要求 > 符号/风格约定 > 图类布局规则 > 通用默认。
+唯一不可豁免的下限是 Phase 4 校验闭环：任何上层要求（包括用户显式要求）都不得跳过或弱化三层闸门；
+冲突时要么修图重跑直至全绿，要么把差异逐条披露后按概念图降级交付——不带病通过，也不静默截断校验。
+
+## 运行纪律
+
+- 渲染/校验模板脚本一律先复制到你的工作目录再修改运行，不要原地执行 skill 里的副本。
+- 脚本输入输出路径以脚本自身位置解析（HERE 同级/上级常量），不假设当前工作目录 = skill 目录；
+  换目标系统时只改顶部路径常量与拓扑数据，在任何 CWD 下运行同一份副本结果一致。
+- 守门工具 `sync_snapshot.py` 与 `selftest.py` 是例外：它们属于 skill 基础设施，不复制，
+  按「随附资产与快照同步」的原位命令从仓库根直接运行。
+
 ## 工作流
 
 ### Phase 0 · 选定链路
@@ -67,4 +81,10 @@ python .agents/skills/hydraulic-schematic/scripts/sync_snapshot.py --apply    # 
 
 工具内置闸门：源符号若丢失标准 `connection-points` 端口组而快照现版有之，拒绝拷入该文件（exit 1），确认非误伤才 `--force`。排除规则会拦截测试图/预览图混入；`--prune` 清理存量垃圾。退出码：0 一致/已同步，1 有拦截，2 有待同步差异（dry run）。
 
-同一审计已接入 **pre-push 钩子**（`.git/hooks/pre-push`，不入库）：快照与规范源存在差异即拒绝推送，按提示跑 `--apply` 后重推即可；确需强行越过用 `git push --no-verify`（不建议）。更完整的回归自测试见「金样回归 selftest」工单。
+同一审计已接入 **pre-push 钩子**（`.git/hooks/pre-push`，不入库）：快照与规范源存在差异即拒绝推送，按提示跑 `--apply` 后重推即可；确需强行越过用 `git push --no-verify`（不建议）。
+
+改动符号、catalog 或模板脚本后，跑一条命令的基准图回归确认出图能力未被打破（详细覆盖面见 `scripts/selftest.py` 头注）：
+
+```bash
+python .agents/skills/hydraulic-schematic/scripts/selftest.py    # 0 过 / 1 断
+```
