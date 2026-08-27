@@ -1,5 +1,8 @@
 # 金样回归 selftest v1
 
+> **[5 号 Issue 已为 canonical](https://github.com/sbhorshy/hydraulic-schematics/issues/5)** —— 本文件是迁移存档快照，后续更新只在 GitHub 上进行。
+
+
 <!-- labels: wayfinder:task · AFK -->
 <!-- child of MAP-hydraulic-skill-uplift -->
 

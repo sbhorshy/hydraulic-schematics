@@ -1,5 +1,8 @@
 # hydraulic-schematic 能力抬升 —— Wayfinding 地图
 
+> **[1 号 Issue 已为 canonical](https://github.com/sbhorshy/hydraulic-schematics/issues/1)** —— 本文件是迁移存档快照，后续更新只在 GitHub 上进行。
+
+
 <!-- labels: wayfinder:map -->
 
 ## Destination
@@ -14,8 +17,8 @@
 - 领域：航空液压系统原理图绘制工作流（见该 skill 的 SKILL.md 四条不变式，任何决议不得违反）。
 - 参考系：上游 fireworks-tech-graph 的机制名——composition-quality-contract（数值构图契约）、
   validate before layout（语义预检）、two focused correction passes（有界收敛）、tests/ 套件（金样回归）、rule precedence。
-- 本仓库为 git 仓库（`origin` = github.com 私有库 hydraulic-schematics），tracker 用本地 markdown：
-  工单在本目录 `T0xx-*.md`，阻塞用正文 `Blocked-by` 约定；认领即填 `Assignee`。
+- tracker **已切换为 GitHub Issues**（本 effort 的票在 #2–#6，地图 #1）：认领改填 assignee 字段，
+  阻塞/父子用原生子任务表达；本地 `issues/` 目录自 2026-08-27 起仅为只读存档。
   `.gitattributes` 已禁用换行转换以保字节一致性。
 - 同步工具 sync_snapshot.py 已存在：任何触及 assets/scripts 的决议须注明"同步时快照刷新由其闸门接管"。
 - 工作语言中文；引用工单一律用名称不用裸编号。
