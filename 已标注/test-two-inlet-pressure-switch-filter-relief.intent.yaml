@@ -1,0 +1,50 @@
+# L0 系统意图：双入口滤油与泄压回路
+#
+# 本文件为系统级到设备级的平坦拓扑。装配不是拓扑构造，只是渲染分组。
+# 对照 test-two-inlet-pressure-switch-filter-relief.json（171 行 L2 草案，
+# 其中装配封装把 4 条物理油路各切成两半、多出 8 条网络记录）。
+
+l0_version: "1.1"
+system: TEST-TWO-INLET-PS-CHECK-FILTER-RELIEF
+catalog: comac-hydraulic-components@A
+maturity: concept
+
+extern:
+  IN-001: inlet
+  IN-002: inlet
+  OUT-001: outlet
+  RET-001: return
+
+parts:
+  PS-001: pressure_switch
+  PS-002: pressure_switch
+  CV-001: check_valve
+  CV-002: check_valve
+  F-001: filter
+  RV-001: relief_valve
+
+paths:
+  - [IN-001, CV-001, "@MERGE"]
+  - [IN-002, CV-002, "@MERGE"]
+  - ["@MERGE", F-001, OUT-001]
+
+taps:
+  - {sensor: PS-001, at: CV-001.inlet, position: upstream}
+  - {sensor: PS-002, at: CV-002.inlet, position: upstream}
+
+relief:
+  - {valve: RV-001, from: F-001.outlet, to: RET-001}
+
+# 渲染分组：仅生成虚线框，不参与拓扑、不切分网络、不产生端口。
+# 依据为实际装配边界（不可现场单独拆分），供图面识读，不是连接节点。
+groups:
+  - id: LRU-001
+    label: 双入口滤油与泄压组件
+    members: [PS-001, PS-002, CV-001, CV-002, F-001, RV-001]
+    reason: not_field_removable
+
+unknown:
+  - pressure_class
+  - flow_rate
+  - RV-001.setting
+  - operating_modes

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"
+     width="80" height="80"
+     data-component-type="engine_driven_pump"
+     data-symbol-version="0.1"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="NONE_NO_STANDARD_PAGE_SUPPLIED">
+
+  <!-- 临时符号。组件库无 EDP 资产,本符号由我按通用泵符号构造,
+       未经任何符号标准页核对,不得用于正式出图。
+
+       构造依据:圆 + 指向出口的实心三角(通用泵/马达符号族)。
+       *** 刻意未画变量泵斜箭头 ***
+       EDP 是否为变量泵、是否压力补偿,系统未声明。
+       EMP 的库内资产文件名含 variable-displacement,故 EMP 符号画了
+       斜箭头;EDP 无此依据,不猜。见 unknown: EDP-001.displacement_type。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="40" cy="40" r="22"/>
+    <!-- 排出方向实心三角,顶点落在圆周右侧 -->
+    <path d="M62 40 L48 32 L48 48 Z" fill="#000000" stroke="none"/>
+    <!-- 端口引线 -->
+    <line x1="0"  y1="40" x2="18" y2="40"/>
+    <line x1="62" y1="40" x2="80" y2="40"/>
+    <line x1="40" y1="62" x2="40" y2="80"/>
+    <line x1="40" y1="18" x2="40" y2="0"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-suction" cx="0" cy="40" r="2"
+            data-port-id="suction" data-medium="hydraulic"
+            data-port-role="suction" data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-pressure-out" cx="80" cy="40" r="2"
+            data-port-id="pressure_out" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="out"
+            data-anchor-direction="right"/>
+    <circle id="port-case-drain" cx="40" cy="80" r="2"
+            data-port-id="case_drain" data-medium="hydraulic"
+            data-port-role="case_drain" data-flow-capability="out"
+            data-anchor-direction="down"/>
+    <circle id="port-drive-shaft" cx="40" cy="0" r="2"
+            data-port-id="drive_shaft" data-medium="mechanical"
+            data-port-role="shaft" data-flow-capability="none"
+            data-anchor-direction="up"/>
+  </g>
+</svg>

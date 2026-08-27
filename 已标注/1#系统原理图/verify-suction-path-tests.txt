@@ -1,0 +1,28 @@
+test_S_changes_rendered_slash_height (test_suction_markers.SuctionMarkerTest) ... ok
+test_S_scales_every_dimension (test_suction_markers.SuctionMarkerTest) ... ok
+test_collinear_router_fragments_are_one_visual_run (test_suction_markers.SuctionMarkerTest) ... ok
+test_end_clearance_is_measured_to_group_outer_edge (test_suction_markers.SuctionMarkerTest) ... ok
+test_fsov_to_edp_segment_is_marked_as_suction (test_suction_markers.SuctionMarkerTest) ... ok
+test_horizontal_line_gets_groups_of_five_slashes (test_suction_markers.SuctionMarkerTest) ... ok
+test_inline_component_does_not_reset_terminal_clearance (test_suction_markers.SuctionMarkerTest) ... ok
+test_marker_group_is_rejected_when_it_hits_obstacle (test_suction_markers.SuctionMarkerTest) ... ok
+test_rendered_sheet_has_solid_baseline_and_grouped_slashes (test_suction_markers.SuctionMarkerTest) ... ok
+test_sheet_has_no_renderer_pipeline_arrows (test_suction_markers.SuctionMarkerTest) ... ok
+test_short_port_stub_has_no_marker (test_suction_markers.SuctionMarkerTest) ... ok
+test_suction_geometry_is_derived_from_S (test_suction_markers.SuctionMarkerTest) ... ok
+test_suction_path_kind_propagates_through_inline_component (test_suction_markers.SuctionMarkerTest) ... ok
+test_v17_reports_declared_S (test_suction_markers.SuctionMarkerTest) ... ok
+test_vertical_line_rotates_the_same_marker (test_suction_markers.SuctionMarkerTest) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 6.710s
+
+OK
+wrote /mnt/d/File/COMAC/组件库/已标注/1#系统原理图/1#系统原理图.svg
+nets=16  segments=27  junctions=3  buses={'PRESS': 3, 'MANIFOLD': 4}
+wrote /mnt/d/File/COMAC/组件库/已标注/1#系统原理图/1#系统原理图.svg
+nets=16  segments=27  junctions=3  buses={'PRESS': 3, 'MANIFOLD': 4}
+wrote /mnt/d/File/COMAC/组件库/已标注/1#系统原理图/1#系统原理图.svg
+nets=16  segments=27  junctions=3  buses={'PRESS': 3, 'MANIFOLD': 4}
+wrote /mnt/d/File/COMAC/组件库/已标注/1#系统原理图/1#系统原理图.svg
+nets=16  segments=27  junctions=3  buses={'PRESS': 3, 'MANIFOLD': 4}

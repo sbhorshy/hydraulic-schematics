@@ -1,0 +1,171 @@
+{
+  "schema_version": "2.0-draft-encapsulated-assembly",
+  "model_kind": "hydraulic_semantic_model",
+  "system_id": "TEST-TWO-INLET-PS-CHECK-FILTER-RELIEF",
+  "maturity": "concept_test_not_for_design_release",
+  "generation": {
+    "mode": "natural_language_to_l2_draft",
+    "source_document": "test-two-inlet-pressure-switch-filter-relief.system-description.md",
+    "review_status": "generated_draft_pending_review",
+    "claims": [
+      { "id": "CLM-001", "source_text": "两个外部压力入口进入一个不可现场拆分的总成。", "classification": "explicit" },
+      { "id": "CLM-002", "source_text": "总成内有两个压力开关、两个单向阀、过滤器和溢流阀。", "classification": "explicit" },
+      { "id": "CLM-003", "source_text": "每个压力开关测量对应单向阀入口侧压力。", "classification": "explicit" },
+      { "id": "CLM-004", "source_text": "每个入口经过对应的单向阀。", "classification": "explicit" },
+      { "id": "CLM-005", "source_text": "每个入口经过对应的单向阀后汇合。", "classification": "explicit" },
+      { "id": "CLM-006", "source_text": "汇合油路经滤器到压力出口；滤器出口设溢流阀，溢流阀回油至回油接口。", "classification": "explicit" },
+      { "id": "CLM-007", "source_text": "两个单向阀用于隔离入口之间的反向串流。", "classification": "explicit" },
+      { "id": "INF-001", "source_text": "pressure_switch 在组件目录中是 sensing_only，故其连接角色为 sensing_branch。", "classification": "catalog_inference", "catalog_ref": "pressure_switch@catalog_revision_to_be_pinned" }
+    ]
+  },
+  "nodes": [
+    { "id": "IN-001", "kind": "external_interface", "interface_type": "hydraulic_inlet", "source_claim_ids": ["CLM-001"] },
+    { "id": "IN-002", "kind": "external_interface", "interface_type": "hydraulic_inlet", "source_claim_ids": ["CLM-001"] },
+    {
+      "id": "ASM-001",
+      "kind": "component",
+      "component_type": "dual_inlet_check_valve_filter_pressure_relief_assembly",
+      "members_removable_in_situ": false,
+      "boundary_style": "assembly_enclosure",
+      "source_claim_ids": ["CLM-001", "CLM-002"],
+      "members": [
+        { "id": "PS-001", "component_type": "pressure_switch", "source_claim_ids": ["CLM-002"] },
+        { "id": "CV-001", "component_type": "check_valve", "source_claim_ids": ["CLM-002"] },
+        { "id": "PS-002", "component_type": "pressure_switch", "source_claim_ids": ["CLM-002"] },
+        { "id": "CV-002", "component_type": "check_valve", "source_claim_ids": ["CLM-002"] },
+        { "id": "F-001", "component_type": "filter", "source_claim_ids": ["CLM-002"] },
+        { "id": "RV-001", "component_type": "relief_valve", "source_claim_ids": ["CLM-002"] }
+      ],
+      "instrumentation_relationships": [
+        {
+          "id": "SENSE-PS-001",
+          "kind": "pressure_sensing",
+          "sensor": { "member_id": "PS-001", "port_id": "pressure_sense" },
+          "via_internal_net_id": "ASM-N-P-001",
+          "observed_target": { "kind": "member_port", "member_id": "CV-001", "port_id": "inlet", "position": "upstream" },
+          "source_claim_ids": ["CLM-003", "INF-001"]
+        },
+        {
+          "id": "SENSE-PS-002",
+          "kind": "pressure_sensing",
+          "sensor": { "member_id": "PS-002", "port_id": "pressure_sense" },
+          "via_internal_net_id": "ASM-N-P-002",
+          "observed_target": { "kind": "member_port", "member_id": "CV-002", "port_id": "inlet", "position": "upstream" },
+          "source_claim_ids": ["CLM-003", "INF-001"]
+        }
+      ],
+      "internal_nets": [
+        {
+          "id": "ASM-N-P-001",
+          "medium": "hydraulic",
+          "line_type": "pressure",
+          "attachments": [
+            { "member_id": "PS-001", "port_id": "pressure_sense", "role": "sensing_branch" },
+            { "member_id": "CV-001", "port_id": "inlet", "role": "main_path" }
+          ],
+          "published_port_ids": ["inlet_1"],
+          "source_claim_ids": ["CLM-003", "CLM-004", "INF-001"]
+        },
+        {
+          "id": "ASM-N-P-002",
+          "medium": "hydraulic",
+          "line_type": "pressure",
+          "attachments": [
+            { "member_id": "PS-002", "port_id": "pressure_sense", "role": "sensing_branch" },
+            { "member_id": "CV-002", "port_id": "inlet", "role": "main_path" }
+          ],
+          "published_port_ids": ["inlet_2"],
+          "source_claim_ids": ["CLM-003", "CLM-004", "INF-001"]
+        },
+        {
+          "id": "ASM-N-P-003",
+          "medium": "hydraulic",
+          "line_type": "pressure",
+          "attachments": [
+            { "member_id": "CV-001", "port_id": "outlet", "role": "source" },
+            { "member_id": "CV-002", "port_id": "outlet", "role": "source" },
+            { "member_id": "F-001", "port_id": "inlet", "role": "main_path" }
+          ],
+          "review_flags": ["parallel_sources_are_isolated_by_check_valves"],
+          "source_claim_ids": ["CLM-005"]
+        },
+        {
+          "id": "ASM-N-P-004",
+          "medium": "hydraulic",
+          "line_type": "pressure",
+          "attachments": [
+            { "member_id": "F-001", "port_id": "outlet", "role": "main_path" },
+            { "member_id": "RV-001", "port_id": "pressure_in", "role": "relief_branch" }
+          ],
+          "published_port_ids": ["outlet"],
+          "source_claim_ids": ["CLM-006"]
+        },
+        {
+          "id": "ASM-N-R-001",
+          "medium": "hydraulic",
+          "line_type": "return",
+          "attachments": [
+            { "member_id": "RV-001", "port_id": "return_out", "role": "source" }
+          ],
+          "published_port_ids": ["return"],
+          "source_claim_ids": ["CLM-006"]
+        }
+      ],
+      "published_ports": [
+        { "id": "inlet_1", "medium": "hydraulic", "maps_to": { "internal_net_id": "ASM-N-P-001" } },
+        { "id": "inlet_2", "medium": "hydraulic", "maps_to": { "internal_net_id": "ASM-N-P-002" } },
+        { "id": "outlet", "medium": "hydraulic", "maps_to": { "internal_net_id": "ASM-N-P-004" } },
+        { "id": "return", "medium": "hydraulic", "maps_to": { "internal_net_id": "ASM-N-R-001" } }
+      ],
+      "member_relations": [
+        { "kind": "blocks_reverse_flow", "from_member_id": "CV-001", "to_member_id": "F-001", "source_claim_ids": ["CLM-007"] },
+        { "kind": "blocks_reverse_flow", "from_member_id": "CV-002", "to_member_id": "F-001", "source_claim_ids": ["CLM-007"] },
+        { "kind": "relieves", "from_member_id": "RV-001", "to_member_id": "F-001", "source_claim_ids": ["CLM-006"] }
+      ]
+    },
+    { "id": "OUT-001", "kind": "external_interface", "interface_type": "hydraulic_outlet", "source_claim_ids": ["CLM-006"] },
+    { "id": "RET-001", "kind": "external_interface", "interface_type": "hydraulic_return", "source_claim_ids": ["CLM-006"] }
+  ],
+  "nets": [
+    {
+      "id": "NET-IN-001",
+      "medium": "hydraulic",
+      "line_type": "pressure",
+      "attachments": [
+        { "node_id": "IN-001", "port_id": "out", "role": "source" },
+        { "node_id": "ASM-001", "port_id": "inlet_1", "role": "assembly_interface" }
+      ],
+      "source_claim_ids": ["CLM-001", "CLM-004"]
+    },
+    {
+      "id": "NET-IN-002",
+      "medium": "hydraulic",
+      "line_type": "pressure",
+      "attachments": [
+        { "node_id": "IN-002", "port_id": "out", "role": "source" },
+        { "node_id": "ASM-001", "port_id": "inlet_2", "role": "assembly_interface" }
+      ],
+      "source_claim_ids": ["CLM-001", "CLM-004"]
+    },
+    {
+      "id": "NET-OUT-001",
+      "medium": "hydraulic",
+      "line_type": "pressure",
+      "attachments": [
+        { "node_id": "ASM-001", "port_id": "outlet", "role": "assembly_interface" },
+        { "node_id": "OUT-001", "port_id": "in", "role": "consumer_interface" }
+      ],
+      "source_claim_ids": ["CLM-006"]
+    },
+    {
+      "id": "NET-RET-001",
+      "medium": "hydraulic",
+      "line_type": "return",
+      "attachments": [
+        { "node_id": "ASM-001", "port_id": "return", "role": "assembly_interface" },
+        { "node_id": "RET-001", "port_id": "in", "role": "return_interface" }
+      ],
+      "source_claim_ids": ["CLM-006"]
+    }
+  ]
+}

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="2500" height="1500" viewBox="0 0 2500 1500" role="img"
+     aria-labelledby="title description">
+  <title id="title">整机液压系统原理图</title>
+  <desc id="description">由 aircraft_hydraulic_system.sysml 的 connect 拓扑生成。绿+黄两条液压回路经 PTU 交联, 绿供起落架、黄供飞控, 控制器引出指挥信号。概念图,非工程放行图。</desc>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#000000"/></marker>
+    <marker id="am" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7a7a7a"/></marker>
+  <style>
+    .hi { fill:none; stroke:#000000; stroke-width:3.0; stroke-linecap:round; stroke-linejoin:round; }
+    .med { fill:none; stroke:#000000; stroke-width:1.4; stroke-linecap:round; stroke-linejoin:round; }
+    .lo { fill:none; stroke:#000000; stroke-width:1.2; stroke-linecap:round; stroke-linejoin:round; }
+    .sig { fill:none; stroke:#000000; stroke-width:1.2; stroke-dasharray:7 4; stroke-linecap:round; }
+    .mech { fill:none; stroke:#6a6a6a; stroke-width:1.4; stroke-dasharray:12 3 3 3; stroke-linecap:round; }
+    .port { fill:#ffffff; stroke:#000000; stroke-width:2; }
+    .junction { fill:#000000; stroke:none; }
+    .zone { fill:none; stroke:#000000; stroke-width:1.2; stroke-dasharray:10 4; }
+    .block { fill:#ffffff; stroke:#000000; stroke-width:1.5; }
+    .subblock { fill:#fbfbfb; stroke:#000000; stroke-width:0.9; }
+    .label { font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#111111; }
+    .legendbox { fill:#ffffff; stroke:#000000; stroke-width:1.2; }
+    .lghead { font-family:monospace; font-weight:bold; fill:#111111; }
+    .lgitem { font-family:"Microsoft YaHei","Noto Sans CJK SC",sans-serif; fill:#111111; }
+  </style>
+  </defs>
+  <rect width="2500" height="1500" fill="#ffffff"/>
+  <text class="label" x="50" y="52" font-size="30" font-weight="700">整机液压系统原理图</text>
+  <text class="label" x="50" y="82" font-size="16">来源: aircraft_hydraulic_system.sysml (SysML v2)   |   范围: AircraftHydraulicSystem 顶层   |   成熟度: concept   概念图,非工程放行图。</text>
+  <rect class="zone" x="100" y="150" width="1150" height="660" data-zone="greenCircuit"/>
+  <text class="label" x="116" y="142" font-size="18" font-weight="700">GREEN CIRCUIT / 绿系统  (HydraulicCircuit)</text>
+  <rect class="zone" x="1370" y="150" width="1050" height="660" data-zone="yellowCircuit"/>
+  <text class="label" x="1386" y="142" font-size="18" font-weight="700">YELLOW CIRCUIT / 黄系统  (HydraulicCircuit)</text>
+  <image class="sym" data-node="green.reservoir" x="260" y="220" width="218" height="564" preserveAspectRatio="xMidYMid meet" href="已标注/油箱_开放描边_实线_draft.svg" xlink:href="已标注/油箱_开放描边_实线_draft.svg"/>
+  <image class="sym" data-node="green.enginePump" x="530" y="320" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/edp-provisional-stroke.svg" xlink:href="已标注/edp-provisional-stroke.svg"/>
+  <image class="sym" data-node="green.electricPump" x="530" y="490" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/emp-provisional-stroke.svg" xlink:href="已标注/emp-provisional-stroke.svg"/>
+  <image class="sym" data-node="green.filterUnit" x="710" y="410" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/filter-plain-stroke.svg" xlink:href="已标注/filter-plain-stroke.svg"/>
+  <g class="valve" data-node="green.pressureControl">
+    <rect class="block" x="860" y="410" width="110" height="96"/>
+    <path class="lo" d="M 878 474 L 886 460 L 894 476 L 902 460 L 910 476 L 918 462"/>
+    <path class="hi" d="M 876 458 L 909 458" marker-end="url(#ah)"/>
+    <text class="label" x="915" y="498" font-size="11" text-anchor="middle">压力控制</text>
+  </g>
+  <g class="valve" data-node="green.isolationValve">
+    <rect class="block" x="1020" y="410" width="120" height="96"/>
+    <path class="hi" d="M 1036 458 L 1074 458" marker-end="url(#ah)"/>
+    <rect class="block" x="1066" y="436" width="28" height="44" fill="#f2f2f2"/>
+    <path class="lo" d="M 1066 450 L 1078 450"/>
+    <rect class="block" x="1071" y="418" width="18" height="14"/>
+    <text class="label" x="1080" y="498" font-size="11" text-anchor="middle">隔离阀</text>
+  </g>
+  <image class="sym" data-node="green.accumulator" x="1170" y="250" width="72" height="120" preserveAspectRatio="xMidYMid meet" href="已标注/accumulator-stroke.svg" xlink:href="已标注/accumulator-stroke.svg"/>
+  <circle class="port" data-port="green.out" cx="1230" cy="458" r="5"/>
+  <text class="label" x="1230" y="446" font-size="11" text-anchor="middle">系统输出</text>
+  <circle class="port" data-port="green.in" cx="578" cy="250" r="5"/>
+  <text class="label" x="578" y="238" font-size="11" text-anchor="middle">机械输入</text>
+  <path id="green.supply_edp" class="med" data-edge="green.supply_edp" data-sysml-line="200" d="M 478.0 490.0 H 500.0 V 368.0 H 530.0" marker-end="url(#ah)"/>
+  <path id="green.supply_emp" class="med" data-edge="green.supply_emp" data-sysml-line="201" d="M 478.0 490.0 H 500.0 V 538.0 H 530.0" marker-end="url(#ah)"/>
+  <path id="green.pres_edp" class="hi" data-edge="green.pres_edp" data-sysml-line="202" d="M 626.0 368.0 H 660.0 V 458.0 H 710.0" marker-end="url(#ah)"/>
+  <path id="green.pres_emp" class="hi" data-edge="green.pres_emp" data-sysml-line="203" d="M 626.0 538.0 H 660.0 V 458.0 H 710.0" marker-end="url(#ah)"/>
+  <path id="green.filter_pc" class="hi" data-edge="green.filter_pc" data-sysml-line="204" d="M 806.0 458.0 H 860.0" marker-end="url(#ah)"/>
+  <path id="green.pc_iso" class="hi" data-edge="green.pc_iso" data-sysml-line="205" d="M 970.0 458.0 H 1020.0" marker-end="url(#ah)"/>
+  <path id="green.iso_acc" class="hi" data-edge="green.iso_acc" data-sysml-line="206" d="M 1140.0 458.0 H 1206.0 V 370.0" marker-end="url(#ah)"/>
+  <path id="green.iso_out" class="hi" data-edge="green.iso_out" data-sysml-line="207" d="M 1140.0 458.0 H 1206.0 H 1230.0" marker-end="url(#ah)"/>
+  <path id="green.mech_edp" class="mech" data-edge="green.mech_edp" data-sysml-line="197" d="M 578.0 250.0 V 320.0"/>
+  <circle class="junction" cx="500" cy="490" r="4"/>
+  <circle class="junction" cx="660" cy="458" r="4"/>
+  <circle class="junction" cx="1206" cy="458" r="4"/>
+  <circle class="port" data-port="green.supply" cx="478" cy="490" r="5"/>
+  <circle class="port" data-port="green.return" cx="478" cy="620" r="5"/>
+  <circle class="port" data-port="green.suction" cx="530" cy="368" r="5"/>
+  <circle class="port" data-port="green.pressure_out" cx="626" cy="368" r="5"/>
+  <circle class="port" data-port="green.suction" cx="530" cy="538" r="5"/>
+  <circle class="port" data-port="green.pressure_out" cx="626" cy="538" r="5"/>
+  <circle class="port" data-port="green.inlet" cx="710" cy="458" r="5"/>
+  <circle class="port" data-port="green.outlet" cx="806" cy="458" r="5"/>
+  <circle class="port" data-port="green.inlet" cx="860" cy="458" r="5"/>
+  <circle class="port" data-port="green.outlet" cx="970" cy="458" r="5"/>
+  <circle class="port" data-port="green.command" cx="970" cy="410" r="5"/>
+  <circle class="port" data-port="green.inlet" cx="1020" cy="458" r="5"/>
+  <circle class="port" data-port="green.outlet" cx="1140" cy="458" r="5"/>
+  <circle class="port" data-port="green.command" cx="1140" cy="410" r="5"/>
+  <circle class="port" data-port="green.hydraulic" cx="1206" cy="370" r="5"/>
+  <text class="label" x="252" y="310" font-size="13" text-anchor="end">油箱</text>
+  <text class="label" x="578" y="312" font-size="12" text-anchor="middle">EDP</text>
+  <text class="label" x="578" y="482" font-size="12" text-anchor="middle">EMP</text>
+  <text class="label" x="758" y="402" font-size="12" text-anchor="middle">压力滤</text>
+  <text class="label" x="1206" y="242" font-size="12" text-anchor="middle">蓄压器</text>
+  <image class="sym" data-node="yellow.reservoir" x="2152" y="220" width="218" height="564" preserveAspectRatio="xMidYMid meet" href="已标注/油箱_开放描边_实线_draft.svg" xlink:href="已标注/油箱_开放描边_实线_draft.svg" transform="translate(4522 0) scale(-1 1)"/>
+  <image class="sym" data-node="yellow.enginePump" x="2004" y="320" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/edp-provisional-stroke.svg" xlink:href="已标注/edp-provisional-stroke.svg" transform="translate(4104 0) scale(-1 1)"/>
+  <image class="sym" data-node="yellow.electricPump" x="2004" y="490" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/emp-provisional-stroke.svg" xlink:href="已标注/emp-provisional-stroke.svg" transform="translate(4104 0) scale(-1 1)"/>
+  <image class="sym" data-node="yellow.filterUnit" x="1824" y="410" width="96" height="96" preserveAspectRatio="xMidYMid meet" href="已标注/filter-plain-stroke.svg" xlink:href="已标注/filter-plain-stroke.svg" transform="translate(3744 0) scale(-1 1)"/>
+  <g class="valve" data-node="yellow.pressureControl">
+    <rect class="block" x="1660" y="410" width="110" height="96"/>
+    <path class="lo" d="M 1678 474 L 1686 460 L 1694 476 L 1702 460 L 1710 476 L 1718 462"/>
+    <path class="hi" d="M 1676 458 L 1709 458" marker-end="url(#ah)"/>
+    <text class="label" x="1715" y="498" font-size="11" text-anchor="middle">压力控制</text>
+  </g>
+  <g class="valve" data-node="yellow.isolationValve">
+    <rect class="block" x="1490" y="410" width="120" height="96"/>
+    <path class="hi" d="M 1506 458 L 1544 458" marker-end="url(#ah)"/>
+    <rect class="block" x="1536" y="436" width="28" height="44" fill="#f2f2f2"/>
+    <path class="lo" d="M 1536 450 L 1548 450"/>
+    <rect class="block" x="1541" y="418" width="18" height="14"/>
+    <text class="label" x="1550" y="498" font-size="11" text-anchor="middle">隔离阀</text>
+  </g>
+  <image class="sym" data-node="yellow.accumulator" x="1388" y="250" width="72" height="120" preserveAspectRatio="xMidYMid meet" href="已标注/accumulator-stroke.svg" xlink:href="已标注/accumulator-stroke.svg" transform="translate(2848 0) scale(-1 1)"/>
+  <circle class="port" data-port="yellow.out" cx="1400" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.in" cx="2052" cy="250" r="5"/>
+  <path id="yellow.supply_edp" class="med" data-edge="yellow.supply_edp" data-sysml-line="200" d="M 2152.0 490.0 H 2130.0 V 368.0 H 2100.0" marker-end="url(#ah)"/>
+  <path id="yellow.supply_emp" class="med" data-edge="yellow.supply_emp" data-sysml-line="201" d="M 2152.0 490.0 H 2130.0 V 538.0 H 2100.0" marker-end="url(#ah)"/>
+  <path id="yellow.pres_edp" class="hi" data-edge="yellow.pres_edp" data-sysml-line="202" d="M 2004.0 368.0 H 1970.0 V 458.0 H 1920.0" marker-end="url(#ah)"/>
+  <path id="yellow.pres_emp" class="hi" data-edge="yellow.pres_emp" data-sysml-line="203" d="M 2004.0 538.0 H 1970.0 V 458.0 H 1920.0" marker-end="url(#ah)"/>
+  <path id="yellow.filter_pc" class="hi" data-edge="yellow.filter_pc" data-sysml-line="204" d="M 1824.0 458.0 H 1770.0" marker-end="url(#ah)"/>
+  <path id="yellow.pc_iso" class="hi" data-edge="yellow.pc_iso" data-sysml-line="205" d="M 1660.0 458.0 H 1610.0" marker-end="url(#ah)"/>
+  <path id="yellow.iso_acc" class="hi" data-edge="yellow.iso_acc" data-sysml-line="206" d="M 1490.0 458.0 H 1424.0 V 370.0" marker-end="url(#ah)"/>
+  <path id="yellow.iso_out" class="hi" data-edge="yellow.iso_out" data-sysml-line="207" d="M 1490.0 458.0 H 1424.0 H 1400.0" marker-end="url(#ah)"/>
+  <path id="yellow.mech_edp" class="mech" data-edge="yellow.mech_edp" data-sysml-line="197" d="M 2052.0 250.0 V 320.0"/>
+  <circle class="junction" cx="2130" cy="490" r="4"/>
+  <circle class="junction" cx="1970" cy="458" r="4"/>
+  <circle class="junction" cx="1424" cy="458" r="4"/>
+  <circle class="port" data-port="yellow.supply" cx="2152" cy="490" r="5"/>
+  <circle class="port" data-port="yellow.return" cx="2152" cy="620" r="5"/>
+  <circle class="port" data-port="yellow.suction" cx="2100" cy="368" r="5"/>
+  <circle class="port" data-port="yellow.pressure_out" cx="2004" cy="368" r="5"/>
+  <circle class="port" data-port="yellow.suction" cx="2100" cy="538" r="5"/>
+  <circle class="port" data-port="yellow.pressure_out" cx="2004" cy="538" r="5"/>
+  <circle class="port" data-port="yellow.inlet" cx="1920" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.outlet" cx="1824" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.inlet" cx="1770" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.outlet" cx="1660" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.command" cx="1660" cy="410" r="5"/>
+  <circle class="port" data-port="yellow.inlet" cx="1610" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.outlet" cx="1490" cy="458" r="5"/>
+  <circle class="port" data-port="yellow.command" cx="1490" cy="410" r="5"/>
+  <circle class="port" data-port="yellow.hydraulic" cx="1424" cy="370" r="5"/>
+  <text class="label" x="2378" y="310" font-size="13" text-anchor="start">油箱</text>
+  <text class="label" x="2052" y="312" font-size="12" text-anchor="middle">EDP</text>
+  <text class="label" x="2052" y="482" font-size="12" text-anchor="middle">EMP</text>
+  <text class="label" x="1872" y="402" font-size="12" text-anchor="middle">压力滤</text>
+  <text class="label" x="1424" y="242" font-size="12" text-anchor="middle">蓄压器</text>
+  <g class="ptu" data-node="powerTransferUnit">
+    <rect class="block" x="1250" y="330" width="120" height="220"/>
+    <text class="label" x="1310" y="348" font-size="12" text-anchor="middle" font-weight="700">PTU-001</text>
+    <text class="label" x="1310" y="364" font-size="10" text-anchor="middle">能源转换装置</text>
+    <circle cx="1292" cy="410" r="20" fill="#ffffff" stroke="#000000" stroke-width="1.4"/>
+    <circle cx="1328" cy="410" r="20" fill="#ffffff" stroke="#000000" stroke-width="1.4"/>
+    <circle cx="1292" cy="480" r="20" fill="#ffffff" stroke="#000000" stroke-width="1.4"/>
+    <circle cx="1328" cy="480" r="20" fill="#ffffff" stroke="#000000" stroke-width="1.4"/>
+    <path class="mech" d="M 1312 445 H 1308"/>
+    <circle class="port" data-port="powerTransferUnit.greenInput" cx="1250" cy="445" r="5"/>
+    <circle class="port" data-port="powerTransferUnit.yellowInput" cx="1370" cy="445" r="5"/>
+    <circle class="port" data-port="powerTransferUnit.command" cx="1310" cy="550" r="5"/>
+  </g>
+  <g class="cons" data-node="landingGear">
+    <rect class="block" x="200" y="900" width="620" height="90"/>
+    <text class="label" x="510" y="890" font-size="13" text-anchor="middle" font-weight="700">起落架 (LandingGearActuationSystem)</text>
+    <text class="label" x="510" y="924" font-size="10" text-anchor="middle">起落架</text>
+    <rect class="subblock" x="210" y="950" width="192" height="24"/>
+    <text class="label" x="306" y="966" font-size="10" text-anchor="middle">前起落架作动器</text>
+    <rect class="subblock" x="414" y="950" width="192" height="24"/>
+    <text class="label" x="510" y="966" font-size="10" text-anchor="middle">左主起落架作动器</text>
+    <rect class="subblock" x="618" y="950" width="192" height="24"/>
+    <text class="label" x="714" y="966" font-size="10" text-anchor="middle">右主起落架作动器</text>
+    <circle class="port" data-port="landingGear.hydraulicInput" cx="510" cy="900" r="5"/>
+  </g>
+  <g class="cons" data-node="flightControls">
+    <rect class="block" x="1700" y="900" width="700" height="90"/>
+    <text class="label" x="2050" y="890" font-size="13" text-anchor="middle" font-weight="700">飞控 (FlightControlActuationSystem)</text>
+    <text class="label" x="2050" y="924" font-size="10" text-anchor="middle">飞控</text>
+    <rect class="subblock" x="1710" y="950" width="161" height="24"/>
+    <text class="label" x="1790" y="966" font-size="10" text-anchor="middle">左副翼作动器</text>
+    <rect class="subblock" x="1883" y="950" width="161" height="24"/>
+    <text class="label" x="1963" y="966" font-size="10" text-anchor="middle">右副翼作动器</text>
+    <rect class="subblock" x="2056" y="950" width="161" height="24"/>
+    <text class="label" x="2136" y="966" font-size="10" text-anchor="middle">升降舵作动器</text>
+    <rect class="subblock" x="2229" y="950" width="161" height="24"/>
+    <text class="label" x="2309" y="966" font-size="10" text-anchor="middle">方向舵作动器</text>
+    <circle class="port" data-port="flightControls.hydraulicInput" cx="2050" cy="900" r="5"/>
+  </g>
+  <g class="ctrl" data-node="controller">
+    <rect class="block" x="1100" y="950" width="400" height="120"/>
+    <text class="label" x="1300" y="970" font-size="13" text-anchor="middle" font-weight="700">控制器</text>
+    <text class="label" x="1300" y="988" font-size="10" text-anchor="middle">HydraulicSystemController</text>
+    <circle class="port" data-port="controller.greenPumpCommand" cx="1190" cy="950" r="5"/>
+    <text class="label" x="1190" y="959" font-size="8" text-anchor="middle" fill="#666">greenPumpCommand</text>
+    <circle class="port" data-port="controller.ptuCommand" cx="1300" cy="950" r="5"/>
+    <text class="label" x="1300" y="959" font-size="8" text-anchor="middle" fill="#666">ptuCommand</text>
+    <circle class="port" data-port="controller.yellowPumpCommand" cx="1410" cy="950" r="5"/>
+    <text class="label" x="1410" y="959" font-size="8" text-anchor="middle" fill="#666">yellowPumpCommand</text>
+    <circle class="port" data-port="controller.landingGearCommand" cx="1100" cy="1012" r="5"/>
+    <text class="label" x="1102" y="998" font-size="8" text-anchor="start" fill="#666">landingGearCommand</text>
+    <circle class="port" data-port="controller.flightControlCommand" cx="1500" cy="1012" r="5"/>
+    <text class="label" x="1498" y="998" font-size="8" text-anchor="end" fill="#666">flightControlCommand</text>
+  </g>
+  <path id="green.ptu" class="hi" data-edge="green_ptu" data-sysml-line="222" d="M 1230.0 458.0 H 1250.0 V 445.0" marker-end="url(#ah)"/>
+  <path id="yellow.ptu" class="hi" data-edge="yellow_ptu" data-sysml-line="223" d="M 1400.0 458.0 H 1370.0 V 445.0" marker-end="url(#ah)"/>
+  <path id="green.lg" class="hi" data-edge="green_lg" data-sysml-line="224" d="M 1230.0 458.0 H 1185.0 V 860.0 H 510.0 V 900.0" marker-end="url(#ah)"/>
+  <path id="yellow.fc" class="hi" data-edge="yellow_fc" data-sysml-line="225" d="M 1400.0 458.0 H 1455.0 V 860.0 H 2050.0 V 900.0" marker-end="url(#ah)"/>
+  <circle class="junction" cx="1185" cy="458" r="4"/>
+  <circle class="junction" cx="1455" cy="458" r="4"/>
+  <circle class="port" data-port="greenCircuit.enginePumpCommand" cx="1250" cy="720" r="5"/>
+  <path id="ctrl.greencmd" class="sig" data-edge="green_cmd" data-sysml-line="227" d="M 1190.0 950.0 H 1250.0 V 720.0" marker-end="url(#ah)"/>
+  <circle class="port" data-port="yellowCircuit.enginePumpCommand" cx="1370" cy="720" r="5"/>
+  <path id="ctrl.yellowcmd" class="sig" data-edge="yellow_cmd" data-sysml-line="228" d="M 1410.0 950.0 H 1370.0 V 720.0" marker-end="url(#ah)"/>
+  <path id="ctrl.ptu" class="sig" data-edge="ptu_cmd" data-sysml-line="229" d="M 1300.0 950.0 H 1310.0 V 550.0" marker-end="url(#ah)"/>
+  <path id="ctrl.lg" class="sig" data-edge="lg_cmd" data-sysml-line="230" d="M 1100.0 1012.0 H 820.0 V 962.0" marker-end="url(#ah)"/>
+  <path id="ctrl.fc" class="sig" data-edge="fc_cmd" data-sysml-line="231" d="M 1500.0 1012.0 H 1700.0 V 962.0" marker-end="url(#ah)"/>
+  <g id="legend">
+    <rect class="legendbox" x="100" y="1180" width="900" height="230"/>
+    <text class="lghead" x="116" y="1208" font-size="14">图例  (T = 1.20)</text>
+    <path class="hi" d="M 116 1232 H 206" marker-end="url(#ah)"/>
+    <text class="lgitem" x="226" y="1233" font-size="13">High Pressure Line  高压供压线  3.0T</text>
+    <path class="med" d="M 116 1254 H 206" marker-end="url(#ah)"/>
+    <text class="lgitem" x="226" y="1255" font-size="13">Supply / Suction Line  供油/吸油线  1.4T</text>
+    <path class="lo" d="M 116 1276 H 206" marker-end="url(#ah)"/>
+    <text class="lgitem" x="226" y="1277" font-size="13">Low Pressure (return) Line  回油线  1.2T</text>
+    <path class="sig" d="M 116 1298 H 206" marker-end="url(#ah)"/>
+    <text class="lgitem" x="226" y="1299" font-size="13">Command / Status Signal  指挥/状态信号(虚线)  1.2T</text>
+    <path class="mech" d="M 116 1320 H 206" marker-end="url(#ah)"/>
+    <text class="lgitem" x="226" y="1321" font-size="13">Mechanical (shaft) Power  机械轴功率  1.4T</text>
+    <circle class="junction" cx="124" cy="1338" r="4.5"/>
+    <text class="lgitem" x="226" y="1343" font-size="13">Junction (tee)  三通/节点实心点</text>
+    <circle class="port" cx="124" cy="1360" r="5"/>
+    <text class="lgitem" x="226" y="1365" font-size="13">Connection Port  端口(白底黑边)</text>
+  </g>
+  <g id="title">
+    <rect class="legendbox" x="1030" y="1180" width="1390" height="230"/>
+    <text class="lghead" x="1046" y="1208" font-size="14">图签栏</text>
+    <text class="lgitem" x="1046" y="1236" font-size="13">系统: AircraftHydraulicSystem   |   来源: aircraft_hydraulic_system.sysml   |   成熟度: concept</text>
+    <text class="lgitem" x="1046" y="1262" font-size="13">连接: 20 条 SysML connect (回路内部 9 条×2 + 整机 9 条已画; 198/199 内部控制在边界口聚合)   |   元件: 油箱/EDP/EMP/滤/蓄压器为描边符号</text>
+    <text class="lgitem" x="1046" y="1288" font-size="13">非标注符号: EDP/EMP(临时几何)  压力控制/隔离/PTU/作动器/控制器(绘制框图)</text>
+    <text class="lgitem" x="1046" y="1314" font-size="13">概念图,非工程放行图。作动器回油、状态接线在模型中未定义,未画。</text>
+  </g>
+</svg>

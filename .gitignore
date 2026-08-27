@@ -1,0 +1,10 @@
+# 浏览器回读用的临时 profile（12M+，非资产）
+已标注/1#系统原理图/_edge_readback_profile/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 系统杂项
+.DS_Store
+Thumbs.db

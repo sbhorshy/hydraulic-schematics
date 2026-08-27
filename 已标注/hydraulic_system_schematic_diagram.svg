@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated from hydraulic_system_schematic_diagram.json. -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1600" height="1100" viewBox="0 0 1600 1100" role="img"
+     aria-labelledby="title description">
+  <title id="title">油箱、优先阀、蓄压器与充气阀原理图</title>
+  <desc id="description">由 hydraulic_system_schematic_diagram.json 的五条连接关系生成。主油路从油箱出发，经优先阀回到油箱；蓄压器为三通并联支路，充气阀接蓄压器气腔。</desc>
+  <defs>
+    <marker id="black-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#000000"/>
+    </marker>
+    <style>
+      .connection { fill:none; stroke:#000000; stroke-width:6; stroke-linecap:round; stroke-linejoin:round; }
+      .port { fill:#ffffff; stroke:#000000; stroke-width:3; }
+      .junction { fill:#000000; }
+      .label { font-family:"Microsoft YaHei", "Noto Sans CJK SC", sans-serif; fill:#111111; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1100" fill="#ffffff"/>
+  <rect x="30" y="30" width="1540" height="1040" rx="12" fill="none" stroke="#9da9b5" stroke-width="2"/>
+  <text class="label" x="70" y="88" font-size="30" font-weight="700">液压系统原理图</text>
+  <text class="label" x="70" y="120" font-size="17">连接依据：hydraulic_system_schematic_diagram.json；全部管线黑色、正交且无交叉。</text>
+
+  <!-- Component layout selected after the JSON topology is fixed. -->
+  <image x="120" y="160" width="270" height="700" preserveAspectRatio="xMidYMid meet"
+         href="Bootstrap Type Reservoir.svg" xlink:href="Bootstrap Type Reservoir.svg"/>
+  <image x="760" y="220" width="400" height="222" preserveAspectRatio="xMidYMid meet"
+         href="Priority Valve.svg" xlink:href="Priority Valve.svg"/>
+  <image x="750" y="600" width="190" height="330" preserveAspectRatio="xMidYMid meet"
+         href="Hydro-Pneumatic Accumulator.svg" xlink:href="Hydro-Pneumatic Accumulator.svg"/>
+  <image x="-1330" y="572" width="300" height="128" preserveAspectRatio="xMidYMid meet"
+         transform="scale(-1 1)" href="Air-Charging Valve for Accumulator.svg"
+         xlink:href="Air-Charging Valve for Accumulator.svg"/>
+
+  <!-- C-001: R-001.reservoir_out -> PV-001.high_pressure_in. -->
+  <path id="C-001" class="connection" data-connection-id="C-001"
+        d="M 198 669 H 80 V 1020 H 1450 V 300 H 1137" marker-end="url(#black-arrow)"/>
+  <!-- C-002: PV-001.low_pressure_out -> J-001. -->
+  <path id="C-002" class="connection" data-connection-id="C-002"
+        d="M 772 298 H 620" marker-end="url(#black-arrow)"/>
+  <!-- C-003: J-001 -> R-001.pressure_in. -->
+  <path id="C-003" class="connection" data-connection-id="C-003"
+        d="M 620 298 H 470 V 669 H 358" marker-end="url(#black-arrow)"/>
+  <!-- C-004: J-001 -> ACC-001.hydraulic_port (parallel branch). -->
+  <path id="C-004" class="connection" data-connection-id="C-004"
+        d="M 620 298 V 980 H 847 V 909"/>
+  <!-- C-005: ACC-001.pneumatic_port -> ACV-001.accumulator_gas_out. -->
+  <path id="C-005" class="connection" data-connection-id="C-005"
+        d="M 847 639 H 1050"/>
+
+  <circle class="junction" cx="620" cy="298" r="7"/>
+  <!-- Cover the source SVG semantic-port dots while preserving visible black endpoints. -->
+  <circle class="port" cx="198" cy="669" r="8"/>
+  <circle class="port" cx="358" cy="669" r="8"/>
+  <circle class="port" cx="1137" cy="300" r="8"/>
+  <circle class="port" cx="772" cy="298" r="8"/>
+  <circle class="port" cx="847" cy="909" r="8"/>
+  <circle class="port" cx="847" cy="639" r="8"/>
+  <circle class="port" cx="1050" cy="639" r="8"/>
+  <circle class="port" cx="1302" cy="638" r="8"/>
+
+  <g class="label">
+    <text x="120" y="145" font-size="20" font-weight="700">R-001  自增压油箱</text>
+    <text x="790" y="200" font-size="20" font-weight="700">PV-001  优先阀</text>
+    <text x="708" y="580" font-size="20" font-weight="700">ACC-001  液压—气动蓄压器</text>
+    <text x="1030" y="552" font-size="20" font-weight="700">ACV-001  蓄压器充气阀</text>
+    <rect x="95" y="990" width="176" height="30" rx="4" fill="#ffffff"/>
+    <text x="108" y="1012" font-size="16">油箱出口 → 优先阀</text>
+    <rect x="465" y="248" width="145" height="30" rx="4" fill="#ffffff"/>
+    <text x="478" y="270" font-size="16">优先阀 → 油箱</text>
+    <rect x="635" y="756" width="156" height="30" rx="4" fill="#ffffff"/>
+    <text x="648" y="778" font-size="16">蓄压器并联支路</text>
+    <rect x="865" y="600" width="154" height="30" rx="4" fill="#ffffff"/>
+    <text x="878" y="622" font-size="16">蓄压器充气连接</text>
+  </g>
+  <text class="label" x="70" y="1045" font-size="15">概念连接图，不作为工程放行图。</text>
+</svg>

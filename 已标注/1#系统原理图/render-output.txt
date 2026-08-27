@@ -1,0 +1,2 @@
+wrote /mnt/d/File/COMAC/组件库/已标注/1#系统原理图/1#系统原理图.svg
+nets=16  segments=27  junctions=3  buses={'PRESS': 3, 'MANIFOLD': 4}

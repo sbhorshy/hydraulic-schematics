@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 122"
+     width="80" height="122"
+     data-component-type="filter_with_indicator"
+     data-symbol-version="1.2"
+     data-symbol-form="stroke_geometry">
+
+  <!-- 描边几何符号,取代 potrace 描摹填充版。
+       几何依据:渲染原描摹符号并实测其子路径包围盒。
+         原符号 viewBox 140x173,液压中心线 Y=117.2
+         菱形本体 子路径6  X 40.8..88.2  Y 91..143.3  -> 47x52
+         内圆滤芯 子路径9/10 (中心≈64.5,117.5)
+         指示器圆 upper-circle-outline cx=63.5 cy=35 r=19
+         竖管 子路径3/4/5  X≈53..74  Y 43..90
+       按比例映射到 80 宽:菱形半宽 22,内圆 r=13,指示器 r=13,竖管长 32。
+
+       原符号内圆中含十字/星形细节(子路径9/10 及 X≈42..49 一组),
+       本版以单圆表示滤芯,未复现该细节。若该细节承载工程含义
+       (例如可换芯标记或特定滤型),须补画,见 stroke-symbol-notes.md D-2。
+
+       液压接口中心线 Y=82,非 40。指示器占据顶部 40 单位。
+       布局器须按 port 实际坐标接线,不得假定各符号中心线一致。
+       纯滤(无指示器)符号另见 filter-plain-stroke.svg。
+
+       线宽由 stroke-width 统一控制,基准 T=2。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 管线:液压中心线 Y=82 -->
+    <line x1="0" y1="82" x2="18" y2="82"/>
+    <line x1="62" y1="82" x2="80" y2="82"/>
+    <!-- 菱形外框:左右顶点为管线接入点 -->
+    <path d="M18 82 L40 56 L62 82 L40 108 Z"/>
+    <!-- 内部圆形滤芯 -->
+    <circle cx="40" cy="82" r="13"/>
+    <!-- 指示器竖管 -->
+    <line x1="40" y1="56" x2="40" y2="27"/>
+    <!-- 指示器:带 X 标记的圆 -->
+    <circle cx="40" cy="14" r="13"/>
+    <line x1="31" y1="5" x2="49" y2="23"/>
+    <line x1="49" y1="5" x2="31" y2="23"/>
+  </g>
+
+  <g id="connection-points" visibility="hidden">
+    <circle id="port-inlet" cx="0" cy="82" r="2"
+            data-port-id="inlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-outlet" cx="80" cy="82" r="2"
+            data-port-id="outlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"
+     width="80" height="80"
+     data-component-type="check_valve"
+     data-symbol-version="1.3"
+     data-symbol-form="stroke_geometry"
+     data-flow-permitted="PENDING_ENGINEER_CONFIRMATION">
+
+  <!-- 描边几何符号,取代 potrace 描摹填充版。
+       几何依据:对原描摹符号子路径做最小二乘圆拟合,实测值:
+         原 viewBox 80x81,中心线 Y=39.5
+         球内孔拟合圆 圆心(38.0,39.3) r=14.0 偏差0.0  -> 描边中心线 r≈16
+         锥座尖端 (57.0,39.5)   座臂末端 (32.4,11.1)/(33.4,68.6)
+         管线端点 (0,39.5),管线半厚 1.5 (实测 y 38.0..41.0)
+       本版按上述实测值绘制,球与锥座口重叠(球嵌入 V 口),
+       与原符号一致;v1.2 曾缩小球并拉开间距,不符,已废。
+
+       *** 流向未定 ***
+       球嵌于锥座口,座尖端朝右。按球-锥座物理:
+         自右侧(尖端)来流推球离座 -> 导通;自左侧来流压球入座 -> 关断
+         => 允许流向 右 -> 左,与本文件 inlet 在左相反。
+       另一读法:右侧">"为流向箭头 => 允许流向 左 -> 右。
+       两种读法后果相反,须工程师确认,见 stroke-symbol-notes.md D-1。
+       若确认为 右->左,应镜像重绘本源文件的球与座,
+       不得交换端口命名,也不得在实例上镜像(allow_mirror=false)。
+
+       线宽 stroke-width=2 (基准 T),端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 管线:中心线 Y=40。左段止于球左缘 x=22,右段起于座尖 x=57 -->
+    <line x1="0" y1="40" x2="18" y2="40"/>
+    <line x1="57" y1="40" x2="80" y2="40"/>
+    <!-- 阀球:实测圆心 38,r=16 -->
+    <circle cx="35" cy="40" r="16"/>
+    <!-- 锥座:尖端 (57,40) 朝右,臂末端贯穿至上下边缘 -->
+    <path d="M32 11 L57 40 L32 69"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="80" cy="40" r="2"
+            data-port-id="inlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="right"/>
+    <circle id="port-outlet" cx="0" cy="40" r="2"
+            data-port-id="outlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="left"/>
+  </g>
+</svg>

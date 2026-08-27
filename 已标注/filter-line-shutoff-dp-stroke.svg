@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"
+     width="80" height="112"
+     data-component-type="filter_line_shutoff_dp_indicator"
+     data-symbol-version="3.1"
+     data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="PENDING_STANDARD_ID:clause-6.1.6">
+
+  <!-- filter-line-shutoff-stroke.svg v2.1 + 压差指示器。
+       line shutoff 部分原样保留,未改动。
+
+       指示器几何取自原 Filter.svg 实测,按菱形半宽比例 0.92 缩放:
+         原指示器圆 (63.5,35) r=19        -> 本版 (40,22) r=17.5
+         原竖管 X 53..73(宽20) Y 54..91   -> 本版 x 30.5/49.5,长 23
+         原菱形中心 (64.5,117.2) 半宽23.7 -> 本版 (40,84) 半宽22
+       竖管与指示器圆的交点由 dx=9.5,r=17.5 解得 dy=14.7,即 y=36.7。
+
+       *** 液压中心线 Y=84,不是 40 ***
+       指示器占据顶部约 40 单位。布局器必须按 port 实测坐标接线,
+       不得假定各符号中心线一致(check-valve-stroke.svg 为 Y=40)。
+
+       *** 不新增任何端口 ***
+       压差指示器为机械弹出式就地目视,无电输出,故:
+         目录 ports 清单不变,仍为 inlet / outlet 两个液压端口;
+         L0 无需 taps 或 signal 条目;L2 拓扑完全不受影响。
+       本次改动是纯符号层变更。
+       若实际为压差传感器(有电输出),须另建符号并声明电气端口,
+       见 system-1-pressure-filter-assy.intent.yaml 的
+       unknown: DPS-001_indicator_or_sensor。
+
+       待确认项见 stroke-symbol-notes.md D-2 至 D-7。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ===== 压差指示器 ===== -->
+    <circle cx="40" cy="32" r="12"/>
+    <line x1="32" y1="24" x2="48" y2="40"/>
+    <line x1="48" y1="24" x2="32" y2="40"/>
+    <!-- 竖管:下端落在菱形上边(y=70.36 解得),上端接指示器圆(y=36.7)
+         v3.0 曾取下端 y=60(菱形顶点),该处菱形宽度为零,
+         竖管两侧各悬空 9.5,渲染出可见缺口。v3.1 修正。 -->
+    <line x1="30.5" y1="39.7" x2="30.5" y2="70.36"/>
+    <line x1="49.5" y1="39.7" x2="49.5" y2="70.36"/>
+
+    <!-- ===== 滤体 ===== -->
+    <line x1="0" y1="84" x2="18" y2="84"/>
+    <line x1="62" y1="84" x2="80" y2="84"/>
+    <path d="M18 84 L40 60 L62 84 L40 108 Z"/>
+
+    <!-- ===== line shutoff 特征(v2.1 原样) ===== -->
+    <circle cx="40" cy="84" r="16"/>
+    <circle cx="29" cy="84" r="4.5"/>
+    <circle cx="47" cy="84" r="4.5"/>
+    <line x1="32" y1="76" x2="48" y2="92"/>
+    <line x1="32" y1="92" x2="48" y2="76"/>
+    <line x1="40" y1="62" x2="40" y2="108" stroke-dasharray="5"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="0" cy="84" r="2"
+            data-port-id="inlet" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-outlet" cx="80" cy="84" r="2"
+            data-port-id="outlet" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "report_kind": "l0_compile_report",
+  "source_file": "negative-sensing-in-path.intent.yaml",
+  "catalog": "comac-hydraulic-components@A",
+  "status": "failed",
+  "phase": "topology_check",
+  "products_emitted": ["negative-sensing-in-path.l0-normalized.json"],
+  "products_withheld": ["l2.json", "review-card.md", "svg"],
+  "findings": [
+    {
+      "id": "E-1005",
+      "level": "ERROR",
+      "rule": "L0-10.5 / check-15.3.10",
+      "l0_line": 22,
+      "object": "PS-001",
+      "message": "component_type 'pressure_switch' 的目录 connection_role 为 sensing_only，不得出现在 paths 中。",
+      "catalog_evidence": {
+        "component_type": "pressure_switch",
+        "connection_role": "sensing_only",
+        "main_path": null
+      },
+      "remedy": "从 paths 中移除 PS-001，改写为 taps 条目，并显式指定测点端口与上下游位置。",
+      "suggested_l0": "paths:\n  - [IN-001, CV-001, OUT-001]\ntaps:\n  - {sensor: PS-001, at: CV-001.inlet, position: upstream}"
+    },
+    {
+      "id": "E-1006",
+      "level": "ERROR",
+      "rule": "L0-10.2 / check-15.2.8",
+      "l0_line": 22,
+      "object": "PS-001",
+      "message": "裸实例位置要求类型具有唯一 main_path 端口对，pressure_switch 的 main_path 为 null，无法填充串接端口。",
+      "remedy": "同 E-1005。"
+    }
+  ],
+  "notes": [
+    "两条 ERROR 指向同一根因，编译器必须全部报出而非首错即停，以便工程师一次看清约束来源。",
+    "本负样例的价值在于：同样的意图用自然语言表达时（'在压力开关后有单向阀'）会被静默编译为串联拓扑，且不产生任何告警。L0 使该错误在解析期不可能通过。"
+  ]
+}

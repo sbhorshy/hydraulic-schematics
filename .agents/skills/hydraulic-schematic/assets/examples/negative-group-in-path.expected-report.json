@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "report_kind": "l0_compile_report",
+  "source_file": "negative-group-in-path.intent.yaml",
+  "catalog": "comac-hydraulic-components@A",
+  "status": "failed",
+  "phase": "topology_check",
+  "products_emitted": ["negative-group-in-path.l0-normalized.json"],
+  "products_withheld": ["l2.json", "review-card.md", "svg"],
+  "findings": [
+    {
+      "id": "E-2001",
+      "level": "ERROR",
+      "rule": "L0-9.1 / check-15.3.14",
+      "l0_line": 23,
+      "object": "LRU-001.inlet_1",
+      "message": "LRU-001 是 groups 声明的渲染分组，不是拓扑节点，不得出现在 paths 中；分组不产生端口，inlet_1 不存在。",
+      "remedy": "path 应直接连接分组成员的元件端口。分组边界仅供图面识读，管线穿越边界只表示成员对外接口。",
+      "suggested_l0": "paths:\n  - [IN-001, CV-001, F-001, OUT-001]"
+    },
+    {
+      "id": "E-2002",
+      "level": "ERROR",
+      "rule": "L0-10.5",
+      "l0_line": 24,
+      "object": "CV-001.inlet",
+      "message": "CV-001.inlet 未被任何 path 纳入网络，端口悬空。",
+      "cause": "第 23 行本应连接 CV-001.inlet，但错误地连向分组 ID。",
+      "remedy": "同 E-2001。"
+    }
+  ],
+  "notes": [
+    "本负样例针对的是封装装配方案的思维惯性：把虚线框当作可连接对象。",
+    "封装方案下 ASM-001.inlet_1 是合法写法，因为公开端口确实是拓扑对象；平坦方案下同一写法必须报错。两个负样例（sensing-in-path 与 group-in-path）分别守住取压防线与分组防线。"
+  ]
+}

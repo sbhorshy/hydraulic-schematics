@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"
+     width="80" height="80"
+     data-component-type="filter_line_shutoff"
+     data-symbol-version="2.1"
+     data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="PENDING_STANDARD_ID:clause-6.1.6">
+
+  <!--   几何:
+         菱形 半宽 22 半高 24(比例参考原描摹符号实测 23.7 x 26.2)
+         中心大圆 r=17
+         左右小圆 r=5,圆心 x=±9
+         斜线自各小圆内侧指向中心,呈 X 形交于圆心
+         四箭头沿上/下/左/右指向圆心,箭尖止于大圆外 1 单位
+
+       待确认项见 stroke-symbol-notes.md D-2 至 D-5。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 管线:中心线 Y=40 -->
+    <line x1="0" y1="40" x2="18" y2="40"/>
+    <line x1="62" y1="40" x2="80" y2="40"/>
+
+    <!-- 菱形外框 -->
+    <path d="M18 40 L40 16 L62 40 L40 64 Z"/>
+
+    <!-- 中心大圆:近内切菱形 -->
+    <circle cx="40" cy="40" r="16"/>
+
+    <!-- 一对关断阀:左右小圆各带斜线指向中心 -->
+    <circle cx="29" cy="40" r="4.5"/>
+    <circle cx="47" cy="40" r="4.5"/>
+    <line x1="32" y1="48" x2="48" y2="32"/>
+    <line x1="32" y1="32" x2="48" y2="48"/>
+
+    <!-- 虚线:中心线 x=40 -->
+    <line x1="40" y1="18" x2="40" y2="64" stroke-dasharray="5"/>
+    
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="0" cy="40" r="2"
+            data-port-id="inlet" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-outlet" cx="80" cy="40" r="2"
+            data-port-id="outlet" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>

@@ -1,0 +1,104 @@
+# L0 系统意图：1# 液压系统
+#
+# 输入（工程师口述）：一个 EDP、一个 EMP、一个 FWSOV、
+#   两个壳体回油滤、一个压力油滤、一个回油滤、一个蓄压器
+#
+# 状态：草案，不可用于工程放行。
+#   组件目录不存在，8 个组件类型全部未受控；
+#   4 处架构位置由我判断，3 项功能必需件未声明。
+#   全部待决项见 system-1.review-card.md。
+
+l0_version: "1.1"
+system: HYD-SYS-1
+catalog: "comac-hydraulic-components@CATALOG-DOES-NOT-EXIST"
+maturity: concept
+
+# 油箱未声明。以下 7 项是油箱侧与用户侧的边界标记，不是受控组件。
+# 油箱一旦确认为实例，SUP-001/002 与 RET-001/002/003 应合并为
+# 油箱本体端口，回路由开口变为闭环——这会改变 5 条网络的构成。
+# 油箱已声明为实例 TANK-001,故原 SUP-001/002 与 RET-001/002/003
+# 五个油箱侧边界标记全部撤销:回路在油箱处闭合,不再是开口。
+# 只剩用户侧两个边界——用户仍未声明。
+extern:
+  USR-001: outlet         # 用户供压边界（用户未声明）
+  USR-002: return         # 用户回油边界（用户未声明）
+
+parts:
+  TANK-001: bootstrap_reservoir
+  EDP-001: engine_driven_pump
+  EMP-001: electric_motor_driven_pump
+  FSOV-001: firewall_shutoff_valve
+  PF-001: pressure_filter
+  RF-001: return_filter
+  CDF-001: case_drain_filter
+  CDF-002: case_drain_filter
+  ACC-001: hydro_pneumatic_accumulator
+
+# 泵有 3 个端口（吸油、压力、壳体回油），main_path 不唯一，
+# 按 L0 规范 10.2 必须写显式端口，不得用裸实例名。
+paths:
+  # 吸油。定义范围从油箱吸油口起,经全部串联流道和连接部件,
+  # 至液压泵吸入口止。因此 TANK→FSOV→EDP 是一条完整吸油路径,
+  # FSOV.outlet→EDP.suction 仍属于 suction,不得在 FSOV 处终止线型。
+  # FSOV 置于 EDP 吸油侧——防火墙关断阀的功能是发动机
+  # 失火时切断向 EDP 的供油。若 1# 系统的 FWSOV 实际装在压力侧，
+  # 本行必须重写，见审查卡 D-1。
+  - ["TANK-001.suction_out", FSOV-001, "EDP-001.suction"]
+  - ["TANK-001.suction_out", "EMP-001.suction"]
+
+  # 压力汇合。两泵出口直接并联，无隔离单向阀，见审查卡 D-2。
+  - ["EDP-001.pressure_out", "@PRESS"]
+  - ["EMP-001.pressure_out", "@PRESS"]
+  - ["@PRESS", PF-001, "@MANIFOLD"]
+
+  # 压力总管。蓄压器置于压力滤下游，见审查卡 D-3。
+  # 油箱自增压端口连接到压力总管,提供活塞增压力。
+  - ["@MANIFOLD", USR-001]
+  - ["@MANIFOLD", "ACC-001.hydraulic_port"]
+  - ["@MANIFOLD", "TANK-001.bootstrap_pressure_in"]
+
+  # 主回油
+  - [USR-002, RF-001, "TANK-001.return_in"]
+
+  # 壳体回油。两泵各一路独立壳体回油滤，见审查卡 D-4。
+  - ["EDP-001.case_drain", CDF-001, "TANK-001.return_in"]
+  - ["EMP-001.case_drain", CDF-002, "TANK-001.return_in"]
+
+# 蓄压器气侧未建模。充气活门未声明，气侧压力未知。
+# 无气侧则蓄压器行为不可求解（L4）。见审查卡 M-3。
+
+groups:
+  - id: LRU-EDP-001
+    label: EDP 及壳体回油滤
+    members: [EDP-001, CDF-001]
+    reason: zone
+  - id: LRU-EMP-001
+    label: EMP 及壳体回油滤
+    members: [EMP-001, CDF-002]
+    reason: zone
+
+unknown:
+  # 油箱符号的左右端口功能分配未经标准页核对。
+  # 若接反,整个系统的回油与吸油走向全部反了。
+  - TANK-001.port_assignment_left_right_unverified
+  - TANK-001.separator_type
+  # 三条回油(主回油、两路壳体回油)都接到同一个 return_in 端口。
+  # 实际油箱是否只有一个回油口,未确认。
+  - TANK-001.return_port_count
+  # 架构缺项（无这些件系统不成立，见审查卡 M 段）
+  - system_relief_valve_not_declared
+  - pump_isolation_check_valves_not_declared
+  - consumers_not_declared
+  - accumulator_gas_charging_valve_not_declared
+  - no_instrumentation_declared
+  # 参数
+  - system_pressure_class
+  - EDP-001.rated_flow
+  - EMP-001.rated_flow
+  - ACC-001.precharge_pressure
+  - ACC-001.volume
+  - PF-001.filtration_rating
+  - RF-001.filtration_rating
+  - CDF-001.filtration_rating
+  - CDF-002.filtration_rating
+  - operating_modes

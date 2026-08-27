@@ -1,0 +1,4 @@
+interface:
+  display_name: "液压原理图工作流"
+  short_description: "从 SysML/L0 输入定义绘制液压系统原理图：符号复用、正交走线、追溯清单与校验闭环"
+  default_prompt: "为本仓库的液压系统模型绘制或更新原理图 SVG，生成追溯清单并完成结构与感知校验"

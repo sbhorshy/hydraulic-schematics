@@ -1,0 +1,167 @@
+{
+  "sheet": "1#系统原理图.svg",
+  "validation": "failed",
+  "visual_review": "pending",
+  "fail_count": 1,
+  "warn_count": 7,
+  "checks": [
+    {
+      "id": "V12",
+      "result": "fail",
+      "detail": "管线压住文字 \"发动机驱动泵\"(lbl),段 (980.0, 190.0)->(40.0, 190.0)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (210.0, 514.4)->(230.0, 514.4)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+    },
+    {
+      "id": "V4",
+      "result": "warn",
+      "detail": "三通点 (349,1088) 不在任何母线 x 上"
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 4 个,须在图签栏计数并标红: ACC-001.gas_port EDP-001.drive_shaft EMP-001.elec_power FSOV-001.command"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 9 个,不可正式出图: ACC-001(none) CDF-001(none) CDF-002(none) EDP-001(provisional) EMP-001(provisional) FSOV-001(provisional) PF-001(none) RF-001(none) TANK-001(draft)"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "V2",
+      "polylines": 27,
+      "segments": 63
+    },
+    {
+      "id": "V12",
+      "texts": 37
+    },
+    {
+      "id": "V13",
+      "segments": 63
+    },
+    {
+      "id": "V14",
+      "crossings": 0,
+      "bridged": 0,
+      "unbridged": 0
+    },
+    {
+      "id": "V15",
+      "base_T": 1.2,
+      "allowed_T": {
+        "high": 3.0,
+        "low": 1.0,
+        "symbol": 1.5
+      },
+      "violations": 0,
+      "non_scaling_stroke": 0
+    },
+    {
+      "id": "V17",
+      "S": 8.0,
+      "slash_height": 16.0,
+      "slash_angle_deg": 60.0,
+      "intra_spacing": 10.0,
+      "group_pitch": 100.0,
+      "end_clearance": 32.0,
+      "groups": 5,
+      "slashes": 25,
+      "duplicate_slashes": 0,
+      "legend_sample": [
+        1,
+        5
+      ],
+      "obstacle_hits": 0,
+      "baseline": "continuous"
+    },
+    {
+      "id": "V18",
+      "pipeline_arrows": 0,
+      "arrow_layers": 0
+    },
+    {
+      "id": "V16",
+      "scheme": "A: 轮廓 1.5T 不随管网",
+      "lead_ends": 40,
+      "steps": 0,
+      "orphan_lead_ends": 0
+    },
+    {
+      "id": "V4",
+      "junctions": 4,
+      "bus_x": [
+        700,
+        1190
+      ]
+    },
+    {
+      "id": "V5",
+      "dangling": [
+        "ACC-001.gas_port",
+        "EDP-001.drive_shaft",
+        "EMP-001.elec_power",
+        "FSOV-001.command"
+      ]
+    },
+    {
+      "id": "V6",
+      "canvas": [
+        1580,
+        1210
+      ],
+      "shift_x": 30,
+      "content_x": [
+        50.0,
+        1510.0
+      ],
+      "content_y": [
+        90,
+        880.0
+      ]
+    },
+    {
+      "id": "V8",
+      "groups": 2
+    },
+    {
+      "id": "V9",
+      "not_annotated": [
+        "ACC-001(none)",
+        "CDF-001(none)",
+        "CDF-002(none)",
+        "EDP-001(provisional)",
+        "EMP-001(provisional)",
+        "FSOV-001(provisional)",
+        "PF-001(none)",
+        "RF-001(none)",
+        "TANK-001(draft)"
+      ]
+    },
+    {
+      "id": "V10",
+      "l0_nets": 16,
+      "rendered_polylines": 27
+    }
+  ]
+}
