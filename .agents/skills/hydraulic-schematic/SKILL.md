@@ -66,3 +66,5 @@ python .agents/skills/hydraulic-schematic/scripts/sync_snapshot.py --apply    # 
 ```
 
 工具内置闸门：源符号若丢失标准 `connection-points` 端口组而快照现版有之，拒绝拷入该文件（exit 1），确认非误伤才 `--force`。排除规则会拦截测试图/预览图混入；`--prune` 清理存量垃圾。退出码：0 一致/已同步，1 有拦截，2 有待同步差异（dry run）。
+
+同一审计已接入 **pre-push 钩子**（`.git/hooks/pre-push`，不入库）：快照与规范源存在差异即拒绝推送，按提示跑 `--apply` 后重推即可；确需强行越过用 `git push --no-verify`（不建议）。更完整的回归自测试见「金样回归 selftest」工单。
