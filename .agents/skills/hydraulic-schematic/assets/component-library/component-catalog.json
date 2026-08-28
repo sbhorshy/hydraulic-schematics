@@ -503,6 +503,7 @@
     {
       "component_type": "bootstrap_reservoir",
       "description": "带液位计的自增压液压油箱",
+      "connection_role": "terminal",
       "main_path": {
         "in": "return_in",
         "out": "suction_out"
