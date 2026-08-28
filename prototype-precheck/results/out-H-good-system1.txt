@@ -1,0 +1,2 @@
+[hybrid] 形状层（schema.json 复用 form-a）: OK
+[hybrid] 语义层（preflight 复用 form-b 核心）: cleared_for_layout

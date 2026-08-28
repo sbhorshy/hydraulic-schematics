@@ -1,0 +1,23 @@
+[form B] 预检拦截于布局之前 -> blocked_pre_layout
+  扣留产物: layout, svg, topology.md
+  E-CAT-XPU-001  ERROR XPU-001:xenon_pump_unit
+               YAML 第 25 行 | 类型 xenon_pump_unit 不在目录 comac-hydraulic-components@0.1-draft 内，其端口集合无从谈起
+               处方: 改用目录内类型，或先把类型登记进 component-catalog.json 再引用
+  E-SENS-p0.1    ERROR PS-001
+               YAML 第 28 行 | role 兼容: pressure_switch 为 sensing_only，不得串入 paths
+               处方: 从 paths 移除，改写为 taps 条目并指明测点位置
+  E-BARE-p0.1    ERROR PS-001
+               YAML 第 28 行 | pressure_switch 的 main_path=null（2 个端口），裸实例无法填充串接端口
+               处方: 写显式端口，如 PS-001.elec_out
+  E-PORT-p0.2    ERROR F-001.inlet_1
+               YAML 第 28 行 | 端口存在性: 类型 pressure_filter 无端口 inlet_1（可用: inlet, outlet）
+               处方: 改成列出的真实端口 id
+  E-BARE-p1.1    ERROR ACC-001
+               YAML 第 29 行 | hydro_pneumatic_accumulator 的 main_path=null（2 个端口），裸实例无法填充串接端口
+               处方: 写显式端口，如 ACC-001.gas_port
+  E-UND-p1.2     ERROR USR-009
+               YAML 第 29 行 | 实例 USR-009 未在 parts/extern 中声明
+               处方: 先在 parts 里声明实例与类型，或改为已声明的边界标记
+  E-MED-p2.0     ERROR ACC-001.gas_port
+               YAML 第 30 行 | medium 兼容: paths 属液压主路，ACC-001.gas_port 的 medium=pneumatic
+               处方: 该端口属电气/气侧，走 taps 或专线，不入 paths

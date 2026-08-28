@@ -1,0 +1,39 @@
+# 坏输入混样：#4 三形态原型共用的唯一测试输入。
+# 刻意把 6 类真实违规揉进一份小文件，全部取材于已实际发生过的失效模式：
+#   S1 引用未声明实例     USR-009 / XPU-001 声明了类型但实例拼写类错误见 paths 第 2 行
+#   S2 类型不在目录       xenon_pump_unit（catalog 漂移）
+#   S3 sensing_only 串主路 pressure_switch 当串联件（negative-sensing 同源）
+#   S4 main_path=null 裸实例 蓄压器不写显式端口
+#   S5 显式端口不存在     F-001.inlet_1（真名 inlet）——TANK-001.suction_out 事故同构
+#   M1 medium 兼容        gas_port(pneumatic) 接进液压主路
+#   结构样例              unknown 条目写成对象而非字符串（常见手误）
+# 预期：预检 ERROR，拦截在布局之前。
+
+l0_version: "1.1"
+system: BAD-MIXED
+catalog: "comac-hydraulic-components@0.1-draft"
+maturity: concept
+
+extern:
+  IN-001: inlet
+  OUT-001: outlet
+
+parts:
+  PS-001: pressure_switch
+  F-001: pressure_filter
+  ACC-001: hydro_pneumatic_accumulator
+  XPU-001: xenon_pump_unit
+
+paths:
+  - [IN-001, PS-001, "F-001.inlet_1"]
+  - ["XPU-001.pressure_out", ACC-001, USR-009]
+  - ["ACC-001.gas_port", OUT-001]
+
+groups:
+  - id: GRP-A
+    label: 对照分组
+    members: [F-001]
+    reason: zone
+
+unknown:
+  - item: pressure_class

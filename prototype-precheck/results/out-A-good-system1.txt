@@ -1,0 +1,1 @@
+[form A] good-system1.intent.yaml -> passed（结构 0 项 / 语义 0 项）
