@@ -2,9 +2,44 @@
   "sheet": "1#系统原理图.svg",
   "validation": "failed",
   "visual_review": "pending",
-  "fail_count": 1,
-  "warn_count": 7,
+  "fail_count": 13,
+  "warn_count": 5,
   "checks": [
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 20 单位,段 (210.0, 514.4)->(230.0, 514.4)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 45 单位,段 (230.0, 514.4)->(275.0, 514.4)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 20 单位,段 (210.0, 514.4)->(230.0, 514.4)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 136 单位,段 (230.0, 514.4)->(230.0, 650.0)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 45 单位,段 (230.0, 650.0)->(275.0, 650.0)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 18 单位,段 (171.6, 615.5)->(171.6, 633.5)"
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 TANK-001 本体 204 单位,段 (171.6, 633.5)->(171.6, 850.0)"
+    },
     {
       "id": "V12",
       "result": "fail",
@@ -12,23 +47,28 @@
     },
     {
       "id": "V13",
-      "result": "warn",
-      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (210.0, 514.4)->(230.0, 514.4)"
+      "result": "fail",
+      "detail": "管线共线重叠 20 单位:(210.0, 514.4)->(230.0, 514.4) 与 (210.0, 514.4)->(230.0, 514.4)"
     },
     {
       "id": "V13",
-      "result": "warn",
-      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+      "result": "fail",
+      "detail": "管线共线重叠 20 单位:(40.0, 514.4)->(60.0, 514.4) 与 (40.0, 514.4)->(60.0, 514.4)"
     },
     {
       "id": "V13",
-      "result": "warn",
-      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+      "result": "fail",
+      "detail": "管线共线重叠 20 单位:(40.0, 514.4)->(60.0, 514.4) 与 (40.0, 514.4)->(60.0, 514.4)"
     },
     {
       "id": "V13",
-      "result": "warn",
-      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (40.0, 514.4)->(60.0, 514.4)"
+      "result": "fail",
+      "detail": "管线共线重叠 20 单位:(40.0, 514.4)->(60.0, 514.4) 与 (40.0, 514.4)->(60.0, 514.4)"
+    },
+    {
+      "id": "V17",
+      "result": "fail",
+      "detail": "吸油斜杠压住组件 TANK-001"
     },
     {
       "id": "V4",
@@ -44,6 +84,16 @@
       "id": "V9",
       "result": "warn",
       "detail": "非 annotated 符号 9 个,不可正式出图: ACC-001(none) CDF-001(none) CDF-002(none) EDP-001(provisional) EMP-001(provisional) FSOV-001(provisional) PF-001(none) RF-001(none) TANK-001(draft)"
+    },
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "构图预算 B2：单条折返 4 > 3——存量历史版本（rendering-rules 预算表注¹）：油箱侧通道线折返 4 次、绕行比 1.571/3.973，按下版收敛或显式披露处理"
+    },
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "构图预算 B3：绕行比 1.571/3.973 > 1.5，边界端子走廊按披露豁免"
     }
   ],
   "evidence": [
@@ -92,7 +142,7 @@
         1,
         5
       ],
-      "obstacle_hits": 0,
+      "obstacle_hits": 5,
       "baseline": "continuous"
     },
     {
@@ -162,6 +212,93 @@
       "id": "V10",
       "l0_nets": 16,
       "rendered_polylines": 27
+    },
+    {
+      "id": "V19",
+      "crossings": 0,
+      "turns_total": 20,
+      "turns_max_single": 4,
+      "detour_max": 3.973,
+      "min_segment": 15.0,
+      "box_gap_min": 52.0
+    },
+    {
+      "id": "composition_budget",
+      "source": "rendering-rules.md 数值构图预算（concept 档 v1）",
+      "items": {
+        "B1": "pass",
+        "B2": "exempt",
+        "B3": "exempt",
+        "B4": "pass",
+        "B5": "pass",
+        "B6": "pass"
+      },
+      "not_measured": [
+        "B6.avoid_corridor",
+        "B7"
+      ],
+      "note": "B7 标签净空 6px 未自动测量（需文本包围盒近似），V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。"
     }
-  ]
+  ],
+  "composition_budget": {
+    "source": "rendering-rules.md 数值构图预算（concept 档 v1）",
+    "items": [
+      {
+        "id": "B1",
+        "metric": "线线交叉",
+        "measured": 0,
+        "status": "pass"
+      },
+      {
+        "id": "B2",
+        "metric": "折返次数",
+        "measured": {
+          "total": 20,
+          "max_single": 4
+        },
+        "status": "exempt",
+        "detail": "存量历史版本（rendering-rules 预算表注¹）：油箱侧通道线折返 4 次、绕行比 1.571/3.973，按下版收敛或显式披露处理"
+      },
+      {
+        "id": "B3",
+        "metric": "绕行比（路线长÷直角曼哈顿距）",
+        "measured": {
+          "max": 3.973,
+          "over_budget": [
+            "1.571",
+            "3.973"
+          ]
+        },
+        "status": "exempt",
+        "detail": "超限走线均经边界走廊进出边界端子，绕行比 1.571/3.973 ≤4——存量历史版本（rendering-rules 预算表注¹）：油箱侧通道线折返 4 次、绕行比 1.571/3.973，按下版收敛或显式披露处理"
+      },
+      {
+        "id": "B4",
+        "metric": "最短走线段(px)",
+        "measured": 15.0,
+        "status": "pass"
+      },
+      {
+        "id": "B5",
+        "metric": "节点盒最小净距(px)",
+        "measured": 52.0,
+        "status": "pass"
+      },
+      {
+        "id": "B6",
+        "metric": "容器走廊(px)",
+        "measured": {
+          "group_padding": 20,
+          "avoid_corridor": "not_measured"
+        },
+        "status": "pass",
+        "detail": "避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关"
+      }
+    ],
+    "not_measured": [
+      "B6.avoid_corridor（避让走廊 ≥12）",
+      "B7（标签净空 ≥6）"
+    ],
+    "note": "B6 避让走廊与 B7 标签净空 v1 未实现自动测量（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。"
+  }
 }

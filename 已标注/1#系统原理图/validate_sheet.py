@@ -23,6 +23,35 @@ INTENT = os.path.join(HERE, '..', 'system-1.intent.yaml')
 CATALOG = os.path.join(HERE, '..', 'component-catalog.json')
 NS = 'http://www.w3.org/2000/svg'
 
+# ---------- 构图预算（B1–B7）----------
+# 与 .agents/skills/hydraulic-schematic/references/rendering-rules.md
+# 『数值构图预算（concept 档 v1）』表同源，改动须两处同步。
+# 定位是"预算披露 + 超限告警"：除交叉（B1，恒为 0）硬 fail 外，
+# 其余超限记 WARN（V19）。composition_budget 状态口径：
+#   pass=达标 / over=超限走告警通道 / exempt=表注豁免或存量披露 / fail=B1 专用失败通道。
+BUDGET = {
+    'B1': {'metric': '线线交叉', 'budget': 0,
+           'note': '恒为 0，无桥接豁免——难避免优先改道'},
+    'B2': {'metric': '折返次数', 'budget_max_single': 3, 'budget_total': 40},
+    'B3': {'metric': '绕行比（路线长÷直角曼哈顿距）', 'budget': 1.5,
+           'budget_boundary': 4.0,
+           'note': '经边界走廊进出边界端子的走线 ≤4 且须披露'},
+    'B4': {'metric': '最短走线段(px)', 'budget': 8.0},
+    'B5': {'metric': '节点盒最小净距(px)', 'budget': 40.0},
+    'B6': {'metric': '容器走廊(px)', 'budget_group_padding': 14.0,
+           'budget_avoid_corridor': 12.0},
+    'B7': {'metric': '标签净空(px)', 'budget': 6.0},
+}
+# 边界端子：图幅边缘外部接口。前两个来自 layout.externs（用户供/回油），
+# 第三个是油箱侧通道端子，坐标见 1# 图追溯清单披露的边界走廊终点。
+BOUNDARY_TERMINALS = [(1480.0, 300.0), (1480.0, 700.0), (60.0, 514.4)]
+# 存量披露：1# 系统图为历史版本（rendering-rules 预算表注¹），
+# 两条油箱侧通道线单条折返 4、绕行比 ≈1.6/≈4.0 超预算，
+# 按"下版改图收敛或显式披露"处理，记 exempt，不作为新出图先例。
+LEGACY_DISCLOSURE = ('存量历史版本（rendering-rules 预算表注¹）：'
+                     '油箱侧通道线折返 4 次、绕行比 1.571/3.973，'
+                     '按下版收敛或显式披露处理')
+
 
 def read_symbol(path):
     """返回 (markup, (vx,vy,vw,vh), {port_id: (x, y, anchor, role, medium)})."""
@@ -808,6 +837,170 @@ def main():
         W.append(('V10', 'L0 声明 %d 条网络,图上只有 %d 条折线(母线合并所致须确认)'
                   % (nets, len(polys))))
 
+    # ---------- 构图预算面板（B1–B7，V19）----------
+    # 折返数：方向变化次数，U 形回折(180°)也算一次（与
+    # prototype-precheck/calibrate_profile.py 同一口径）。
+    def turns_of(pts):
+        dirs = []
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            if abs(x1 - x0) >= abs(y1 - y0):
+                dirs.append('H' if x1 >= x0 else 'h')
+            else:
+                dirs.append('V' if y1 >= y0 else 'v')
+        return sum(1 for i in range(1, len(dirs))
+                   if dirs[i] != dirs[i - 1] or dirs[i][0] != dirs[i - 1][0])
+
+    def near_terminal(p):
+        return any(abs(p[0] - t[0]) < 3 and abs(p[1] - t[1]) < 3
+                   for t in BOUNDARY_TERMINALS)
+
+    turn_total = 0
+    turn_max = 0
+    ratios = []
+    min_seg = 9e9
+    for _c, pts in polys:
+        turn_total += turns_of(pts)
+        turn_max = max(turn_max, turns_of(pts))
+        man = abs(pts[-1][0] - pts[0][0]) + abs(pts[-1][1] - pts[0][1])
+        length = sum(abs(a[0] - b[0]) + abs(a[1] - b[1])
+                     for a, b in zip(pts, pts[1:]))
+        if man > 0:
+            ratios.append((length / man, pts))
+        for a, b in zip(pts, pts[1:]):
+            min_seg = min(min_seg, abs(a[0] - b[0]) + abs(a[1] - b[1]))
+
+    # B1 交叉：正交段几何交点，端点相接（T 型汇入/三通）不算。
+    # 预算恒为 0，不承认跨线桥豁免——有桥也是超预算，须改道。
+    b1_cross = []
+    for i in range(len(segs_all)):
+        _c1, a1, b1 = segs_all[i]
+        h1 = abs(b1[1] - a1[1]) < 0.6
+        for j in range(i + 1, len(segs_all)):
+            _c2, a2, b2 = segs_all[j]
+            h2 = abs(b2[1] - a2[1]) < 0.6
+            if h1 == h2:
+                continue
+            if h1:
+                x, y = a2[0], a1[1]
+            else:
+                x, y = a1[0], a2[1]
+            def on(p, s, e):
+                return (min(s[0], e[0]) - 0.5 <= x <= max(s[0], e[0]) + 0.5
+                        and min(s[1], e[1]) - 0.5 <= y <= max(s[1], e[1]) + 0.5)
+            if not (on((x, y), a1, b1) and on((x, y), a2, b2)):
+                continue
+            ends = {(round(q[0], 1), round(q[1], 1))
+                    for q in (segs_all[i][1], segs_all[i][2],
+                              segs_all[j][1], segs_all[j][2])}
+            if (round(x, 1), round(y, 1)) in ends:
+                continue
+            b1_cross.append((x, y))
+
+    # B5 节点盒净距：矩形间最小距离（轴向或对角，欧氏）。
+    b5_gap = None
+    bl = sorted(boxes.items())
+    for i in range(len(bl)):
+        for j in range(i + 1, len(bl)):
+            r1, r2 = bl[i][1], bl[j][1]
+            dx = max(r1[0] - r2[2], r2[0] - r1[2], 0.0)
+            dy = max(r1[1] - r2[3], r2[1] - r1[3], 0.0)
+            g = math.hypot(dx, dy)
+            if b5_gap is None or g < b5_gap:
+                b5_gap = g
+
+    items = []
+    def add(bid, measured, status, detail=None):
+        it = {'id': bid, 'metric': BUDGET[bid]['metric'],
+              'measured': measured, 'status': status}
+        if detail:
+            it['detail'] = detail
+        items.append(it)
+        return it
+
+    # B1 交叉恒 0，硬 fail（唯一走 fail 通道的预算项）。
+    if b1_cross:
+        add('B1', len(set(b1_cross)), 'fail',
+            '非连通交叉 %d 处，预算恒为 0（含跨线桥也不豁免）' % len(set(b1_cross)))
+        F.append(('V19', '构图预算 B1：交叉 %d 处 > 0，须改道消除'
+                  % len(set(b1_cross))))
+    else:
+        add('B1', 0, 'pass')
+
+    # B2 折返：单条 ≤3 且全图 ≤40。超限走 WARN；落在边界端子上的
+    # 存量走线按表注¹披露为 exempt。
+    over_turn = [n for n in range(len(polys)) if turns_of(polys[n][1]) > 3]
+    if turn_max > 3 or turn_total > 40:
+        if over_turn and all(near_terminal(polys[n][1][0])
+                             or near_terminal(polys[n][1][-1])
+                             for n in over_turn):
+            add('B2', {'total': turn_total, 'max_single': turn_max},
+                'exempt', LEGACY_DISCLOSURE)
+            W.append(('V19', '构图预算 B2：单条折返 %d > 3——%s'
+                      % (turn_max, LEGACY_DISCLOSURE)))
+        else:
+            add('B2', {'total': turn_total, 'max_single': turn_max}, 'over')
+            W.append(('V19', '构图预算 B2：折返单条 %d > 3 / 全图 %d > 40，超限'
+                      % (turn_max, turn_total)))
+    else:
+        add('B2', {'total': turn_total, 'max_single': turn_max}, 'pass')
+
+    # B3 绕行比：一般 ≤1.5；边界端子走廊 ≤4 且须披露。超限 WARN。
+    b3_over = [(r, pts) for r, pts in ratios
+               if r > BUDGET['B3']['budget']]
+    b3_status, b3_detail = 'pass', None
+    for r, pts in b3_over:
+        on_edge = (near_terminal(pts[0]) or near_terminal(pts[-1]))
+        if r <= BUDGET['B3']['budget_boundary'] and on_edge:
+            if b3_status != 'fail':
+                b3_status = 'exempt'
+            b3_detail = ('超限走线均经边界走廊进出边界端子，绕行比 %s ≤4——%s'
+                         % ('/'.join('%.3f' % x for x, _ in b3_over),
+                            LEGACY_DISCLOSURE))
+        else:
+            b3_status = 'over'
+            W.append(('V19', '构图预算 B3：绕行比 %.3f > 1.5 且非边界走廊，超限' % r))
+    if b3_status == 'exempt':
+        W.append(('V19', '构图预算 B3：绕行比 %s > 1.5，边界端子走廊按披露豁免'
+                  % ('/'.join('%.3f' % x for x, _ in b3_over))))
+    add('B3', {'max': round(max(r for r, _ in ratios), 3) if ratios else 0.0,
+               'over_budget': ['%.3f' % r for r, _ in b3_over]},
+        b3_status, b3_detail)
+
+    # B4 最短走线段 ≥8px。
+    if min_seg < BUDGET['B4']['budget']:
+        add('B4', round(min_seg, 1), 'over')
+        W.append(('V19', '构图预算 B4：最短走线段 %.1f < 8' % min_seg))
+    else:
+        add('B4', round(min_seg, 1), 'pass')
+
+    # B5 节点盒净距 ≥40px。
+    if b5_gap is not None and b5_gap < BUDGET['B5']['budget']:
+        add('B5', round(b5_gap, 1), 'over')
+        W.append(('V19', '构图预算 B5：节点盒最小净距 %.1f < 40' % b5_gap))
+    else:
+        add('B5', round(b5_gap, 1) if b5_gap is not None else None, 'pass')
+
+    # B6 容器走廊：分组内边距取 layout.group_padding 实测；
+    # 避让走廊需逐段算走线与元件的间隙，v1 未测。
+    gp = L.get('group_padding')
+    if gp is not None and gp < BUDGET['B6']['budget_group_padding']:
+        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'over')
+        W.append(('V19', '构图预算 B6：分组内边距 %g < 14' % gp))
+    else:
+        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'pass',
+            '避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关')
+    ev.append({'id': 'V19', 'crossings': len(set(b1_cross)),
+               'turns_total': turn_total, 'turns_max_single': turn_max,
+               'detour_max': round(max(r for r, _ in ratios), 3) if ratios else None,
+               'min_segment': round(min_seg, 1), 'box_gap_min': b5_gap})
+
+    ev.append({'id': 'composition_budget', 'source':
+               'rendering-rules.md 数值构图预算（concept 档 v1）',
+               'items': {it['id']: it['status'] for it in items},
+               'not_measured': ['B6.avoid_corridor', 'B7'],
+               'note': 'B7 标签净空 6px 未自动测量（需文本包围盒近似），'
+                       'V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。'})
+
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
@@ -819,6 +1012,14 @@ def main():
         'warn_count': len(W),
         'checks': checks,
         'evidence': ev,
+        'composition_budget': {
+            'source': 'rendering-rules.md 数值构图预算（concept 档 v1）',
+            'items': items,
+            'not_measured': ['B6.avoid_corridor（避让走廊 ≥12）', 'B7（标签净空 ≥6）'],
+            'note': 'B6 避让走廊与 B7 标签净空 v1 未实现自动测量'
+                    '（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠'
+                    '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
+        },
     }
     out = os.path.join(HERE, 'validation-report.json')
     io.open(out, 'w', encoding='utf-8').write(
@@ -830,6 +1031,16 @@ def main():
     for i, d in W:
         print('  WARN %s  %s' % (i, d))
     print('report ->', out)
+    print('构图预算面板（rendering-rules.md concept 档 v1）:')
+    mark = {'pass': 'pass ', 'fail': 'FAIL ', 'exempt': 'exempt',
+            'not_measured': 'n/a  '}
+    for it in items:
+        print('  %s %-28s 实测=%-24s 预算=%s'
+              % (mark.get(it['status'], '?     '), it['id'] + ' ' + it['metric'],
+                 json.dumps(it['measured'], ensure_ascii=False),
+                 json.dumps({k: v for k, v in BUDGET[it['id']].items()
+                             if k.startswith('budget')}, ensure_ascii=False)))
+    print('  未测: B6.avoid_corridor, B7 标签净空（v1 裁剪，见报告注明）')
     return 1 if F else 0
 
 
