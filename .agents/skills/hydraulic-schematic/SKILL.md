@@ -35,9 +35,9 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 | 链路 | 输入 | 模板脚本（skill 自带 `scripts/`） | 范例输入（`assets/examples/`） |
 |---|---|---|---|
 | 整机/SysML | `*.sysml`（SysML v2：part/port/connect） | `render_aircraft_schematic.py` | `aircraft_hydraulic_system.sysml` |
-| 分系统/L0 | `intent.yaml` + `*.layout.json` | `render_l0_sheet.py` | `system-1.intent.yaml`、`1#系统.layout.json` |
+| 分系统/L0 | `intent.yaml` + `*.layout.json` | `render_l0_sheet.py`（内置 `preflight.py` 预检） | `system-1.intent.yaml`、`1#系统.layout.json` |
 
-两条链路共享符号库、视觉常量与校验理念。已有模型就用对应链路，不要混用。模板脚本的文件名/输出路径常量按目标系统改——**复制到你自己的工作目录后修改运行**，不要原地执行 skill 里的副本。
+两条链路共享符号库、视觉常量与校验理念。L0 链路在渲染器 parse 后、布局前强制跑 `scripts/preflight.py` 预检（JSON Schema 形状层 + 端口/role/medium 语义层，一次报齐）：任何 ERROR 即扣留 layout/svg/topology 并以退出码 1 终止；也可独立同源调用：`python scripts/preflight.py <intent.yaml>`（0 过 / 1 拦，`--json` 出结构化 findings）。已有模型就用对应链路，不要混用。模板脚本的文件名/输出路径常量按目标系统改——**复制到你自己的工作目录后修改运行**，不要原地执行 skill 里的副本。
 
 ### Phase 1 · 符号准备
 
@@ -67,10 +67,11 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 | 资产 | 内容 |
 |---|---|
 | `assets/component-library/` | 已标注描边符号 SVG + component-catalog.json |
-| `scripts/` | 两链路渲染模板、`validate_sheet.py` 几何校核、`test_suction_markers.py` 专项测试范例 |
-| `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对） |
+| `assets/contracts/` | `l0-input-contract.schema.json`——L0 intent 结构契约（预检器形状层，也可被编辑器/CI 独立消费） |
+| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器、`validate_sheet.py` 几何校核、`test_suction_markers.py` 专项测试范例 |
+| `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对；`negative-mixed-violations` 为七类违规混样、`positive-preflight-cleared` 为预检正例，供 preflight 回归） |
 
-依赖提示：L0 渲染器需要 `ruamel.yaml`；其余仅标准库。
+依赖提示：L0 渲染器与预检器需要 `ruamel.yaml`；预检器形状层另需 `jsonschema`（缺失时形状层降级为 WARN，语义层照跑）；其余仅标准库。
 
 在仓库里修订了符号、目录或脚本后，用随附的同步守门工具刷快照（**默认 dry run 只审计，加 `--apply` 才写入**）：
 

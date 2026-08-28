@@ -45,6 +45,7 @@ SCRIPTS_GROUP = dict(
     pairs=[
         (os.path.join(REPO, 'render_aircraft_schematic.py'), 'render_aircraft_schematic.py'),
         (os.path.join(REPO, '已标注', '1#系统原理图', 'render.py'), 'render_l0_sheet.py'),
+        (os.path.join(REPO, '已标注', '1#系统原理图', 'preflight.py'), 'preflight.py'),
         (os.path.join(REPO, '已标注', '1#系统原理图', 'validate_sheet.py'), 'validate_sheet.py'),
         (os.path.join(REPO, '已标注', '1#系统原理图', 'test_suction_markers.py'), 'test_suction_markers.py'),
     ],
@@ -61,6 +62,8 @@ EXAMPLES_GROUP = dict(
         (os.path.join(REPO, '已标注', 'negative-group-in-path.expected-report.json'), 'negative-group-in-path.expected-report.json'),
         (os.path.join(REPO, '已标注', 'negative-sensing-in-path.intent.yaml'), 'negative-sensing-in-path.intent.yaml'),
         (os.path.join(REPO, '已标注', 'negative-sensing-in-path.expected-report.json'), 'negative-sensing-in-path.expected-report.json'),
+        (os.path.join(REPO, '已标注', 'negative-mixed-violations.intent.yaml'), 'negative-mixed-violations.intent.yaml'),
+        (os.path.join(REPO, '已标注', 'positive-preflight-cleared.intent.yaml'), 'positive-preflight-cleared.intent.yaml'),
     ],
 )
 

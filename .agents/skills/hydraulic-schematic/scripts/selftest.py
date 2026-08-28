@@ -19,6 +19,10 @@
   D. --force 旁路：同一场景加 --force --apply → 文件确实被强制拷入（exit 0）。
   E. prune 计数：沙箱快照放置命中排除规则的文件 → dry-run 只报 PRUNE 不删，
      加 --prune 才删除且计数=1。
+  F. L0 预检器（#8）：负例 negative-mixed-violations（七类违规混样）必须被拦截
+     （exit 1，且报出端口存在性 E-PORT / role 兼容 E-SENS / 结构契约 E-SHAPE-* 等
+     具体 finding id、一次报齐）；正例 positive-preflight-cleared 必须放行（exit 0）。
+     与渲染器、CLI 同源调用 scripts/preflight.py。
 
 明确不在 v1 覆盖内：L0 链路金样（L0 规范源断裂，见地图 Out of scope）、
 构图度量回归（等「构图预算定档」阈值冻结）、PNG 光栅化比对（属感知层人工回读）。
@@ -246,12 +250,36 @@ def check_prune_counts():
         shutil.rmtree(src_root, ignore_errors=True)
 
 
+# ---------- F. L0 输入预检器 ----------
+
+PREFLIGHT = os.path.join(HERE, 'preflight.py')
+EX_NEG = os.path.join(SKILL, 'assets', 'examples', 'negative-mixed-violations.intent.yaml')
+EX_POS = os.path.join(SKILL, 'assets', 'examples', 'positive-preflight-cleared.intent.yaml')
+
+
+def check_preflight():
+    rc, out = run_py([PREFLIGHT, EX_NEG], expect_zero=False)
+    if rc != 1:
+        raise Fail('负例七类违规混样未被拦截（退出码 %d，期望 1）。输出：\n%s' % (rc, out[-800:]))
+    for fid in ('E-PORT', 'E-SENS', 'E-BARE', 'E-UND', 'E-MED', 'E-CAT-XPU-001', 'E-SHAPE-'):
+        if fid not in out:
+            raise Fail('负例报告缺 finding id %s（首错不停一次报齐被破坏）。输出：\n%s' % (fid, out[-800:]))
+    if 'blocked_pre_layout' not in out:
+        raise Fail('负例报告缺 blocked_pre_layout 状态标记。输出：\n%s' % out[-400:])
+    rc, out = run_py([PREFLIGHT, EX_POS], expect_zero=False)
+    if rc != 0:
+        raise Fail('正例被误杀（退出码 %d，期望 0 放行）。输出：\n%s' % (rc, out[-800:]))
+    if 'cleared_for_layout' not in out:
+        raise Fail('正例输出缺 cleared_for_layout 状态标记。输出：\n%s' % out[-400:])
+
+
 CHECKS = [
     ('A. SysML 链路金样比对（渲染退出码/结构自检/SVG+清单逐字节）', check_sysml_golden),
     ('B. sync_snapshot 当前审计一致（dry-run=0）', check_sync_audit_clean),
     ('C. 端口回退闸门拦截（exit 1 且 dry-run 不落盘）', check_gate_blocks_regression),
     ('D. --force --apply 强制旁路生效', check_gate_force_bypass),
     ('E. 排除规则 prune 计数与实际删除', check_prune_counts),
+    ('F. L0 预检器：负例七类违规拦截报齐 / 正例放行', check_preflight),
 ]
 
 
