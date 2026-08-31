@@ -1,0 +1,31 @@
+{
+  "driver": "validate-driver-1.0",
+  "converged": false,
+  "rounds": [],
+  "prescriptions": [],
+  "residuals": [
+    {
+      "stage": "R0",
+      "id": "E-TERM-p31.1",
+      "level": "ERROR",
+      "object": "TANK-001",
+      "message": "role 兼容: bootstrap_reservoir 为 terminal，只能在 path 端点出现，不得中间串接",
+      "remedy": "把 TANK-001 移到该 path 的首或尾，或拆分路径",
+      "hint": "处方表无此类的机械修法（语义不可推导），需人工改 intent 后重跑驱动器"
+    }
+  ],
+  "inject": {
+    "class": "C terminal 中串(E-TERM，无处方可修)",
+    "path": [
+      "USER-001.pressure_in",
+      "TANK-001",
+      "USER-002.pressure_in"
+    ]
+  },
+  "exit_code": 2,
+  "preflight": {
+    "status": "blocked_pre_layout",
+    "findings": 1
+  },
+  "elapsed_s": 0.4
+}

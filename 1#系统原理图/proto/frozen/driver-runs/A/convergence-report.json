@@ -1,0 +1,66 @@
+{
+  "driver": "validate-driver-1.0",
+  "converged": true,
+  "rounds": [
+    {
+      "round": 1,
+      "layout_source": "engine",
+      "rendered": "1#系统原理图.svg",
+      "readback": "regenerated@1680w",
+      "fail_count": 0,
+      "warn_count": 6,
+      "fails": [],
+      "budget": {
+        "B1": "pass",
+        "B2": "pass",
+        "B3": "over",
+        "B4": "pass",
+        "B5": "pass",
+        "B6": "pass"
+      }
+    }
+  ],
+  "prescriptions": [
+    {
+      "stage": "R0",
+      "id": "P1",
+      "round": 0,
+      "applied": [
+        {
+          "path": [
+            "PG-001.pressure_sense",
+            "ACV-001.charge_port"
+          ],
+          "tap": {
+            "sensor": "PG-001.pressure_sense",
+            "at": "ACV-001.charge_port"
+          },
+          "deduped": false
+        }
+      ],
+      "triggered_by": [
+        "E-SENS-p31.0 role 兼容: pressure_gauge 为 sensing_only，不得串入 paths",
+        "E-MED-p31.0 medium 兼容: paths 属液压主路，PG-001.pressure_sense 的 medium=pneumatic",
+        "E-MED-p31.1 medium 兼容: paths 属液压主路，ACV-001.charge_port 的 medium=pneumatic"
+      ]
+    }
+  ],
+  "residuals": [],
+  "inject": {
+    "class": "A 传感对误入 paths(E-MED×2)",
+    "path": [
+      "PG-001.pressure_sense",
+      "ACV-001.charge_port"
+    ],
+    "removed_tap": {
+      "sensor": "PG-001.pressure_sense",
+      "at": "ACV-001.charge_port"
+    }
+  },
+  "exit_code": 0,
+  "preflight": {
+    "status": "cleared_for_layout",
+    "findings": 0
+  },
+  "elapsed_s": 5.1
+}
