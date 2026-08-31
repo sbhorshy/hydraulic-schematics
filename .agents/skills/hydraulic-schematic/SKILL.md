@@ -25,7 +25,7 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 - 渲染/校验模板脚本一律先复制到你的工作目录再修改运行，不要原地执行 skill 里的副本。
 - 脚本输入输出路径以脚本自身位置解析（HERE 同级/上级常量），不假设当前工作目录 = skill 目录；
   换目标系统时只改顶部路径常量与拓扑数据，在任何 CWD 下运行同一份副本结果一致。
-- 守门工具 `sync_snapshot.py` 与 `selftest.py` 是例外：它们属于 skill 基础设施，不复制，
+- 守门工具 `check_library.py` 与 `selftest.py` 是例外：它们属于 skill 基础设施，不复制，
   按「随附资产与快照同步」的原位命令从仓库根直接运行。
 
 ## 工作流
@@ -64,29 +64,36 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 
 按 [references/validation.md](references/validation.md) 执行三层：Python 结构自检（退出码门禁）→ `scripts/validate_sheet.py` 几何校核出 `validation-report.json` → 浏览器/Inkscape 渲染 PNG 回读做感知校核。任何一层不过，修图重跑，不带病交付。
 
-## 随附资产与快照同步
+## 随附资产与单源纪律（#20 定案）
 
-本 skill 自包含三组资产（均为仓库规范源的同步快照）：
+本 skill 自包含四组资产：
 
 | 资产 | 内容 |
 |---|---|
-| `assets/component-library/` | 已标注描边符号 SVG + component-catalog.json |
+| `assets/component-library/` | 描边符号 SVG（kebab-case 规范名）+ component-catalog.json |
 | `assets/contracts/` | `l0-input-contract.schema.json`——L0 intent 结构契约（预检器形状层，也可被编辑器/CI 独立消费） |
-| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器、`validate_sheet.py` 几何校核、`test_suction_markers.py` 专项测试范例 |
+| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`test_suction_markers.py` 专项测试范例 |
 | `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对；`negative-mixed-violations` 为七类违规混样、`positive-preflight-cleared` 为预检正例，供 preflight 回归） |
 
 依赖提示：L0 渲染器与预检器需要 `ruamel.yaml`；预检器形状层另需 `jsonschema`（缺失时形状层降级为 WARN，语义层照跑）；其余仅标准库。
 
-在仓库里修订了符号、目录或脚本后，用随附的同步守门工具刷快照（**默认 dry run 只审计，加 `--apply` 才写入**）：
+本 skill 即组件库的**唯一规范源**（单源化，2026-09-01）：`assets/component-library/`、
+`scripts/`、`assets/examples/` 不再是对外副本，没有「规范源→快照」的镜像同步。
+旧的镜像工具 `sync_snapshot.py` 已随规范源归档退役；其核心价值——端口回退检测
+（油箱事件：符号编辑丢失 `connection-points`）——由**库结构校验器**承接：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/sync_snapshot.py            # 审计：列出三组差异
-python .agents/skills/hydraulic-schematic/scripts/sync_snapshot.py --apply    # 同步 + 报告端口变化
+python .agents/skills/hydraulic-schematic/scripts/check_library.py     # 0 过 / 1 断
 ```
 
-工具内置闸门：源符号若丢失标准 `connection-points` 端口组而快照现版有之，拒绝拷入该文件（exit 1），确认非误伤才 `--force`。排除规则会拦截测试图/预览图混入；`--prune` 清理存量垃圾。退出码：0 一致/已同步，1 有拦截，2 有待同步差异（dry run）。
-
-同一审计已接入 **pre-push 钩子**（`.git/hooks/pre-push`，不入库）：快照与规范源存在差异即拒绝推送，按提示跑 `--apply` 后重推即可；确需强行越过用 `git push --no-verify`（不建议）。
+- **L1** 每个 SVG 必须是合法 XML；**L2** 必须含 `connection-points` 端口组且
+  组内 `data-port-id` 唯一——已知方言缺口走 `WHITELIST`（每项带理由与跟踪票，
+  白名单是挂账不是赦免）；**L3** catalog↔symbol 交叉校验：`symbol.asset` 解析
+  不到库内文件的条目按 INFO 出回清单（#21 回登记工作清单），修完后用
+  `--strict-catalog` 升硬。
+- 改动符号/catalog 后先跑它，再跑 selftest（见下）。**pre-push 钩子**
+  （`.git/hooks/pre-push`，不入库）已接本工具：库结构不过即拒绝推送；
+  确需强行越过用 `git push --no-verify`（不建议，须披露）。
 
 改动符号、catalog 或模板脚本后，跑一条命令的基准图回归确认出图能力未被打破（详细覆盖面见 `scripts/selftest.py` 头注）：
 
