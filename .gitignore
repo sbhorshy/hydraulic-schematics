@@ -6,6 +6,7 @@ prototype-precheck/**/*.png
 prototype-precheck/**/*.txt
 prototype-precheck/envelope-survey/
 1#系统原理图/judge-*.png
+archive
 
 # Python
 __pycache__/
