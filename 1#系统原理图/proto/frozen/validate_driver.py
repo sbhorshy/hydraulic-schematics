@@ -276,6 +276,9 @@ def main():
                     help='引擎参照布局：仅承载 labels 等呈现文案，'
                          '坐标一律重推；传 none 则无参照')
     ap.add_argument('--inject', choices=['a', 'b', 'c', 'd'], default=None)
+    ap.add_argument('--optimize', action='store_true',
+                    help='首轮即叠加引擎阶段 3 寻优（#14 定案的到站标准链'
+                         '：规则+守门+寻优）；不加则首轮为规则+守门')
     ap.add_argument('--keep', action='store_true',
                     help='保留上轮工作区不清理（默认每次重建）')
     args = ap.parse_args()
@@ -348,7 +351,7 @@ def main():
 
     # ---- 有界轮次 ----
     seed_pending = seed is not None or args.layout_seed
-    p3_armed = False
+    p3_armed = bool(args.optimize)
     if args.ref and args.ref.lower() != 'none' and os.path.isfile(args.ref):
         shutil.copy2(args.ref, os.path.join(wd, 'ref.layout.json'))
         ref_path = 'ref.layout.json'
