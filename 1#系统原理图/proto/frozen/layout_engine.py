@@ -23,6 +23,7 @@
 REF_LAYOUT 仅取 labels/label_pos/label_drop 等展示文案（标签文字不是坐标决策），
 坐标一概不从参照布局读取。--param 供改参传播实验（如 ROW_PITCH=420）。
 """
+import copy
 import io
 import json
 import os
@@ -448,6 +449,9 @@ def rules(intent, cat, params, ref=None):
     # ---- R11 走廊 ----
     vlanes = [P['VLANE_WEST'],
               tank_right + P['EDGE_PAD']]           # 西缘竖廊 + 吸油上行竖廊
+    # 走廊分配不做规则式吸收(#19 实验结论):回油次走廊与壳体回油下落带、
+    # 母线接入高度、画序占带全局耦合,单条 lane 规则(曾试 R15)在引擎布局
+    # 上仍取顶走廊 2.373。走廊选择由 --optimize 阶段(寻优叠加层)全局分配。
 
     # ---- extern 兜底(extern 类 intent;用户名框类 intent 的 extern 为空)----
     for e, kind in intent.get('extern', {}).items():
@@ -668,7 +672,7 @@ def main(argv):
         return argv[i + 1]
 
     intent_p, cat_p, ref_p = argv[1], argv[2], argv[3]
-    out_p, guard_p = None, None
+    out_p, guard_p, opt_kicks = None, None, None
     params = dict(P)
     ref = None
     i = 4
@@ -684,6 +688,9 @@ def main(argv):
             params[k] = (json.loads(v) if v.startswith('{')
                          else int(v) if v.lstrip('-').isdigit() else float(v))
             i += 2
+        elif argv[i] == '--optimize':
+            opt_kicks = True
+            i += 1
         else:
             raise SystemExit('未知参数: %s' % argv[i])
     if ref_p != '-':
@@ -694,6 +701,25 @@ def main(argv):
         cat = json.load(f)
     layout, structure = rules(intent, cat, params, ref)
     layout, report = guard(layout, structure, params)
+    if opt_kicks is not None:
+        # ---- 阶段 3:寻优叠加层(#19 正式并入)----
+        # 规则+守门之后,以 B1–B5+硬缺陷(V2/V13)为能量做邻域微调
+        # (挪位/换行/母线微调),不劣化约束取阶段 2 输出为下限。
+        # 注意:阶段 3 的输出由校核链(validate)仲裁,守门零漂移只对
+        # 阶段 2 的规则解成立——寻优位移是有意为之的 licensed drift。
+        import proto_optimize
+        bp0 = proto_optimize.bpanel(copy.deepcopy(layout), intent, cat)
+        proto_optimize.NO_REGRESSION.update(
+            b1=bp0['b1'], b2tot=bp0['b2tot'], b2max=bp0['b2max'],
+            b4=bp0['b4'], b5=bp0['b5'])
+        opt_log = []
+        layout, bp, _e = proto_optimize.climb(layout, intent, cat,
+                                              opt_log, 'stage3')
+        layout['note'] = layout.get('note', '') + (
+            ';阶段3 寻优叠加层 %d 步(B3 %.3f,违限 %d)'
+            % (len(opt_log) - 1, bp['b3'], proto_optimize.violations(bp)))
+        print('optimize: %d 步, B3=%.3f, 违限=%d'
+              % (len(opt_log) - 1, bp['b3'], proto_optimize.violations(bp)))
     with io.open(out_p, 'w', encoding='utf-8') as f:
         json.dump(layout, f, ensure_ascii=False, indent=2)
     if guard_p:
