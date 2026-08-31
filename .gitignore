@@ -1,6 +1,12 @@
 # 浏览器回读用的临时 profile（12M+，非资产）
 已标注/1#系统原理图/_edge_readback_profile/
 
+# 符号重绘测量工作区：对比截图/测量输出留本地，不入库（脚本样板与正式资产除外）
+prototype-precheck/**/*.png
+prototype-precheck/**/*.txt
+prototype-precheck/envelope-survey/
+1#系统原理图/judge-*.png
+
 # Python
 __pycache__/
 *.py[cod]
