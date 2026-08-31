@@ -16,6 +16,10 @@ python validate_driver.py --workdir driver-run-B --inject b \
 # 演练 C：terminal 串入 path 中段（E-TERM）→ 处方表无机械修法，
 #          残差上报退出 2，渲染一行未启动（fail-closed）
 python validate_driver.py --workdir driver-run-C --inject c
+# 演练 B2（#14 换策略后回归）：同演练 B 注入，P3 已是首改进+浅拷贝+抛光帽
+#          ——端到端 91.6s（策略更换前 940.9s），轮 2 fail 0
+python validate_driver.py --workdir driver-run-B2 --inject b \
+    --layout-seed "1#系统丁.layout.json" --rounds 2
 ```
 
 要点：

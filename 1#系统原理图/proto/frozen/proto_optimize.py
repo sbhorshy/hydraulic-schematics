@@ -302,8 +302,25 @@ def neighbors(L):
     return ms
 
 
+def _fast_copy(L):
+    """两级浅拷贝替代 deepcopy（#14）。布局各键至多嵌套两层——
+    nodes/buses/externs 的值是标量 dict，lanes/vlanes 是标量 list，
+    legend/title_block/canvas/style 是标量 dict——两级拷贝即隔离
+    apply_move 与管线管线写入的全部路径，候选对象新鲜度契约不变，
+    省掉 deepcopy 的备忘录机制（实测约占爬坡墙钟一半）。"""
+    c = dict(L)
+    for k in ('canvas', 'style', 'legend', 'title_block'):
+        if isinstance(L.get(k), dict):
+            c[k] = dict(L[k])
+    for k in ('externs', 'nodes', 'buses'):
+        c[k] = {n: dict(v) for n, v in (L.get(k) or {}).items()}
+    for k in ('lanes', 'vlanes'):
+        c[k] = list(L.get(k) or [])
+    return c
+
+
 def apply_move(L, m):
-    L = copy.deepcopy(L)
+    L = _fast_copy(L)
     op = m[0]
     if op == 'lane_move':
         L['lanes'][m[1]] += m[2]
@@ -339,31 +356,52 @@ def apply_move(L, m):
     return L
 
 
-# ---------- 搜索：全邻域最陡下降 + 随机踢散重启 ----------
+# ---------- 搜索：固定种子首改进下降 + 随机踢散重启（#14 换策略）----------
 
-def climb(L0, intent, catalog, log, tag):
+# 违限清零且 B3 入预算后的抛光步上限。绿线之后的全是"总长再短几步"的
+# 收益递减，而抛光尾的长度随种子波动可达数分钟（seed19 实测 8m37s）——
+# 驱动器的 P3 步要的是可预测性，25 步已捕获 1# 实测大部分长度收益。
+POLISH_STEPS = 25
+
+
+def climb(L0, intent, catalog, log, tag, seed=19):
+    """首改进下降：洗牌邻域、遇第一个改进即接受；整轮无改进=局部最优。
+    取代原全邻域最陡下降——每接受一步的评估成本从 ~邻域全体 降到
+    ~期望一半，同预算下走得多；1# 实测终态持平或更优（seed7 与最陡下降
+    的丁逐位相同、seed19 总长再短 60）而墙钟大降（eval-p3-speedup*.py）。
+    固定种子保确定性；绿线（违限 0 且 B3 入预算）后最多再走 POLISH_STEPS。"""
+    rng = random.Random(seed)
     bp = bpanel(L0, intent, catalog)
     cur, e = L0, energy(bp)
     log.append({'tag': tag, 'step': 0, 'move': None, 'energy': e, 'bp': bp})
     step = 0
+    polish = POLISH_STEPS
     while True:
         step += 1
-        best, bestm, bestbp, bestL = e, None, bp, cur
-        for m in neighbors(cur):
+        msl = neighbors(cur)
+        rng.shuffle(msl)
+        found = None
+        for m in msl:
             cand = apply_move(cur, m)
             if cand is None:
                 continue
             cbp = bpanel(cand, intent, catalog)
             ce = energy(cbp)
-            if ce < best:
-                best, bestm, bestbp, bestL = ce, m, cbp, cand
-        if bestm is None:
+            if ce < e:
+                found = (cand, cbp, ce, m)
+                break
+        if found is None:
             break
-        cur, bp, e = bestL, bestbp, best
-        log.append({'tag': tag, 'step': step, 'move': repr(bestm),
+        cur, bp, e = found[0], found[1], found[2]
+        log.append({'tag': tag, 'step': step, 'move': repr(found[3]),
                     'energy': e, 'bp': bp})
         print('  [%s] step %d %s -> %s b3=%.3f len=%d'
-              % (tag, step, bestm, e[:2], bp['b3'], bp['length']))
+              % (tag, step, found[3], e[:2], bp['b3'], bp['length']))
+        if e[0] == 0 and e[1] == 0.0:
+            polish -= 1
+            if polish <= 0:
+                print('  [%s] 抛光帽 %d 步用尽，绿线后收工' % (tag, POLISH_STEPS))
+                break
     return cur, bp, e
 
 

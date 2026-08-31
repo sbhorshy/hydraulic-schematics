@@ -1,0 +1,68 @@
+{
+  "driver": "validate-driver-1.0",
+  "converged": true,
+  "rounds": [
+    {
+      "round": 1,
+      "layout_source": "seed",
+      "rendered": "1#系统原理图.svg",
+      "readback": "regenerated@1680w",
+      "fail_count": 1,
+      "warn_count": 7,
+      "fails": [
+        {
+          "id": "V2",
+          "detail": "管线穿越 ACC-001 本体 94 单位,段 (1170.0, 329.2)->(1170.0, 478.0)"
+        }
+      ],
+      "budget": {
+        "B1": "pass",
+        "B2": "pass",
+        "B3": "pass",
+        "B4": "over",
+        "B5": "over",
+        "B6": "pass"
+      }
+    },
+    {
+      "round": 2,
+      "layout_source": "engine+optimize",
+      "rendered": "1#系统原理图.svg",
+      "readback": "regenerated@1680w",
+      "fail_count": 0,
+      "warn_count": 5,
+      "fails": [],
+      "budget": {
+        "B1": "pass",
+        "B2": "pass",
+        "B3": "pass",
+        "B4": "pass",
+        "B5": "pass",
+        "B6": "pass"
+      }
+    }
+  ],
+  "prescriptions": [
+    {
+      "stage": "round",
+      "id": "P3",
+      "round": 1,
+      "applied": [
+        "引擎重推布局 + --optimize 第三阶段",
+        "触发: V2 管线穿越 ACC-001 本体 94 单位,段 (1170.0, 329.2)->(1170.0, 478.0)"
+      ]
+    }
+  ],
+  "residuals": [],
+  "inject": {
+    "class": "B 种子布局几何缺陷(ACC-001 y+170)",
+    "moved": "ACC-001",
+    "dy": 170
+  },
+  "exit_code": 0,
+  "preflight": {
+    "status": "cleared_for_layout",
+    "findings": 0
+  },
+  "elapsed_s": 91.6
+}
