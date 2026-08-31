@@ -49,7 +49,7 @@
 </style>
 <rect x="0" y="0" width="1680" height="1390" fill="#ffffff"/>
 <text class="banner" x="40" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>
-<text class="lbl" x="40" y="44">1# 液压系统原理图  (由 1#系统.intent.yaml 生成,源清单 1#系统组件.json; EDP/EMP/FWSOV provisional,油箱 draft,优先阀/充气活门/压力表 draft,不可用于工程放行)</text>
+<text class="lbl" x="40" y="44">1# 液压系统原理图  (由 1#系统.intent.yaml 生成,源清单 1#系统组件.json; EDP/EMP/FWSOV provisional,油箱 draft,优先阀/充气活门/压力表 draft,用户名框 provisional,不可用于工程放行)</text>
 <g id="sheet" transform="translate(30,0)"><g id="groups"></g>
 <g id="lines"><polyline class="ln-suction" points="278.0,686.0 298.0,686.0 480.0,686.0 480.0,650.0 500.0,650.0"/>
 <polyline class="ln-suction" points="278.0,686.0 298.0,686.0 298.0,330.0 310.0,330.0 330.0,330.0"/>
@@ -62,13 +62,29 @@
 <polyline class="ln-pressure" points="935.0,338.0 880.0,338.0"/>
 <polyline class="ln-pressure" points="1080.0,338.0 1098.0,338.0 1160.0,338.0"/>
 <polyline class="ln-pressure" points="1300.0,317.2 1282.0,317.2 1160.0,317.2"/>
-<polyline class="ln-pressure" points="1440.0,317.2 1460.0,317.2 1460.0,400.0 1480.0,400.0"/>
+<polyline class="ln-pressure" points="1440.0,317.2 1458.0,317.2 1470.0,317.2"/>
+<polyline class="ln-pressure" points="1498.0,190.0 1480.0,190.0 1470.0,190.0"/>
+<polyline class="ln-pressure" points="1498.0,295.0 1480.0,295.0 1470.0,295.0"/>
+<polyline class="ln-pressure" points="1498.0,400.0 1480.0,400.0 1470.0,400.0"/>
+<polyline class="ln-pressure" points="1498.0,505.0 1480.0,505.0 1470.0,505.0"/>
+<polyline class="ln-pressure" points="1498.0,610.0 1480.0,610.0 1470.0,610.0"/>
+<polyline class="ln-pressure" points="1498.0,715.0 1480.0,715.0 1470.0,715.0"/>
+<polyline class="ln-pressure" points="1498.0,820.0 1480.0,820.0 1470.0,820.0"/>
+<polyline class="ln-pressure" points="1498.0,925.0 1480.0,925.0 1470.0,925.0"/>
 <polyline class="ln-pressure" points="1210.0,290.0 1210.0,308.0 1160.0,308.0"/>
 <polyline class="ln-pressure" points="580.0,780.6 598.0,780.6 880.0,780.6"/>
 <polyline class="ln-pressure" points="440.0,780.6 420.0,780.6 420.0,860.0 232.0,860.0 232.0,840.0"/>
 <polyline class="ln-pressure" points="1186.0,593.8 1168.0,593.8 1160.0,593.8"/>
-<polyline class="ln-return" points="1480.0,700.0 1460.0,700.0 1300.0,700.0 1300.0,728.0 1280.0,728.0"/>
-<polyline class="ln-return" points="1200.0,728.0 1182.0,728.0 940.0,728.0"/>
+<polyline class="ln-return" points="1618.0,190.0 1636.0,190.0 1646.0,190.0"/>
+<polyline class="ln-return" points="1618.0,295.0 1636.0,295.0 1646.0,295.0"/>
+<polyline class="ln-return" points="1618.0,400.0 1636.0,400.0 1646.0,400.0"/>
+<polyline class="ln-return" points="1618.0,505.0 1636.0,505.0 1646.0,505.0"/>
+<polyline class="ln-return" points="1618.0,610.0 1636.0,610.0 1646.0,610.0"/>
+<polyline class="ln-return" points="1618.0,715.0 1636.0,715.0 1646.0,715.0"/>
+<polyline class="ln-return" points="1618.0,820.0 1636.0,820.0 1646.0,820.0"/>
+<polyline class="ln-return" points="1618.0,925.0 1636.0,925.0 1646.0,925.0"/>
+<polyline class="ln-return" points="1280.0,1040.0 1298.0,1040.0 1646.0,1040.0"/>
+<polyline class="ln-return" points="1200.0,1040.0 1182.0,1040.0 940.0,1040.0"/>
 <polyline class="ln-return" points="60.0,686.0 42.0,686.0 42.0,100.0 940.0,100.0 940.0,686.0"/>
 <polyline class="ln-return" points="1200.0,933.8 1182.0,933.8 940.0,933.8"/>
 <polyline class="ln-case_drain" points="540.0,370.0 540.0,388.0 620.0,388.0"/>
@@ -77,7 +93,9 @@
 <polyline class="ln-case_drain" points="480.0,100.0 480.0,80.0 40.0,80.0 40.0,686.0 60.0,686.0"/>
 <polyline class="ln-pressure" points="880.0,330.0 880.0,780.6"/>
 <polyline class="ln-pressure" points="1160.0,308.0 1160.0,593.8"/>
-<polyline class="ln-return" points="940.0,686.0 940.0,933.8"/>
+<polyline class="ln-pressure" points="1470.0,190.0 1470.0,925.0"/>
+<polyline class="ln-return" points="1646.0,190.0 1646.0,1040.0"/>
+<polyline class="ln-return" points="940.0,686.0 940.0,1040.0"/>
 <polyline class="ln-case_drain" points="620.0,175.1 620.0,708.0"/>
 <polyline class="ln-sense" points="1240.0,89.5 1222.0,89.5 1210.0,89.5 1210.0,190.0"/>
 <polyline class="ln-sense" points="1446.0,117.0 1446.0,135.0 1374.0,135.0 1374.0,89.5"/></g>
@@ -93,10 +111,23 @@
 <circle class="jn" cx="880.0" cy="338.0" r="3"/>
 <circle class="jn" cx="1160.0" cy="338.0" r="3"/>
 <circle class="jn" cx="1160.0" cy="317.2" r="3"/>
-<circle class="jn" cx="940.0" cy="728.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="317.2" r="3"/>
+<circle class="jn" cx="1470.0" cy="295.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="400.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="505.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="610.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="715.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="820.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="295.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="400.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="505.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="610.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="715.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="820.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="925.0" r="3"/>
+<circle class="jn" cx="940.0" cy="933.8" r="3"/>
 <circle class="jn" cx="620.0" cy="388.0" r="3"/></g>
-<g id="externs"><path class="ext-mark" d="M1492.0 392.0 L1480.0 400.0 L1492.0 408.0 Z" fill="#ffffff"/>
-<path class="ext-mark" d="M1492.0 692.0 L1480.0 700.0 L1492.0 708.0 Z" fill="#e8e8e8"/></g>
+<g id="externs"></g>
 <g id="symbols"><g id="inst-TANK-001" transform="translate(60,276) translate(0,0) rotate(0) scale(1) translate(-20,-10)">
 <rect id="TANK-001__white-background" x="24.960693359375" y="10.153091430664062" width="218.9725341796875" height="564.3383178710938" fill="#ffffff" />
   
@@ -235,7 +266,7 @@
 
   
 </g>
-<g id="inst-RF-001" transform="translate(1200,700) translate(80,112) rotate(180) scale(1) translate(-0,-0)">
+<g id="inst-RF-001" transform="translate(1200,1012) translate(80,112) rotate(180) scale(1) translate(-0,-0)">
 <g id="RF-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
 
     
@@ -437,6 +468,126 @@
   </g>
 
   
+</g>
+<g id="inst-USER-001" transform="translate(1498,160) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-001__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-001__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-001__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-001__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-001</tspan><tspan x="60" y="40.5">MF扰流板</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-002" transform="translate(1498,265) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-002__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-002__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-002__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-002__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-002__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-002</tspan><tspan x="60" y="40.5">襟翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-003" transform="translate(1498,370) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-003__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-003__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-003__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-003__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-003__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-003</tspan><tspan x="60" y="40.5">缝翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-004" transform="translate(1498,475) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-004__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-004__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-004__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-004__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-004__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-004</tspan><tspan x="60" y="40.5">副翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-005" transform="translate(1498,580) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-005__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-005__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-005__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-005__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-005__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-005</tspan><tspan x="60" y="40.5">升降舵</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-006" transform="translate(1498,685) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-006__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-006__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-006__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-006__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-006__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-006</tspan><tspan x="60" y="40.5">方向舵</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-007" transform="translate(1498,790) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-007__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-007__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-007__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-007__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-007__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-007</tspan><tspan x="60" y="40.5">反推</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-008" transform="translate(1498,895) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-008__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-008__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-008__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-008__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-008__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-008</tspan><tspan x="60" y="40.5">正常刹车</tspan></text>
+  </g>
+
+  
 </g></g>
 <g id="dangling"><circle class="dang" cx="540.0" cy="290.0" r="5"/>
 <circle class="dang" cx="540.0" cy="610.0" r="5"/>
@@ -455,8 +606,8 @@
 <text class="lbl" x="1092.0" y="283.0" text-anchor="start">压力油滤</text>
 <text class="lbl" x="492.0" y="116.0" text-anchor="start">CDF-001</text>
 <text class="lbl" x="492.0" y="129.0" text-anchor="start">壳体回油滤</text>
-<text class="lbl" x="1240.0" y="828.0" text-anchor="middle">RF-001</text>
-<text class="lbl" x="1240.0" y="841.0" text-anchor="middle">回油滤</text>
+<text class="lbl" x="1240.0" y="1140.0" text-anchor="middle">RF-001</text>
+<text class="lbl" x="1240.0" y="1153.0" text-anchor="middle">回油滤</text>
 <text class="lbl" x="1370.0" y="269.0" text-anchor="middle">PRV-001</text>
 <text class="lbl" x="1370.0" y="282.0" text-anchor="middle">优先阀</text>
 <text class="lbl" x="510.0" y="824.0" text-anchor="middle">PRV-002</text>
@@ -470,43 +621,37 @@
 <text class="lbl" x="1266.0" y="644.0" text-anchor="middle">QDP-001</text>
 <text class="lbl" x="1266.0" y="657.0" text-anchor="middle">地面压力快卸接头</text>
 <text class="lbl" x="1280.0" y="984.0" text-anchor="middle">QDR-001</text>
-<text class="lbl" x="1280.0" y="997.0" text-anchor="middle">地面回油快卸接头</text>
-<text class="ext" x="1490.0" y="404.0" text-anchor="start">至用户 (供压)</text>
-<text class="ext" x="1490.0" y="417.0" text-anchor="start">扰流板/襟翼/缝翼/副翼</text>
-<text class="ext" x="1490.0" y="430.0" text-anchor="start">升降舵/方向舵/反推/正常刹车</text>
-<text class="ext" x="1490.0" y="704.0" text-anchor="start">自用户 (回油)</text>
-<text class="ext" x="1490.0" y="717.0" text-anchor="start">扰流板/襟翼/缝翼/副翼</text>
-<text class="ext" x="1490.0" y="730.0" text-anchor="start">升降舵/方向舵/反推/正常刹车</text></g></g>
-<g id="legend"><rect class="lg" x="1000.0" y="1020.0" width="540.0" height="290.0"/>
-<text class="lg-t" x="1010.0" y="1038.0" font-weight="bold">图例  (T = 1.20)</text>
-<line x1="1012.0" y1="1060.0" x2="1056.0" y2="1060.0" stroke="#000" stroke-width="3.60"/>
-<text class="lg-t" x="1064.0" y="1064.0">High Pressure Lines  高压 (高于回油压力的全部压力级)  3.0 T</text>
-<line x1="1012.0" y1="1082.0" x2="1056.0" y2="1082.0" stroke="#000" stroke-width="1.20"/>
-<text class="lg-t" x="1064.0" y="1086.0">Low Pressure Lines   低压 (回油、壳体回油)             1.0 T</text>
-<line x1="1012.0" y1="1104.0" x2="1056.0" y2="1104.0" stroke="#000" stroke-width="1.20"/>
-<text class="lg-t" x="1064.0" y="1108.0">Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T</text>
-<line class="suc-sample-base" x1="1012.0" y1="1126.0" x2="1056.0" y2="1126.0" stroke="#000" stroke-width="1.20"/>
-<line class="suc-sample-mark" x1="1012.0" y1="1133.1" x2="1020.3" y2="1118.9" stroke="#000" stroke-width="1.20"/>
-<line class="suc-sample-mark" x1="1020.9" y1="1133.1" x2="1029.2" y2="1118.9" stroke="#000" stroke-width="1.20"/>
-<line class="suc-sample-mark" x1="1029.9" y1="1133.1" x2="1038.1" y2="1118.9" stroke="#000" stroke-width="1.20"/>
-<line class="suc-sample-mark" x1="1038.8" y1="1133.1" x2="1047.1" y2="1118.9" stroke="#000" stroke-width="1.20"/>
-<line class="suc-sample-mark" x1="1047.7" y1="1133.1" x2="1056.0" y2="1118.9" stroke="#000" stroke-width="1.20"/>
-<text class="lg-t" x="1064.0" y="1130.0">Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=8)</text>
-<line x1="1012.0" y1="1148.0" x2="1056.0" y2="1148.0" stroke="#000" stroke-width="1.80"/>
-<text class="lg-t" x="1064.0" y="1152.0">组件本体 (符号轮廓、内部机构)                          1.5 T</text>
-<text class="lg-t" x="1072.0" y="1174.0">  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T</text>
-<text class="lg-t" x="1072.0" y="1196.0">  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化</text>
-<path d="M1012.0 1207.0 L1026.0 1214.0 L1012.0 1221.0 Z" fill="#e8e8e8" stroke="#000" stroke-width="1.80"/>
-<text class="lg-t" x="1064.0" y="1218.0">系统边界接口(用户未建模)</text>
-<path class="brg-lo" d="M1024.0 1236.0 A5 5 0 0 1 1034.0 1236.0"/>
-<line x1="1029.0" y1="1224.0" x2="1029.0" y2="1244.0" stroke="#000" stroke-width="1.20"/>
-<text class="lg-t" x="1064.0" y="1240.0">跨线桥:横线跨过竖线,二者不连通</text>
-<circle class="jn" cx="1029.0" cy="1258.0" r="3"/>
-<line x1="1012.0" y1="1258.0" x2="1046.0" y2="1258.0" stroke="#000" stroke-width="3.60"/>
-<text class="lg-t" x="1064.0" y="1262.0">三通:实心点表示连通</text>
-<circle class="dang" cx="1029.0" cy="1280.0" r="5"/>
-<text class="lg-t" x="1064.0" y="1284.0">悬空端口:未接线,不得视为已连接</text></g>
+<text class="lbl" x="1280.0" y="997.0" text-anchor="middle">地面回油快卸接头</text></g></g>
+<g id="legend"><rect class="lg" x="380.0" y="1020.0" width="540.0" height="290.0"/>
+<text class="lg-t" x="390.0" y="1038.0" font-weight="bold">图例  (T = 1.20)</text>
+<line x1="392.0" y1="1060.0" x2="436.0" y2="1060.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="1064.0">High Pressure Lines  高压 (高于回油压力的全部压力级)  3.0 T</text>
+<line x1="392.0" y1="1082.0" x2="436.0" y2="1082.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1086.0">Low Pressure Lines   低压 (回油、壳体回油)             1.0 T</text>
+<line x1="392.0" y1="1104.0" x2="436.0" y2="1104.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1108.0">Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T</text>
+<line class="suc-sample-base" x1="392.0" y1="1126.0" x2="436.0" y2="1126.0" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="392.0" y1="1133.1" x2="400.3" y2="1118.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="400.9" y1="1133.1" x2="409.2" y2="1118.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="409.9" y1="1133.1" x2="418.1" y2="1118.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="418.8" y1="1133.1" x2="427.1" y2="1118.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="427.7" y1="1133.1" x2="436.0" y2="1118.9" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1130.0">Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=8)</text>
+<line x1="392.0" y1="1148.0" x2="436.0" y2="1148.0" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="1152.0">组件本体 (符号轮廓、内部机构)                          1.5 T</text>
+<text class="lg-t" x="452.0" y="1174.0">  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T</text>
+<text class="lg-t" x="452.0" y="1196.0">  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化</text>
+<path d="M392.0 1207.0 L406.0 1214.0 L392.0 1221.0 Z" fill="#e8e8e8" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="1218.0">系统边界接口(用户未建模)</text>
+<path class="brg-lo" d="M404.0 1236.0 A5 5 0 0 1 414.0 1236.0"/>
+<line x1="409.0" y1="1224.0" x2="409.0" y2="1244.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1240.0">跨线桥:横线跨过竖线,二者不连通</text>
+<circle class="jn" cx="409.0" cy="1258.0" r="3"/>
+<line x1="392.0" y1="1258.0" x2="426.0" y2="1258.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="1262.0">三通:实心点表示连通</text>
+<circle class="dang" cx="409.0" cy="1280.0" r="5"/>
+<text class="lg-t" x="444.0" y="1284.0">悬空端口:未接线,不得视为已连接</text></g>
 <g id="title"><rect class="tb" x="40.0" y="1330.0" width="1600.0" height="56.0"/>
 <text class="tb-t" x="50.0" y="1351.0">系统 HYD-SYS-1   |   L0 1.1   |   目录 comac-hydraulic-components@0.3-draft   |   成熟度 concept</text>
-<text class="tb-t" x="50.0" y="1370.0">部件 14   |   网络 21   |   气侧支路 2   |   未知项 27   |   临时/草稿符号: EDP EMP FWSOV provisional; 油箱 draft(描摹); 优先阀 充气活门 压力表 draft   |   悬空端口 5: EDP-001.drive_shaft EMP-001.elec_power FSOV-001.command QDP-001.outlet QDR-001.outlet</text></g>
+<text class="tb-t" x="50.0" y="1370.0">部件 22   |   网络 37   |   气侧支路 2   |   未知项 28   |   临时/草稿符号: EDP EMP FWSOV provisional; 油箱 draft(描摹); 优先阀 充气活门 压力表 draft   |   悬空端口 5: EDP-001.drive_shaft EMP-001.elec_power FSOV-001.command QDP-001.outlet QDR-001.outlet</text></g>
 </svg>

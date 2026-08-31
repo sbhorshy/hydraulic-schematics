@@ -18,7 +18,7 @@
     {
       "id": "V4",
       "result": "warn",
-      "detail": "三通点 (1029,1258) 不在任何母线 x 上"
+      "detail": "三通点 (409,1258) 不在任何母线 x 上"
     },
     {
       "id": "V5",
@@ -28,7 +28,7 @@
     {
       "id": "V9",
       "result": "warn",
-      "detail": "非 annotated 符号 14 个,不可正式出图: ACC-001(none) ACV-001(draft) CDF-001(none) EDP-001(provisional) EMP-001(provisional) FSOV-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(none) TANK-001(draft)"
+      "detail": "非 annotated 符号 22 个,不可正式出图: ACC-001(none) ACV-001(draft) CDF-001(none) EDP-001(provisional) EMP-001(provisional) FSOV-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(none) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)"
     },
     {
       "id": "V19",
@@ -39,16 +39,16 @@
   "evidence": [
     {
       "id": "V2",
-      "polylines": 30,
-      "segments": 69
+      "polylines": 48,
+      "segments": 100
     },
     {
       "id": "V12",
-      "texts": 50
+      "texts": 44
     },
     {
       "id": "V13",
-      "segments": 69
+      "segments": 100
     },
     {
       "id": "V14",
@@ -93,18 +93,20 @@
     {
       "id": "V16",
       "scheme": "A: 轮廓 1.5T 不随管网",
-      "lead_ends": 40,
+      "lead_ends": 72,
       "steps": 0,
       "orphan_lead_ends": 0
     },
     {
       "id": "V4",
-      "junctions": 7,
+      "junctions": 21,
       "bus_x": [
         620,
         880,
         940,
-        1160
+        1160,
+        1470,
+        1646
       ]
     },
     {
@@ -130,11 +132,11 @@
       "shift_x": 30,
       "content_x": [
         70.0,
-        1510.0
+        1676.0
       ],
       "content_y": [
         50,
-        968
+        1124
       ]
     },
     {
@@ -157,18 +159,26 @@
         "QDP-001(provisional)",
         "QDR-001(provisional)",
         "RF-001(none)",
-        "TANK-001(draft)"
+        "TANK-001(draft)",
+        "USER-001(provisional)",
+        "USER-002(provisional)",
+        "USER-003(provisional)",
+        "USER-004(provisional)",
+        "USER-005(provisional)",
+        "USER-006(provisional)",
+        "USER-007(provisional)",
+        "USER-008(provisional)"
       ]
     },
     {
       "id": "V10",
-      "l0_nets": 21,
-      "rendered_polylines": 30
+      "l0_nets": 37,
+      "rendered_polylines": 48
     },
     {
       "id": "V19",
       "crossings": 0,
-      "turns_total": 24,
+      "turns_total": 20,
       "turns_max_single": 3,
       "detour_max": 2.373,
       "min_segment": 8.0,
@@ -205,7 +215,7 @@
         "id": "B2",
         "metric": "折返次数",
         "measured": {
-          "total": 24,
+          "total": 20,
           "max_single": 3
         },
         "status": "pass"
