@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "L0 intent.yaml 结构子集契约",
+  "description": "方案 A：把 intent 的形状冻结在声明式契约里，供任何工具独立校验。只管形状，不管语义——类型是否存在、端口是否真实由语义层负责。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["l0_version", "system", "catalog", "maturity", "extern", "parts", "paths"],
+  "properties": {
+    "l0_version": {"type": "string", "pattern": "^\\d+\\.\\d+$"},
+    "system": {"type": "string", "minLength": 1},
+    "catalog": {"type": "string", "pattern": "^[a-z][a-z0-9-]*@.+$",
+                "description": "<catalog_id>@<revision> 形式；与具体目录的一致性属语义层。"},
+    "maturity": {"type": "string", "enum": ["concept", "review", "released"]},
+    "extern": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "enum": ["inlet", "outlet", "return"]}
+    },
+    "parts": {
+      "type": "object",
+      "additionalProperties": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$",
+                               "description": "值是 component_type 蛇形命名。"}
+    },
+    "paths": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "array", "minItems": 2,
+        "items": {"type": "string",
+                  "pattern": "^(@[A-Za-z0-9_-]+|[A-Z][A-Za-z0-9_-]*)(\\.[a-z][a-z0-9_]*)?$"}
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "label", "members", "reason"],
+        "properties": {
+          "id": {"type": "string"},
+          "label": {"type": "string"},
+          "members": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "reason": {"type": "string"}
+        }
+      }
+    },
+    "taps": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["sensor", "at"],
+        "properties": {
+          "sensor": {"type": "string"},
+          "at": {"type": "string"},
+          "position": {"type": "string", "enum": ["upstream", "downstream"]}
+        }
+      }
+    },
+    "unknown": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  }
+}

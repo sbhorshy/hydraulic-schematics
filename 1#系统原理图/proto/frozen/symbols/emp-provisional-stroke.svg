@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"
+     width="80" height="80"
+     data-component-type="electric_motor_driven_pump"
+     data-symbol-version="0.1"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="TRACED_FROM:Electric motor-driven variable-displacement pump.svg">
+
+  <!-- 临时符号。库内原资产为 potrace 描摹填充(612x525pt,3 条填充路径),
+       无法取端口坐标、无法控线宽,故重绘为描边几何。
+       但原图内部机构未逐一测量,本符号只保留可确认的三项特征:
+         泵圆 + 排出三角 + 变量斜箭头(文件名 variable-displacement 为依据)
+       电机符号(通常为另一圆内含 M 或方框)未画,因原图内部结构未测。
+       不得用于正式出图。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="40" cy="40" r="22"/>
+    <path d="M62 40 L48 32 L48 48 Z" fill="#000000" stroke="none"/>
+    <!-- 变量排量斜箭头:穿越符号本体,箭头指向右上 -->
+    <line x1="22" y1="58" x2="58" y2="22"/>
+    <path d="M58 22 L50 24 L56 30 Z" fill="#000000" stroke="none"/>
+    <line x1="0"  y1="40" x2="18" y2="40"/>
+    <line x1="62" y1="40" x2="80" y2="40"/>
+    <line x1="40" y1="62" x2="40" y2="80"/>
+    <line x1="40" y1="18" x2="40" y2="0" stroke-dasharray="4"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-suction" cx="0" cy="40" r="2"
+            data-port-id="suction" data-medium="hydraulic"
+            data-port-role="suction" data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-pressure-out" cx="80" cy="40" r="2"
+            data-port-id="pressure_out" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="out"
+            data-anchor-direction="right"/>
+    <circle id="port-case-drain" cx="40" cy="80" r="2"
+            data-port-id="case_drain" data-medium="hydraulic"
+            data-port-role="case_drain" data-flow-capability="out"
+            data-anchor-direction="down"/>
+    <circle id="port-elec-power" cx="40" cy="0" r="2"
+            data-port-id="elec_power" data-medium="electrical"
+            data-port-role="signal_in" data-flow-capability="none"
+            data-anchor-direction="up"/>
+  </g>
+</svg>

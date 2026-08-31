@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 100"
+     width="60" height="100"
+     data-component-type="hydro_pneumatic_accumulator"
+     data-symbol-version="1.0"
+     data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="REDRAWN_FROM:Hydro-Pneumatic Accumulator.svg">
+
+  <!-- 重绘自库内 Hydro-Pneumatic Accumulator.svg(147x256pt 描摹填充)。
+       原文件两个端口的 id 都是 "port-pressure-in"(重复 id,SVG 非法,
+       getElementById 只能取到第一个),且气侧 data-direction="down"
+       与其位于顶部矛盾。本版按目录 ports 定义重建:
+         hydraulic_port  下  anchor down
+         gas_port        上  anchor up
+
+       气侧在上为识读惯例,目录 layout 禁 90/270 旋转。
+       气液分隔线画为实线横线(隔膜/活塞式未声明,
+       见 unknown: ACC-001.separator_type)。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 壳体:上下半圆的胶囊形 -->
+    <path d="M12 30 A18 18 0 0 1 48 30 L48 70 A18 18 0 0 1 12 70 Z"/>
+    <polygon points="30 50, 35 42, 25 42"/>
+    <!-- 气液分隔 -->
+    <line x1="12" y1="50" x2="48" y2="50"/>
+    <!-- 端口引线 -->
+    <line x1="30" y1="88" x2="30" y2="100"/>
+    <line x1="30" y1="12" x2="30" y2="0"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-hydraulic" cx="30" cy="100" r="2"
+            data-port-id="hydraulic_port" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="bidirectional"
+            data-anchor-direction="down"/>
+    <circle id="port-gas" cx="30" cy="0" r="2"
+            data-port-id="gas_port" data-medium="pneumatic"
+            data-port-role="gas" data-flow-capability="bidirectional"
+            data-anchor-direction="up"/>
+  </g>
+</svg>
