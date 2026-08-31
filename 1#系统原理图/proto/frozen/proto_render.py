@@ -1190,7 +1190,10 @@ def main():
                  encoding='utf-8') as f:
         catalog = json.load(f)
     # 预检器钩子（#4/#8）：parse 后、布局前强制断言；ERROR 则报齐并退出，布局一行不执行。
-    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read())
+    _tplp = preflight.default_template_path(src)
+    _tpl = preflight.load_yaml_text(_tplp)[0] if _tplp else None
+    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read(),
+                              template=_tpl)
     if not rep['ok']:
         preflight.emit_preflight_failure(rep)
         sys.exit(1)

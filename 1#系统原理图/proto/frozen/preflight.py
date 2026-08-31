@@ -191,12 +191,63 @@ def semantic_findings(intent, catalog, source_text):
     return findings
 
 
+# ---------- 模板门禁（#12 定案：串联组合第三环）----------
+
+def default_template_path(intent_path):
+    """受控清单模板解析：intent 同目录下唯一 *受控模板.yaml；无或多则不启用
+    （模板是可选输入，缺失不拦路；存在但与 intent 不符才拦）。"""
+    if not intent_path:
+        return None
+    import glob as _glob
+    d = os.path.dirname(os.path.abspath(intent_path))
+    hits = sorted(_glob.glob(os.path.join(d, '*受控模板.yaml')))
+    return hits[0] if len(hits) == 1 else None
+
+
+def template_findings(intent, catalog, source_text, tpl):
+    """受控清单模板三向对账 + 签认状态，进 preflight 统一出口：
+    对账差异 = ERROR——intent 不得发明清单模板之外的连接，模板不得漏背书；
+    签认按 maturity 分级：concept 未签认 = WARN 披露（演练不被签认卡死），
+    其余 maturity 未签认 = ERROR 拦截（正式出图必须先签认）。
+    对账实现复用 topology_confirm.audit，不复制不漂移。"""
+    import topology_confirm as _tc
+    findings = []
+    problems, _ctx = _tc.audit(intent, tpl, source_text or '')
+    for i, pr in enumerate(problems):
+        findings.append(dict(id='E-RECON-%d' % i, level='ERROR',
+                             rule='template-reconciliation',
+                             yamlline=None, object='受控清单模板',
+                             message='对账差异: %s' % pr,
+                             remedy='改 intent 或改受控清单模板，二者须互为背书；'
+                                    '对账干净并签认后再进布局'))
+    sig = tpl.get('签认') or {}
+    mat = (intent.get('maturity') or 'concept')
+    if sig.get('状态') != 'signed':
+        if mat == 'concept':
+            findings.append(dict(
+                id='W-SIGN-UNSIGNED', level='WARN', rule='template-signoff',
+                yamlline=None, object='受控清单模板.签认',
+                message='拓扑确认单未签认（maturity=%s，按披露放行）' % mat,
+                remedy='工程师对照确认单逐行签认后，把模板签认区状态改 signed'))
+        else:
+            findings.append(dict(
+                id='E-SIGN-UNSIGNED', level='ERROR', rule='template-signoff',
+                yamlline=None, object='受控清单模板.签认',
+                message='maturity=%s 未签认，拓扑确认单未过人工对账' % mat,
+                remedy='工程师签认确认单并在模板签认区登记 signed 后再出图'))
+    return findings
+
+
 # ---------- 合并出口 ----------
 
-def preflight(intent, catalog, source_text=None, skip_schema=False):
-    """parse 后、布局前的全量预检。形状层+语义层收齐合并，一次报齐。"""
+def preflight(intent, catalog, source_text=None, skip_schema=False,
+              template=None):
+    """parse 后、布局前的全量预检。形状层+语义层+模板门禁（可选）收齐
+    合并，一次报齐。template 为受控清单模板 dict（None=未启用）。"""
     findings = [] if skip_schema else schema_findings(intent)
     findings += semantic_findings(intent, catalog, source_text)
+    if template is not None:
+        findings += template_findings(intent, catalog, source_text, template)
     errs = [f for f in findings if f['level'] == 'ERROR']
     return dict(tool='l0-preflight',
                 ok=not errs,
@@ -238,12 +289,15 @@ def main(argv=None):
     intent, text = load_yaml_text(args[0])
     with io.open(catp, encoding='utf-8') as f:
         catalog = json.load(f)
-    rep = preflight(intent, catalog, text)
+    tplp = default_template_path(args[0])
+    tpl = load_yaml_text(tplp)[0] if tplp else None
+    rep = preflight(intent, catalog, text, template=tpl)
     if '--json' in flags:
         print(json.dumps(rep, ensure_ascii=False, indent=1))
     elif rep['ok']:
-        print('[l0-preflight] %s -> cleared_for_layout，进入 place()/wire()。'
-              % os.path.basename(args[0]))
+        print('[l0-preflight] %s%s -> cleared_for_layout，进入 place()/wire()。'
+              % (os.path.basename(args[0]),
+                 '' if tpl else '（无受控清单模板，模板门禁未启用）'))
     else:
         emit_preflight_failure(rep)
     return 0 if rep['ok'] else 1

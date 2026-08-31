@@ -239,3 +239,12 @@ catalog: "comac-hydraulic-components@0.3-draft"
            USER-005, USER-006, USER-007, USER-008]
     名单: {USER-001: MF扰流板, USER-002: 襟翼, USER-003: 缝翼, USER-004: 副翼,
            USER-005: 升降舵, USER-006: 方向舵, USER-007: 反推, USER-008: 正常刹车}
+
+# ---- 签认区（#12 定案：preflight 按 maturity 分级查此状态）----
+# 工程师对照拓扑确认单逐行签认后，把状态改 signed 并登记签署人/日期；
+# 签认前：concept 档 WARN 披露放行，其余 maturity ERROR 拦截。
+签认:
+  状态: 未签认
+  工程师: ""
+  日期: ""
+  对应确认单: 拓扑确认单-1#.md

@@ -20,7 +20,18 @@ python validate_driver.py --workdir driver-run-C --inject c
 #          ——端到端 91.6s（策略更换前 940.9s），轮 2 fail 0
 python validate_driver.py --workdir driver-run-B2 --inject b \
     --layout-seed "1#系统丁.layout.json" --rounds 2
+# 演练 D（#12 定案门禁回归）：模板侧种子错（蓄压器 @分配→@用户供压）→
+#          preflight 对账双向抓出（intent 无背书＋清单无落地）→ 残差退出 2
+python validate_driver.py --workdir driver-run-D --inject d
 ```
+
+## #12 定案后（2026-08-31 串联组合落码）
+
+- `topology_confirm.audit()`：三向对账唯一实现，确认单 CLI 与 preflight 共用；
+- `preflight.template_findings()`：对账差异=ERROR；签认按 maturity 分级
+  （concept 未签认=WARN 披露，其余=ERROR 拦截），状态记录在模板 `签认:` 区；
+- 渲染器钩子（proto_render/render）与驱动器沙箱均已启用模板门禁；
+  演练 D 即该门禁的端到端拦截证据；基线（门禁激活）轮 1 收敛 5.3s。
 
 要点：
 

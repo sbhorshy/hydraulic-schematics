@@ -10,6 +10,10 @@ intent + 受控清单模板 → 人类可读的分段拓扑确认单（markdown�
 
 用法: python topology_confirm.py <intent.yaml> <受控模板.yaml> -o <确认单.md>
 退出码: 对账有差异 = 1（确认单仍生成，供工程师看到差异后签认或退回）。
+
+#12 定案（串联组合）：audit() 是三向对账的唯一实现，preflight 模板门禁
+与本 CLI 共用，不复制不漂移；签认状态记录在模板 `签认:` 区，由 preflight
+按 maturity 分级检查（concept 未签认=WARN，其余未签认=ERROR）。
 """
 import io
 import os
@@ -98,21 +102,11 @@ def parse_unknown_block(raw):
     return out
 
 
-def main():
-    argv = sys.argv[1:]
-    intent_p, tpl_p = argv[0], argv[1]
-    out_p = argv[argv.index('-o') + 1] if '-o' in argv else '拓扑确认单.md'
-    yaml = YAML(typ='safe')
-    with io.open(intent_p, encoding='utf-8') as f:
-        intent = yaml.load(f)
-    raw = io.open(intent_p, encoding='utf-8').read()
-    with io.open(tpl_p, encoding='utf-8') as f:
-        tpl = yaml.load(f)
-
+def expand_template(tpl):
+    """模板侧展开：母线词反查进模块全局（label/分段用），返回
+    (连接对, 悬空登记, 追问 slug 集)。供 audit 与确认单渲染共用。"""
     for word, bus in (tpl.get('母线词汇') or {}).items():
         BUS_REV[bus] = word
-
-    # ---- 模板侧：实例登记 + 连接对展开 ----
     busmap = {'@' + w: b for w, b in (tpl.get('母线词汇') or {}).items()}
     tpl_pairs, tpl_dangle, tpl_slugs, seen = [], [], set(), set()
     for row in tpl['行']:
@@ -149,16 +143,28 @@ def main():
                         raise SystemExit('模板重复声明连接: %s | %s' % (a, b))
                     seen.add(key)
                     tpl_pairs.append((a, b))
+    return tpl_pairs, tpl_dangle, tpl_slugs
 
-    # ---- intent 侧：paths 对 + taps 对 ----
+
+def intent_pairs(intent):
+    """intent 侧：paths 相邻对 + taps 对，规范成无向可匹配形。"""
     hyd, gasp = [], []
     for path in intent.get('paths') or []:
         for a, b in zip(path, path[1:]):
             hyd.append((canon(a), canon(b)))
     for t in intent.get('taps') or []:
         gasp.append((canon(t['sensor']), canon(t['at'])))
+    return hyd, gasp
 
-    # ---- 三向对账 ----
+
+def audit(intent, tpl, raw):
+    """三向对账（#12 定案的布局门禁断言，串联组合第三环）：
+    实例集一致、intent 每条连接有清单背书、清单每条连接有 intent 落地、
+    模板追问全部登记 intent.unknown。返回 (差异列表, ctx)；
+    ctx 携带配对明细供确认单渲染复用。本函数是 preflight 与本 CLI
+    的唯一对账实现，不复制不漂移。"""
+    tpl_pairs, tpl_dangle, tpl_slugs = expand_template(tpl)
+    hyd, gasp = intent_pairs(intent)
     problems = []
     tp_insts = set(INST_NAME)
     it_insts = set(intent.get('parts') or {})
@@ -182,6 +188,27 @@ def main():
     miss = tpl_slugs - unk
     if miss:
         problems.append('模板追问未登记 intent.unknown: %s' % sorted(miss))
+    ctx = dict(hyd=hyd, gasp=gasp, display=display, all_int=all_int,
+               tpl_pairs=tpl_pairs, tpl_dangle=tpl_dangle,
+               inst_count=len(it_insts))
+    return problems, ctx
+
+
+def main():
+    argv = sys.argv[1:]
+    intent_p, tpl_p = argv[0], argv[1]
+    out_p = argv[argv.index('-o') + 1] if '-o' in argv else '拓扑确认单.md'
+    yaml = YAML(typ='safe')
+    with io.open(intent_p, encoding='utf-8') as f:
+        intent = yaml.load(f)
+    raw = io.open(intent_p, encoding='utf-8').read()
+    with io.open(tpl_p, encoding='utf-8') as f:
+        tpl = yaml.load(f)
+
+    problems, ctx = audit(intent, tpl, raw)
+    hyd, gasp, display = ctx['hyd'], ctx['gasp'], ctx['display']
+    all_int = ctx['all_int']
+    it_insts = set(intent.get('parts') or {})
 
     # ---- 渲染 ----
     o = []

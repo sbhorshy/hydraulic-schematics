@@ -1,0 +1,36 @@
+{
+  "driver": "validate-driver-1.0",
+  "converged": false,
+  "rounds": [],
+  "prescriptions": [],
+  "residuals": [
+    {
+      "stage": "R0",
+      "id": "E-RECON-0",
+      "level": "ERROR",
+      "object": "受控清单模板",
+      "message": "对账差异: intent 连接无清单背书: 分配母线(@MANIFOLD) ~ accumulator（系统蓄压器）(ACC-001).hydraulic_port",
+      "remedy": "改 intent 或改受控清单模板，二者须互为背书；对账干净并签认后再进布局",
+      "hint": "处方表无此类的机械修法（语义不可推导），需人工改 intent 后重跑驱动器"
+    },
+    {
+      "stage": "R0",
+      "id": "E-RECON-1",
+      "level": "ERROR",
+      "object": "受控清单模板",
+      "message": "对账差异: 清单连接无 intent 落地: accumulator（系统蓄压器）(ACC-001).hydraulic_port ~ 用户供压母线(@USR)",
+      "remedy": "改 intent 或改受控清单模板，二者须互为背书；对账干净并签认后再进布局",
+      "hint": "处方表无此类的机械修法（语义不可推导），需人工改 intent 后重跑驱动器"
+    }
+  ],
+  "inject": {
+    "class": "D 模板种子错(蓄压器母线归属错，对账双向抓出)",
+    "changed": "ACC 对端 @分配 -> @用户供压"
+  },
+  "exit_code": 2,
+  "preflight": {
+    "status": "blocked_pre_layout",
+    "findings": 3
+  },
+  "elapsed_s": 0.5
+}

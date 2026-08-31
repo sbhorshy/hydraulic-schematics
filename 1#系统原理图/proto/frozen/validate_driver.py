@@ -55,7 +55,8 @@ READBACK = 'sheet-readback.png'
 READBACK_W = 1680                      # = viewBox 宽，导出即 1:1
 
 SCRIPTS = ['preflight.py', 'proto_render.py', 'validate_sheet.py',
-           'layout_engine.py', 'proto_optimize.py']
+           'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py']
+TPL_NAME = '1#清单受控模板.yaml'     # 随沙箱复制，preflight 模板门禁按同目录解析
 PY = sys.executable
 INKSCAPE_CANDIDATES = [
     r'D:\Program Files\Inkscape\bin\inkscape.exe',
@@ -125,6 +126,22 @@ def inject_c(intent):
         ['USER-001.pressure_in', 'TANK-001', 'USER-002.pressure_in'])
     return {'class': 'C terminal 中串(E-TERM，无处方可修)',
             'path': ['USER-001.pressure_in', 'TANK-001', 'USER-002.pressure_in']}
+
+
+def inject_d(tpl):
+    """演练 D（#12 定案门禁）：模板侧种子错——蓄压器液压口对端从分配母线
+    改挂用户供压母线。preflight 对账应双向抓出（intent 无背书 + 清单无落地），
+    处方表无机械修法，预期残差上报退出 2。"""
+    hit = 0
+    for row in tpl.get('行') or []:
+        if 'accumulator' in (row.get('口语名') or ''):
+            for c in row.get('连接') or []:
+                if c.get('对端') == '@分配':
+                    c['对端'] = '@用户供压'
+                    hit += 1
+    assert hit, '演练 D 需要模板中蓄压器挂 @分配 的连接行'
+    return {'class': 'D 模板种子错(蓄压器母线归属错，对账双向抓出)',
+            'changed': 'ACC 对端 @分配 -> @用户供压'}
 
 
 # ---------- 处方 P1：纯传感链误入 paths → 降级 taps ----------
@@ -258,7 +275,7 @@ def main():
     ap.add_argument('--ref', default=DEFAULT_REF,
                     help='引擎参照布局：仅承载 labels 等呈现文案，'
                          '坐标一律重推；传 none 则无参照')
-    ap.add_argument('--inject', choices=['a', 'b', 'c'], default=None)
+    ap.add_argument('--inject', choices=['a', 'b', 'c', 'd'], default=None)
     ap.add_argument('--keep', action='store_true',
                     help='保留上轮工作区不清理（默认每次重建）')
     args = ap.parse_args()
@@ -272,6 +289,7 @@ def main():
     # ---- 沙箱工作区 ----
     setup_workdir(wd)
     shutil.copy2(args.intent, os.path.join(wd, INTENT_NAME))
+    shutil.copy2(os.path.join(HERE, TPL_NAME), os.path.join(wd, TPL_NAME))
     seed = None
     if args.inject == 'b':
         seed = load_yaml(args.layout_seed or DEFAULT_SEED)
@@ -286,6 +304,10 @@ def main():
         report['inject'] = (inject_a(intent) if args.inject == 'a'
                             else inject_c(intent))
         dump_intent(intent, os.path.join(wd, INTENT_NAME))
+    elif args.inject == 'd':
+        tpl = load_yaml(os.path.join(wd, TPL_NAME))
+        report['inject'] = inject_d(tpl)
+        dump_intent(tpl, os.path.join(wd, TPL_NAME))
     with io.open(os.path.join(wd, CATALOG), encoding='utf-8') as f:
         catalog = json.load(f)
     inkscape = find_inkscape()
