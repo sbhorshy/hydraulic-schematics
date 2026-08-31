@@ -53,8 +53,9 @@ PROD_SVG_NAME = 'aircraft_hydraulic_system_schematic.svg'
 PROD_MD_NAME = 'aircraft_hydraulic_system_topology.md'
 
 # 回退闸门测试用的符号候选：必须依次试到第一个真带端口组的
-CANDIDATES = ['check-valve-stroke.svg', 'Filter.svg', 'edp-provisional-stroke.svg',
-              'accumulator-stroke.svg']
+# （2026-08-30 快照重命名后旧 *-stroke.svg 文件名已不存在，换现役名）
+CANDIDATES = ['check-valve.svg', 'priority-valve.svg', 'accumulator.svg',
+              'filter-line-shutoff-dp.svg']
 # prune 测试用：必须命中 sync_snapshot 的排除规则（stroke-symbol-preview*）
 JUNK = 'stroke-symbol-preview-selftest-junk.svg'
 

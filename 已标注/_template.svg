@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"
+     width="80" height="80"
+     data-component-type="{{component_type}}"
+     data-symbol-version="1.0"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="draft"
+     data-symbol-source-ref="NONE_NO_STANDARD_PAGE_SUPPLIED">
+
+  <!-- ============================================================
+       模板说明(起稿后删除本段):
+       · 本文件是技术规范 §6.3.1 符号模板的可拷贝实现。新建/重绘组件
+         SVG 一律复制本件起稿,逐项替换 {{...}} 占位符;入库前跑
+         check_symbol.py(门禁跳过 _ 前缀件,故本文件不进全量报表)。
+       · 几何只画描边(line/circle/rect/path),stroke-width=2(基准 T),
+         round cap/join,fill=none;实心箭头/三角等指示图元须
+         fill 填充 + stroke="none" 且顶点数<=4。potrace 描摹的填充
+         轮廓不得入库(§6.3.2 一)。
+       · width/height 不带单位,数值必须等于 viewBox 第三、四项(二)。
+       · 端口圆心必须落在 viewBox 边界线上;符号本体与边界之间留出
+         引线段(三)。
+       · data-symbol-status: draft 几何未完成 / provisional 几何完成
+         但无标准页依据 / annotated 已核对标准页。非 annotated 不得
+         正式出图,渲染器须在图签栏披露(四)。
+       · 无标准页依据时只取通用符号族最小特征,禁止编造内部机构(五);
+         全部省略与构造写入下方"未确认项",并登记到引用它的 L0 文件
+         unknown 段。
+       · 端口数量不固定:以 catalog ports[] 为准,有几个端口就放几个
+         circle——terminal 型通常 1 个(如油箱、充气阀);inline 型通常
+         2 个(如单向阀、滤器);3 个及以上(如优先阀、泵+轴口)按各自
+         anchor-direction 出线;sensing_only 型(压力开关/传感器)不得
+         出现在 L0 paths,只能经 taps 声明。
+       · 多稳态/多状态符号可加根属性 data-symbol-state="<state>"
+         (如 connected / disconnected)。
+       ============================================================ -->
+
+  <!-- 依据: {{符号几何来源:标准页条款号 / 对原件的实测映射(px每单位+关键坐标) / "由通用符号族构造"}}
+       未确认项: {{逐条列出;无则写"无",但仍须与引用它的 L0 文件 unknown 段核对}} -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 每个图元给语义 id 与一行注释。以下为占位示意几何,替换或删除。 -->
+
+    <!-- 符号本体轮廓 -->
+    <path id="housing" d="M20 20 H60 V60 H20 Z"/>
+
+    <!-- 端口引线(示意,几何按实际符号重画): 自本体到 viewBox 边界,
+         方向与 data-anchor-direction 一致;端口有几个画几条,本示意为
+         inline 双口,单口/三口型删改之 -->
+    <line id="port-stub-left"  x1="20" y1="40" x2="0"  y2="40"/>
+    <line id="port-stub-right" x1="60" y1="40" x2="80" y2="40"/>
+
+    <!-- 实心指示图元示例(流向箭头),按需启用:
+    <polygon id="flow-arrow" points="36,34 52,40 36,46"
+             fill="#000000" stroke="none"/> -->
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <!-- 端口数量不固定:以 catalog ports[] 为准,有几个复制几份 circle 块,
+         多余示例删除。每端口一个 circle,r=2,id 命名 port-<data-port-id>;
+         data-port-id 必须与 catalog ports[].id 一一对应。枚举(以
+         catalog enums 为准): data-medium hydraulic|pneumatic|electrical|mechanical
+         data-port-role pressure|return|suction|case_drain|work|measurement|signal_in|signal_out|shaft|gas
+         data-flow-capability in|out|bidirectional|none
+         data-anchor-direction left|right|up|down -->
+
+    <!-- 端口示例 1(单口型如油箱/充气阀,留这一块即可) -->
+    <circle id="port-{{port_id_1}}" cx="0" cy="40" r="2"
+            data-port-id="{{port_id_1}}"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="left"/>
+
+    <!-- 端口示例 2(inline 第二口,如单向阀出口) -->
+    <!-- <circle id="port-{{port_id_2}}" cx="80" cy="40" r="2"
+            data-port-id="{{port_id_2}}"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="right"/> -->
+
+    <!-- 三口及以上(如优先阀/泵+轴口):再复制 circle 块,anchor-direction
+         按各端口实际出线方向取值(机械轴口 medium=mechanical,
+         port-role=shaft;电信号口 medium=electrical,role=signal_out) -->
+  </g>
+</svg>

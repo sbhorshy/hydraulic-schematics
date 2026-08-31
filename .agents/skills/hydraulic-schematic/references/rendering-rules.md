@@ -36,6 +36,7 @@ unknown:     # 数量/接法存疑, 显式列出, 不代为编造
 - 实心三通节点只画在真实汇/分点，不画折角。
 - 对称系统用"局部回路 + 水平镜像"：镜像关于局部中线，盒子须 `LOCAL_W - bx - bw` 让出宽度；符号 `<image>` 用 `transform="translate(2ax+bw,0) scale(-1,1)"` 翻转。
 - 符号经 `<image>` 引用并按盒缩放，href 相对**活动库根**（工作区库写作 `已标注/xxx.svg`；用 skill 快照时相对其 `assets/component-library/`）；目录外或未标注符号画干净描边框图（box+标注），在图签栏披露。
+- 用户（用油设备）一律用 `hydraulic_user` 通用符号：**矩形框+框内用户名**，左=压力入口（`pressure_in`）、右=回油出口（`return_out`），inline 串接。用户名不写在符号文件里——符号带 `data-name-slot` 文本槽，L0 渲染器把实例标签写入框内，并自动省略该实例的框外标签（名字不画两遍）。SysML/image 链路暂无此机制，须为该实例另存命名符号文件并披露。
 - 分区框 `<rect data-zone>` + 分区标题（如 GREEN CIRCUIT / 绿系统）。
 - 标签中英双行（`油箱\nReservoir`），中文主名；字体 fallback `"Microsoft YaHei","Noto Sans CJK SC",sans-serif`。
 - 图签栏（title block）必含：来源文件、范围、成熟度及免责声明（`成熟度: concept 概念图,非工程放行图`）；图例框列全各类线型。

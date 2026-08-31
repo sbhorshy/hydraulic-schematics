@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 12 213 92"
+     width="213" height="92"
+     data-component-type="priority_valve"
+     data-symbol-version="2.0"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="user_supplied_svg (sym:metadata draft), 4.0 px per unit measured"
+     data-envelope-class="single">
+
+  <!-- v2.0 库格式转换 + 方框本体基准统一(2026-08-30):
+       原 user-supplied 草稿(sym:metadata + CSS var 线宽 + 旧端口 API)整体转换
+       为 _template.svg 库格式;本体方框 162x129 -> 80x80,落位 (67,15)-(147,95)。
+       【本体归一映射:rel 为相对本体的归一化坐标】
+         主管线中线 y=63( rel 0.240 ) -> y=34;左右端口引线延伸至 viewBox 边界
+           (v1 端口 (10,63)/(305,63) 悬空,C10 违例,此版修复)
+         节点(用户确认,曾误读为菱形件):左 (89,63) rel(0.080) -> (73,34);
+           右 (227,63) rel(0.932) -> (142,34),实心圆点 r=3 双弧路径
+         上部调节机构:竖杆 M118 84 V50 rel -> (88,47)-(88,26);
+           实心上指箭头 -> polygon (85,32) (88,23) (91,32)
+         弹簧状折线(语义未确认) rel -> points 101,41 104,27 108,41 111,27 114,38
+       【内部单向阀 x2:用户确认,几何源自 check-valve-stroke.svg,等比无镜像】
+         上阀:主线上,junction 间距按比例 73..142,阀宽 0.444x80 = 36,
+           transform="translate(106 16) scale(0.45)",球心 (121.75,34) 落主管线
+         下阀:rotated 180(用户指定),旁通通道 y=121(rel 0.690) -> y=70,
+           transform="translate(90 52) scale(0.45) rotate(180 40 40)",球心 (110.25,70)
+         旁通通道圆角 r8 -> Q 阈圆角保留:M73 34 V62 Q73 70 81 70 H90;
+           M126 70 H134 Q142 70 142 62 V34
+       【端口】
+         port-left-main / port-right-main,medium=hydraulic;role 按优先阀常规取
+           pressure(左入)/work(右出),flow in/out;均 PENDING_ENGINEER_CONFIRMATION
+           (原草稿 role=unknown,flow 待确认)。
+       【目录】
+         catalog 尚无 priority_valve 条目(端口语义确认后随目录票增补),
+         门禁 C3 提示属预期。
+       未确认项(引用本符号的 L0 文件须在 unknown 登记):
+         - 无标准页依据(status=provisional);
+         - 上部调节机构/弹簧功能语义未确认(沿用原草稿 unknown 标注);
+         - 单向阀允许流向、主路端口 role/flow 均待工程确认。
+
+       线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 本体方框 (80x80 基准) -->
+    <path id="housing" d="M67 15 H147 V95 H67 Z"/>
+
+    <!-- 主液压管线(用户确认:单一水平管线,内嵌上单向阀) -->
+    <path id="main-pipeline-left" d="M0 34 H106"/>
+    <path id="main-pipeline-right" d="M142 34 H213"/>
+
+    <!-- 节点(用户确认) -->
+    <path id="junction-left" d="M70 34 A3 3 0 1 0 76 34 A3 3 0 1 0 70 34 Z"
+          fill="#000000" stroke="none"/>
+    <path id="junction-right" d="M139 34 A3 3 0 1 0 145 34 A3 3 0 1 0 139 34 Z"
+          fill="#000000" stroke="none"/>
+
+    <!-- 上部调节机构(语义未确认,几何沿用原稿) -->
+    <path id="upper-vertical-stem" d="M88 47 V26"/>
+    <polygon id="upper-stem-arrow" points="85,32 88,23 91,32"
+             fill="#000000" stroke="none"/>
+    <polyline id="upper-spring-like"
+              data-status="unknown"
+              points="101,41 104,27 108,41 111,27 114,38"/>
+
+    <!-- 内部单向阀 1(用户确认,主线上;流向待工程确认) -->
+    <g id="check-valve-upper"
+       data-status="identified"
+       data-confirmation="user"
+       data-geometry-source="check-valve-stroke.svg"
+       data-flow-permitted="PENDING_ENGINEER_CONFIRMATION"
+       data-allow-mirror="false"
+       transform="translate(106 16) scale(0.45)">
+      <line id="upper-check-line-left" x1="0" y1="40" x2="18" y2="40"/>
+      <line id="upper-check-line-right" x1="57" y1="40" x2="80" y2="40"/>
+      <circle id="upper-check-ball" cx="35" cy="40" r="16"/>
+      <path id="upper-check-seat" d="M32 11 L57 40 L32 69"/>
+    </g>
+
+    <!-- 下部反馈/旁通通道(语义未确认,几何沿用原稿,圆角保留) -->
+    <path id="lower-left-passage" d="M73 34 V62 Q73 70 81 70 H90"/>
+    <path id="lower-right-passage" d="M126 70 H134 Q142 70 142 62 V34"/>
+
+    <!-- 内部单向阀 2(用户确认,旁通通道上,rotated 180;流向待工程确认) -->
+    <g id="check-valve-lower"
+       data-status="identified"
+       data-confirmation="user"
+       data-geometry-source="check-valve-stroke.svg"
+       data-flow-permitted="PENDING_ENGINEER_CONFIRMATION"
+       data-allow-mirror="false"
+       transform="translate(90 52) scale(0.45) rotate(180 40 40)">
+      <line id="lower-check-line-left" x1="0" y1="40" x2="18" y2="40"/>
+      <line id="lower-check-line-right" x1="57" y1="40" x2="80" y2="40"/>
+      <circle id="lower-check-ball" cx="35" cy="40" r="16"/>
+      <path id="lower-check-seat" d="M32 11 L57 40 L32 69"/>
+    </g>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-left-main-anchor" cx="0" cy="34" r="2"
+            data-port-id="port-left-main"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-right-main-anchor" cx="213" cy="34" r="2"
+            data-port-id="port-right-main"
+            data-medium="hydraulic"
+            data-port-role="work"
+            data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>

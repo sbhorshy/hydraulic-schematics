@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 -0.5 27.297 11"
+     width="27.297mm" height="11mm"
+     data-source="Drawing2.dxf"
+     data-block="带单向阀快速接头"
+     data-dxf-version="AC1032" data-units="mm">
+
+  <!-- 由 Drawing2.dxf 转换(AutoCAD 2013/AC1032,单位 mm,代码页 ANSI_936)。
+       模型空间仅一个 INSERT 引用块「带单向阀快速接头」(缩放 1,旋转 0),
+       块内 15 条 LINE + 2 个 CIRCLE,全部位于图层 "11"(ACI 颜色 1=红,线宽 0.18mm)。
+       本 SVG:逐实体映射为 line/circle 图元,坐标平移至原点并翻转 Y 轴
+       (CAD y 向上 -> SVG y 向下),内容包围盒 26.297 x 10 mm。
+       图元顺序与 DXF 实体顺序一致,可在 Inkscape/Illustrator 中直接编辑。 -->
+
+  <g id="layer-11" stroke="#000000" stroke-width="0.18" fill="none"
+     stroke-linecap="round" stroke-linejoin="round">
+    <line id="e01-line" x1="20.692" y1="5.0" x2="26.297" y2="5.0"/>
+    <line id="e02-line" x1="8.961" y1="5.0" x2="17.362" y2="5.0"/>
+    <circle id="e03-circle" cx="19.027" cy="4.984" r="1.665"/>
+    <circle id="e04-circle" cx="7.296" cy="4.984" r="1.665"/>
+    <line id="e05-line" x1="3.102" y1="0.0" x2="13.061" y2="0.0"/>
+    <line id="e06-line" x1="0.0" y1="5.0" x2="5.631" y2="5.0"/>
+    <line id="e07-line" x1="13.062" y1="4.184" x2="13.062" y2="5.0"/>
+    <line id="e08-line" x1="10.76" y1="4.984" x2="7.932" y2="2.156"/>
+    <line id="e09-line" x1="10.76" y1="5.016" x2="7.932" y2="7.844"/>
+    <line id="e10-line" x1="13.062" y1="5.816" x2="13.062" y2="5.0"/>
+    <line id="e11-line" x1="3.102" y1="10.0" x2="13.061" y2="10.0"/>
+    <line id="e12-line" x1="15.365" y1="5.016" x2="18.193" y2="7.844"/>
+    <line id="e13-line" x1="15.365" y1="4.984" x2="18.193" y2="2.156"/>
+    <line id="e14-line" x1="23.102" y1="0.0" x2="13.064" y2="0.0"/>
+    <line id="e15-line" x1="23.102" y1="10.0" x2="13.064" y2="10.0"/>
+    <line id="e16-line" x1="23.102" y1="0.0" x2="23.102" y2="10.0"/>
+    <line id="e17-line" x1="3.102" y1="10.0" x2="3.102" y2="0.0"/>
+  </g>
+</svg>

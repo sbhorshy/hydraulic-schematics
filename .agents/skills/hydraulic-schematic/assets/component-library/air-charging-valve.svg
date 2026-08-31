@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:sym="urn:hydraulic-symbol"
+     version="1.1"
+     width="268" height="114" viewBox="0 0 268 114"
+     preserveAspectRatio="xMidYMid meet"
+     data-status="draft"
+     data-symbol-form="stroke_geometry"
+     data-mirror-allowed="false"
+     data-allowed-rotations="0 90 180 270">
+
+  <title>Editable stroke symbol — draft</title>
+  <desc>Reconstructed from the user-supplied filled-outline SVG as editable stroke geometry. Visible component semantics are not confirmed by a standard page and remain draft/unknown. Port anchors are machine-readable. Mirroring is forbidden.</desc>
+
+  <style>
+    .sym-outline {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: calc(1.5 * var(--T));
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .port-anchor {
+      fill: none;
+      stroke: none;
+      pointer-events: none;
+    }
+  </style>
+
+  <metadata>
+    <sym:symbol
+      status="draft"
+      geometry="stroke_geometry"
+      source="user_supplied_filled_outline_svg"
+      standardPageConfirmed="false"
+      mirrorAllowed="false"
+      allowedRotations="0,90,180,270"
+      baseWidth="268"
+      baseHeight="114"
+      baseViewBox="0 0 268 114">
+
+      <sym:ports>
+        <sym:port id="port-left"
+                  x="25" y="59"
+                  direction="left"
+                  role="unknown"
+                  interfaceGeometry="symbol"
+                  status="draft"
+                  sourcePortId="port-bootstrap-pressure-in"
+                  sourcePortType="hydraulic-pressure"
+                  sourceDirection="right" />
+        <sym:port id="port-right"
+                  x="250" y="59"
+                  direction="right"
+                  role="unknown"
+                  interfaceGeometry="symbol"
+                  status="draft"
+                  sourcePortId="port-pressure-out"
+                  sourcePortType="pneumatic"
+                  sourceDirection="down" />
+      </sym:ports>
+
+      <sym:connections>
+        <sym:pipeline id="main-horizontal-interface"
+                      orientation="horizontal"
+                      centerlineY="59"
+                      fromPort="port-left"
+                      toPort="port-right"
+                      status="geometry_reconstructed" />
+      </sym:connections>
+
+      <sym:components>
+        <sym:component id="left-end-feature" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="central-left-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="central-right-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="right-small-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+      </sym:components>
+
+      <sym:rotations>
+        <sym:rotation angle="0" width="268" height="114" viewBox="0 0 268 114">
+          <sym:anchor port="port-left"  x="25"  y="59" direction="left" />
+          <sym:anchor port="port-right" x="250" y="59" direction="right" />
+        </sym:rotation>
+        <sym:rotation angle="90" width="114" height="268" viewBox="0 0 114 268">
+          <sym:anchor port="port-left"  x="55" y="25"  direction="up" />
+          <sym:anchor port="port-right" x="55" y="250" direction="down" />
+        </sym:rotation>
+        <sym:rotation angle="180" width="268" height="114" viewBox="0 0 268 114">
+          <sym:anchor port="port-left"  x="243" y="55" direction="right" />
+          <sym:anchor port="port-right" x="18"  y="55" direction="left" />
+        </sym:rotation>
+        <sym:rotation angle="270" width="114" height="268" viewBox="0 0 114 268">
+          <sym:anchor port="port-left"  x="59" y="243" direction="down" />
+          <sym:anchor port="port-right" x="59" y="18"  direction="up" />
+        </sym:rotation>
+      </sym:rotations>
+
+      <sym:uncertainties>
+        <sym:item id="component-identity" status="unknown" note="No standard page supplied; geometry reproduced without asserting component identity." />
+        <sym:item id="port-media-role" status="unknown" note="Original SVG metadata contains inconsistent port type/direction information; normalized outward anchor directions are used while source values are retained above." />
+      </sym:uncertainties>
+    </sym:symbol>
+  </metadata>
+
+  <g id="visible-symbol" class="sym-outline">
+    <!-- Left interface and vertical end feature -->
+    <path id="left-end-feature"
+          data-component-type="unknown"
+          data-status="draft"
+          d="M25 39 V79" />
+    <path id="left-interface-line"
+          data-network-id="main-horizontal-interface"
+          data-interface-port="port-left"
+          d="M25 59 H75" />
+
+    <!-- Central opposed triangular geometry; stroke-only, no filled outline tracing -->
+    <path id="central-left-triangle"
+          data-component-type="unknown"
+          data-status="draft"
+          d="M75 29 V87 L119 59 Z" />
+    <path id="central-right-triangle"
+          data-component-type="unknown"
+          data-status="draft"
+          d="M161 30 V86 L119 59 Z" />
+
+    <!-- Horizontal interface between central and right-side feature -->
+    <path id="middle-interface-line"
+          data-network-id="main-horizontal-interface"
+          d="M161 59 H194" />
+
+    <!-- Right-side smaller triangular geometry -->
+    <path id="right-small-triangle"
+          data-component-type="unknown"
+          data-status="draft"
+          d="M194 44 V75 L220 59 Z" />
+
+    <!-- Right interface to machine-readable anchor -->
+    <path id="right-interface-line"
+          data-network-id="main-horizontal-interface"
+          data-interface-port="port-right"
+          d="M220 59 H250" />
+  </g>
+
+  <!-- Invisible machine-readable connection anchors. -->
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-left-anchor"
+            class="port-anchor"
+            cx="25" cy="52" r="2"
+            data-port-id="port-left"
+            data-port-type="unknown"
+            data-direction="left"
+            data-status="draft" />
+    <circle id="port-right-anchor"
+            class="port-anchor"
+            cx="250" cy="59" r="2"
+            data-port-id="port-right"
+            data-port-type="unknown"
+            data-direction="right"
+            data-status="draft" />
+  </g>
+</svg>

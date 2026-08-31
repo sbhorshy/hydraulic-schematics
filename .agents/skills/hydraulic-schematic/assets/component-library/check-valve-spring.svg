@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-48 0 96 142"
+     width="96" height="142"
+     data-component-type="check_valve"
+     data-symbol-version="1.0"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="Drawing2.dxf">
+
+  <!-- 描边几何重绘,源自 Drawing2.dxf (AutoCAD 2018) 块「单向阀（简易符号）带弹簧」。
+       依据:块几何 x10、Y 轴翻转、轴线平移至 x=0、上油口端头平移至 y=0;
+       端口圆心落在 viewBox 上下边界(模板 §6.3.2 三 / 门禁 C10)。
+         弹簧  四段折线,绕轴线包拢,下端接近球顶(与原件一致)
+         球    圆心 (0,67.4) r=16.7
+         阀座  V 形两臂,顶点 (0,92.05),臂端 (±28.3,63.8)
+         油口  上下各一段引线,自边界至球/座
+       流向:自下而上,油流顶开球阀克服弹簧;上口出油。
+       端口(catalog check_valve 条目为 inlet/outlet、水平串联 anchor left/right;
+       本件为竖直带弹簧变体,以图面实测为准 anchor down/up,catalog 拆分待修订):
+         port-inlet:  下油口,medium=hydraulic,role=pressure,flow=in, anchor=down
+         port-outlet: 上油口,medium=hydraulic,role=pressure,flow=out,anchor=up
+       未确认项:无标准页依据(status=provisional),几何以工程 CAD 原件为据;
+           引用本符号的 L0 文件须在 unknown 登记。
+       线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 上油口引线:自上边界至弹簧上端 -->
+    <line id="port-lead-outlet" x1="0" y1="0" x2="0" y2="50"/>
+    <!-- 整定弹簧:四段折线绕轴线 -->
+    <g id="spring">
+      <line id="spring-1" x1="19.7" y1="22.4" x2="-17.8" y2="11.1"/>
+      <line id="spring-2" x1="-17.7" y1="33.6" x2="19.7" y2="22.4"/>
+      <line id="spring-3" x1="19.7" y1="44.9" x2="-17.7" y2="33.6"/>
+      <line id="spring-4" x1="-17.8" y1="56.0" x2="19.7" y2="44.9"/>
+    </g>
+    <!-- 阀球 -->
+    <circle id="ball" cx="0" cy="67.4" r="16.7"/>
+    <!-- V 形阀座 -->
+    <path id="seat" d="M -28.3 63.8 L 0 92.05 L 28.3 63.8"/>
+    <!-- 下油口引线:自座顶点至下边界 -->
+    <line id="port-lead-inlet" x1="0" y1="92.05" x2="0" y2="142"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="0" cy="142" r="2"
+            data-port-id="inlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="down"/>
+    <circle id="port-outlet" cx="0" cy="0" r="2"
+            data-port-id="outlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="up"/>
+  </g>
+</svg>

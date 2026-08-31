@@ -160,12 +160,12 @@ hydraulic-schematic-library/
 
 ### 6.2 端口组
 
-所有可连接端口必须放在唯一的 `connection-points` 组内：
+所有可连接端口必须放在唯一的 `connection-points` 组内（示例与 6.3.1 模板同款：红点 r=2 仅作辅助标记，不随正式图出图）：
 
 ```xml
-<g id="connection-points" visibility="hidden">
+<g id="connection-points" fill="#ff0000">
   <circle id="port-high-pressure-in"
-          cx="10" cy="63" r="4"
+          cx="0" cy="63" r="2"
           data-port-id="high_pressure_in"
           data-medium="hydraulic"
           data-port-role="pressure"
@@ -230,6 +230,8 @@ down
 ### 6.3.1 符号模板
 
 新建组件 SVG 必须由本模板起稿。模板本身即合规最小件，逐项替换尖括号内容。
+
+同一模板以可解析、可复制的物理文件维护在组件库规范源下：`已标注/_template.svg`（占位符写作 `{{...}}`，本节条文修订时须同步改它；`check_symbol.py --all` 跳过 `_` 前缀基础设施件，本模板自身也应通过 `check_symbol.py _template.svg` 校核）。
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>

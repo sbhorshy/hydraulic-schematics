@@ -1,0 +1,221 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:sym="urn:hydraulic-symbol"
+     version="1.1"
+     width="324" height="180" viewBox="0 0 324 180"
+     preserveAspectRatio="xMidYMid meet"
+     data-symbol-name="Priority Valve"
+     data-status="draft"
+     data-mirror-allowed="false"
+     data-allowed-rotations="0 90 180 270">
+
+  <title>Priority Valve — editable stroke geometry (draft)</title>
+  <desc>Editable stroke geometry. The two user-confirmed internal check valves use the geometry supplied in check-valve-stroke.svg and are rendered at equal scale. The lower check valve instance is rotated 180 degrees per user instruction. The two lower bypass-passage bends are rounded. The left/right diamond-like marks are user-confirmed junction points on one continuous horizontal main pipeline. Check-valve flow direction remains pending engineer confirmation; other unconfirmed semantics remain draft/unknown.</desc>
+
+  <style>
+    .sym-outline {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: calc(1.5 * var(--T));
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .port-anchor {
+      fill: none;
+      stroke: none;
+      pointer-events: none;
+    }
+  </style>
+
+  <metadata>
+    <sym:symbol
+      name="Priority Valve"
+      status="draft"
+      geometry="stroke_geometry"
+      source="user_supplied_svg"
+      standardPageConfirmed="false"
+      mirrorAllowed="false"
+      allowedRotations="0,90,180,270"
+      baseWidth="324"
+      baseHeight="180"
+      baseViewBox="0 0 324 180">
+
+      <sym:ports>
+        <sym:port id="port-left-main"
+                  x="10" y="63"
+                  direction="left"
+                  role="unknown"
+                  interfaceGeometry="symbol"
+                  status="draft" />
+        <sym:port id="port-right-main"
+                  x="305" y="63"
+                  direction="right"
+                  role="unknown"
+                  interfaceGeometry="symbol"
+                  status="draft" />
+      </sym:ports>
+
+      <sym:connections>
+        <sym:pipeline id="main-horizontal-pipeline"
+                      orientation="horizontal"
+                      centerlineY="63"
+                      fromPort="port-left-main"
+                      toPort="port-right-main"
+                      topology="single_pipeline_with_inline_check_valve"
+                      status="user_confirmed" />
+        <sym:junction id="junction-left" x="89" y="63"
+                      pipeline="main-horizontal-pipeline"
+                      branch="lower-feedback-passage"
+                      status="user_confirmed" />
+        <sym:junction id="junction-right" x="227" y="63"
+                      pipeline="main-horizontal-pipeline"
+                      branch="lower-feedback-passage"
+                      status="user_confirmed" />
+      </sym:connections>
+
+      <sym:rotations>
+        <sym:rotation angle="0"   width="324" height="180" viewBox="0 0 324 180">
+          <sym:anchor port="port-left-main"  x="10"  y="63"  direction="left" />
+          <sym:anchor port="port-right-main" x="305" y="63"  direction="right" />
+        </sym:rotation>
+        <sym:rotation angle="90"  width="180" height="324" viewBox="0 0 180 324">
+          <sym:anchor port="port-left-main"  x="117" y="10"  direction="up" />
+          <sym:anchor port="port-right-main" x="117" y="305" direction="down" />
+        </sym:rotation>
+        <sym:rotation angle="180" width="324" height="180" viewBox="0 0 324 180">
+          <sym:anchor port="port-left-main"  x="314" y="117" direction="right" />
+          <sym:anchor port="port-right-main" x="19"  y="117" direction="left" />
+        </sym:rotation>
+        <sym:rotation angle="270" width="180" height="324" viewBox="0 0 180 324">
+          <sym:anchor port="port-left-main"  x="63" y="314" direction="down" />
+          <sym:anchor port="port-right-main" x="63" y="19"  direction="up" />
+        </sym:rotation>
+      </sym:rotations>
+
+      <sym:components>
+        <sym:component id="check-valve-upper"
+                       type="check_valve"
+                       status="identified"
+                       confirmation="user"
+                       geometrySource="check-valve-stroke.svg"
+                       flowPermitted="PENDING_ENGINEER_CONFIRMATION"
+                       standardPageConfirmed="false" />
+        <sym:component id="check-valve-lower"
+                       type="check_valve"
+                       status="identified"
+                       confirmation="user"
+                       geometrySource="check-valve-stroke.svg"
+                       flowPermitted="PENDING_ENGINEER_CONFIRMATION"
+                       standardPageConfirmed="false" />
+      </sym:components>
+
+      <sym:uncertainties>
+        <sym:item id="upper-regulating-mechanism" status="unknown" note="regulating geometry reproduced from source; exact standard semantics not confirmed" />
+        <sym:item id="lower-feedback-mechanism" status="unknown" note="surrounding feedback/bypass geometry reproduced from source; exact standard semantics not confirmed" />
+        <sym:item id="spring-function" status="unknown" note="spring-like geometry visible in source; functional role not confirmed by standard page" />
+      </sym:uncertainties>
+    </sym:symbol>
+  </metadata>
+
+  <!-- All visible geometry uses the single global outline class. -->
+  <g id="visible-symbol" class="sym-outline">
+
+    <!-- Housing -->
+    <path id="housing" d="M76 32 H238 V161 H76 Z" />
+
+    <!-- Confirmed main hydraulic path: one horizontal pipeline.
+         It is geometrically interrupted only where the inline check-valve symbol occupies the path. -->
+    <path id="main-pipeline-left"
+          d="M10 63 H155"
+          data-network-id="main-horizontal-pipeline"
+          data-interface-port="port-left-main" />
+    <path id="main-pipeline-right"
+          d="M227 63 H305"
+          data-network-id="main-horizontal-pipeline"
+          data-interface-port="port-right-main" />
+
+    <!-- User-confirmed connection/junction point; formerly misread as a diamond-shaped component. -->
+    <circle id="junction-left"
+            cx="89" cy="63" r="3" fill="#000000"
+            data-component-type="junction"
+            data-network-id="main-horizontal-pipeline"
+            data-status="user_confirmed" />
+
+    <!-- Upper internal regulating geometry -->
+    <path id="upper-vertical-stem" d="M118 84 V50" />
+    <path id="upper-stem-arrow" d="M112 60 L118 45 L124 60 L112 60" fill="currentColor" />
+
+    <!-- spring-like zig-zag, semantics intentionally unconfirmed -->
+    <polyline id="upper-spring-like"
+              data-status="unknown"
+              points=" 144,74 151,51 158,74 165,52 172,69" />
+
+    <!-- User-confirmed internal check valve 1.
+         Geometry taken from check-valve-stroke.svg, normalized to inherit .sym-outline.
+         Uniform scale only; no mirroring. Flow direction remains pending engineer confirmation. -->
+    <g id="check-valve-upper"
+       data-component-type="check_valve"
+       data-status="identified"
+       data-confirmation="user"
+       data-geometry-source="check-valve-stroke.svg"
+       data-flow-permitted="PENDING_ENGINEER_CONFIRMATION"
+       data-allow-mirror="false"
+       transform="translate(155 27) scale(0.9)">
+      <line id="upper-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="upper-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="upper-check-ball" cx="35" cy="40" r="16" />
+      <path id="upper-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+    <!-- User-confirmed connection/junction point; formerly misread as a diamond-shaped component. -->
+    <circle id="junction-right"
+            cx="227" cy="63" r="3" fill="#000000"
+            data-component-type="junction"
+            data-network-id="main-horizontal-pipeline"
+            data-status="user_confirmed" />
+
+    <!-- Lower feedback / bypass passage -->
+    <path id="lower-left-passage"
+          d="M89 63 V113 Q89 121 97 121 H122"
+          data-from-junction="junction-left"
+          data-network-id="lower-feedback-passage" />
+    <path id="lower-right-passage"
+          d="M194 121 H219 Q227 121 227 113 V63"
+          data-to-junction="junction-right"
+          data-network-id="lower-feedback-passage" />
+
+    <!-- User-confirmed internal check valve 2.
+         Geometry taken from check-valve-stroke.svg, normalized to inherit .sym-outline.
+         Uniform scale only; no mirroring. Flow direction remains pending engineer confirmation. -->
+    <g id="check-valve-lower"
+       data-component-type="check_valve"
+       data-status="identified"
+       data-confirmation="user"
+       data-geometry-source="check-valve-stroke.svg"
+       data-flow-permitted="PENDING_ENGINEER_CONFIRMATION"
+       data-allow-mirror="false"
+       transform="translate(122 85) scale(0.9) rotate(180 40 40)">
+      <line id="lower-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="lower-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="lower-check-ball" cx="35" cy="40" r="16" />
+      <path id="lower-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+
+  </g>
+
+  <!-- Invisible machine-readable anchors. -->
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-left-main-anchor"
+            class="port-anchor"
+            cx="10" cy="63" r="2"
+            data-port-id="port-left-main"
+            data-port-type="hydraulic"
+            data-direction="left"
+            data-status="draft" />
+    <circle id="port-right-main-anchor"
+            class="port-anchor"
+            cx="305" cy="63" r="2"
+            data-port-id="port-right-main"
+            data-port-type="hydraulic"
+            data-direction="right"
+            data-status="draft" />
+  </g>
+</svg>

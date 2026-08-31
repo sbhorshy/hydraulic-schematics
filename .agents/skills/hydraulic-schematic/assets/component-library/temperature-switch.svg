@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 7 148 89"
+     width="148" height="89"
+     data-component-type="temperature_switch"
+     data-symbol-version="1.2"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="root/Temperature Switch.svg potrace traced original, 4.0 px per unit measured"
+     data-envelope-class="single">
+
+  <!-- 描边几何重绘,取代根目录 potrace 描摹填充版 Temperature Switch.svg。
+       几何依据:对原描摹件按 4.0 px/单位实测(3x 渲染 + 像素行程分析)。
+
+       v1.2 方框本体基准统一(2026-08-30):开关大方框 172x162 -> 80x80,
+       落位 (67,15)-(147,95)(与 transducer/pressure-switch 族同位);
+       内部元件按原相对位置(归一化坐标)重排到整数网格:
+         铰点圆   (244,103) r=13 rel(0.209,0.327) -> (84,41) r=6
+         动臂     自铰点上方斜向右下 (248,83)-(294,186) -> (86,31)-(107,82)
+         动触点圆 (294,186) r=11 rel(0.500,0.840) -> (107,82) r=5
+         固定触点圆 (354,103) r=11 rel(0.849,0.327) -> (135,41) r=5
+         触点断开位:动触点在下,固定触点在右上,二者分离(同原图)
+       感温包:沿用用户确认约定(左框为正方形、右缘与开关框左缘共边、
+         竖向中线与感温线同高)。原 104x104(框高 0.64)等比 -> 50x50 附件方框
+         (边<60,非本体),落位 (17,30)-(67,80)。
+       感温短线:接口处不连续(用户确认约定)——外段 (0,55)-(17,55) 止于感温包
+         左缘;内段 (24,55)-(43,55) 悬浮独立线段;端头实心感温圆 (49,55) r=6。
+       电信号口引线随本体:顶边中部 (107,15) 向上至顶边界 (107,7)。
+       实心指示圆点(感温圆/铰点/动触点/固定触点)仍为闭合双弧路径:
+         门禁 C8 放行"顶点<=4 且闭合"的短路径(技术规范 §6.4-8 指示性图元除外)。
+
+       端口(catalog temperature_switch 条目与本图双向一致):
+         port-temp-sense:感温取压口,medium=hydraulic,role=measurement,
+           flow=none,anchor=left,位于感温线自由端 (0,55)。
+         port-elec-out:电信号口,medium=electrical,role=signal_out,
+           flow=none,anchor=up,位于顶边引线端头 (107,7)。
+           原图无外部电引线(触点画在框内即表意),引出方向按
+           pressure_switch 家族惯例推断。
+
+       未确认项(引用本符号的 L0 文件须在 unknown 登记):
+         - 无标准页依据(status=provisional),触点画法沿用 pressure-switch 同款;
+         - elec_out 引出方向(up)为家族惯例推断,非原件实测。
+
+       线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 感温包正方形(50x50 附件,右缘与开关框左缘共边) -->
+    <path id="bulb-housing" d="M17 30 H67 V80 H17 Z"/>
+    <!-- 开关大方框 (80x80 本体基准) -->
+    <path id="switch-housing" d="M67 15 H147 V95 H67 Z"/>
+    <!-- 感温短线:外段自 viewBox 左边界止于感温包左缘;框内为悬浮独立线段(接口处
+         不连续),端头感温圆 -->
+    <line id="temp-sense-line" x1="0" y1="55" x2="17" y2="55"/>
+    <line id="bulb-line-inner" x1="24" y1="55" x2="43" y2="55"/>
+    <!-- 实心感温圆 (49,55) r=6,双弧路径 -->
+    <path id="bulb-dot" d="M43 55 A6 6 0 1 0 55 55 A6 6 0 1 0 43 55 Z"
+          fill="#000000" stroke="none"/>
+
+    <!-- 电开关触点:铰点、动臂、动触点、固定触点(断开位),实心圆点双弧路径 -->
+    <path id="pivot-dot" d="M78 41 A6 6 0 1 0 90 41 A6 6 0 1 0 78 41 Z"
+          fill="#000000" stroke="none"/>
+    <line id="contact-arm" x1="86" y1="31" x2="107" y2="82"/>
+    <path id="movable-dot" d="M102 82 A5 5 0 1 0 112 82 A5 5 0 1 0 102 82 Z"
+          fill="#000000" stroke="none"/>
+    <path id="fixed-dot" d="M130 41 A5 5 0 1 0 140 41 A5 5 0 1 0 130 41 Z"
+          fill="#000000" stroke="none"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-temp-sense" cx="0" cy="55" r="2"
+            data-port-id="temp_sense"
+            data-medium="hydraulic"
+            data-port-role="measurement"
+            data-flow-capability="none"
+            data-anchor-direction="left"/>
+
+  </g>
+</svg>

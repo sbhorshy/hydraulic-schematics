@@ -48,6 +48,10 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 
 只有带 `<g id="connection-points">` 标注的符号可直接参与绘图。需要标注新符号时，遵循 [references/symbol-library.md](references/symbol-library.md) 的标注规范；改的是哪一份库就属于哪一份——仓库里改完记得刷新 skill 快照。
 
+**新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完用 `已标注/check_symbol.py <file.svg>` 过入库门禁（§6.4 1–12 条）再入库；模板与规范条文两处同步修订。
+
+**用户（用油设备）不需要新符号**：intent `parts` 直接写 `<inst>: hydraulic_user`，画成"用户名+长方形框"，左压力进口/右回油出口，名字由 L0 渲染器写入框内名槽（`data-name-slot`）——详见 [references/symbol-library.md](references/symbol-library.md) 的通用用户框一节。
+
 ### Phase 2 · 布局与渲染
 
 线宽/线型/走线/镜像/分区框/图签图例的完整约定见 [references/rendering-rules.md](references/rendering-rules.md)。照抄模板脚本的结构（局部回路 + 水平镜像，或 layout.json 显式坐标），只改拓扑数据，不改约定本身。

@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 218 564"
+     width="218"
+     height="564"
+     id="bootstrap-reservoir-draft"
+     data-component-type="bootstrap_reservoir"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="draft"
+     data-stroke-rule="1.5T"
+     data-mirror-allowed="false"
+     data-allowed-rotations="0 90 180 270"
+     data-rotation="0">
+  <title>自增压液压油箱——开放描边重画（draft）</title>
+  <desc>仅将可判定的油箱外壳和接口几何重画为开放描边；活塞/隔离机构、弹簧、液位计仍标记为 unknown，未作为已确认标准符号。</desc>
+
+  <style>
+    /* 渲染器必须注入 --sym-outline-width = 1.5T；本文件不写死绝对线宽。 */
+    .sym-outline {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: var(--sym-outline-width);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .sym-unknown {
+      opacity: 0.72;
+    }
+  </style>
+
+  <metadata id="machine-readable-metadata"><![CDATA[
+{
+  "status": "draft",
+  "geometry": "stroke_geometry",
+  "strokeRule": "1.5T",
+  "mirrorAllowed": false,
+  "allowedRotations": [0, 90, 180, 270],
+  "canonicalCanvas": {"rotation": 0, "width": 218, "height": 564},
+  "ports": [
+    {
+      "id": "return_in",
+      "medium": "hydraulic",
+      "role": "return",
+      "flowCapability": "in",
+      "certainty": "provisional",
+      "anchor": {"x": 0, "y": 410, "direction": "left"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":0,"y":410,"direction":"left"},
+        "90":  {"width":564,"height":218,"x":154,"y":0,"direction":"up"},
+        "180": {"width":218,"height":564,"x":218,"y":154,"direction":"right"},
+        "270": {"width":564,"height":218,"x":410,"y":218,"direction":"down"}
+      }
+    },
+    {
+      "id": "suction_out",
+      "medium": "hydraulic",
+      "role": "suction",
+      "flowCapability": "out",
+      "certainty": "provisional",
+      "anchor": {"x": 218, "y": 410, "direction": "right"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":218,"y":410,"direction":"right"},
+        "90":  {"width":564,"height":218,"x":154,"y":218,"direction":"down"},
+        "180": {"width":218,"height":564,"x":0,"y":154,"direction":"left"},
+        "270": {"width":564,"height":218,"x":410,"y":0,"direction":"up"}
+      }
+    },
+    {
+      "id": "bootstrap_pressure_in",
+      "medium": "hydraulic",
+      "role": "pressure",
+      "flowCapability": "in",
+      "certainty": "provisional",
+      "anchor": {"x": 172, "y": 564, "direction": "down"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":172,"y":564,"direction":"down"},
+        "90":  {"width":564,"height":218,"x":0,"y":172,"direction":"left"},
+        "180": {"width":218,"height":564,"x":46,"y":0,"direction":"up"},
+        "270": {"width":564,"height":218,"x":564,"y":46,"direction":"right"}
+      }
+    }
+  ],
+  "unknown": [
+    {"id":"bootstrap_internal_mechanism","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"spring","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"liquid_level_gauge","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"isolation_mechanism","status":"unknown","reason":"standard_page_not_provided"}
+  ]
+}
+  ]]></metadata>
+
+  <!-- 已确认/可直接重画的外壳与分隔线：全部为开放描边，无黑色填充轮廓。 -->
+  <g id="confirmed-shell" class="sym-outline" data-certainty="confirmed-from-source-geometry">
+    <path id="tank-shell" d="M 8 327 L 8 95 Q 108 52 207 95 L 207 327" />
+    <line id="separator-upper" x1="8" y1="231" x2="207" y2="231" />
+    <line id="separator-lower" x1="8" y1="253" x2="98" y2="253" />
+    <line id="separator-lower" x1="118" y1="253" x2="207" y2="253" />
+    <line id="tank-bottom-left" x1="8" y1="327" x2="98" y2="327" />
+    <line id="tank-bottom-right" x1="119" y1="327" x2="207" y2="327" />
+  </g>
+
+  <!-- 符号接口几何：属于符号本体，按 .sym-outline = 1.5T；外部管线从边界 anchor 起由渲染器绘制。 -->
+  <g id="port-interface-geometry" class="sym-outline" data-certainty="provisional">
+    <path id="return-interface" d="M 25 327 L 25 410 M 0 410 25 410" />
+    <path id="suction-interface" d="M 190 327 L 190 410 M 190 410 218 410" />
+    <path id="pressure-interface" d="M 155 380 L 155 564 M155 380 140 380" />
+  </g>
+
+  <!-- 以下机构未经标准页核对，仅以 unknown/draft 表示；不得解释为已确认标准几何。 -->
+  <g id="unknown-geometry" class="sym-outline sym-unknown" data-certainty="unknown">
+    <!-- 自增压内部活塞/隔离机构：仅保留源图大致占位关系。 -->
+    <g id="bootstrap-internal-mechanism" data-status="unknown">
+      <path d="M 76 327 L 76 444 L 98 444 L 98 253" />
+      <path d="M 118 253 L 118 444 L 140 444 L 140 327" />
+      <path d="M 76 444 L 76 535 L 140 535 L 140 444" />
+      <line x1="76" y1="468" x2="140" y2="468" />
+    </g>
+
+    <!-- 顶部液位计：unknown。全部为描边，不使用黑色填充。 -->
+    <g id="liquid-level-gauge" data-status="unknown">
+      <circle cx="108" cy="49" r="24" />
+      <line x1="85" y1="39" x2="131" y2="39" />
+      <line x1="85" y1="58" x2="131" y2="58" />
+      <path d="M 84 24 Q 108 9 132 24" />
+      <polyline points="145,3 135,20 150,17 137,35 153,28" />
+    </g>
+  </g>
+
+  <!-- 机器读取用 anchor；不参与显示。 -->
+  <g id="port-anchors" fill="#ff0000">
+    <circle id="anchor-return-in" cx="0" cy="410" r="2"
+            data-port-id="return_in"
+            data-anchor-x="0" data-anchor-y="410" data-anchor-direction="left"
+            data-port-role="return" data-flow-capability="in" data-certainty="provisional" />
+    <circle id="anchor-suction-out" cx="218" cy="410" r="2"
+            data-port-id="suction_out"
+            data-anchor-x="218" data-anchor-y="410" data-anchor-direction="right"
+            data-port-role="suction" data-flow-capability="out" data-certainty="provisional" />
+    <circle id="anchor-bootstrap-pressure-in" cx="155" cy="564" r="2"
+            data-port-id="bootstrap_pressure_in"
+            data-anchor-x="172" data-anchor-y="564" data-anchor-direction="down"
+            data-port-role="pressure" data-flow-capability="in" data-certainty="provisional" />
+  </g>
+</svg>

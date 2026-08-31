@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 246"
+     width="168" height="246"
+     data-component-type="relief_valve"
+     data-symbol-version="1.0"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-envelope-class="multi"
+     data-symbol-source-ref="NONE_NO_STANDARD_PAGE_SUPPLIED">
+
+  <!-- 描边几何重绘,取代根目录 potrace 描摹填充版 Relief Valve.svg。
+       几何依据:对原描摹件按 4.005 px/单位实测(3x 渲染 + 像素行程分析),等比映射到本 viewBox:
+         原 viewBox 194x243;方框 x 53..133 / y 89..174 (约 80x83) -> 本图 x 40..120 / y 93..173 (80x80)
+         上端口中线 x≈93.5(框宽 40%),下端口中线 x≈93 —— 两端口同轴,取 x=80(框水平中线)
+         框内偏置竖线 x≈72.5(距左缘 1/4 框宽,距端口轴 20) -> x=60;自框顶边下行,实心箭头指向下,
+           箭头宽≈12 高≈25,尖端抵框底边 -> 本图箭头宽 14 高 23,尖端 (60,171) 距框底边 2
+         弹簧:右缘外伸,原长≈47 中线 y≈132.5≈框高中点,振幅≈±10,约 4.5 个半波
+           -> 本图 x 120..165,中线 y=133(框高中点),振幅 ±9,4 个折点
+         虚线先导回路:自框顶边(约 39% 框宽处)斜上引出,顶部水平线在框顶上方约 30,
+           左侧竖线在框左缘外约 34,底部水平线回到框左缘中点(框高 1/2 处) -> 本图 (70,93)→(44,63)→(6,63)→(6,133)→(40,133)
+
+       语义读图(与 catalog relief_valve 条目对齐):
+         箭头向下 => 允许通流 自上端口 至 下端口;上=压力入口(pressure_in),下=回油出口(return_out),
+         右侧弹簧为复位力,左侧虚线为先导/感受回路(取压于进口腔,作用于左中点)。
+       注意:catalog 现版 pressure_in 记 anchor_direction=left,与本图(上端口进油)不符,
+         属目录待修订项,见仓库 catalog 批量对齐任务;本符号以图面实测为准。
+       未确认项: 无标准页依据(status=provisional);catalog pressure_in anchor_direction
+         与图面不符待目录修订,引用本符号的 L0 文件须在 unknown 登记。
+
+       线宽 stroke-width=2 (基准 T);端口引线延伸至 viewBox 边界,端口圆心
+         落在边界线上(技术规范 §6.3.2 三 / §6.4-10,与 _template.svg 一致)。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 阀体方框 -->
+    <path id="housing" d="M40 93 H120 V173 H40 Z"/><path id="cell2" d="M120 93 H200 V173 H120 Z"/>
+    <!-- 管线:上=压力入口,下=回油出口,同轴 x=80;引线延伸至 viewBox 边界 -->
+    <line id="port-stub-top" x1="80" y1="0" x2="80" y2="93"/>
+    <line id="port-stub-bottom" x1="80" y1="173" x2="80" y2="246"/>
+    <!-- 框内偏置流路:常闭位,箭头示开启后流向 自上而下 -->
+    <line id="flow-line" x1="60" y1="93" x2="60" y2="148"/>
+    <polygon id="flow-arrow" points="53,148 67,148 60,171"
+             fill="#000000" stroke="none"/>
+    <!-- 复位弹簧(右侧) -->
+
+    <polyline id="upper-spring-like"
+      data-status="unknown"
+      points=" 120,144 127,111 134,144 141,112 148,144" />
+    <!-- 先导/感受回路(虚线,绕行左侧) -->
+    <path id="pilot-line" d="M70 93 L44 63 H6 V133 H40"
+          stroke-dasharray="20 9"/>
+
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-pressure-in" cx="80" cy="0" r="2"
+            data-port-id="pressure_in"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="up"/>
+    <circle id="port-return-out" cx="80" cy="246" r="2"
+            data-port-id="return_out"
+            data-medium="hydraulic"
+            data-port-role="return"
+            data-flow-capability="out"
+            data-anchor-direction="down"/>
+  </g>
+</svg>

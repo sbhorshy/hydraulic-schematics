@@ -1,0 +1,50 @@
+# L0 系统意图：油箱温度传感（油箱 + 温度传感器 + 温度开关）
+#
+# 输入（工程师口述）：油箱上安装了温度传感器和温度开关。
+#
+# 状态：草案，不可用于工程放行。
+#   两个温度件类型本次已登记进 component-catalog v0.1-draft（provisional 符号）；
+#   油箱仍为 bootstrap_reservoir（符号 draft）。
+#   传感安装点、电输出去向、参数均未声明，全部进 unknown。
+
+l0_version: "1.1"
+system: RESERVOIR-TEMP-SENSING
+catalog: "comac-hydraulic-components@0.1-draft"
+maturity: concept
+
+# 只声明回油边界：有回油入箱，感温支路才不是悬空网络（规范 11.1
+# "取压点不能悬空"）。吸油侧/自增压气源的下游均未声明，不代为编造。
+extern:
+  RET-001: return        # 回油边界（回油来源未建模）
+
+parts:
+  TANK-001: bootstrap_reservoir
+  TT-001: temperature_transducer
+  TSW-001: temperature_switch
+
+paths:
+  # 回油入箱。油箱 terminal 型，只出现在 path 端点（预检 E-TERM）。
+  - [RET-001, "TANK-001.return_in"]
+
+# 感温支路按 L0 规范 11.1 走 taps，不得写进 paths（10.5 防线）。
+# 安装点声明在 TANK-001.return_in 所在网络：目录的 bootstrap_reservoir
+# 没有油箱本体感温口，只能挂网络，见 unknown 首条。
+taps:
+  - {sensor: TT-001, at: "TANK-001.return_in", position: upstream}
+  - {sensor: TSW-001, at: "TANK-001.return_in", position: upstream}
+
+unknown:
+  # —— 目录/符号缺陷 ——
+  - TANK-001.bulk_temp_sense_port_not_in_catalog   # 油箱本体感温口不存在,感温挂回油网络
+  - TANK-001.separator_type                        # 符号未确认隔离机构
+  - TANK-001.return_port_count                     # 实际回油口数量未确认
+  # —— 架构缺项 ——
+  - TANK-001.bootstrap_pressure_source             # 自增压气源未声明,端口悬空
+  - TANK-001.suction_consumer                      # 吸油去向(泵)未声明,端口悬空
+  - TT-001.elec_out_destination                    # 温度传感器电输出去向未声明,端口悬空
+  - TSW-001.elec_out_destination                   # 温度开关电输出去向未声明,端口悬空
+  # —— 参数 ——
+  - TT-001.measurement_range
+  - TSW-001.setpoint
+  - TANK-001.fluid_type
+  - system_operating_modes

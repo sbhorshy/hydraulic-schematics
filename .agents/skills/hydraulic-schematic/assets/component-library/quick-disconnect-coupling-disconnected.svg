@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 10 213 90"
+     width="213" height="90"
+     data-component-type="quick_disconnect_coupling"
+     data-symbol-version="1.2"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="root/Quick Disconnect Coupling_disconnected.svg potrace traced original, 4.0 px per unit measured"
+     data-symbol-state="disconnected"
+     data-envelope-class="single">
+
+  <!-- 描边几何重绘,取代根目录 potrace 描摹填充版 Quick Disconnect Coupling_disconnected.svg。
+       几何依据:对原描摹件按 4.0 px/单位实测(3x 渲染 + 像素行程分析)。
+
+       v1.2 方框本体基准统一(2026-08-30):阀体方框 95x88 -> 80x80,
+       落位 (67,15)-(147,95)(与仪表族同位);水平流线中线 y=62 -> 55。内部元件:
+         "<" 阀瓣:顶点 rel(0.200,0.500) -> (83,55),两臂 45° 张向右,
+           臂尖 rel(0.610,0.057/0.943) -> (116,20)/(116,90)
+         阀球:圆心 rel(0.600,0.500) -> (115,55);相切几何重算:顶点距 83->115 = 34,
+           45° 臂理论掠切半径 34*sin45° = 24.0,取 r=23(臂缘距 22.6,与原版
+           26.9/27 同为描边宽内的视觉相切,保持"两臂掠过圆缘"画法)
+         右流线:自阀球右缘 (138,55) 至右边界 (213,55)(断开位,右端无竖杆)
+         左端:分离半端竖杆 x=1(右移1防边界裁切,同 v1.1),y 55±17(随本体等比);
+           左流线自左边界 (0,55) 穿竖杆至阀瓣顶点 (83,55),实测原图线连续无断口
+
+       语义:快速自封接头,断开位。左端竖杆=分离半端(带端杆的线端),方框=带
+       Internal 自封阀瓣的座端;圆+两臂为封闭阀瓣图形。组件图元仅有左右两个油口。
+       状态对约束:配对件(mated)仍是根目录 potrace 原始件,重绘转正时须以本件
+           坐标系为基准对齐端口(同类水平中线、同向端口),保证两状态在图上互换
+           时端口不漂移(方框基准豁免件,见 symbol-library.md「方框本体基准」)。
+       端口语义待确认(PENDING_ENGINEER_CONFIRMATION):
+         - 原文件遗留标注自相矛盾(左口注释"气压输入" vs data-port-type
+           "hydraulic-pressure");本版按库内同类串接件惯例取 inlet/outlet、
+           medium=hydraulic;若工程确认用于气动充气线,须改 data-medium=pneumatic。
+       未确认项: 无标准页依据(status=provisional);上列端口语义待工程确认,
+           引用本符号的 L0 文件须在 unknown 登记。
+
+       线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 阀体方框(座端,80x80 本体基准) -->
+    <path id="housing" d="M67 15 H147 V95 H67 Z"/>
+    <!-- 左端:分离半端竖杆(线端,右移1防边界裁切) + 流线(自左边界至阀瓣顶点) -->
+    <line id="mating-half-tick" x1="1" y1="38" x2="1" y2="72"/>
+    <line id="line-left" x1="0" y1="55" x2="83" y2="55"/>
+    <!-- 封闭阀瓣:圆 + 45° 两臂包拢圆缘 -->
+    <circle id="poppet-ball" cx="115" cy="55" r="23"/>
+    <path id="poppet-jaws" d="M116 20 L83 55 L116 90"/>
+    <!-- 右流线:自阀球右缘至 viewBox 右边界(断开位,右端无竖杆) -->
+    <line id="line-right" x1="138" y1="55" x2="213" y2="55"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="0" cy="55" r="2"
+            data-port-id="inlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-outlet" cx="213" cy="55" r="2"
+            data-port-id="outlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>

@@ -193,6 +193,9 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             path = os.path.normpath(os.path.join(HERE, nd['symbol']))
             markup, vb, ports = read_symbol(path)
+            # 用户框类符号带名槽(data-name-slot):实例名渲染期写入框内,
+            # 框外标签随之省略(名字不画两遍)。
+            nd['_name_slot'] = 'data-name-slot' in markup
             vx, vy, vw, vh = vb
             # 缩放:布局给的 w/h 是图上占位尺寸,符号 viewBox 可能是任意
             # 尺寸(油箱 218x564,其余 80x80)。等比缩放,取较小的比例。
@@ -543,6 +546,8 @@ class Sheet(object):
         哪里有字,画完才发现压住标签(校核项 V12)。"""
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 名字已画在框内名槽,不占框外避让包围盒
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             fs = FS.get(pos, 11.0)
@@ -766,6 +771,8 @@ class Sheet(object):
     def texts(self):
         out = []
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 用户框:名字在框内名槽,不再画框外标签
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             cx = nd['x'] + nd['w'] / 2.0
@@ -808,6 +815,8 @@ class Sheet(object):
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
             mk = self.norm_stroke(self.uniq(markup, inst))
             mk = self.portlines(mk, ports, inst)
+            if nd.get('_name_slot'):
+                mk = self.fill_name_slot(mk, inst)
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
             # 覆盖——不能写成实例 g 的 stroke-width 属性,那会被后代
@@ -864,6 +873,33 @@ class Sheet(object):
             return tag[:-2].rstrip() + ' class="pl-%s"/>' % hit[0]
 
         return re.sub(r'<line [^>]*/>', sub, markup)
+
+    def fill_name_slot(self, markup, inst):
+        """把用户框符号的名槽文本替换为实例标签(hydraulic_user)。
+
+        符号文件里的槽位是占位内容"用户";实例名各不相同,只能渲染期
+        写入。槽位 x/y 从符号自带属性读,不在此硬编码几何;多行标签以
+        单行基线为中心上下展开(行距 13,与图纸标签一致)。
+        """
+        lines = [ln for ln in self.L['labels'].get(inst, inst).split('\n') if ln]
+        if not lines:
+            return markup
+
+        def repl(m):
+            open_, close = m.group(1), m.group(3)
+            mx = re.search(r'\bx="([-\d.]+)"', open_)
+            my = re.search(r'\by="([-\d.]+)"', open_)
+            x = mx.group(1) if mx else '0'
+            y = float(my.group(1)) if my else 0.0
+            ys = [y + 13.0 * k - 6.5 * (len(lines) - 1)
+                  for k in range(len(lines))]
+            inner = ''.join('<tspan x="%s" y="%.1f">%s</tspan>'
+                            % (x, yy, self.esc(ln))
+                            for yy, ln in zip(ys, lines))
+            return open_ + inner + close
+
+        return re.sub(r'(<text[^>]*\bdata-name-slot\b[^>]*>)(.*?)(</text>)',
+                      repl, markup, flags=re.S)
 
     @staticmethod
     def norm_stroke(markup):
