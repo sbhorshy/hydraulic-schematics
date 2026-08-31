@@ -1,0 +1,241 @@
+# =============================================================================
+# 受控清单模板（#12 机制一·样例）—— 1# 液压系统真实内容回顾性填写
+# =============================================================================
+# 目的：把工程师手写清单（已标注/1#系统原理图/1#系统组件.json，自由文本）
+#       改造成向导式受控 schema。AI 转写从「自由裁量」变「受约束映射」：
+#       类型词必须命中词典或显式置空进追问；连接必须逐端口声明或显式 unknown。
+#
+# 填写规则（fail-closed，沿 #4/#8 预检原则）：
+#   R1 每行必有 序号 + 口语名（照抄工程师原文，含笔误）。
+#   R2 类型词必须命中下方领域词典；未命中则 类型: null 且 未入图原因 必填。
+#   R3 连接逐端口声明，对端只许三种规范形：
+#        "@母线词"            —— 母线词汇表六词之一
+#        "实例名.端口id"      —— 实例名必须是某行 展开 中列出的名字
+#        "unknown:slug"       —— 悬空/说不清，强制登记追问，不计入连接对账
+#      每条连接全表只声明一次（任选一行视角），重复声明对账报错。
+#   R4 组合件（一拆多）用 展开 列实例；展开后的实例集 = 图上实例集（机器对账）。
+#   R5 追问条目必须登记 intent.unknown（slug 一致），不得口头带过。
+# =============================================================================
+
+系统: HYD-SYS-1
+清单版本: "1#-手写清单 v1"
+catalog: "comac-hydraulic-components@0.3-draft"
+
+# ---- 母线词汇表（受控，共 6 词；对端只许用这些词、实例引用或 unknown）----
+母线词汇:
+  压力汇流: "@PRESS"       # 双泵压力出口汇合
+  分配: "@MANIFOLD"        # 压力滤下游分配母线
+  用户供压: "@USR"         # 优先阀下游用户母线
+  用户回油: "@USERR"       # 用户回油收集母线
+  回油: "@RET"             # 回油滤下游回油母线
+  壳体回油: "@CASE"        # 泵壳体回油母线
+
+# ---- 领域词典（口语/笔误 → catalog 受控类型；跨语言别名显式登记）----
+领域词典:
+  EDP: engine_driven_pump
+  EMP: electric_motor_driven_pump
+  FWSOV: firewall_shutoff_valve        # 清单笔误（规范缩写 FSOV），别名保留
+  FSOV: firewall_shutoff_valve
+  firewall-shutoff-valve: firewall_shutoff_valve
+  quick-disconnect-coupling-disconnected:
+    按括注区分:
+      地面压力快卸接头: quick_disconnect_coupling_disconnected
+      地面回油快卸接头: quick_disconnect_coupling_disconnected_return
+  filter-line-shutoff-dp:
+    按括注区分:
+      压力油滤: filter_line_shutoff_dp
+      壳体回油滤: filter_line_shutoff_dp_case_drain
+      回油滤: filter_line_shutoff_dp_return
+  priority-valve: priority_valve       # 同型多役：系统优先阀/自增压优先阀，
+                                       #   役别由 连接 区分（行 9 / 行 14）
+  accumulator: hydro_pneumatic_accumulator
+  air-charging-valve: air_charging_valve
+  pressure-gauge: pressure_gauge
+  check-valve: check_valve
+  bootstrap-type-reservoir: bootstrap_reservoir
+  用户: hydraulic_user                 # 组合件，按名单逐项展开
+
+# ---- 清单安全件对照提示（catalog 有而本清单未声明，逐条请工程师确认）----
+安全件对照:
+  - {类型: relief_valve, 提示: 清单未声明系统溢流阀——确认不需要还是漏写？}
+  - {类型: check_valve, 提示: 双泵并联无泵隔离单向阀——确认允许互扰还是漏写？}
+  - {类型: pressure_switch, 提示: 清单未声明压力开关——本系统压力信号如何引出？}
+
+# ---- 清单行（18 行，序号 = 手写清单原文顺序）----
+行:
+
+  - 序号: 1
+    口语名: "EDP"
+    类型: engine_driven_pump
+    数量: 1
+    连接:
+      - {本件端口: suction, 对端: "FSOV-001.outlet"}
+      - {本件端口: pressure_out, 对端: "@压力汇流"}
+      - {本件端口: case_drain, 对端: "@壳体回油"}
+      - {本件端口: drive_shaft, 对端: "unknown:EDP-001-drive-shaft-destination"}
+    展开: [EDP-001]
+
+  - 序号: 2
+    口语名: "EMP"
+    类型: electric_motor_driven_pump
+    数量: 1
+    连接:
+      - {本件端口: suction, 对端: "TANK-001.suction_out"}
+      - {本件端口: pressure_out, 对端: "@压力汇流"}
+      - {本件端口: case_drain, 对端: "@壳体回油"}
+      - {本件端口: elec_power, 对端: "unknown:EMP-001-elec-power-destination"}
+    展开: [EMP-001]
+
+  - 序号: 3
+    口语名: "firewall-shutoff-valve（FWSOV）"
+    类型: firewall_shutoff_valve
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "TANK-001.suction_out", 背书: 审查卡A-吸油流道}
+      - {本件端口: command, 对端: "unknown:FSOV-001-command-destination"}
+    追问: [FSOV-001-suction-side-placement-assumed]
+    展开: [FSOV-001]
+
+  - 序号: 4
+    口语名: "quick-disconnect-coupling-disconnected(地面回油快卸接头)"
+    类型: quick_disconnect_coupling_disconnected_return
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@回油"}
+      - {本件端口: ground_side, 对端: "unknown:QD-open-ends-are-disconnected-position"}
+    展开: [QDR-001]
+
+  - 序号: 5
+    口语名: "filter-line-shutoff-dp（压力油滤）"
+    类型: filter_line_shutoff_dp
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@压力汇流"}
+      - {本件端口: outlet, 对端: "@分配"}
+    展开: [PF-001]
+
+  - 序号: 6
+    口语名: "filter-line-shutoff-dp（壳体回油滤）"
+    类型: filter_line_shutoff_dp_case_drain
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@壳体回油", 背书: 清单只声明1只-双泵合流}
+      - {本件端口: outlet, 对端: "TANK-001.return_in"}
+    追问: [TANK-001-return-port-count-unconfirmed]
+    展开: [CDF-001]
+
+  - 序号: 7
+    口语名: "filter-line-shutoff-dp（回油滤）"
+    类型: filter_line_shutoff_dp_return
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@用户回油"}
+      - {本件端口: outlet, 对端: "@回油"}
+    展开: [RF-001]
+
+  - 序号: 8
+    口语名: "quick-disconnect-coupling-disconnected(地面压力快卸接头)"
+    类型: quick_disconnect_coupling_disconnected
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@分配"}
+      - {本件端口: ground_side, 对端: "unknown:QD-open-ends-are-disconnected-position"}
+    展开: [QDP-001]
+
+  - 序号: 9
+    口语名: "priority-valve(系统优先阀)"
+    类型: priority_valve
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@分配"}
+      - {本件端口: outlet, 对端: "@用户供压"}
+    展开: [PRV-001]
+
+  - 序号: 10
+    口语名: "能源转换装置选择阀"
+    类型: null
+    数量: 1
+    状态: 未入图
+    未入图原因: 词典未命中-类型与符号未登记
+    追问: [ETP-selector-valve-not-in-catalog]
+    展开: []
+
+  - 序号: 11
+    口语名: "能源转换装置"
+    类型: null
+    数量: 1
+    状态: 未入图
+    未入图原因: 词典未命中-判读疑似PTU未登记
+    追问: [ETP-unit-not-in-catalog]
+    展开: []
+
+  - 序号: 12
+    口语名: "check-valve(地面加油单向阀)"
+    类型: check_valve
+    数量: 1
+    状态: 未入图
+    未入图原因: 类型受控但加油口拓扑未声明-不画
+    追问: [ground-refuel-check-valve-connection-unknown]
+    展开: []
+
+  - 序号: 13
+    口语名: "集中加油组件"
+    类型: null
+    数量: 1
+    状态: 未入图
+    未入图原因: 词典未命中-类型与符号未登记
+    追问: [ground-refuel-assembly-not-in-catalog]
+    展开: []
+
+  - 序号: 14
+    口语名: "priority-valve（自增压优先阀）"
+    类型: priority_valve
+    数量: 1
+    连接:
+      - {本件端口: inlet, 对端: "@压力汇流"}
+      - {本件端口: outlet, 对端: "TANK-001.bootstrap_pressure_in"}
+    展开: [PRV-002]
+
+  - 序号: 15
+    口语名: "accumulator（系统蓄压器）"
+    类型: hydro_pneumatic_accumulator
+    数量: 1
+    连接:
+      - {本件端口: hydraulic_port, 对端: "@分配"}
+      - {本件端口: gas_port, 对端: "ACV-001.accumulator_gas", 介质: 气}
+      - {本件端口: charge_source, 对端: "unknown:accumulator-charge-source-not-declared"}
+    展开: [ACC-001]
+
+  - 序号: 16
+    口语名: "air-charging-valve & pressure-gauge（蓄压器充气压力表组件）"
+    类型: [air_charging_valve, pressure_gauge]
+    数量: 1
+    状态: 一拆二
+    连接:
+      - {本件端口: PG.pressure_sense, 对端: "ACV-001.charge_port", 介质: 气,
+         背书: 测压介质按用途判读}
+      - {本件端口: ACV.charge_source, 对端: "unknown:accumulator-charge-source-not-declared"}
+    追问: [pressure-gauge-medium-pneumatic-assumed, air-charging-valve-port-orientation-assumed]
+    展开: [ACV-001, PG-001]
+
+  - 序号: 17
+    口语名: "bootstrap-type-reservoir（油箱）"
+    类型: bootstrap_reservoir
+    数量: 1
+    连接:
+      - {本件端口: return_in, 对端: "@回油", 背书: 主回油与壳体回油共用此口}
+    追问: [TANK-001-return-port-count-unconfirmed]
+    展开: [TANK-001]
+
+  - 序号: 18
+    口语名: "用户[MF扰流板，襟翼，缝翼，副翼，升降舵，方向舵，反推，正常刹车]"
+    类型: hydraulic_user
+    数量: 8
+    状态: 组合展开
+    连接:
+      - {本件端口: pressure_in, 对端: "@用户供压", 每实例: true}
+      - {本件端口: return_out, 对端: "@用户回油", 每实例: true}
+    展开: [USER-001, USER-002, USER-003, USER-004,
+           USER-005, USER-006, USER-007, USER-008]
+    名单: {USER-001: MF扰流板, USER-002: 襟翼, USER-003: 缝翼, USER-004: 副翼,
+           USER-005: 升降舵, USER-006: 方向舵, USER-007: 反推, USER-008: 正常刹车}
