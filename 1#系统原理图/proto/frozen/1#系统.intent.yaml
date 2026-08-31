@@ -1,14 +1,15 @@
 # L0 系统意图：1# 液压系统（组件清单版）
 #
 # 唯一输入：`./1#系统组件.json`（工程师手写组件清单，非结构化；自 已标注/1#系统原理图/ 复制回位，归档件为准）。
-# 本文件把清单逐项落成受控 parts / extern / taps / unknown：
-#   清单 18 项 -> 14 个受控实例 + 2 个用户侧边界 + 2 个气侧 taps；
+# 本文件把清单逐项落成受控 parts / taps / unknown：
+#   清单 18 项 -> 22 个受控实例（含用户 8 只名框）+ 2 个气侧 taps；
+#   用户按 skill 通用用户框规范(hydraulic_user)建模，名单逐项落实例；
 #   4 项（能源转换装置选择阀、能源转换装置、集中加油组件、地面加油单向阀）
 #   因类型未登记/拓扑未声明不入图，逐条见 unknown 与追溯清单简化说明。
 #
 # 状态：草案（concept），不可用于工程放行。
 # 目录：本工作目录扩展副本 component-catalog.json（0.3-draft，
-#       基于 skill 快照 0.2-draft 新增 8 类型，见 build_catalog.py）。
+#       基于 skill 快照新增 8 类型 + 收录 hydraulic_user，见 build_catalog.py）。
 # 布局与架构判断沿 system-1.intent.yaml 审查卡结论（FSOV 装吸油侧、
 # 双泵并联无隔离单向阀、蓄压器置于压力滤下游等），新增件的安装位置
 # 由我判断并在对应行注明。
@@ -18,11 +19,9 @@ system: HYD-SYS-1
 catalog: "comac-hydraulic-components@0.3-draft"
 maturity: concept
 
-# 用户未建模为受控组件（清单第 18 项只给了用户名单）。
-# 供压/回油各留一个边界标记，名单写进布局标签。
-extern:
-  USR-001: outlet       # 至用户（供压）：MF扰流板/襟翼/缝翼/副翼/升降舵/方向舵/反推/正常刹车
-  USR-002: return       # 自用户（回油）
+# 用户不再用边界标记：skill 通用用户框规范(hydraulic_user)生效，
+# 8 只用户名框全部入 parts，供压/回油均为真实受控端口。
+extern: {}
 
 parts:
   TANK-001: bootstrap_reservoir                          # 清单17 bootstrap-type-reservoir（油箱）
@@ -39,6 +38,14 @@ parts:
   PG-001: pressure_gauge                                 # 清单16 充气压力表（同上组件）
   QDP-001: quick_disconnect_coupling_disconnected        # 清单8 地面压力快卸接头（断开位）
   QDR-001: quick_disconnect_coupling_disconnected_return # 清单4 地面回油快卸接头（断开位）
+  USER-001: hydraulic_user                               # 清单18 MF扰流板
+  USER-002: hydraulic_user                               # 清单18 襟翼
+  USER-003: hydraulic_user                               # 清单18 缝翼
+  USER-004: hydraulic_user                               # 清单18 副翼
+  USER-005: hydraulic_user                               # 清单18 升降舵
+  USER-006: hydraulic_user                               # 清单18 方向舵
+  USER-007: hydraulic_user                               # 清单18 反推
+  USER-008: hydraulic_user                               # 清单18 正常刹车
 
 # 液压主路。端口 role 决定线型；@名 为竖直母线（布局给定 x）。
 paths:
@@ -54,15 +61,33 @@ paths:
   - ["EMP-001.pressure_out", "@PRESS"]
   - ["@PRESS", "PF-001", "@MANIFOLD"]
 
-  # 分配母线：优先阀 -> 用户；蓄压器液压口；自增压优先阀 -> 油箱增压口；
-  # 地面压力快卸接头支路（断开位，地面侧开放），接分配母线。
-  - ["@MANIFOLD", "PRV-001", "USR-001"]
+  # 分配母线：优先阀 -> 用户供压母线(@USR)分赴八只用户；蓄压器液压口；
+  # 自增压优先阀 -> 油箱增压口；地面压力快卸接头支路（断开位，地面侧开放）。
+  - ["@MANIFOLD", "PRV-001", "@USR"]
+  - ["@USR", "USER-001.pressure_in"]
+  - ["@USR", "USER-002.pressure_in"]
+  - ["@USR", "USER-003.pressure_in"]
+  - ["@USR", "USER-004.pressure_in"]
+  - ["@USR", "USER-005.pressure_in"]
+  - ["@USR", "USER-006.pressure_in"]
+  - ["@USR", "USER-007.pressure_in"]
+  - ["@USR", "USER-008.pressure_in"]
   - ["@MANIFOLD", "ACC-001.hydraulic_port"]
   - ["@PRESS", "PRV-002", "TANK-001.bootstrap_pressure_in"]
   - ["@MANIFOLD", "QDP-001.inlet"]
 
-  # 主回油：用户 -> 回油滤 -> 回油母线；母线分赴油箱与地面回油快卸接头。
-  - ["USR-002", "RF-001", "@RET"]
+  # 主回油：八只用户回油 -> 收集母线(@USERR) -> 回油滤 RF-001 -> @RET；
+  # 母线分赴油箱与地面回油快卸接头。回油滤仍串在用户回油汇入回油母线
+  # 之前(v2.3 语义不变:先过滤再分配)。
+  - ["USER-001.return_out", "@USERR"]
+  - ["USER-002.return_out", "@USERR"]
+  - ["USER-003.return_out", "@USERR"]
+  - ["USER-004.return_out", "@USERR"]
+  - ["USER-005.return_out", "@USERR"]
+  - ["USER-006.return_out", "@USERR"]
+  - ["USER-007.return_out", "@USERR"]
+  - ["USER-008.return_out", "@USERR"]
+  - ["@USERR", "RF-001", "@RET"]
   - ["@RET", "TANK-001.return_in"]
   - ["@RET", "QDR-001.inlet"]
 
@@ -89,6 +114,7 @@ unknown:
   - filter-line-shutoff-dp-standard-page-pending # 滤符号无标准页依据（clause-6.1.6 构型）
   - air-charging-valve-port-orientation-assumed  # 左=蓄压器侧/右=充气源为形位判读，未经标准页
   - pressure-gauge-medium-pneumatic-assumed      # 测压介质按"蓄压器充气压力表"用途定为气侧
+  - hydraulic-user-symbol-provisional            # 用户名框符号 provisional 无标准页（skill 通用用户框规范），按 concept 披露
   # ---- 架构判断（沿 system-1 审查卡）----
   - FSOV-001-suction-side-placement-assumed      # FWSOV 装吸油侧为判断；若实际在压力侧须改
   - TANK-001-return-port-count-unconfirmed       # 主回油+壳体回油共用一个 return_in 端口

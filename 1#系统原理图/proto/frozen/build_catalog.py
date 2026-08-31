@@ -27,6 +27,10 @@ updates = {
     'bootstrap_reservoir': ('reservoir-bootstrap-annotated.svg', 'annotated',
                             'draft 级描边(数据源 USER_ANNOTATED);门禁 C8 报 data-symbol-form=traced_outline,'
                             '属符号重绘运动待办早期符号。本图按 CONCEPT 档使用并在图签披露。'),
+    # skill 更新后快照收录 hydraulic_user(0.1-draft);资产路径改指本目录副本。
+    'hydraulic_user': ('hydraulic-user.svg', 'provisional',
+                       '通用用户名框(data-name-slot),实例名由渲染器写入名槽;'
+                       '门禁 C11/C12:provisional 无标准页,引用它的 L0 文件须在 unknown 登记。'),
 }
 for t, (asset, st, note) in updates.items():
     types[t]['symbol'] = {'asset': SYMDIR + asset, 'symbol_status': st, 'note': note}

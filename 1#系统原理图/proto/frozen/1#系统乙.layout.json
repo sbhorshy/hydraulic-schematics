@@ -1,0 +1,285 @@
+{
+  "layout_version": "layout-engine-1.0",
+  "source_l0": "",
+  "note": "方案乙:R1–R14 规则定行位 + kiwi 守门微调(#18);全部坐标由参数表+intent 拓扑推导,零手工坐标。",
+  "canvas": {
+    "width": 1680,
+    "height": 1390
+  },
+  "canvas_shift_x": 30,
+  "style": {
+    "base_line_width_T": 1.2,
+    "symbol_stroke_width": 2,
+    "suction_marker_S": 8
+  },
+  "externs": {},
+  "nodes": {
+    "TANK-001": {
+      "x": 60,
+      "y": 276,
+      "w": 218,
+      "h": 564,
+      "rot": 0,
+      "symbol": "symbols/reservoir-bootstrap-annotated.svg"
+    },
+    "FSOV-001": {
+      "x": 368,
+      "y": 290,
+      "w": 80,
+      "h": 80,
+      "rot": 0,
+      "symbol": "symbols/fsov-provisional-stroke.svg"
+    },
+    "EDP-001": {
+      "x": 538,
+      "y": 290,
+      "w": 80,
+      "h": 80,
+      "rot": 0,
+      "symbol": "symbols/edp-provisional-stroke.svg"
+    },
+    "EMP-001": {
+      "x": 538,
+      "y": 610,
+      "w": 80,
+      "h": 80,
+      "rot": 0,
+      "symbol": "symbols/emp-provisional-stroke.svg"
+    },
+    "PF-001": {
+      "x": 1000,
+      "y": 246,
+      "w": 80,
+      "h": 112,
+      "rot": 0,
+      "symbol": "symbols/filter-line-shutoff-dp.svg"
+    },
+    "PRV-001": {
+      "x": 1300,
+      "y": 302,
+      "w": 140,
+      "h": 78,
+      "rot": 0,
+      "symbol": "symbols/priority-valve.svg"
+    },
+    "USER-001": {
+      "x": 1498,
+      "y": 160,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-002": {
+      "x": 1498,
+      "y": 265,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-003": {
+      "x": 1498,
+      "y": 370,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-004": {
+      "x": 1498,
+      "y": 475,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-005": {
+      "x": 1498,
+      "y": 580,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-006": {
+      "x": 1498,
+      "y": 685,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-007": {
+      "x": 1498,
+      "y": 790,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "USER-008": {
+      "x": 1498,
+      "y": 895,
+      "w": 120,
+      "h": 60,
+      "rot": 0,
+      "symbol": "symbols/hydraulic-user.svg"
+    },
+    "PRV-002": {
+      "x": 438,
+      "y": 740,
+      "w": 140,
+      "h": 78,
+      "rot": 180,
+      "symbol": "symbols/priority-valve.svg"
+    },
+    "ACC-001": {
+      "x": 1180,
+      "y": 190,
+      "w": 60,
+      "h": 100,
+      "rot": 0,
+      "symbol": "symbols/accumulator.svg"
+    },
+    "QDP-001": {
+      "x": 1188,
+      "y": 560,
+      "w": 160,
+      "h": 68,
+      "rot": 0,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg"
+    },
+    "QDR-001": {
+      "x": 1200,
+      "y": 900,
+      "w": 160,
+      "h": 68,
+      "rot": 0,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg"
+    },
+    "RF-001": {
+      "x": 1200,
+      "y": 1012,
+      "w": 80,
+      "h": 112,
+      "rot": 180,
+      "symbol": "symbols/filter-line-shutoff-dp.svg"
+    },
+    "CDF-001": {
+      "x": 420,
+      "y": 100,
+      "w": 60,
+      "h": 80,
+      "rot": 270,
+      "symbol": "symbols/filter-line-shutoff-dp.svg"
+    },
+    "ACV-001": {
+      "x": 1180,
+      "y": 90,
+      "w": 134,
+      "h": 57,
+      "rot": 0,
+      "symbol": "symbols/air-charging-valve.svg"
+    },
+    "PG-001": {
+      "x": 1357,
+      "y": 90,
+      "w": 63,
+      "h": 67,
+      "rot": 0,
+      "symbol": "symbols/pressure-gauge.svg"
+    }
+  },
+  "buses": {
+    "PRESS": {
+      "kind": "v",
+      "x": 880
+    },
+    "MANIFOLD": {
+      "kind": "v",
+      "x": 1160
+    },
+    "USR": {
+      "kind": "v",
+      "x": 1470
+    },
+    "USERR": {
+      "kind": "v",
+      "x": 1646
+    },
+    "RET": {
+      "kind": "v",
+      "x": 940
+    },
+    "CASE": {
+      "kind": "v",
+      "x": 658
+    }
+  },
+  "lanes": [
+    100
+  ],
+  "vlanes": [
+    20,
+    290
+  ],
+  "group_padding": 20,
+  "group_label_gap": 10,
+  "legend": {
+    "x": 380,
+    "y": 1020,
+    "w": 540,
+    "h": 290
+  },
+  "title_block": {
+    "x": 40,
+    "y": 1330,
+    "w": 1600,
+    "h": 56
+  },
+  "labels": {
+    "TANK-001": "TANK-001\n自增压油箱",
+    "FSOV-001": "FSOV-001\n防火墙关断活门",
+    "EDP-001": "EDP-001\n发动机驱动泵",
+    "EMP-001": "EMP-001\n电动泵",
+    "PF-001": "PF-001\n压力油滤",
+    "CDF-001": "CDF-001\n壳体回油滤",
+    "RF-001": "RF-001\n回油滤",
+    "PRV-001": "PRV-001\n优先阀",
+    "PRV-002": "PRV-002\n自增压优先阀",
+    "ACC-001": "ACC-001\n系统蓄压器",
+    "ACV-001": "ACV-001\n充气活门",
+    "PG-001": "PG-001\n充气压力表",
+    "QDP-001": "QDP-001\n地面压力快卸接头",
+    "QDR-001": "QDR-001\n地面回油快卸接头",
+    "USER-001": "USER-001\nMF扰流板",
+    "USER-002": "USER-002\n襟翼",
+    "USER-003": "USER-003\n缝翼",
+    "USER-004": "USER-004\n副翼",
+    "USER-005": "USER-005\n升降舵",
+    "USER-006": "USER-006\n方向舵",
+    "USER-007": "USER-007\n反推",
+    "USER-008": "USER-008\n正常刹车"
+  },
+  "label_pos": {
+    "TANK-001": "below",
+    "FSOV-001": "below",
+    "EDP-001": "below",
+    "EMP-001": "above",
+    "PF-001": "right",
+    "CDF-001": "right",
+    "RF-001": "below",
+    "PRV-001": "above",
+    "PRV-002": "below",
+    "ACC-001": "right",
+    "ACV-001": "above",
+    "PG-001": "above",
+    "QDP-001": "below",
+    "QDR-001": "below"
+  },
+  "label_drop": {
+    "TANK-001": 100,
+    "EDP-001": 40
+  }
+}

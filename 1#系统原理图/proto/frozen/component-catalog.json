@@ -46,10 +46,6 @@
       "unannotated",
       "defective",
       "missing"
-    ],
-    "envelope_class": [
-      "single",
-      "multi"
     ]
   },
   "field_contract": {
@@ -57,8 +53,7 @@
     "main_path": "裸实例名在 paths 中的默认端口对。null 表示必须写显式端口(L0 §10.2)。",
     "port_role": "决定管线渲染样式。suction 网络须用受控吸油管线符号(技术规范 §10.6.1)。",
     "anchor_direction": "端口基准出线方向。实例旋转后须同步变换(技术规范 §10.4)。",
-    "symbol_status": "绘图就绪度。annotated 之外均不可用于正式出图。",
-    "envelope_class": "方框本体基准(single 单方框/multi 多联位):本体方框一律 80×80,允差 0.5,多联位每格 80。覆盖信封阀与方框仪表;本体非方框的组件(蓄压器/球阀/弓形件/圆表盘/油箱/QDC 原始件)省略此字段。见 symbol-library.md「方框本体基准」。"
+    "symbol_status": "绘图就绪度。annotated 之外均不可用于正式出图。"
   },
   "components": [
     {
@@ -233,8 +228,7 @@
       "connection_role": "inline",
       "symbol": {
         "asset": "组件库/Relief Valve.svg",
-        "symbol_status": "unannotated",
-        "envelope_class": "single"
+        "symbol_status": "unannotated"
       },
       "ports": [
         {
@@ -272,8 +266,7 @@
       "connection_role": "sensing_only",
       "symbol": {
         "asset": "组件库/Pressure Switch.svg",
-        "symbol_status": "unannotated",
-        "envelope_class": "single"
+        "symbol_status": "unannotated"
       },
       "ports": [
         {
@@ -555,8 +548,7 @@
       "connection_role": "sensing_only",
       "symbol": {
         "asset": "组件库/temperature-switch.svg",
-        "symbol_status": "provisional",
-        "envelope_class": "single"
+        "symbol_status": "provisional"
       },
       "ports": [
         {
@@ -595,8 +587,7 @@
       "connection_role": "sensing_only",
       "symbol": {
         "asset": "组件库/temperature-transducer.svg",
-        "symbol_status": "provisional",
-        "envelope_class": "single"
+        "symbol_status": "provisional"
       },
       "ports": [
         {
@@ -618,6 +609,49 @@
       ],
       "main_path": null,
       "main_path_note": "感温元件,画在感温支路末端,不串在主油路上;电输出去向未声明时端口悬空。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "hydraulic_user",
+      "display_name": "用户",
+      "description": "通用用油设备(作动筒/马达/舱门等)。一律画成矩形框+用户名:名字由渲染器写入符号 data-name-slot 文本槽,不写死在符号文件。左压力进口/右回油出口,inline 串接。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/hydraulic-user.svg",
+        "symbol_status": "provisional",
+        "note": "通用用户名框(data-name-slot),实例名由渲染器写入名槽;门禁 C11/C12:provisional 无标准页,引用它的 L0 文件须在 unknown 登记。"
+      },
+      "ports": [
+        {
+          "id": "pressure_in",
+          "svg_element_id": "port-pressure-in",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "return_out",
+          "svg_element_id": "port-return-out",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "pressure_in",
+        "out": "return_out"
+      },
+      "main_path_note": "主路串接件:压力进口进,回油出口出,裸实例名可直接入 paths。",
       "layout": {
         "allowed_rotations_deg": [
           0,

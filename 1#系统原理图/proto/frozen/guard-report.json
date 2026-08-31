@@ -1,0 +1,7 @@
+{
+  "guard": "kiwi REQUIRED on rule solution (#18 方案乙)",
+  "constraints": 153,
+  "violations_at_rule": [],
+  "drifted": {},
+  "zero_drift": true
+}

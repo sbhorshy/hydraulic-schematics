@@ -193,6 +193,9 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             path = os.path.normpath(os.path.join(HERE, nd['symbol']))
             markup, vb, ports = read_symbol(path)
+            # 用户框类符号带名槽(data-name-slot):实例名渲染期写入框内,
+            # 框外标签随之省略(名字不画两遍)。
+            nd['_name_slot'] = 'data-name-slot' in markup
             vx, vy, vw, vh = vb
             # 缩放:布局给的 w/h 是图上占位尺寸,符号 viewBox 可能是任意
             # 尺寸(油箱 218x564,其余 80x80)。等比缩放,取较小的比例。
@@ -543,6 +546,8 @@ class Sheet(object):
         哪里有字,画完才发现压住标签(校核项 V12)。"""
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 名字已画在框内名槽,不占框外避让包围盒
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             fs = FS.get(pos, 11.0)
@@ -722,22 +727,34 @@ class Sheet(object):
             pa = (pa3[0], pa3[1])
             pb = (pb3[0], pb3[1])
             aa = self.abs[(sinst, spid)][2]
+            ab = self.abs[(ainst, apid)][2]
             self.port_lt[(sinst, spid)] = 'sense'
             S = 18.0
             stub = {'left': (-S, 0), 'right': (S, 0),
                     'up': (0, -S), 'down': (0, S)}[aa]
             a1 = (pa[0] + stub[0], pa[1] + stub[1])
+            stubb = {'left': (-S, 0), 'right': (S, 0),
+                     'up': (0, -S), 'down': (0, S)}[ab]
+            # 终点也按锚向先出桩:最后一段必沿端口锚向进入,逆着锚向
+            # 从元件体内反向出线的候选从形状上就不存在了。早先终点不带
+            # 锚向桩,且两端元件盒都被排除出障碍,穿本体逆锚的候选反而
+            # 以最短胜出(V2:感温线横穿充气活门本体)。
+            b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
             cands = []
-            if abs(a1[0] - pb[0]) < 0.5 or abs(a1[1] - pb[1]) < 0.5:
-                cands.append([a1, pb])
-            # 先按 sensor 锚点出线,再一折进入 at 端口;两种折向择优。
+            if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+                cands.append([a1, b1])
+            # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
             # 先纵后横的形状不会倒折回端口正上方,排前。
-            cands.append([a1, (pb[0], a1[1]), pb])
-            cands.append([a1, (a1[0], pb[1]), pb])
-            obs = self.obstacles(exclude=(sinst, ainst))
+            cands.append([a1, (b1[0], a1[1]), b1])
+            cands.append([a1, (a1[0], b1[1]), b1])
+            # 评分段自 a1 起算(端口桩只有 18px 且向外,B5≥40 保证桩不碰
+            # 邻盒),障碍全量不豁免:回折穿传感器本体的候选由此拿到应有
+            # 的代价。早先两端元件盒都豁免,穿本体逆锚的候选反而以最短
+            # 胜出(V2:感温线横穿充气活门本体)。
+            obs = self.obstacles()
             best, bad = None, None
             for c in cands:
-                pts = self.dedup([pa] + c)
+                pts = self.dedup(c + [pb])
                 if len(pts) < 2:
                     continue
                 h = self.hits(pts, obs, skip_ends=True)
@@ -751,6 +768,7 @@ class Sheet(object):
                       + cr * 120 + ln + len(pts) * 5)
                 if bad is None or sc < bad:
                     bad, best = sc, pts
+            best = self.dedup([pa] + best)      # 绘制/追溯补回端口桩
             for k in range(len(best) - 1):
                 self.drawn.append((best[k], best[k + 1]))
             self.polys.append(('sense', best))
@@ -824,6 +842,8 @@ class Sheet(object):
     def texts(self):
         out = []
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 用户框:名字在框内名槽,不再画框外标签
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             cx = nd['x'] + nd['w'] / 2.0
@@ -866,6 +886,8 @@ class Sheet(object):
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
             mk = self.norm_stroke(self.uniq(markup, inst))
             mk = self.portlines(mk, ports, inst)
+            if nd.get('_name_slot'):
+                mk = self.fill_name_slot(mk, inst)
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
             # 覆盖——不能写成实例 g 的 stroke-width 属性,那会被后代
@@ -922,6 +944,33 @@ class Sheet(object):
             return tag[:-2].rstrip() + ' class="pl-%s"/>' % hit[0]
 
         return re.sub(r'<line [^>]*/>', sub, markup)
+
+    def fill_name_slot(self, markup, inst):
+        """把用户框符号的名槽文本替换为实例标签(hydraulic_user)。
+
+        符号文件里的槽位是占位内容"用户";实例名各不相同,只能渲染期
+        写入。槽位 x/y 从符号自带属性读,不在此硬编码几何;多行标签以
+        单行基线为中心上下展开(行距 13,与图纸标签一致)。
+        """
+        lines = [ln for ln in self.L['labels'].get(inst, inst).split('\n') if ln]
+        if not lines:
+            return markup
+
+        def repl(m):
+            open_, close = m.group(1), m.group(3)
+            mx = re.search(r'\bx="([-\d.]+)"', open_)
+            my = re.search(r'\by="([-\d.]+)"', open_)
+            x = mx.group(1) if mx else '0'
+            y = float(my.group(1)) if my else 0.0
+            ys = [y + 13.0 * k - 6.5 * (len(lines) - 1)
+                  for k in range(len(lines))]
+            inner = ''.join('<tspan x="%s" y="%.1f">%s</tspan>'
+                            % (x, yy, self.esc(ln))
+                            for yy, ln in zip(ys, lines))
+            return open_ + inner + close
+
+        return re.sub(r'(<text[^>]*\bdata-name-slot\b[^>]*>)(.*?)(</text>)',
+                      repl, markup, flags=re.S)
 
     @staticmethod
     def norm_stroke(markup):
@@ -1231,7 +1280,7 @@ def main():
     P.append('<text class="lbl" x="%d" y="44">1# 液压系统原理图  '
              '(由 1#系统.intent.yaml 生成,源清单 1#系统组件.json;'
              ' EDP/EMP/FWSOV provisional,油箱 draft,优先阀/充气活门/压力表 draft,'
-             '不可用于工程放行)</text>' % 40)
+             '用户名框 provisional,不可用于工程放行)</text>' % 40)
     dmarks, dnames = s.dangling()
     body = []
     body.append('<g id="groups">%s</g>' % '\n'.join(s.groups()))
@@ -1310,6 +1359,20 @@ def self_check(intent, layout, s, path_polys, tap_polys):
 
 
 # ---------- 追溯清单(rendering-rules;本副本增量) ----------
+# 构图预算披露文本:跑完 validate_sheet 后按 validation-report.json 实测回填。
+BUDGET_DISCLOSURE = (
+    'B1 交叉 0、B2 折返单条 3/全图 20、B4 最短段 8.0、B5 节点净距 40.0、'
+    'B6 达标;B3 油箱回油线(@RET->TANK.return_in,顶绕走廊 y=100)'
+    '绕行比 2.373 > 1.5 走 WARN 通道——根因是油箱单一 return_in 端口'
+    '(unknown: TANK-001-return-port-count-unconfirmed),'
+    '确认多回油口后本线可拆直。用户供压/回油支路全部绕行比 1.0。'
+    'V4 的"三通点不在母线"为图例示例点,非实体三通;'
+    'V5 计 9 个悬空端口系校核器未计 taps 连通,图面实际标红 5 个'
+    '(EDP-001.drive_shaft、EMP-001.elec_power、FSOV-001.command、'
+    'QDP-001.outlet、QDR-001.outlet,后两者为断开位语义);'
+    'V9 计 22 个 provisional/draft 符号,按 CONCEPT 档降级使用并在图签披露。')
+
+
 def write_manifest(path, intent, layout, s, path_polys, tap_polys, dnames):
     L = []
     L.append('# %s 追溯清单' % intent['system'])
@@ -1338,6 +1401,14 @@ def write_manifest(path, intent, layout, s, path_polys, tap_polys, dnames):
         ('PG-001', '清单16 pressure-gauge(充气压力表)'),
         ('QDP-001', '清单8 quick-disconnect(地面压力快卸接头)'),
         ('QDR-001', '清单4 quick-disconnect(地面回油快卸接头)'),
+        ('USER-001', '清单18 用户:MF扰流板'),
+        ('USER-002', '清单18 用户:襟翼'),
+        ('USER-003', '清单18 用户:缝翼'),
+        ('USER-004', '清单18 用户:副翼'),
+        ('USER-005', '清单18 用户:升降舵'),
+        ('USER-006', '清单18 用户:方向舵'),
+        ('USER-007', '清单18 用户:反推'),
+        ('USER-008', '清单18 用户:正常刹车'),
     ]
     items = dict(item_map)
     for inst, typ in intent['parts'].items():
@@ -1394,32 +1465,34 @@ def write_manifest(path, intent, layout, s, path_polys, tap_polys, dnames):
              'ETP-selector-valve-not-in-catalog / ETP-unit-not-in-catalog / '
              'ground-refuel-assembly-not-in-catalog / '
              'ground-refuel-check-valve-connection-unknown。')
-    L.append('2. 壳体回油滤清单只声明 1 只,双泵壳体回油经 @CASE 母线合流入滤'
+    L.append('2. 用户按 skill 更新后的通用用户框规范(hydraulic_user)绘制:'
+             '清单第 18 项用户名单逐项落为 USER-001..008 八只名框,名字由渲染器'
+             '写入符号名槽(v2.3 的"至用户/自用户"边界标记废除)。供压经 @USR '
+             '分配母线接自优先阀 PRV-001;回油经 @USERR 收集母线下行接入回油滤 '
+             'RF-001,过滤后汇入 @RET——回油先过滤再分配,v2.3 语义不变;'
+             '两条母线是并联用户的绘图抽象,用户内部作动器/马达不在本图建模'
+             '(concept,unknown: hydraulic-user-symbol-provisional)。')
+    L.append('3. 壳体回油滤清单只声明 1 只,双泵壳体回油经 @CASE 母线合流入滤'
              '(unknown: TANK-001-return-port-count-unconfirmed 同源问题:'
              '主回油+壳体回油共用油箱 return_in 端口)。')
-    L.append('3. FWSOV 装吸油侧沿 system-1 审查卡 D-1 判断;若实际在压力侧须重接'
+    L.append('4. FWSOV 装吸油侧沿 system-1 审查卡 D-1 判断;若实际在压力侧须重接'
              '(unknown: FSOV-001-suction-side-placement-assumed)。')
-    L.append('4. 气侧件(充气活门/充气压力表)按预检处方走 taps 专线,不入液压 paths;'
+    L.append('5. 气侧件(充气活门/充气压力表)按预检处方走 taps 专线,不入液压 paths;'
              '充气源去向未声明,charge_port 由压力表接入即为末端'
              '(unknown: accumulator-charge-source-not-declared)。')
-    L.append('5. 两只地面快卸接头画为断开位:机侧接入母线支路,地面侧开放,'
+    L.append('6. 两只地面快卸接头画为断开位:机侧接入母线支路,地面侧开放,'
              '悬空端口红圈是断开位语义而非缺线'
              '(unknown: QD-open-ends-are-disconnected-position)。')
-    L.append('6. 悬空端口 %d 个: %s。其中 EDP.drive_shaft、EMP.elec_power、'
+    L.append('7. 悬空端口 %d 个: %s。其中 EDP.drive_shaft、EMP.elec_power、'
              'FSOV.command 为动力源/命令端去向未声明。'
              % (len(dnames), ' '.join(dnames)))
-    L.append('7. 目录为本工作目录扩展副本(0.3-draft):基于 skill 快照 0.2-draft '
-             '新增 8 个类型(油滤三变体/快卸接头两变体/优先阀/充气活门/充气压力表),'
-             '详见 build_catalog.py;这些类型尚未回登记规范源 '
+    L.append('8. 目录为本工作目录扩展副本(0.3-draft):基于 skill 快照新增 '
+             '8 个类型(油滤三变体/快卸接头两变体/优先阀/充气活门/充气压力表),'
+             '并随 skill 更新收录 hydraulic_user(通用用户名框,符号副本 '
+             'symbols/hydraulic-user.svg,provisional,unknown 已登记);'
+             '详见 build_catalog.py。这些类型尚未回登记规范源 '
              '已标注/component-catalog.json,冻结前须补。')
-    L.append('8. 构图预算披露(validation-report.json):B1 交叉 0、B2 折返/单条 3、'
-             'B4/B5/B6 达标;B3 油箱回油线(@RET->TANK.return_in,顶绕走廊 y=100)'
-             '绕行比 2.373 > 1.5 走 WARN 通道——根因是油箱单一 return_in 端口'
-             '(unknown: TANK-001-return-port-count-unconfirmed),'
-             '确认多回油口后本线可拆直。V4 的"三通点不在母线"为图例示例点,非实体三通;'
-             'V5 计 9 个悬空端口系校核器未计 taps 连通,图面实际标红 5 个'
-             '(EDP-001.drive_shaft、EMP-001.elec_power、FSOV-001.command、'
-             'QDP-001.outlet、QDR-001.outlet,后两者为断开位语义)。')
+    L.append('9. 构图预算披露(validation-report.json):' + BUDGET_DISCLOSURE)
     L.append('')
     with io.open(path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(L))

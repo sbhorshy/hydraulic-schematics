@@ -193,6 +193,9 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             path = os.path.normpath(os.path.join(HERE, nd['symbol']))
             markup, vb, ports = read_symbol(path)
+            # 用户框类符号带名槽(data-name-slot):实例名渲染期写入框内,
+            # 框外标签随之省略(名字不画两遍)。
+            nd['_name_slot'] = 'data-name-slot' in markup
             vx, vy, vw, vh = vb
             # 缩放:布局给的 w/h 是图上占位尺寸,符号 viewBox 可能是任意
             # 尺寸(油箱 218x564,其余 80x80)。等比缩放,取较小的比例。
@@ -543,6 +546,8 @@ class Sheet(object):
         哪里有字,画完才发现压住标签(校核项 V12)。"""
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 名字已画在框内名槽,不占框外避让包围盒
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             fs = FS.get(pos, 11.0)
@@ -722,22 +727,32 @@ class Sheet(object):
             pa = (pa3[0], pa3[1])
             pb = (pb3[0], pb3[1])
             aa = self.abs[(sinst, spid)][2]
+            ab = self.abs[(ainst, apid)][2]
             self.port_lt[(sinst, spid)] = 'sense'
             S = 18.0
             stub = {'left': (-S, 0), 'right': (S, 0),
                     'up': (0, -S), 'down': (0, S)}[aa]
             a1 = (pa[0] + stub[0], pa[1] + stub[1])
+            stubb = {'left': (-S, 0), 'right': (S, 0),
+                     'up': (0, -S), 'down': (0, S)}[ab]
+            # 终点也按锚向先出桩:最后一段必沿端口锚向进入,逆着锚向
+            # 从元件体内反向出线的候选从形状上就不存在了。
+            b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
             cands = []
-            if abs(a1[0] - pb[0]) < 0.5 or abs(a1[1] - pb[1]) < 0.5:
-                cands.append([a1, pb])
-            # 先按 sensor 锚点出线,再一折进入 at 端口;两种折向择优。
+            if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+                cands.append([a1, b1])
+            # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
             # 先纵后横的形状不会倒折回端口正上方,排前。
-            cands.append([a1, (pb[0], a1[1]), pb])
-            cands.append([a1, (a1[0], pb[1]), pb])
-            obs = self.obstacles(exclude=(sinst, ainst))
+            cands.append([a1, (b1[0], a1[1]), b1])
+            cands.append([a1, (a1[0], b1[1]), b1])
+            # 评分段自 a1 起算(端口桩只有 18px 且向外,B5≥40 保证桩不碰
+            # 邻盒),障碍全量不豁免:回折穿传感器/目标本体的候选由此拿到
+            # 应有的代价。早先两端元件盒都豁免且终点不带锚向桩,穿本体
+            # 逆锚的候选反而以最短胜出(V2:感温线横穿充气活门本体)。
+            obs = self.obstacles()
             best, bad = None, None
             for c in cands:
-                pts = self.dedup([pa] + c)
+                pts = self.dedup(c + [pb])
                 if len(pts) < 2:
                     continue
                 h = self.hits(pts, obs, skip_ends=True)
@@ -751,6 +766,7 @@ class Sheet(object):
                       + cr * 120 + ln + len(pts) * 5)
                 if bad is None or sc < bad:
                     bad, best = sc, pts
+            best = self.dedup([pa] + best)      # 绘制/追溯补回端口桩
             for k in range(len(best) - 1):
                 self.drawn.append((best[k], best[k + 1]))
             self.polys.append(('sense', best))
@@ -824,6 +840,8 @@ class Sheet(object):
     def texts(self):
         out = []
         for inst, nd in self.L['nodes'].items():
+            if nd.get('_name_slot'):
+                continue    # 用户框:名字在框内名槽,不再画框外标签
             lab = self.L['labels'].get(inst, inst)
             pos = self.L['label_pos'].get(inst, 'below')
             cx = nd['x'] + nd['w'] / 2.0
@@ -866,6 +884,8 @@ class Sheet(object):
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
             mk = self.norm_stroke(self.uniq(markup, inst))
             mk = self.portlines(mk, ports, inst)
+            if nd.get('_name_slot'):
+                mk = self.fill_name_slot(mk, inst)
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
             # 覆盖——不能写成实例 g 的 stroke-width 属性,那会被后代
@@ -922,6 +942,33 @@ class Sheet(object):
             return tag[:-2].rstrip() + ' class="pl-%s"/>' % hit[0]
 
         return re.sub(r'<line [^>]*/>', sub, markup)
+
+    def fill_name_slot(self, markup, inst):
+        """把用户框符号的名槽文本替换为实例标签(hydraulic_user)。
+
+        符号文件里的槽位是占位内容"用户";实例名各不相同,只能渲染期
+        写入。槽位 x/y 从符号自带属性读,不在此硬编码几何;多行标签以
+        单行基线为中心上下展开(行距 13,与图纸标签一致)。
+        """
+        lines = [ln for ln in self.L['labels'].get(inst, inst).split('\n') if ln]
+        if not lines:
+            return markup
+
+        def repl(m):
+            open_, close = m.group(1), m.group(3)
+            mx = re.search(r'\bx="([-\d.]+)"', open_)
+            my = re.search(r'\by="([-\d.]+)"', open_)
+            x = mx.group(1) if mx else '0'
+            y = float(my.group(1)) if my else 0.0
+            ys = [y + 13.0 * k - 6.5 * (len(lines) - 1)
+                  for k in range(len(lines))]
+            inner = ''.join('<tspan x="%s" y="%.1f">%s</tspan>'
+                            % (x, yy, self.esc(ln))
+                            for yy, ln in zip(ys, lines))
+            return open_ + inner + close
+
+        return re.sub(r'(<text[^>]*\bdata-name-slot\b[^>]*>)(.*?)(</text>)',
+                      repl, markup, flags=re.S)
 
     @staticmethod
     def norm_stroke(markup):
