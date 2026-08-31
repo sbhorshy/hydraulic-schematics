@@ -1,0 +1,988 @@
+{
+  "schema_version": "2.0",
+  "catalog_id": "comac-hydraulic-components",
+  "catalog_revision": "0.3-draft",
+  "status": "draft_not_frozen",
+  "scope": "仅支持原理图绘制(L2 拓扑编译 + L4 布局 + L5 渲染)。不含元件行为、状态、内部通路和参数——那些属于功能理解层,本阶段不需要。",
+  "deferred": "states / internal_paths / parameters / behavior 已刻意省略。进入功能理解层时按 液压系统架构理解分级与L2-L5完整路径.md §5 补充。",
+  "enums": {
+    "medium": [
+      "hydraulic",
+      "pneumatic",
+      "electrical",
+      "mechanical"
+    ],
+    "port_role": [
+      "pressure",
+      "return",
+      "suction",
+      "case_drain",
+      "work",
+      "measurement",
+      "signal_in",
+      "signal_out",
+      "shaft",
+      "gas"
+    ],
+    "flow_capability": [
+      "in",
+      "out",
+      "bidirectional",
+      "none"
+    ],
+    "anchor_direction": [
+      "left",
+      "right",
+      "up",
+      "down"
+    ],
+    "connection_role": [
+      "inline",
+      "terminal",
+      "sensing_only"
+    ],
+    "symbol_status": [
+      "annotated",
+      "unannotated",
+      "defective",
+      "missing"
+    ],
+    "envelope_class": [
+      "single",
+      "multi"
+    ]
+  },
+  "field_contract": {
+    "connection_role": "inline 可串接;terminal 只能在 path 端点;sensing_only 禁止出现在 paths(L0 §10.5),只能经 taps 声明。决定元件画在主路上还是支路上。",
+    "main_path": "裸实例名在 paths 中的默认端口对。null 表示必须写显式端口(L0 §10.2)。",
+    "port_role": "决定管线渲染样式。suction 网络须用受控吸油管线符号(技术规范 §10.6.1)。",
+    "anchor_direction": "端口基准出线方向。实例旋转后须同步变换(技术规范 §10.4)。",
+    "symbol_status": "绘图就绪度。annotated 之外均不可用于正式出图。",
+    "envelope_class": "方框本体基准(single 单方框/multi 多联位):本体方框一律 80×80,允差 0.5,多联位每格 80。覆盖信封阀与方框仪表;本体非方框的组件(蓄压器/球阀/弓形件/圆表盘/油箱/QDC 原始件)省略此字段。见 symbol-library.md「方框本体基准」。"
+  },
+  "components": [
+    {
+      "component_type": "check_valve",
+      "display_name": "单向阀",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "组件库/Check Valve.svg",
+        "symbol_status": "unannotated"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false,
+        "mirror_note": "镜像会反转符号指向的允许通流方向"
+      }
+    },
+    {
+      "component_type": "pressure_filter",
+      "display_name": "压力油滤",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "组件库/Filter.svg",
+        "symbol_status": "unannotated"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": true
+      }
+    },
+    {
+      "component_type": "return_filter",
+      "display_name": "回油滤",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "组件库/Filter.svg",
+        "symbol_status": "unannotated",
+        "note": "与压力油滤共用符号,区别在 port role 与安装位置"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": true
+      }
+    },
+    {
+      "component_type": "case_drain_filter",
+      "display_name": "壳体回油滤",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "组件库/Filter.svg",
+        "symbol_status": "unannotated"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "constraint": {
+        "rule": "case_drain 端口不得与 role=pressure 的网络连通",
+        "level": "ERROR"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": true
+      }
+    },
+    {
+      "component_type": "relief_valve",
+      "display_name": "溢流阀",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "组件库/Relief Valve.svg",
+        "symbol_status": "unannotated",
+        "envelope_class": "single"
+      },
+      "ports": [
+        {
+          "id": "pressure_in",
+          "svg_element_id": "port-pressure-in",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "return_out",
+          "svg_element_id": "port-return-out",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "out",
+          "anchor_direction": "down"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "不是主路串接件,画在泄放支路上。经 L0 relief 节声明。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "pressure_switch",
+      "display_name": "压力开关",
+      "connection_role": "sensing_only",
+      "symbol": {
+        "asset": "组件库/Pressure Switch.svg",
+        "symbol_status": "unannotated",
+        "envelope_class": "single"
+      },
+      "ports": [
+        {
+          "id": "pressure_sense",
+          "svg_element_id": "port-pressure-sense",
+          "medium": "hydraulic",
+          "role": "measurement",
+          "flow_capability": "none",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "elec_out",
+          "svg_element_id": "port-elec-out",
+          "medium": "electrical",
+          "role": "signal_out",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "取压元件,画在取压支路末端,不串在主油路上。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "hydro_pneumatic_accumulator",
+      "display_name": "液压气动蓄压器",
+      "connection_role": "terminal",
+      "symbol": {
+        "asset": "symbols/accumulator.svg",
+        "symbol_status": "annotated",
+        "note": "重描绘边件,端口标注齐全;旧\"两处 port-pressure-in 重 id\"缺陷已随重绘消除。"
+      },
+      "ports": [
+        {
+          "id": "hydraulic_port",
+          "svg_element_id": "port-hydraulic",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "bidirectional",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "gas_port",
+          "svg_element_id": "port-gas",
+          "medium": "pneumatic",
+          "role": "gas",
+          "flow_capability": "bidirectional",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "终端件,只能在 path 端点。",
+      "constraint": {
+        "rule": "gas_port 不得与 medium=hydraulic 的网络连通",
+        "level": "ERROR"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          180
+        ],
+        "allow_mirror": false,
+        "rotation_note": "气侧在上为识读惯例,禁 90/270"
+      }
+    },
+    {
+      "component_type": "engine_driven_pump",
+      "display_name": "发动机驱动泵",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/edp-provisional-stroke.svg",
+        "symbol_status": "provisional",
+        "note": "本工作目录副本已带 connection-points(描边 provisional,无标准页)。"
+      },
+      "ports": [
+        {
+          "id": "suction",
+          "svg_element_id": "port-suction",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "pressure_out",
+          "svg_element_id": "port-pressure-out",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        },
+        {
+          "id": "case_drain",
+          "svg_element_id": "port-case-drain",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "out",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "drive_shaft",
+          "svg_element_id": "port-drive-shaft",
+          "medium": "mechanical",
+          "role": "shaft",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "三个液压端口,进出不唯一。paths 中必须写显式端口。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "electric_motor_driven_pump",
+      "display_name": "电动泵",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/emp-provisional-stroke.svg",
+        "symbol_status": "provisional",
+        "note": "本工作目录副本已带 connection-points(描边 provisional)。"
+      },
+      "ports": [
+        {
+          "id": "suction",
+          "svg_element_id": "port-suction",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "pressure_out",
+          "svg_element_id": "port-pressure-out",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        },
+        {
+          "id": "case_drain",
+          "svg_element_id": "port-case-drain",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "out",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "elec_power",
+          "svg_element_id": "port-elec-power",
+          "medium": "electrical",
+          "role": "signal_in",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "同 EDP。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "firewall_shutoff_valve",
+      "display_name": "防火墙关断活门",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/fsov-provisional-stroke.svg",
+        "symbol_status": "provisional",
+        "note": "本工作目录副本已带 connection-points(描边 provisional,无标准页)。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "in",
+          "anchor_direction": "left",
+          "role_note": "当前按装在吸油侧取 role=suction。若实际在压力侧须改为 pressure——这会改变管线渲染样式。"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "out",
+          "anchor_direction": "right",
+          "role_note": "同 inlet。"
+        },
+        {
+          "id": "command",
+          "svg_element_id": "port-command",
+          "medium": "electrical",
+          "role": "signal_in",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "bootstrap_reservoir",
+      "description": "带液位计的自增压液压油箱",
+      "connection_role": "terminal",
+      "main_path": {
+        "in": "return_in",
+        "out": "suction_out"
+      },
+      "ports": [
+        {
+          "id": "bootstrap_pressure_in",
+          "svg_element_id": "port-bootstrap-pressure-in",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "suction_out",
+          "svg_element_id": "port-suction-out",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        },
+        {
+          "id": "return_in",
+          "svg_element_id": "port-return-in",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        }
+      ],
+      "symbol": {
+        "asset": "symbols/reservoir-bootstrap-annotated.svg",
+        "symbol_status": "annotated",
+        "note": "draft 级描边(数据源 USER_ANNOTATED);门禁 C8 报 data-symbol-form=traced_outline,属符号重绘运动待办早期符号。本图按 CONCEPT 档使用并在图签披露。"
+      }
+    },
+    {
+      "component_type": "temperature_switch",
+      "display_name": "温度开关",
+      "description": "感温包式温度开关,电触点输出(图示断开位)。sensing_only,不得串入 paths。",
+      "connection_role": "sensing_only",
+      "symbol": {
+        "asset": "组件库/temperature-switch.svg",
+        "symbol_status": "provisional",
+        "envelope_class": "single"
+      },
+      "ports": [
+        {
+          "id": "temp_sense",
+          "svg_element_id": "port-temp-sense",
+          "medium": "hydraulic",
+          "role": "measurement",
+          "flow_capability": "none",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "elec_out",
+          "svg_element_id": "port-elec-out",
+          "medium": "electrical",
+          "role": "signal_out",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "感温元件,画在感温支路末端,不串在主油路上;电输出去向未声明时端口悬空。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "temperature_transducer",
+      "display_name": "温度传感器",
+      "description": "感温包式温度变送器,电信号输出。sensing_only,不得串入 paths。",
+      "connection_role": "sensing_only",
+      "symbol": {
+        "asset": "组件库/temperature-transducer.svg",
+        "symbol_status": "provisional",
+        "envelope_class": "single"
+      },
+      "ports": [
+        {
+          "id": "temp_sense",
+          "svg_element_id": "port-temp-sense",
+          "medium": "hydraulic",
+          "role": "measurement",
+          "flow_capability": "none",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "elec_out",
+          "svg_element_id": "port-elec-out",
+          "medium": "electrical",
+          "role": "signal_out",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "感温元件,画在感温支路末端,不串在主油路上;电输出去向未声明时端口悬空。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "filter_line_shutoff_dp",
+      "display_name": "压力油滤(线端关断+压差指示)",
+      "description": "1#系统组件清单\"filter-line-shutoff-dp(压力油滤)\"。压差指示器占符号上半,布局占位须按 80x112。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/filter-line-shutoff-dp.svg",
+        "symbol_status": "annotated",
+        "note": "draft;符号注释含未确认项(无标准页 clause-6.1.6 构型),已登记 intent unknown。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "filter_line_shutoff_dp_return",
+      "display_name": "回油滤(线端关断+压差指示)",
+      "description": "1#系统组件清单\"filter-line-shutoff-dp(回油滤)\"。与压力油滤共用符号,区别在 port role=return(沿用回油滤共用滤符号先例)。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/filter-line-shutoff-dp.svg",
+        "symbol_status": "annotated",
+        "note": "与 filter_line_shutoff_dp 共用同一符号文件;本类型把端口 role 定为 return。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "filter_line_shutoff_dp_case_drain",
+      "display_name": "壳体回油滤(线端关断+压差指示)",
+      "description": "1#系统组件清单\"filter-line-shutoff-dp(壳体回油滤)\"。与压力油滤共用符号,port role=case_drain。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/filter-line-shutoff-dp.svg",
+        "symbol_status": "annotated",
+        "note": "与 filter_line_shutoff_dp 共用同一符号文件;本类型把端口 role 定为 case_drain。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "quick_disconnect_coupling_disconnected",
+      "display_name": "地面压力快卸接头(断开位)",
+      "description": "1#系统组件清单\"quick-disconnect-coupling-disconnected(地面压力快卸接头)\"。断开位:机侧接通、地面侧开放,出图呈悬空端口红圈。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/quick-disconnect-coupling-disconnected.svg",
+        "symbol_status": "annotated",
+        "note": "provisional;符号注释\"端口语义待工程确认\"已登记 intent unknown。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left",
+          "role_note": "机侧,接压力总管支路。"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right",
+          "role_note": "地面侧,断开位开放。"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "quick_disconnect_coupling_disconnected_return",
+      "display_name": "地面回油快卸接头(断开位)",
+      "description": "1#系统组件清单\"quick-disconnect-coupling-disconnected(地面回油快卸接头)\"。与压力快卸接头共用符号,port role=return 使支路线宽归低压级。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/quick-disconnect-coupling-disconnected.svg",
+        "symbol_status": "annotated",
+        "note": "与 quick_disconnect_coupling_disconnected 共用同一符号文件;本类型端口 role 定为 return。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "in",
+          "anchor_direction": "left",
+          "role_note": "机侧,接回油总管支路。"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "out",
+          "anchor_direction": "right",
+          "role_note": "地面侧,断开位开放。"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "priority_valve",
+      "display_name": "优先阀",
+      "description": "1#系统组件清单\"priority-valve(优先阀)\"与\"priority-valve(自增压优先阀)\"共用本类型。符号内含主路单向阀与下旁路单向阀,两者流向 PENDING_ENGINEER_CONFIRMATION(符号注释),已登记 intent unknown。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/priority-valve.svg",
+        "symbol_status": "annotated",
+        "note": "draft;端口标注 v0.3 升级为现行属性约定(id 改语义名 inlet/outlet,引线延至 viewBox 边界)。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet-anchor",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet-anchor",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "air_charging_valve",
+      "display_name": "蓄压器充气活门",
+      "description": "1#系统组件清单\"air-charging-valve & pressure-gauge(蓄压器充气压力表组件)\"的活门件。气侧件,medium=pneumatic,不得串入液压 paths,经 taps 挂接蓄压器 gas_port。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "symbols/air-charging-valve.svg",
+        "symbol_status": "annotated",
+        "note": "draft;端口标注 v0.3 升级为现行属性约定(左端口圆原偏离接口线,已随引线延至边界一并修正)。"
+      },
+      "ports": [
+        {
+          "id": "accumulator_gas",
+          "svg_element_id": "port-accumulator-gas-anchor",
+          "medium": "pneumatic",
+          "role": "gas",
+          "flow_capability": "bidirectional",
+          "anchor_direction": "left",
+          "role_note": "按符号形位判读:左侧接蓄压器 gas_port;左右分配未经标准页确认,见 intent unknown。"
+        },
+        {
+          "id": "charge_port",
+          "svg_element_id": "port-charge-anchor",
+          "medium": "pneumatic",
+          "role": "gas",
+          "flow_capability": "bidirectional",
+          "anchor_direction": "right",
+          "role_note": "充气源/量表接口侧,断开位开放。"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "气侧件不入液压 paths;挂接关系经 taps 声明(预检处方\"气侧走 taps 或专线\")。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    },
+    {
+      "component_type": "pressure_gauge",
+      "display_name": "蓄压器充气压力表",
+      "description": "1#系统组件清单\"air-charging-valve & pressure-gauge(蓄压器充气压力表组件)\"的表件。sensing_only,经 taps 挂接;medium=pneumatic 按\"测蓄压器气侧压力\"用途判定(符号 v1.2 注释)。",
+      "connection_role": "sensing_only",
+      "symbol": {
+        "asset": "symbols/pressure-gauge.svg",
+        "symbol_status": "annotated",
+        "note": "draft;v1.2 引线延至 viewBox 下边界并改 medium=pneumatic。"
+      },
+      "ports": [
+        {
+          "id": "pressure_sense",
+          "svg_element_id": "port-pressure-sense",
+          "medium": "pneumatic",
+          "role": "measurement",
+          "flow_capability": "none",
+          "anchor_direction": "down"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "sensing_only 禁止入 paths;经 taps 声明。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false
+      }
+    }
+  ],
+  "drawing_blockers": [
+    {
+      "id": "B-1",
+      "level": "ERROR",
+      "issue": "10 个类型的 symbol_status 无一为 annotated。现有 SVG 均无 data-port-id / data-medium / data-port-role / data-anchor-direction(技术规范 §6.2),端口坐标无法解析。",
+      "action": "按 §6.2 标注端口,或重画为描边几何符号。"
+    },
+    {
+      "id": "B-2",
+      "level": "ERROR",
+      "issue": "engine_driven_pump 与 firewall_shutoff_valve 无符号资产。",
+      "action": "新建符号。FWSOV 需先确认正常位。"
+    },
+    {
+      "id": "B-3",
+      "level": "ERROR",
+      "issue": "hydro_pneumatic_accumulator 符号有重复端口 ID。",
+      "action": "修复为 port-hydraulic 与 port-gas。"
+    },
+    {
+      "id": "B-4",
+      "level": "WARNING",
+      "issue": "现有符号为 potrace 描摹填充路径(fill,无 stroke),线宽不可控,无法满足装配边界 1.5T 线宽要求(§10.7)。",
+      "action": "首批符号重画为描边几何。"
+    }
+  ]
+}

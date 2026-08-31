@@ -1,0 +1,217 @@
+{
+  "layout_version": "1.0",
+  "source_l0": "1#系统.intent.yaml",
+  "source_components_json": "./1#系统组件.json",
+  "note": "油箱置左,回路闭合。压力侧两条母线:@PRESS(泵汇合+滤+自增压优先阀+地面压力接头) x=880,@DIST(分配:优先阀/蓄压器) x=1160。回油母线 @RET x=940,壳体回油母线 @CASE x=590。吸油走廊 x=290。全部坐标手工给定,无自动布局。",
+  "revision_log": [
+    "1.0 初版:18 项组件清单落图。14 受控实例 + 2 用户边界 + 2 气侧 taps;",
+    "2.0 重排:QDP 移 @MANIFOLD 下方(1186,760);CDF 移顶部 (420,180) rot270;气侧组件移 ACC 上方(ACV 1240,60 / PG 1414,50);PRV-001 (1300,290);QDR (1200,900);EDP/FSOV 行下移至 y=290;吸油两行换序。走廊:lane 245 供 @RET->油箱 顶绕;vlanes 290/20 供吸油与回油。",
+    "2.1 修:@CASE 移 620(让开吸油走廊);QDP 改接 @MANIFOLD;PF 右移 920 消除接头折返;CDF 上移 (420,110),出油走 vlanes 20;顶绕走廊改 100。",
+    "2.2 修:QDP 上移 (1186,560),@MANIFOLD 母线底回到 593.8,RF->@RET 支路 (y=728) 不再跨母线。",
+    "2.3 修:PF 移 (1000,254) 让开 @RET 顶绕竖线 940;CDF 节点宽收 60,消除进线短桩穿自身节点盒 (V2)。"
+  ],
+  "canvas": {
+    "width": 1680,
+    "height": 1390
+  },
+  "canvas_shift_x": 30,
+  "style": {
+    "base_line_width_T": 1.2,
+    "symbol_stroke_width": 2,
+    "suction_marker_S": 8
+  },
+  "externs": {
+    "USR-001": {
+      "x": 1480,
+      "y": 400,
+      "anchor": "left",
+      "label": "至用户 (供压)\n扰流板/襟翼/缝翼/副翼\n升降舵/方向舵/反推/正常刹车"
+    },
+    "USR-002": {
+      "x": 1480,
+      "y": 700,
+      "anchor": "left",
+      "label": "自用户 (回油)\n扰流板/襟翼/缝翼/副翼\n升降舵/方向舵/反推/正常刹车"
+    }
+  },
+  "nodes": {
+    "TANK-001": {
+      "x": 60,
+      "y": 276,
+      "symbol": "symbols/reservoir-bootstrap-annotated.svg",
+      "w": 218,
+      "h": 564
+    },
+    "FSOV-001": {
+      "x": 330,
+      "y": 290,
+      "symbol": "symbols/fsov-provisional-stroke.svg",
+      "w": 80,
+      "h": 80
+    },
+    "EDP-001": {
+      "x": 500,
+      "y": 290,
+      "symbol": "symbols/edp-provisional-stroke.svg",
+      "w": 80,
+      "h": 80
+    },
+    "EMP-001": {
+      "x": 500,
+      "y": 610,
+      "symbol": "symbols/emp-provisional-stroke.svg",
+      "w": 80,
+      "h": 80
+    },
+    "PF-001": {
+      "x": 1000,
+      "y": 254,
+      "symbol": "symbols/filter-line-shutoff-dp.svg",
+      "w": 80,
+      "h": 112
+    },
+    "CDF-001": {
+      "x": 420,
+      "y": 100,
+      "symbol": "symbols/filter-line-shutoff-dp.svg",
+      "w": 60,
+      "h": 80,
+      "rot": 270
+    },
+    "RF-001": {
+      "x": 1200,
+      "y": 700,
+      "symbol": "symbols/filter-line-shutoff-dp.svg",
+      "w": 80,
+      "h": 112,
+      "rot": 180
+    },
+    "PRV-001": {
+      "x": 1300,
+      "y": 290,
+      "symbol": "symbols/priority-valve.svg",
+      "w": 140,
+      "h": 78
+    },
+    "PRV-002": {
+      "x": 440,
+      "y": 730,
+      "symbol": "symbols/priority-valve.svg",
+      "w": 140,
+      "h": 78,
+      "rot": 180
+    },
+    "ACC-001": {
+      "x": 1180,
+      "y": 190,
+      "symbol": "symbols/accumulator.svg",
+      "w": 60,
+      "h": 100
+    },
+    "ACV-001": {
+      "x": 1240,
+      "y": 60,
+      "symbol": "symbols/air-charging-valve.svg",
+      "w": 134,
+      "h": 57
+    },
+    "PG-001": {
+      "x": 1414,
+      "y": 50,
+      "symbol": "symbols/pressure-gauge.svg",
+      "w": 63,
+      "h": 67
+    },
+    "QDP-001": {
+      "x": 1186,
+      "y": 560,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
+      "w": 160,
+      "h": 68
+    },
+    "QDR-001": {
+      "x": 1200,
+      "y": 900,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
+      "w": 160,
+      "h": 68
+    }
+  },
+  "buses": {
+    "PRESS": {
+      "kind": "v",
+      "x": 880
+    },
+    "MANIFOLD": {
+      "kind": "v",
+      "x": 1160
+    },
+    "RET": {
+      "kind": "v",
+      "x": 940
+    },
+    "CASE": {
+      "kind": "v",
+      "x": 620
+    }
+  },
+  "labels": {
+    "TANK-001": "TANK-001\n自增压油箱",
+    "FSOV-001": "FSOV-001\n防火墙关断活门",
+    "EDP-001": "EDP-001\n发动机驱动泵",
+    "EMP-001": "EMP-001\n电动泵",
+    "PF-001": "PF-001\n压力油滤",
+    "CDF-001": "CDF-001\n壳体回油滤",
+    "RF-001": "RF-001\n回油滤",
+    "PRV-001": "PRV-001\n优先阀",
+    "PRV-002": "PRV-002\n自增压优先阀",
+    "ACC-001": "ACC-001\n系统蓄压器",
+    "ACV-001": "ACV-001\n充气活门",
+    "PG-001": "PG-001\n充气压力表",
+    "QDP-001": "QDP-001\n地面压力快卸接头",
+    "QDR-001": "QDR-001\n地面回油快卸接头"
+  },
+  "label_pos": {
+    "TANK-001": "below",
+    "FSOV-001": "below",
+    "EDP-001": "below",
+    "EMP-001": "above",
+    "PF-001": "right",
+    "CDF-001": "right",
+    "RF-001": "below",
+    "PRV-001": "above",
+    "PRV-002": "below",
+    "ACC-001": "right",
+    "ACV-001": "above",
+    "PG-001": "above",
+    "QDP-001": "below",
+    "QDR-001": "below"
+  },
+  "label_drop": {
+    "TANK-001": 100,
+    "EDP-001": 40
+  },
+  "lanes_note": "水平走廊 100:供 @RET->油箱 顶绕(从图头文字之下、CDF 顶 112 之上通过);CDF 出油走 vlanes 20 于走廊西侧下行,与油箱支路竖廊 42 保持 22px。",
+  "lanes": [
+    100
+  ],
+  "vlanes_note": "竖廊 290:油箱(278)与 FSOV(330) 之间供 TANK->FSOV 吸油上行;20:油箱西侧供 CDF 出油与回油接入 return_in。",
+  "vlanes": [
+    290,
+    20
+  ],
+  "group_padding": 20,
+  "group_label_gap": 10,
+  "legend": {
+    "x": 1000,
+    "y": 1020,
+    "w": 540,
+    "h": 290
+  },
+  "title_block": {
+    "x": 40,
+    "y": 1330,
+    "w": 1600,
+    "h": 56
+  }
+}

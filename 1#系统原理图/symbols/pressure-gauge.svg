@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 134"
+     width="126" height="134"
+     data-component-type="pressure_gauge"
+     data-symbol-version="1.2"
+     data-symbol-status="draft"
+     data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="REDRAWN_FROM:Pressure Gauge.svg">
+
+  <!-- 描边几何重绘,取代根目录 potrace 描摹填充版 Pressure Gauge.svg。
+       几何依据:对原描摹件按 4.0 px/单位实测(3x 渲染 + 像素行程分析),沿用原 viewBox 126x114:
+         圆(表盘) 外缘 x 18..109.5 / y 15..105 -> 圆心 (63.8,60) 描边中线 r≈43.5
+           -> 本图圆心 (64,60) r=44
+         指针 沿过圆心的对角线,与水平线成 60°(实测方向余弦 0.504/0.865 ≈ cos60/sin60):
+           尖端 ≈(47.6,31.5) 在圆心左上,杆尾 ≈(81.7,90) 在圆心右下,
+           尖/尾到圆心距离 ≈33/35 近似对称 -> 本图沿 60° 方向各取 34:
+           轴线 (47,30.5)-(81,89.5),针杆画至尖端
+         实心箭头 头长≈20..23、全宽≈18(实测最大带宽 51.5..69.5)
+           -> 三角 (47,30.5) (65.5,44) (49.5,53),底边垂直于轴线
+
+       端口(本图登记为蓄压器充气压力表用,测气体介质):
+         port-pressure-sense:取压口,medium=pneumatic,role=measurement,
+           flow=none,anchor=down——与 catalog 中 pressure_switch 取压口的 anchor 约定一致。
+         v1.1:表盘下方增设取压引线,自表盘底部 (64,104) 垂直向下,端口在引线端头。
+         v1.2:引线延长至 (64,134) 使端口落在 viewBox 下边界(门禁 C10);
+           medium 按"蓄压器充气压力表"用途定为 pneumatic。
+
+       线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 表盘圆 -->
+    <circle id="dial" cx="64" cy="60" r="44"/>
+    <!-- 指针:沿 60° 对角线,尖端指向左上 -->
+    <line id="needle" x1="81" y1="89.5" x2="48.5" y2="33"/>
+    <polygon id="needle-arrow" points="47,30.5 65.5,44 49.5,53"
+             fill="#000000" stroke="none"/>
+    <!-- 取压引线:表盘底部向下,端头为取压口 -->
+    <line id="pressure-sense-line" x1="64" y1="104" x2="64" y2="134"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-pressure-sense" cx="64" cy="134" r="2"
+            data-port-id="pressure_sense"
+            data-medium="pneumatic"
+            data-port-role="measurement"
+            data-flow-capability="none"
+            data-anchor-direction="down"/>
+  </g>
+</svg>
