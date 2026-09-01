@@ -47,8 +47,9 @@ python .agents/skills/hydraulic-schematic/scripts/validate_sheet.py 1#系统原�
 
 ## 附带修复（本票内发现）
 
-- 温度/压力开关与传感器 4 只符号：注释声明 elec_out 引线而图面漏画、端口组
-  缺 `elec_out`——补齐引线与端口点（"与温度变送器族对齐时一并补"到期兑现）。
+- ~~温度/压力开关与传感器 4 只符号补齐 elec_out~~ **已撤销（2026-09-01 用户裁决）**：
+  elec_out 是重绘运动时"家族惯例推断"的电信号口，实际元件没有——图面引线、
+  端口点、注释与 catalog 声明一并删除。
 - `bootstrap-type-reservoir.svg` 文件内 `separator-lower` id 重复（渲染器按实例
   改名后整图撞 V1）——改名 left/right；check_library L2 增补**全文件 id 重复**检查防复发。
 - `selftest.py` 仍引用 #20 已退役的 `sync_snapshot`——B–E 四项改写为

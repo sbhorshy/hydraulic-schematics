@@ -31,14 +31,13 @@
        端口(catalog temperature_switch 条目与本图双向一致):
          port-temp-sense:感温取压口,medium=hydraulic,role=measurement,
            flow=none,anchor=left,位于感温线自由端 (0,55)。
-         port-elec-out:电信号口,medium=electrical,role=signal_out,
-           flow=none,anchor=up,位于顶边引线端头 (107,7)。
-           原图无外部电引线(触点画在框内即表意),引出方向按
-           pressure_switch 家族惯例推断。
+         本符号无电信号口——v1.2 曾按 pressure_switch 家族惯例推断
+           elec_out (107,7) up,2026-09-01 用户裁决:实际元件没有该口,
+           图面与 catalog 声明一并撤销。
 
        未确认项(引用本符号的 L0 文件须在 unknown 登记):
          - 无标准页依据(status=provisional),触点画法沿用 pressure-switch 同款;
-         - elec_out 引出方向(up)为家族惯例推断,非原件实测。
+         - 无电信号口(2026-09-01 用户裁决,撤销 v1.2 的家族惯例推断)。
 
        线宽 stroke-width=2 (基准 T);端口坐标为精确几何端点。 -->
 
@@ -64,10 +63,6 @@
           fill="#000000" stroke="none"/>
     <path id="fixed-dot" d="M130 41 A5 5 0 1 0 140 41 A5 5 0 1 0 130 41 Z"
           fill="#000000" stroke="none"/>
-
-    <!-- 电信号口引线:顶边中部 (107,15) 向上至顶边界 (107,7)
-         (#21 修通:注释 v1.2 已声明本引线,图面漏画,随 elec_out 端口点一并补齐) -->
-    <line id="elec-out-line" x1="107" y1="15" x2="107" y2="7"/>
   </g>
 
   <g id="connection-points" fill="#ff0000">
@@ -77,11 +72,6 @@
             data-port-role="measurement"
             data-flow-capability="none"
             data-anchor-direction="left"/>
-    <circle id="port-elec-out" cx="107" cy="7" r="2"
-            data-port-id="elec_out"
-            data-medium="electrical"
-            data-port-role="signal_out"
-            data-flow-capability="none"
-            data-anchor-direction="up"/>
+
   </g>
 </svg>

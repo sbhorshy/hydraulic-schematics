@@ -281,14 +281,6 @@
      "role": "measurement",
      "flow_capability": "none",
      "anchor_direction": "left"
-    },
-    {
-     "id": "elec_out",
-     "svg_element_id": "port-elec-out",
-     "medium": "electrical",
-     "role": "signal_out",
-     "flow_capability": "none",
-     "anchor_direction": "up"
     }
    ],
    "main_path": null,
@@ -564,14 +556,6 @@
      "role": "measurement",
      "flow_capability": "none",
      "anchor_direction": "left"
-    },
-    {
-     "id": "elec_out",
-     "svg_element_id": "port-elec-out",
-     "medium": "electrical",
-     "role": "signal_out",
-     "flow_capability": "none",
-     "anchor_direction": "up"
     }
    ],
    "main_path": null,
@@ -604,14 +588,6 @@
      "role": "measurement",
      "flow_capability": "none",
      "anchor_direction": "left"
-    },
-    {
-     "id": "elec_out",
-     "svg_element_id": "port-elec-out",
-     "medium": "electrical",
-     "role": "signal_out",
-     "flow_capability": "none",
-     "anchor_direction": "up"
     }
    ],
    "main_path": null,
