@@ -5,7 +5,10 @@
      width="268" height="114" viewBox="0 0 268 114"
      preserveAspectRatio="xMidYMid meet"
      data-status="draft"
+     data-component-type="air_charging_valve"
+     data-symbol-status="draft"
      data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="REDRAWN_FROM:Air-Charging Valve for Accumulator.svg"
      data-mirror-allowed="false"
      data-allowed-rotations="0 90 180 270">
 
@@ -40,58 +43,54 @@
       baseViewBox="0 0 268 114">
 
       <sym:ports>
-        <sym:port id="port-left"
-                  x="25" y="59"
+        <sym:port id="accumulator_gas"
+                  x="0" y="59"
                   direction="left"
-                  role="unknown"
+                  role="gas"
+                  medium="pneumatic"
                   interfaceGeometry="symbol"
-                  status="draft"
-                  sourcePortId="port-bootstrap-pressure-in"
-                  sourcePortType="hydraulic-pressure"
-                  sourceDirection="right" />
-        <sym:port id="port-right"
-                  x="250" y="59"
+                  status="draft" />
+        <sym:port id="charge_port"
+                  x="268" y="59"
                   direction="right"
-                  role="unknown"
+                  role="gas"
+                  medium="pneumatic"
                   interfaceGeometry="symbol"
-                  status="draft"
-                  sourcePortId="port-pressure-out"
-                  sourcePortType="pneumatic"
-                  sourceDirection="down" />
+                  status="draft" />
       </sym:ports>
 
       <sym:connections>
         <sym:pipeline id="main-horizontal-interface"
                       orientation="horizontal"
                       centerlineY="59"
-                      fromPort="port-left"
-                      toPort="port-right"
+                      fromPort="accumulator_gas"
+                      toPort="charge_port"
                       status="geometry_reconstructed" />
       </sym:connections>
 
       <sym:components>
-        <sym:component id="left-end-feature" type="unknown" status="draft" standardPageConfirmed="false" />
-        <sym:component id="central-left-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
-        <sym:component id="central-right-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
-        <sym:component id="right-small-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="meta-left-end-feature" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="meta-central-left-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="meta-central-right-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
+        <sym:component id="meta-right-small-triangle" type="unknown" status="draft" standardPageConfirmed="false" />
       </sym:components>
 
       <sym:rotations>
         <sym:rotation angle="0" width="268" height="114" viewBox="0 0 268 114">
-          <sym:anchor port="port-left"  x="25"  y="59" direction="left" />
-          <sym:anchor port="port-right" x="250" y="59" direction="right" />
+          <sym:anchor port="accumulator_gas" x="0"   y="59" direction="left" />
+          <sym:anchor port="charge_port"     x="268" y="59" direction="right" />
         </sym:rotation>
         <sym:rotation angle="90" width="114" height="268" viewBox="0 0 114 268">
-          <sym:anchor port="port-left"  x="55" y="25"  direction="up" />
-          <sym:anchor port="port-right" x="55" y="250" direction="down" />
+          <sym:anchor port="accumulator_gas" x="55" y="0"   direction="up" />
+          <sym:anchor port="charge_port"     x="55" y="268" direction="down" />
         </sym:rotation>
         <sym:rotation angle="180" width="268" height="114" viewBox="0 0 268 114">
-          <sym:anchor port="port-left"  x="243" y="55" direction="right" />
-          <sym:anchor port="port-right" x="18"  y="55" direction="left" />
+          <sym:anchor port="accumulator_gas" x="268" y="55" direction="right" />
+          <sym:anchor port="charge_port"     x="0"   y="55" direction="left" />
         </sym:rotation>
         <sym:rotation angle="270" width="114" height="268" viewBox="0 0 114 268">
-          <sym:anchor port="port-left"  x="59" y="243" direction="down" />
-          <sym:anchor port="port-right" x="59" y="18"  direction="up" />
+          <sym:anchor port="accumulator_gas" x="59" y="268" direction="down" />
+          <sym:anchor port="charge_port"     x="59" y="0"   direction="up" />
         </sym:rotation>
       </sym:rotations>
 
@@ -102,7 +101,8 @@
     </sym:symbol>
   </metadata>
 
-  <g id="visible-symbol" class="sym-outline">
+  <g id="visible-symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
     <!-- Left interface and vertical end feature -->
     <path id="left-end-feature"
           data-component-type="unknown"
@@ -110,8 +110,8 @@
           d="M25 39 V79" />
     <path id="left-interface-line"
           data-network-id="main-horizontal-interface"
-          data-interface-port="port-left"
-          d="M25 59 H75" />
+          data-interface-port="accumulator_gas"
+          d="M0 59 H75" />
 
     <!-- Central opposed triangular geometry; stroke-only, no filled outline tracing -->
     <path id="central-left-triangle"
@@ -137,25 +137,27 @@
     <!-- Right interface to machine-readable anchor -->
     <path id="right-interface-line"
           data-network-id="main-horizontal-interface"
-          data-interface-port="port-right"
-          d="M220 59 H250" />
+          data-interface-port="charge_port"
+          d="M220 59 H268" />
   </g>
 
   <!-- Invisible machine-readable connection anchors. -->
   <g id="connection-points" fill="#ff0000">
-    <circle id="port-left-anchor"
+    <circle id="port-accumulator-gas-anchor"
             class="port-anchor"
-            cx="25" cy="52" r="2"
-            data-port-id="port-left"
-            data-port-type="unknown"
-            data-direction="left"
-            data-status="draft" />
-    <circle id="port-right-anchor"
+            cx="0" cy="59" r="2"
+            data-port-id="accumulator_gas"
+            data-medium="pneumatic"
+            data-port-role="gas"
+            data-flow-capability="bidirectional"
+            data-anchor-direction="left" />
+    <circle id="port-charge-anchor"
             class="port-anchor"
-            cx="250" cy="59" r="2"
-            data-port-id="port-right"
-            data-port-type="unknown"
-            data-direction="right"
-            data-status="draft" />
+            cx="268" cy="59" r="2"
+            data-port-id="charge_port"
+            data-medium="pneumatic"
+            data-port-role="gas"
+            data-flow-capability="bidirectional"
+            data-anchor-direction="right" />
   </g>
 </svg>

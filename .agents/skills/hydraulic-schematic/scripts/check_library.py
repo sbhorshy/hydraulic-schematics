@@ -7,16 +7,18 @@
 
   L1  每个 *.svg 必须是合法 XML（解析失败即 fail，不静默跳过）。
   L2  必须含 <g id="connection-points"> 且至少 1 个 data-port-id，
-      组内 id 唯一。已知方言缺口走白名单（每项必须带理由与跟踪票，
+      组内 id 唯一；全文件元素 id 不得重复（渲染器按实例改名符号内
+      id，文件内重 id 会撞成整图重复，V1 硬 fail——油箱 separator-
+      lower 教训）。已知方言缺口走白名单（每项必须带理由与跟踪票，
       白名单不是赦免是挂账）。
-  L3  catalog 交叉校验（宽容档默认，--strict-catalog 升硬）：
-      symbol.asset 能解析到库内文件 → catalog 声明的端口 id 必须全部
-      存在于符号端口组；解析不到 → INFO（#21 回登记工作清单）。
+  L3  catalog 交叉校验（#21 起默认硬档）：symbol.asset 能解析到库内文件
+      → catalog 声明的端口 id 必须全部存在于符号端口组；解析不到 → 硬失败。
+      --lenient-catalog 可临时降宽容档（解析不到/缺端口只报 INFO）。
 
 CLI:
-    python check_library.py                      # 校验自带库
+    python check_library.py                      # 校验自带库（L3 硬档）
     python check_library.py --lib DIR --catalog PATH   # 沙箱/测试
-    python check_library.py --strict-catalog     # L3 升硬
+    python check_library.py --lenient-catalog    # L3 临时降宽容档
 退出码: 0 过 / 1 fail。
 """
 import argparse
@@ -33,12 +35,9 @@ LIB = os.path.join(SKILL, 'assets', 'component-library')
 # 已知方言缺口白名单：name -> (理由, 跟踪票)。新增缺口必须登记到此，
 # 无名 white-walk 会被 L2 拦下——白名单是挂账不是赦免。
 WHITELIST = {
-    'bootstrap-type-reservoir.svg': (
-        '油箱方言：端口组缺失即 #21 TANK-001.suction_out 崩溃根源，随 T2 修通',
-        '#21'),
     'quick-disconnect-coupling.svg': (
         '连接位变体：端口语义待工程确认（unknown: quick-disconnect-port-'
-        'semantics-pending）', '#21/#22'),
+        'semantics-pending）', '#22'),
 }
 
 
@@ -60,6 +59,14 @@ def read_symbol_ports(path):
     return True, True, ports, None
 
 
+def duplicate_ids(path):
+    """全文件元素 id 重复清单（无重复返回空表）。"""
+    import collections
+    root = ET.parse(path).getroot()
+    ids = [e.get('id') for e in root.iter() if e.get('id')]
+    return [i for i, c in collections.Counter(ids).items() if c > 1]
+
+
 def resolve_asset(asset, lib):
     """catalog 的 symbol.asset 解析到库内文件的路径；解析不到返回 None。"""
     if not asset:
@@ -74,8 +81,10 @@ def main(argv=None):
     ap.add_argument('--lib', default=LIB, help='库目录（默认 skill 自带）')
     ap.add_argument('--catalog', default=None,
                     help='catalog 路径（默认 <lib>/component-catalog.json）')
-    ap.add_argument('--strict-catalog', action='store_true',
-                    help='L3 catalog 交叉校验升级为硬失败（#21 回登记后启用）')
+    ap.add_argument('--strict-catalog', dest='strict_catalog', action='store_true',
+                    default=True, help='L3 catalog 交叉校验硬失败（#21 起默认）')
+    ap.add_argument('--lenient-catalog', dest='strict_catalog', action='store_false',
+                    help='L3 临时降宽容档：解析不到/缺端口只报 INFO')
     a = ap.parse_args(argv)
 
     cat_path = a.catalog or os.path.join(a.lib, 'component-catalog.json')
@@ -104,6 +113,11 @@ def main(argv=None):
         dup = len(ports) != len(set(ports))
         if dup or not ports:
             fails.append('L2 %s 端口组异常（空或 id 重复）' % name)
+        dups = duplicate_ids(p)
+        if dups:
+            fails.append('L2 %s 全文件元素 id 重复: %s'
+                         '（渲染器按实例改名后会在整图撞车，V1 硬 fail）'
+                         % (name, dups))
 
     # ---- L3 catalog 交叉校验 ----
     if os.path.isfile(cat_path):

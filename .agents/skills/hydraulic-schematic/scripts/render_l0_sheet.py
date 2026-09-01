@@ -10,6 +10,28 @@ import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同�
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NS = 'http://www.w3.org/2000/svg'
+# 单源化(#20/#21):catalog 与符号库同居,catalog 在哪,库就在哪。
+# 就地运行时缺省指向 skill 自带库;工作目录里有本地 catalog 则以它为锚。
+SKILL_LIB = os.path.normpath(os.path.join(HERE, '..', 'assets', 'component-library'))
+SKILL_CATALOG = os.path.join(SKILL_LIB, 'component-catalog.json')
+
+
+def resolve_asset(ref, cat_dir=None, workdir=None):
+    """布局节点符号引用 → 实际文件路径。
+
+    优先级:工作目录相对(本地覆盖,传统复制纪律)→ catalog 同目录
+    (单源化:basename 落到 catalog 所在库)→ 脚本 HERE 相对(兼容)。
+    """
+    cands = []
+    if workdir:
+        cands.append(os.path.normpath(os.path.join(workdir, ref)))
+    if cat_dir:
+        cands.append(os.path.join(cat_dir, os.path.basename(ref.replace('\\', '/'))))
+    cands.append(os.path.normpath(os.path.join(HERE, ref)))
+    for p in cands:
+        if os.path.isfile(p):
+            return p
+    return cands[0]
 
 
 def load_yaml(path):
@@ -164,8 +186,9 @@ def suction_markers(pts, blocked=(), S=8.0,
 
 
 class Sheet(object):
-    def __init__(self, intent, layout, catalog):
+    def __init__(self, intent, layout, catalog, cat_dir=None, workdir=None):
         self.i, self.L, self.cat = intent, layout, catalog
+        self.cat_dir, self.workdir = cat_dir, workdir
         self.types = {c['component_type']: c for c in catalog['components']}
         self.sym = {}      # inst -> (markup, wh, ports)
         self.abs = {}      # (inst, port) -> (x, y, anchor)
@@ -191,7 +214,10 @@ class Sheet(object):
     # ---------- 端口绝对坐标 ----------
     def place(self):
         for inst, nd in self.L['nodes'].items():
-            path = os.path.normpath(os.path.join(HERE, nd['symbol']))
+            path = resolve_asset(nd['symbol'], self.cat_dir, self.workdir)
+            if not os.path.isfile(path):
+                sys.exit('符号文件不存在: %s (节点 %s;工作目录与 catalog 库均未命中)'
+                         % (nd['symbol'], inst))
             markup, vb, ports = read_symbol(path)
             # 用户框类符号带名槽(data-name-slot):实例名渲染期写入框内,
             # 框外标签随之省略(名字不画两遍)。
@@ -709,6 +735,71 @@ class Sheet(object):
                     junctions.append((bx, y))
         return segs, junctions, bus_hits, self.polys
 
+    # ---------- taps 气侧/测量支路(L0 规范 11.1) ----------
+    def wire_taps(self):
+        """渲染 taps:传感器端口到被测端口的气侧专线。返回空三通表。
+
+        预检处方:气侧端口(medium=pneumatic)不得串入液压 paths,经 taps
+        声明、此处画专线。接入点恰为元件端口(符号自带红点),不另画三通;
+        线型归 sense(1.0 T)。起自 sensor 端口锚点方向,末端直接进 at 端口。
+        """
+        juncs = []
+        for t in self.i.get('taps') or []:
+            stok, atok = t['sensor'], t['at']
+            sinst, spid = stok.split('.', 1)
+            ainst, apid = atok.split('.', 1)
+            pa3 = self.port(stok)
+            pb3 = self.port(atok)
+            pa = (pa3[0], pa3[1])
+            pb = (pb3[0], pb3[1])
+            aa = self.abs[(sinst, spid)][2]
+            ab = self.abs[(ainst, apid)][2]
+            self.port_lt[(sinst, spid)] = 'sense'
+            S = 18.0
+            stub = {'left': (-S, 0), 'right': (S, 0),
+                    'up': (0, -S), 'down': (0, S)}[aa]
+            a1 = (pa[0] + stub[0], pa[1] + stub[1])
+            stubb = {'left': (-S, 0), 'right': (S, 0),
+                     'up': (0, -S), 'down': (0, S)}[ab]
+            # 终点也按锚向先出桩:最后一段必沿端口锚向进入,逆着锚向
+            # 从元件体内反向出线的候选从形状上就不存在了。早先终点不带
+            # 锚向桩,且两端元件盒都被排除出障碍,穿本体逆锚的候选反而
+            # 以最短胜出(V2:感温线横穿充气活门本体)。
+            b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
+            cands = []
+            if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+                cands.append([a1, b1])
+            # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
+            # 先纵后横的形状不会倒折回端口正上方,排前。
+            cands.append([a1, (b1[0], a1[1]), b1])
+            cands.append([a1, (a1[0], b1[1]), b1])
+            # 评分段自 a1 起算(端口桩只有 18px 且向外,B5≥40 保证桩不碰
+            # 邻盒),障碍全量不豁免:回折穿传感器本体的候选由此拿到应有
+            # 的代价。早先两端元件盒都豁免,穿本体逆锚的候选反而以最短
+            # 胜出(V2:感温线横穿充气活门本体)。
+            obs = self.obstacles()
+            best, bad = None, None
+            for c in cands:
+                pts = self.dedup(c + [pb])
+                if len(pts) < 2:
+                    continue
+                h = self.hits(pts, obs, skip_ends=True)
+                ov = self.overlap(pts, self.drawn)
+                tx = self.hits(pts, self.textboxes, tol=0.0)
+                cr = self.crossings(pts, self.drawn)
+                ln = sum(abs(pts[k + 1][0] - pts[k][0])
+                         + abs(pts[k + 1][1] - pts[k][1])
+                         for k in range(len(pts) - 1))
+                sc = (h * 10000 + ov * 3000 + tx * 900
+                      + cr * 120 + ln + len(pts) * 5)
+                if bad is None or sc < bad:
+                    bad, best = sc, pts
+            best = self.dedup([pa] + best)      # 绘制/追溯补回端口桩
+            for k in range(len(best) - 1):
+                self.drawn.append((best[k], best[k + 1]))
+            self.polys.append(('sense', best))
+        return juncs
+
     # ---------- 分组虚线框(技术规范 10.7) ----------
     def groups(self):
         out = []
@@ -757,6 +848,13 @@ class Sheet(object):
                     if mp:
                         used.add((inst, mp['in']))
                         used.add((inst, mp['out']))
+        # taps 已接的端口不悬空:sensor 端口由支路本身使用,at 端口归被测件。
+        for t in self.i.get('taps') or []:
+            sinst, spid = t['sensor'].split('.', 1)
+            used.add((sinst, spid))
+            ainst, apid = t['at'].split('.', 1)
+            if ainst in self.i['parts']:
+                used.add((ainst, apid))
         marks, names = [], []
         for (inst, pid), (x, y, _a) in sorted(self.abs.items()):
             if (inst, pid) in used:
@@ -950,6 +1048,7 @@ PRESSURE_CLASS = {
     'return': 'low',       # 回油压力是分级基准,自身不高于它
     'suction': 'low',      # 低于回油压力
     'case_drain': 'low',
+    'sense': 'low',        # 气侧支路(充气活门/压力表):1.0 T 实线,归低压级
 }
 WIDTH_T = {'high': 3.0, 'low': 1.0}
 SYMBOL_T = 1.5   # 组件本体线宽(企业标准)。介于低压 1.0T 与高压 3.0T 之间。
@@ -974,6 +1073,7 @@ def css(T):
   .ln-return     { stroke-width: %(lo).2f; }
   .ln-suction    { stroke-width: %(lo).2f; }
   .ln-case_drain { stroke-width: %(lo).2f; }
+  .ln-sense      { stroke-width: %(lo).2f; }
   .suc-mark { stroke: #000; stroke-width: %(lo).2f;
               stroke-linecap: butt; }
   .jn { fill: #000; }
@@ -1022,6 +1122,7 @@ def legend(L, T):
         ('Low Pressure Lines   低压 (回油、壳体回油)             1.0 T', lo),
         ('Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=%g)' % S,
          ('suction', lo)),
+        ('Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T', lo),
         ('组件本体 (符号轮廓、内部机构)                          1.5 T', sy),
         ('  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T', None),
         ('  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化', None),
@@ -1090,44 +1191,81 @@ def legend(L, T):
     return out
 
 
-def title_block(L, intent, nnet, dnames):
+def title_block(L, intent, nnet, dnames, catalog=None):
     t = L['title_block']
     x, y, w, h = t['x'], t['y'], t['w'], t['h']
     out = ['<rect class="tb" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>' % (x, y, w, h)]
     row1 = ('系统 %s   |   L0 %s   |   目录 %s   |   成熟度 %s'
             % (intent['system'], intent['l0_version'], intent['catalog'], intent['maturity']))
-    row2 = ('部件 %d   |   网络 %d   |   未知项 %d   |   临时符号 4 (EDP/EMP/FWSOV/蓄压器)'
-            '   |   悬空端口 %d: %s'
-            % (len(intent['parts']), nnet, len(intent['unknown']),
-               len(dnames), ' '.join(dnames) if dnames else '无'))
+    # 临时/草稿符号按目录 symbol_status 实测披露(按类型去重),不再硬编码清单。
+    prov, draft = [], []
+    if catalog:
+        status_of = {}
+        for c in catalog.get('components', []):
+            sym = c.get('symbol') or {}
+            base = os.path.basename((sym.get('asset') or '').replace('\\', '/'))
+            if base:
+                status_of[base] = (c['component_type'], sym.get('symbol_status'))
+        for inst, nd in L['nodes'].items():
+            base = os.path.basename((nd.get('symbol') or '').replace('\\', '/'))
+            hit = status_of.get(base)
+            if not hit:
+                continue
+            typ, st = hit
+            if st == 'provisional' and typ not in prov:
+                prov.append(typ)
+            elif st == 'draft' and typ not in draft:
+                draft.append(typ)
+    row2 = ('部件 %d   |   网络 %d   |   气侧支路 %d   |   未知项 %d   |   悬空端口 %d: %s   | '
+            'provisional: %s   | draft: %s'
+            % (len(intent['parts']), nnet, len(intent.get('taps') or []),
+               len(intent['unknown']), len(dnames),
+               ' '.join(dnames) if dnames else '无',
+               ' '.join(prov) if prov else '—',
+               ' '.join(draft) if draft else '—'))
     out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 21, row1))
     out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 40, row2))
     return out
 
 
-def main():
-    src = os.path.join(HERE, '..', 'system-1.intent.yaml')
+def main(argv=None):
+    # 用法:render_l0_sheet.py [工作目录]。缺省=脚本就地(传统复制纪律);
+    # 给出工作目录则输入/输出都在该目录,符号经 catalog 锚定到 skill 库,
+    # 工作目录不再需要 symbols/ 拷贝(单源化,#21)。
+    a = list(sys.argv[1:] if argv is None else argv)
+    workdir = a[0] if a else HERE
+    src = os.path.join(workdir, '1#系统.intent.yaml')
     intent = load_yaml(src)
-    with io.open(os.path.join(HERE, '..', 'component-catalog.json'),
-                 encoding='utf-8') as f:
+    catalog_path = os.path.join(workdir, 'component-catalog.json')
+    if not os.path.isfile(catalog_path):
+        catalog_path = SKILL_CATALOG
+    cat_dir = os.path.dirname(catalog_path)
+    with io.open(catalog_path, encoding='utf-8') as f:
         catalog = json.load(f)
     # 预检器钩子（#4/#8）：parse 后、布局前强制断言；ERROR 则报齐并退出，布局一行不执行。
     rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read())
     if not rep['ok']:
         preflight.emit_preflight_failure(rep)
         sys.exit(1)
-    with io.open(os.path.join(HERE, '1#系统.layout.json'), encoding='utf-8') as f:
+    with io.open(os.path.join(workdir, '1#系统.layout.json'), encoding='utf-8') as f:
         layout = json.load(f)
-    s = Sheet(intent, layout, catalog)
+    s = Sheet(intent, layout, catalog, cat_dir=cat_dir, workdir=workdir)
     s.place()
     s.build_textboxes()
     _segs, junc, bus, polys = s.wire()
 
+    # taps 气侧支路:在 path 折线之后追加,一并求交叉/避让。
+    path_polys = list(s.polys)
+    npath_polys = len(path_polys)
+    tap_junc = s.wire_taps()
+    tap_polys = s.polys[npath_polys:]
+    junc = junc + tap_junc
+
     # 先求交叉,再把跨越线打断,最后出图元。顺序不能反:
     # 打断后的折线不能再用来求交叉(断口处已无线段)。
-    cross = s.find_crossings(junc, polys)
+    cross = s.find_crossings(junc, s.polys)
     segs = []
-    for lt, pts in polys:
+    for lt, pts in s.polys:
         for run in s.split_h(pts, cross):
             segs.append(s.polyline(run, lt))
 
@@ -1180,6 +1318,8 @@ def main():
             if len(group) == 5:
                 smarks.append('<g class="suc-mark-group">%s</g>' % ''.join(group))
 
+    self_check(intent, layout, s, path_polys, tap_polys)
+
     W, H = layout['canvas']['width'], layout['canvas']['height']
     P = []
     P.append('<?xml version="1.0" encoding="UTF-8"?>')
@@ -1193,7 +1333,8 @@ def main():
     SHIFT = layout.get('canvas_shift_x', 0)
     P.append('<text class="banner" x="%d" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>' % 40)
     P.append('<text class="lbl" x="%d" y="44">1# 液压系统原理图  '
-             '(由 system-1.intent.yaml 生成,含 4 个临时符号,不可用于工程放行)</text>' % 40)
+             '(由 %s 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>'
+             % (40, os.path.basename(src)))
     dmarks, dnames = s.dangling()
     body = []
     body.append('<g id="groups">%s</g>' % '\n'.join(s.groups()))
@@ -1209,10 +1350,10 @@ def main():
     P.append('<g id="sheet" transform="translate(%d,0)">%s</g>' % (SHIFT, '\n'.join(body)))
     P.append('<g id="legend">%s</g>' % '\n'.join(legend(layout, T)))
     nnet = sum(len(p) - 1 for p in intent['paths'])
-    P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames)))
+    P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames, catalog)))
     P.append('</svg>')
 
-    outp = os.path.join(HERE, '1#系统原理图.svg')
+    outp = os.path.join(workdir, '1#系统原理图.svg')
     with io.open(outp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(P))
     print('wrote', outp)
@@ -1220,6 +1361,51 @@ def main():
           % (nnet, len(segs), len(junc), {k: len(v) for k, v in bus.items()}))
     for w in s.warn:
         print('WARN', w)
+
+
+# ---------- 结构自检(rendering-rules"结构自检") ----------
+def near_pt(p, q, tol=1.0):
+    return abs(p[0] - q[0]) <= tol and abs(p[1] - q[1]) <= tol
+
+
+def self_check(intent, layout, s, path_polys, tap_polys):
+    """渲染成品落盘前核对输入覆盖。缺项打印并以退出码 1 终止。"""
+    missing = []
+    for inst in intent['parts']:
+        if inst not in layout['nodes']:
+            missing.append('part 无节点: %s' % inst)
+    ends = set()
+    for _lt, pts in path_polys:
+        ends.add((round(pts[0][0], 1), round(pts[0][1], 1)))
+        ends.add((round(pts[-1][0], 1), round(pts[-1][1], 1)))
+    nseg = 0
+    for p in intent['paths']:
+        for k in range(len(p) - 1):
+            nseg += 1
+            for want, tok in (('out', p[k]), ('in', p[k + 1])):
+                if tok.startswith('@'):
+                    continue
+                q = s.port(tok, want) if '.' not in tok else s.port(tok)
+                if (round(q[0], 1), round(q[1], 1)) not in ends:
+                    missing.append('path 段端点未画出: %s @ (%.1f,%.1f)'
+                                   % (tok, q[0], q[1]))
+    if len(path_polys) < nseg:
+        missing.append('path 段 %d 条,折线仅 %d 条' % (nseg, len(path_polys)))
+    if len(tap_polys) != len(intent.get('taps') or []):
+        missing.append('taps %d 条,支路仅 %d 条'
+                       % (len(intent.get('taps') or []), len(tap_polys)))
+    for t, (_lt, pts) in zip(intent.get('taps') or [], tap_polys):
+        sinst, spid = t['sensor'].split('.', 1)
+        if not near_pt(pts[0], s.abs[(sinst, spid)], 1.0):
+            missing.append('tap 支路未起自 sensor 端口: %s' % t['sensor'])
+        ainst, apid = t['at'].split('.', 1)
+        if not near_pt(pts[-1], s.abs[(ainst, apid)], 1.0):
+            missing.append('tap 支路未止于 at 端口: %s' % t['at'])
+    if missing:
+        print('结构自检失败,扣留成品:')
+        for m in missing:
+            print('  -', m)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

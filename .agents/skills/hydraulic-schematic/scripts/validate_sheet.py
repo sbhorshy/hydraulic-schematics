@@ -17,10 +17,31 @@ from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-SHEET = os.path.join(HERE, '1#系统原理图.svg')
-LAYOUT = os.path.join(HERE, '1#系统.layout.json')
-INTENT = os.path.join(HERE, '..', 'system-1.intent.yaml')
-CATALOG = os.path.join(HERE, '..', 'component-catalog.json')
+# 用法:validate_sheet.py [工作目录]。缺省=脚本就地(传统复制纪律);
+# 工作目录口径与 render_l0_sheet.py 一致,符号经 catalog 锚定到 skill 库(#21)。
+WORKDIR = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else HERE
+SKILL_CATALOG = os.path.normpath(
+    os.path.join(HERE, '..', 'assets', 'component-library', 'component-catalog.json'))
+SHEET = os.path.join(WORKDIR, '1#系统原理图.svg')
+LAYOUT = os.path.join(WORKDIR, '1#系统.layout.json')
+INTENT = os.path.join(WORKDIR, '1#系统.intent.yaml')
+if os.path.isfile(os.path.join(WORKDIR, 'component-catalog.json')):
+    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
+elif os.path.isfile(SKILL_CATALOG):
+    CATALOG = SKILL_CATALOG
+else:
+    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
+CAT_DIR = os.path.dirname(CATALOG)
+
+
+def _resolve_symbol(ref):
+    """布局符号引用 → 实际路径:工作目录相对 → catalog 同目录 → 脚本 HERE。"""
+    for p in (os.path.normpath(os.path.join(WORKDIR, ref)),
+              os.path.join(CAT_DIR, os.path.basename(ref.replace('\\', '/'))),
+              os.path.normpath(os.path.join(HERE, ref))):
+        if os.path.isfile(p):
+            return p
+    return os.path.normpath(os.path.join(WORKDIR, ref))
 NS = 'http://www.w3.org/2000/svg'
 
 # ---------- 构图预算（B1–B7）----------
@@ -129,7 +150,7 @@ def main():
     for inst, nd in L['nodes'].items():
         boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
-        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        p = _resolve_symbol(nd['symbol'])
         _mk, vb, ps = read_symbol(p)
         vx, vy, vw, vh = vb
         k = min(nd['w'] / float(vw), nd['h'] / float(vh))
@@ -577,7 +598,7 @@ def main():
     # 误报为"引线未改判"。判据是端口 data-medium,不是几何。
     nonhyd = set()      # (inst, 整图 x, 整图 y)
     for inst, nd in (L['nodes'] or {}).items():
-        sp = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        sp = _resolve_symbol(nd['symbol'])
         if not os.path.exists(sp):
             continue
         sroot = ET.parse(sp).getroot()
@@ -639,7 +660,7 @@ def main():
     # 圆弧的中途而非顶点上;油箱的轮廓是描摹填充,根本没有可取顶点的描边。
     # 故顶点匹配失败时改判像素——PNG 上该点周围有无本体墨迹。
     # 这是唯一能同时覆盖弧、填充与描边的判据。
-    png = os.path.join(HERE, 'sheet-readback.png')
+    png = os.path.join(WORKDIR, 'sheet-readback.png')
     ink = None
     if os.path.exists(png):
         try:
@@ -819,7 +840,7 @@ def main():
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
-        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        p = _resolve_symbol(nd['symbol'])
         s = io.open(p, encoding='utf-8').read(4000)
         st = re.search(r'data-symbol-status="([^"]+)"', s)
         st = st.group(1) if st else 'none'
@@ -1021,7 +1042,7 @@ def main():
                     '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
         },
     }
-    out = os.path.join(HERE, 'validation-report.json')
+    out = os.path.join(WORKDIR, 'validation-report.json')
     io.open(out, 'w', encoding='utf-8').write(
         json.dumps(rep, ensure_ascii=False, indent=2))
 

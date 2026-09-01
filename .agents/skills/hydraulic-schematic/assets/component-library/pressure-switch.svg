@@ -55,6 +55,10 @@
     <path id="fixed-dot" d="M127 38 A7 7 0 1 0 141 38 A7 7 0 1 0 127 38 Z"
           fill="#000000" stroke="none"/>
     <line id="contact-arm" x1="84" y1="27" x2="107" y2="77"/>
+
+    <!-- 电信号口引线:顶边中部 (107,15) 向上至顶边界 (107,7)
+         (#21 修通:注释 v1.1 已声明本引线,图面漏画,随 elec_out 端口点一并补齐) -->
+    <line id="elec-out-line" x1="107" y1="15" x2="107" y2="7"/>
   </g>
 
   <g id="connection-points" fill="#ff0000">
@@ -64,6 +68,11 @@
             data-port-role="measurement"
             data-flow-capability="none"
             data-anchor-direction="left"/>
-
+    <circle id="port-elec-out" cx="107" cy="7" r="2"
+            data-port-id="elec_out"
+            data-medium="electrical"
+            data-port-role="signal_out"
+            data-flow-capability="none"
+            data-anchor-direction="up"/>
   </g>
 </svg>

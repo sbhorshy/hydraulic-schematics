@@ -4,7 +4,10 @@
      width="324" height="180" viewBox="0 0 324 180"
      preserveAspectRatio="xMidYMid meet"
      data-symbol-name="Priority Valve"
-     data-status="draft"
+     data-component-type="priority_valve"
+     data-symbol-status="draft"
+     data-symbol-form="stroke_geometry"
+     data-symbol-source-ref="REDRAWN_FROM:已标注/priority-valve-stroke.svg"
      data-mirror-allowed="false"
      data-allowed-rotations="0 90 180 270">
 
@@ -40,16 +43,18 @@
       baseViewBox="0 0 324 180">
 
       <sym:ports>
-        <sym:port id="port-left-main"
-                  x="10" y="63"
+        <sym:port id="inlet"
+                  x="0" y="63"
                   direction="left"
-                  role="unknown"
+                  role="pressure"
+                  medium="hydraulic"
                   interfaceGeometry="symbol"
                   status="draft" />
-        <sym:port id="port-right-main"
-                  x="305" y="63"
+        <sym:port id="outlet"
+                  x="324" y="63"
                   direction="right"
-                  role="unknown"
+                  role="pressure"
+                  medium="hydraulic"
                   interfaceGeometry="symbol"
                   status="draft" />
       </sym:ports>
@@ -58,15 +63,15 @@
         <sym:pipeline id="main-horizontal-pipeline"
                       orientation="horizontal"
                       centerlineY="63"
-                      fromPort="port-left-main"
-                      toPort="port-right-main"
+                      fromPort="inlet"
+                      toPort="outlet"
                       topology="single_pipeline_with_inline_check_valve"
                       status="user_confirmed" />
-        <sym:junction id="junction-left" x="89" y="63"
+        <sym:junction id="meta-junction-left" x="89" y="63"
                       pipeline="main-horizontal-pipeline"
                       branch="lower-feedback-passage"
                       status="user_confirmed" />
-        <sym:junction id="junction-right" x="227" y="63"
+        <sym:junction id="meta-junction-right" x="227" y="63"
                       pipeline="main-horizontal-pipeline"
                       branch="lower-feedback-passage"
                       status="user_confirmed" />
@@ -74,32 +79,32 @@
 
       <sym:rotations>
         <sym:rotation angle="0"   width="324" height="180" viewBox="0 0 324 180">
-          <sym:anchor port="port-left-main"  x="10"  y="63"  direction="left" />
-          <sym:anchor port="port-right-main" x="305" y="63"  direction="right" />
+          <sym:anchor port="inlet"  x="0"   y="63"  direction="left" />
+          <sym:anchor port="outlet" x="324" y="63"  direction="right" />
         </sym:rotation>
         <sym:rotation angle="90"  width="180" height="324" viewBox="0 0 180 324">
-          <sym:anchor port="port-left-main"  x="117" y="10"  direction="up" />
-          <sym:anchor port="port-right-main" x="117" y="305" direction="down" />
+          <sym:anchor port="inlet"  x="117" y="0"   direction="up" />
+          <sym:anchor port="outlet" x="117" y="324" direction="down" />
         </sym:rotation>
         <sym:rotation angle="180" width="324" height="180" viewBox="0 0 324 180">
-          <sym:anchor port="port-left-main"  x="314" y="117" direction="right" />
-          <sym:anchor port="port-right-main" x="19"  y="117" direction="left" />
+          <sym:anchor port="inlet"  x="324" y="117" direction="right" />
+          <sym:anchor port="outlet" x="0"   y="117" direction="left" />
         </sym:rotation>
         <sym:rotation angle="270" width="180" height="324" viewBox="0 0 180 324">
-          <sym:anchor port="port-left-main"  x="63" y="314" direction="down" />
-          <sym:anchor port="port-right-main" x="63" y="19"  direction="up" />
+          <sym:anchor port="inlet"  x="63" y="324" direction="down" />
+          <sym:anchor port="outlet" x="63" y="0"   direction="up" />
         </sym:rotation>
       </sym:rotations>
 
       <sym:components>
-        <sym:component id="check-valve-upper"
+        <sym:component id="meta-check-valve-upper"
                        type="check_valve"
                        status="identified"
                        confirmation="user"
                        geometrySource="check-valve-stroke.svg"
                        flowPermitted="PENDING_ENGINEER_CONFIRMATION"
                        standardPageConfirmed="false" />
-        <sym:component id="check-valve-lower"
+        <sym:component id="meta-check-valve-lower"
                        type="check_valve"
                        status="identified"
                        confirmation="user"
@@ -117,7 +122,8 @@
   </metadata>
 
   <!-- All visible geometry uses the single global outline class. -->
-  <g id="visible-symbol" class="sym-outline">
+  <g id="visible-symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
 
     <!-- Housing -->
     <path id="housing" d="M76 32 H238 V161 H76 Z" />
@@ -125,13 +131,13 @@
     <!-- Confirmed main hydraulic path: one horizontal pipeline.
          It is geometrically interrupted only where the inline check-valve symbol occupies the path. -->
     <path id="main-pipeline-left"
-          d="M10 63 H155"
+          d="M0 63 H155"
           data-network-id="main-horizontal-pipeline"
-          data-interface-port="port-left-main" />
+          data-interface-port="inlet" />
     <path id="main-pipeline-right"
-          d="M227 63 H305"
+          d="M227 63 H324"
           data-network-id="main-horizontal-pipeline"
-          data-interface-port="port-right-main" />
+          data-interface-port="outlet" />
 
     <!-- User-confirmed connection/junction point; formerly misread as a diamond-shaped component. -->
     <circle id="junction-left"
@@ -203,19 +209,21 @@
 
   <!-- Invisible machine-readable anchors. -->
   <g id="connection-points" fill="#ff0000">
-    <circle id="port-left-main-anchor"
+    <circle id="port-inlet-anchor"
             class="port-anchor"
-            cx="10" cy="63" r="2"
-            data-port-id="port-left-main"
-            data-port-type="hydraulic"
-            data-direction="left"
-            data-status="draft" />
-    <circle id="port-right-main-anchor"
+            cx="0" cy="63" r="2"
+            data-port-id="inlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="in"
+            data-anchor-direction="left" />
+    <circle id="port-outlet-anchor"
             class="port-anchor"
-            cx="305" cy="63" r="2"
-            data-port-id="port-right-main"
-            data-port-type="hydraulic"
-            data-direction="right"
-            data-status="draft" />
+            cx="324" cy="63" r="2"
+            data-port-id="outlet"
+            data-medium="hydraulic"
+            data-port-role="pressure"
+            data-flow-capability="out"
+            data-anchor-direction="right" />
   </g>
 </svg>

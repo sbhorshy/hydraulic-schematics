@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1390" width="1680" height="1390">
+<style>
+  text { font-family: "Noto Sans CJK SC","Microsoft YaHei",sans-serif; }
+  .lbl  { font-size: 11px; fill: #000; }
+  .ext  { font-size: 10px; fill: #333; }
+  .grp  { fill: none; stroke: #000; stroke-width: 1.80;
+          stroke-dasharray: 8 5; }
+  .grp-lbl { font-size: 10.5px; fill: #000; }
+  .ext-mark { stroke: #000; stroke-width: 1.20; }
+  polyline { fill: none; stroke: #000;
+             stroke-linecap: butt; stroke-linejoin: miter; }
+  .ln-pressure   { stroke-width: 3.60; }
+  .ln-return     { stroke-width: 1.20; }
+  .ln-suction    { stroke-width: 1.20; }
+  .ln-case_drain { stroke-width: 1.20; }
+  .ln-sense      { stroke-width: 1.20; }
+  .suc-mark { stroke: #000; stroke-width: 1.20;
+              stroke-linecap: butt; }
+  .jn { fill: #000; }
+  .dang { fill: none; stroke: #d00000; stroke-width: 1.80; }
+  .brg-hi { fill: none; stroke: #000; stroke-width: 3.60;
+            stroke-linecap: butt; }
+  .brg-lo { fill: none; stroke: #000; stroke-width: 1.20;
+            stroke-linecap: butt; }
+  .banner { font-size: 15px; font-weight: bold; fill: #b00000; }
+  .tb  { fill: none; stroke: #000; stroke-width: 1.20; }
+  .tb-t{ font-size: 11px; fill: #000; }
+  .lg  { fill: #fff; stroke: #000; stroke-width: 1.20; }
+  .lg-t{ font-size: 10.5px; fill: #000; }
+
+  /* 组件本体线宽:企业标准 1.5 T,一处定义。
+     曾用 vector-effect: non-scaling-stroke 来抵消符号的落位缩放,
+     那是错的:该属性把线宽钉在**设备像素**上,于是整图放大出图时
+     管线随之变粗、而符号内的线纹丝不动(实测 1x/2x/3x 下管线
+     4/8/10px,引线恒为 4px)。改为在实例上按 1/k 补偿,
+     线宽随图缩放,同时不受符号自身缩放影响。 */
+  :root { --kc: 1; }
+  .sym-outline { stroke-width: calc(1.80 * var(--kc)); }
+
+  /* 符号内部的端口引线。它走油,故随管网压力等级,不随组件本体。
+     判据是"是否走油",而非"画在哪个文件里"。
+     选择器带 line 提高特异性,压过父 g 元素继承来的 sym-outline。
+     注:style 内容未包 CDATA,注释里不可出现尖括号,会破坏 XML。 */
+  line.pl-pressure   { stroke-width: calc(3.60 * var(--kc)); }
+  line.pl-return     { stroke-width: calc(1.20 * var(--kc)); }
+  line.pl-suction    { stroke-width: calc(1.20 * var(--kc)); }
+  line.pl-case_drain { stroke-width: calc(1.20 * var(--kc)); }
+</style>
+<rect x="0" y="0" width="1680" height="1390" fill="#ffffff"/>
+<text class="banner" x="40" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>
+<text class="lbl" x="40" y="44">1# 液压系统原理图  (由 1#系统.intent.yaml 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>
+<g id="sheet" transform="translate(30,0)"><g id="groups"></g>
+<g id="lines"><polyline class="ln-suction" points="278.0,686.0 298.0,686.0 480.0,686.0 480.0,650.0 500.0,650.0"/>
+<polyline class="ln-suction" points="278.0,686.0 298.0,686.0 298.0,330.0 310.0,330.0 330.0,330.0"/>
+<polyline class="ln-suction" points="410.0,330.0 430.0,330.0 480.0,330.0 500.0,330.0"/>
+<polyline class="ln-pressure" points="580.0,330.0 598.0,330.0 615.0,330.0"/>
+<polyline class="ln-pressure" points="625.0,330.0 880.0,330.0"/>
+<polyline class="ln-pressure" points="580.0,650.0 598.0,650.0 615.0,650.0"/>
+<polyline class="ln-pressure" points="625.0,650.0 880.0,650.0"/>
+<polyline class="ln-pressure" points="1000.0,338.0 982.0,338.0 945.0,338.0"/>
+<polyline class="ln-pressure" points="935.0,338.0 880.0,338.0"/>
+<polyline class="ln-pressure" points="1080.0,338.0 1098.0,338.0 1160.0,338.0"/>
+<polyline class="ln-pressure" points="1300.0,317.2 1282.0,317.2 1160.0,317.2"/>
+<polyline class="ln-pressure" points="1440.0,317.2 1458.0,317.2 1470.0,317.2"/>
+<polyline class="ln-pressure" points="1498.0,190.0 1480.0,190.0 1470.0,190.0"/>
+<polyline class="ln-pressure" points="1498.0,295.0 1480.0,295.0 1470.0,295.0"/>
+<polyline class="ln-pressure" points="1498.0,400.0 1480.0,400.0 1470.0,400.0"/>
+<polyline class="ln-pressure" points="1498.0,505.0 1480.0,505.0 1470.0,505.0"/>
+<polyline class="ln-pressure" points="1498.0,610.0 1480.0,610.0 1470.0,610.0"/>
+<polyline class="ln-pressure" points="1498.0,715.0 1480.0,715.0 1470.0,715.0"/>
+<polyline class="ln-pressure" points="1498.0,820.0 1480.0,820.0 1470.0,820.0"/>
+<polyline class="ln-pressure" points="1498.0,925.0 1480.0,925.0 1470.0,925.0"/>
+<polyline class="ln-pressure" points="1210.0,290.0 1210.0,308.0 1160.0,308.0"/>
+<polyline class="ln-pressure" points="580.0,780.6 598.0,780.6 880.0,780.6"/>
+<polyline class="ln-pressure" points="440.0,780.6 420.0,780.6 420.0,860.0 215.0,860.0 215.0,840.0"/>
+<polyline class="ln-pressure" points="1186.0,593.8 1168.0,593.8 1160.0,593.8"/>
+<polyline class="ln-return" points="1618.0,190.0 1636.0,190.0 1646.0,190.0"/>
+<polyline class="ln-return" points="1618.0,295.0 1636.0,295.0 1646.0,295.0"/>
+<polyline class="ln-return" points="1618.0,400.0 1636.0,400.0 1646.0,400.0"/>
+<polyline class="ln-return" points="1618.0,505.0 1636.0,505.0 1646.0,505.0"/>
+<polyline class="ln-return" points="1618.0,610.0 1636.0,610.0 1646.0,610.0"/>
+<polyline class="ln-return" points="1618.0,715.0 1636.0,715.0 1646.0,715.0"/>
+<polyline class="ln-return" points="1618.0,820.0 1636.0,820.0 1646.0,820.0"/>
+<polyline class="ln-return" points="1618.0,925.0 1636.0,925.0 1646.0,925.0"/>
+<polyline class="ln-return" points="1280.0,1040.0 1298.0,1040.0 1646.0,1040.0"/>
+<polyline class="ln-return" points="1200.0,1040.0 1182.0,1040.0 940.0,1040.0"/>
+<polyline class="ln-return" points="60.0,686.0 42.0,686.0 42.0,100.0 940.0,100.0 940.0,686.0"/>
+<polyline class="ln-return" points="1200.0,933.8 1182.0,933.8 940.0,933.8"/>
+<polyline class="ln-case_drain" points="540.0,370.0 540.0,388.0 620.0,388.0"/>
+<polyline class="ln-case_drain" points="540.0,690.0 540.0,708.0 620.0,708.0"/>
+<polyline class="ln-case_drain" points="480.0,157.1 480.0,175.1 620.0,175.1"/>
+<polyline class="ln-case_drain" points="480.0,100.0 480.0,80.0 40.0,80.0 40.0,686.0 60.0,686.0"/>
+<polyline class="ln-pressure" points="880.0,330.0 880.0,780.6"/>
+<polyline class="ln-pressure" points="1160.0,308.0 1160.0,593.8"/>
+<polyline class="ln-pressure" points="1470.0,190.0 1470.0,925.0"/>
+<polyline class="ln-return" points="1646.0,190.0 1646.0,1040.0"/>
+<polyline class="ln-return" points="940.0,686.0 940.0,1040.0"/>
+<polyline class="ln-case_drain" points="620.0,175.1 620.0,708.0"/>
+<polyline class="ln-sense" points="1240.0,89.5 1222.0,89.5 1210.0,89.5 1210.0,172.0 1210.0,190.0"/>
+<polyline class="ln-sense" points="1446.0,117.0 1446.0,135.0 1392.0,135.0 1392.0,89.5 1374.0,89.5"/></g>
+<g id="suction-markers"><g class="suc-mark-group"><line class="suc-mark" x1="354.4" y1="694.0" x2="363.6" y2="678.0"/><line class="suc-mark" x1="364.4" y1="694.0" x2="373.6" y2="678.0"/><line class="suc-mark" x1="374.4" y1="694.0" x2="383.6" y2="678.0"/><line class="suc-mark" x1="384.4" y1="694.0" x2="393.6" y2="678.0"/><line class="suc-mark" x1="394.4" y1="694.0" x2="403.6" y2="678.0"/></g>
+<g class="suc-mark-group"><line class="suc-mark" x1="290.0" y1="623.4" x2="306.0" y2="632.6"/><line class="suc-mark" x1="290.0" y1="613.4" x2="306.0" y2="622.6"/><line class="suc-mark" x1="290.0" y1="603.4" x2="306.0" y2="612.6"/><line class="suc-mark" x1="290.0" y1="593.4" x2="306.0" y2="602.6"/><line class="suc-mark" x1="290.0" y1="583.4" x2="306.0" y2="592.6"/></g>
+<g class="suc-mark-group"><line class="suc-mark" x1="290.0" y1="523.4" x2="306.0" y2="532.6"/><line class="suc-mark" x1="290.0" y1="513.4" x2="306.0" y2="522.6"/><line class="suc-mark" x1="290.0" y1="503.4" x2="306.0" y2="512.6"/><line class="suc-mark" x1="290.0" y1="493.4" x2="306.0" y2="502.6"/><line class="suc-mark" x1="290.0" y1="483.4" x2="306.0" y2="492.6"/></g>
+<g class="suc-mark-group"><line class="suc-mark" x1="290.0" y1="423.4" x2="306.0" y2="432.6"/><line class="suc-mark" x1="290.0" y1="413.4" x2="306.0" y2="422.6"/><line class="suc-mark" x1="290.0" y1="403.4" x2="306.0" y2="412.6"/><line class="suc-mark" x1="290.0" y1="393.4" x2="306.0" y2="402.6"/><line class="suc-mark" x1="290.0" y1="383.4" x2="306.0" y2="392.6"/></g>
+<g class="suc-mark-group"><line class="suc-mark" x1="414.4" y1="338.0" x2="423.6" y2="322.0"/><line class="suc-mark" x1="424.4" y1="338.0" x2="433.6" y2="322.0"/><line class="suc-mark" x1="434.4" y1="338.0" x2="443.6" y2="322.0"/><line class="suc-mark" x1="444.4" y1="338.0" x2="453.6" y2="322.0"/><line class="suc-mark" x1="454.4" y1="338.0" x2="463.6" y2="322.0"/></g></g>
+<g id="bridges"><path class="brg-hi" d="M615.0 330.0 A5.0 5.0 0 0 1 625.0 330.0"/>
+<path class="brg-hi" d="M615.0 650.0 A5.0 5.0 0 0 1 625.0 650.0"/>
+<path class="brg-hi" d="M935.0 338.0 A5.0 5.0 0 0 1 945.0 338.0"/></g>
+<g id="junctions"><circle class="jn" cx="880.0" cy="650.0" r="3"/>
+<circle class="jn" cx="880.0" cy="338.0" r="3"/>
+<circle class="jn" cx="1160.0" cy="338.0" r="3"/>
+<circle class="jn" cx="1160.0" cy="317.2" r="3"/>
+<circle class="jn" cx="1470.0" cy="317.2" r="3"/>
+<circle class="jn" cx="1470.0" cy="295.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="400.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="505.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="610.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="715.0" r="3"/>
+<circle class="jn" cx="1470.0" cy="820.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="295.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="400.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="505.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="610.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="715.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="820.0" r="3"/>
+<circle class="jn" cx="1646.0" cy="925.0" r="3"/>
+<circle class="jn" cx="940.0" cy="933.8" r="3"/>
+<circle class="jn" cx="620.0" cy="388.0" r="3"/></g>
+<g id="externs"></g>
+<g id="symbols"><g id="inst-TANK-001" transform="translate(60,276) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="TANK-001__confirmed-shell" class="sym-outline" data-certainty="confirmed-from-source-geometry">
+    <path id="TANK-001__tank-shell" d="M 8 327 L 8 95 Q 108 52 207 95 L 207 327" />
+    <line id="TANK-001__separator-upper" x1="8" y1="231" x2="207" y2="231" />
+    <line id="TANK-001__separator-lower-left" x1="8" y1="253" x2="98" y2="253" />
+    <line id="TANK-001__separator-lower-right" x1="118" y1="253" x2="207" y2="253" />
+    <line id="TANK-001__tank-bottom-left" x1="8" y1="327" x2="98" y2="327" />
+    <line id="TANK-001__tank-bottom-right" x1="119" y1="327" x2="207" y2="327" />
+  </g>
+
+  
+  
+<g id="TANK-001__port-interface-geometry" class="sym-outline" data-certainty="provisional">
+    <path id="TANK-001__return-interface" d="M 25 327 L 25 410 M 0 410 25 410" />
+    <path id="TANK-001__suction-interface" d="M 190 327 L 190 410 M 190 410 218 410" />
+    <path id="TANK-001__pressure-interface" d="M 155 380 L 155 564 M155 380 140 380" />
+  </g>
+
+  
+  
+<g id="TANK-001__unknown-geometry" class="sym-outline sym-unknown" data-certainty="unknown">
+    
+    <g id="TANK-001__bootstrap-internal-mechanism" data-status="unknown">
+      <path d="M 76 327 L 76 444 L 98 444 L 98 253" />
+      <path d="M 118 253 L 118 444 L 140 444 L 140 327" />
+      <path d="M 76 444 L 76 535 L 140 535 L 140 444" />
+      <line x1="76" y1="468" x2="140" y2="468" />
+    </g>
+
+    
+    <g id="TANK-001__liquid-level-gauge" data-status="unknown">
+      <circle cx="108" cy="49" r="24" />
+      <line x1="85" y1="39" x2="131" y2="39" />
+      <line x1="85" y1="58" x2="131" y2="58" />
+      <path d="M 84 24 Q 108 9 132 24" />
+      <polyline points="145,3 135,20 150,17 137,35 153,28" />
+    </g>
+  </g>
+
+  
+  
+</g>
+<g id="inst-FSOV-001" transform="translate(330,290) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="FSOV-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect x="18" y="26" width="22" height="28" />
+    <rect x="40" y="26" width="22" height="28" />
+    
+    <line x1="18" y1="40" x2="40" y2="40" />
+    
+    <line x1="46" y1="40" x2="52" y2="40" />
+    <line x1="52" y1="34" x2="52" y2="46" />
+    
+    <rect x="4" y="30" width="14" height="20" />
+    <line x1="4" y1="50" x2="18" y2="30" />
+    
+    <line x1="0" y1="40" x2="4" y2="40" class="pl-suction"/>
+    <line x1="62" y1="40" x2="80" y2="40" class="pl-suction"/>
+    <line x1="40" y1="26" x2="40" y2="8" />
+  </g>
+
+  
+</g>
+<g id="inst-EDP-001" transform="translate(500,290) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="EDP-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    <circle cx="40" cy="40" r="22" />
+    
+    <path d="M62 40 L48 32 L48 48 Z" fill="#000000" stroke="none" />
+    
+    <line x1="0" y1="40" x2="18" y2="40" class="pl-suction"/>
+    <line x1="62" y1="40" x2="80" y2="40" class="pl-pressure"/>
+    <line x1="40" y1="62" x2="40" y2="80" class="pl-case_drain"/>
+    <line x1="40" y1="18" x2="40" y2="0" />
+  </g>
+
+  
+</g>
+<g id="inst-EMP-001" transform="translate(500,610) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="EMP-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    <circle cx="40" cy="40" r="22" />
+    <path d="M62 40 L48 32 L48 48 Z" fill="#000000" stroke="none" />
+    
+    <line x1="22" y1="58" x2="58" y2="22" />
+    <path d="M58 22 L50 24 L56 30 Z" fill="#000000" stroke="none" />
+    <line x1="0" y1="40" x2="18" y2="40" class="pl-suction"/>
+    <line x1="62" y1="40" x2="80" y2="40" class="pl-pressure"/>
+    <line x1="40" y1="62" x2="40" y2="80" class="pl-case_drain"/>
+    <line x1="40" y1="18" x2="40" y2="0" stroke-dasharray="4" />
+  </g>
+
+  
+</g>
+<g id="inst-PF-001" transform="translate(1000,254) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="PF-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <circle cx="40" cy="32" r="12" />
+    <line x1="32" y1="24" x2="48" y2="40" />
+    <line x1="48" y1="24" x2="32" y2="40" />
+    
+    <line x1="30.5" y1="39.7" x2="30.5" y2="70.36" />
+    <line x1="49.5" y1="39.7" x2="49.5" y2="70.36" />
+
+    
+    <line x1="0" y1="84" x2="18" y2="84" class="pl-pressure"/>
+    <line x1="62" y1="84" x2="80" y2="84" class="pl-pressure"/>
+    <path d="M18 84 L40 60 L62 84 L40 108 Z" />
+
+    
+    <circle cx="40" cy="84" r="16" />
+    <circle cx="29" cy="84" r="4.5" />
+    <circle cx="47" cy="84" r="4.5" />
+    <line x1="32" y1="76" x2="48" y2="92" />
+    <line x1="32" y1="92" x2="48" y2="76" />
+    <line x1="40" y1="62" x2="40" y2="108" stroke-dasharray="5" />
+  </g>
+
+  
+</g>
+<g id="inst-CDF-001" transform="translate(420,100) translate(0,57.1429) rotate(270) scale(0.714286) translate(-0,-0)" style="--kc:1.400000">
+<g id="CDF-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <circle cx="40" cy="32" r="12" />
+    <line x1="32" y1="24" x2="48" y2="40" />
+    <line x1="48" y1="24" x2="32" y2="40" />
+    
+    <line x1="30.5" y1="39.7" x2="30.5" y2="70.36" />
+    <line x1="49.5" y1="39.7" x2="49.5" y2="70.36" />
+
+    
+    <line x1="0" y1="84" x2="18" y2="84" class="pl-case_drain"/>
+    <line x1="62" y1="84" x2="80" y2="84" class="pl-case_drain"/>
+    <path d="M18 84 L40 60 L62 84 L40 108 Z" />
+
+    
+    <circle cx="40" cy="84" r="16" />
+    <circle cx="29" cy="84" r="4.5" />
+    <circle cx="47" cy="84" r="4.5" />
+    <line x1="32" y1="76" x2="48" y2="92" />
+    <line x1="32" y1="92" x2="48" y2="76" />
+    <line x1="40" y1="62" x2="40" y2="108" stroke-dasharray="5" />
+  </g>
+
+  
+</g>
+<g id="inst-RF-001" transform="translate(1200,1012) translate(80,112) rotate(180) scale(1) translate(-0,-0)">
+<g id="RF-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <circle cx="40" cy="32" r="12" />
+    <line x1="32" y1="24" x2="48" y2="40" />
+    <line x1="48" y1="24" x2="32" y2="40" />
+    
+    <line x1="30.5" y1="39.7" x2="30.5" y2="70.36" />
+    <line x1="49.5" y1="39.7" x2="49.5" y2="70.36" />
+
+    
+    <line x1="0" y1="84" x2="18" y2="84" class="pl-return"/>
+    <line x1="62" y1="84" x2="80" y2="84" class="pl-return"/>
+    <path d="M18 84 L40 60 L62 84 L40 108 Z" />
+
+    
+    <circle cx="40" cy="84" r="16" />
+    <circle cx="29" cy="84" r="4.5" />
+    <circle cx="47" cy="84" r="4.5" />
+    <line x1="32" y1="76" x2="48" y2="92" />
+    <line x1="32" y1="92" x2="48" y2="76" />
+    <line x1="40" y1="62" x2="40" y2="108" stroke-dasharray="5" />
+  </g>
+
+  
+</g>
+<g id="inst-PRV-001" transform="translate(1300,290) translate(0,0) rotate(0) scale(0.432099) translate(-0,-0)" style="--kc:2.314286">
+<g id="PRV-001__visible-symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <path id="PRV-001__housing" d="M76 32 H238 V161 H76 Z" />
+
+    
+    <path id="PRV-001__main-pipeline-left" d="M0 63 H155" data-network-id="PRV-001__main-horizontal-pipeline" data-interface-port="inlet" />
+    <path id="PRV-001__main-pipeline-right" d="M227 63 H324" data-network-id="PRV-001__main-horizontal-pipeline" data-interface-port="outlet" />
+
+    
+    <circle id="PRV-001__junction-left" cx="89" cy="63" r="3" fill="#000000" data-component-type="junction" data-network-id="PRV-001__main-horizontal-pipeline" data-status="user_confirmed" />
+
+    
+    <path id="PRV-001__upper-vertical-stem" d="M118 84 V50" />
+    <path id="PRV-001__upper-stem-arrow" d="M112 60 L118 45 L124 60 L112 60" fill="currentColor" />
+
+    
+    <polyline id="PRV-001__upper-spring-like" data-status="unknown" points=" 144,74 151,51 158,74 165,52 172,69" />
+
+    
+    <g id="PRV-001__check-valve-upper" data-component-type="check_valve" data-status="identified" data-confirmation="user" data-geometry-source="check-valve-stroke.svg" data-flow-permitted="PENDING_ENGINEER_CONFIRMATION" data-allow-mirror="false" transform="translate(155 27) scale(0.9)">
+      <line id="PRV-001__upper-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="PRV-001__upper-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="PRV-001__upper-check-ball" cx="35" cy="40" r="16" />
+      <path id="PRV-001__upper-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+    
+    <circle id="PRV-001__junction-right" cx="227" cy="63" r="3" fill="#000000" data-component-type="junction" data-network-id="PRV-001__main-horizontal-pipeline" data-status="user_confirmed" />
+
+    
+    <path id="PRV-001__lower-left-passage" d="M89 63 V113 Q89 121 97 121 H122" data-from-junction="junction-left" data-network-id="PRV-001__lower-feedback-passage" />
+    <path id="PRV-001__lower-right-passage" d="M194 121 H219 Q227 121 227 113 V63" data-to-junction="junction-right" data-network-id="PRV-001__lower-feedback-passage" />
+
+    
+    <g id="PRV-001__check-valve-lower" data-component-type="check_valve" data-status="identified" data-confirmation="user" data-geometry-source="check-valve-stroke.svg" data-flow-permitted="PENDING_ENGINEER_CONFIRMATION" data-allow-mirror="false" transform="translate(122 85) scale(0.9) rotate(180 40 40)">
+      <line id="PRV-001__lower-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="PRV-001__lower-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="PRV-001__lower-check-ball" cx="35" cy="40" r="16" />
+      <path id="PRV-001__lower-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+
+  </g>
+
+  
+  
+</g>
+<g id="inst-PRV-002" transform="translate(440,730) translate(140,77.7778) rotate(180) scale(0.432099) translate(-0,-0)" style="--kc:2.314286">
+<g id="PRV-002__visible-symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <path id="PRV-002__housing" d="M76 32 H238 V161 H76 Z" />
+
+    
+    <path id="PRV-002__main-pipeline-left" d="M0 63 H155" data-network-id="PRV-002__main-horizontal-pipeline" data-interface-port="inlet" />
+    <path id="PRV-002__main-pipeline-right" d="M227 63 H324" data-network-id="PRV-002__main-horizontal-pipeline" data-interface-port="outlet" />
+
+    
+    <circle id="PRV-002__junction-left" cx="89" cy="63" r="3" fill="#000000" data-component-type="junction" data-network-id="PRV-002__main-horizontal-pipeline" data-status="user_confirmed" />
+
+    
+    <path id="PRV-002__upper-vertical-stem" d="M118 84 V50" />
+    <path id="PRV-002__upper-stem-arrow" d="M112 60 L118 45 L124 60 L112 60" fill="currentColor" />
+
+    
+    <polyline id="PRV-002__upper-spring-like" data-status="unknown" points=" 144,74 151,51 158,74 165,52 172,69" />
+
+    
+    <g id="PRV-002__check-valve-upper" data-component-type="check_valve" data-status="identified" data-confirmation="user" data-geometry-source="check-valve-stroke.svg" data-flow-permitted="PENDING_ENGINEER_CONFIRMATION" data-allow-mirror="false" transform="translate(155 27) scale(0.9)">
+      <line id="PRV-002__upper-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="PRV-002__upper-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="PRV-002__upper-check-ball" cx="35" cy="40" r="16" />
+      <path id="PRV-002__upper-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+    
+    <circle id="PRV-002__junction-right" cx="227" cy="63" r="3" fill="#000000" data-component-type="junction" data-network-id="PRV-002__main-horizontal-pipeline" data-status="user_confirmed" />
+
+    
+    <path id="PRV-002__lower-left-passage" d="M89 63 V113 Q89 121 97 121 H122" data-from-junction="junction-left" data-network-id="PRV-002__lower-feedback-passage" />
+    <path id="PRV-002__lower-right-passage" d="M194 121 H219 Q227 121 227 113 V63" data-to-junction="junction-right" data-network-id="PRV-002__lower-feedback-passage" />
+
+    
+    <g id="PRV-002__check-valve-lower" data-component-type="check_valve" data-status="identified" data-confirmation="user" data-geometry-source="check-valve-stroke.svg" data-flow-permitted="PENDING_ENGINEER_CONFIRMATION" data-allow-mirror="false" transform="translate(122 85) scale(0.9) rotate(180 40 40)">
+      <line id="PRV-002__lower-check-line-left" x1="0" y1="40" x2="18" y2="40" />
+      <line id="PRV-002__lower-check-line-right" x1="57" y1="40" x2="80" y2="40" />
+      <circle id="PRV-002__lower-check-ball" cx="35" cy="40" r="16" />
+      <path id="PRV-002__lower-check-seat" d="M32 11 L57 40 L32 69" />
+    </g>
+
+  </g>
+
+  
+  
+</g>
+<g id="inst-ACC-001" transform="translate(1180,190) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="ACC-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <path d="M12 30 A18 18 0 0 1 48 30 L48 70 A18 18 0 0 1 12 70 Z" />
+    <polygon points="30 50, 35 42, 25 42" />
+    
+    <line x1="12" y1="50" x2="48" y2="50" />
+    
+    <line x1="30" y1="88" x2="30" y2="100" class="pl-pressure"/>
+    <line x1="30" y1="12" x2="30" y2="0" />
+  </g>
+
+  
+</g>
+<g id="inst-ACV-001" transform="translate(1240,60) translate(0,0) rotate(0) scale(0.5) translate(-0,-0)" style="--kc:2.000000">
+<g id="ACV-001__visible-symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <path id="ACV-001__left-end-feature" data-component-type="unknown" data-status="draft" d="M25 39 V79" />
+    <path id="ACV-001__left-interface-line" data-network-id="ACV-001__main-horizontal-interface" data-interface-port="accumulator_gas" d="M0 59 H75" />
+
+    
+    <path id="ACV-001__central-left-triangle" data-component-type="unknown" data-status="draft" d="M75 29 V87 L119 59 Z" />
+    <path id="ACV-001__central-right-triangle" data-component-type="unknown" data-status="draft" d="M161 30 V86 L119 59 Z" />
+
+    
+    <path id="ACV-001__middle-interface-line" data-network-id="ACV-001__main-horizontal-interface" d="M161 59 H194" />
+
+    
+    <path id="ACV-001__right-small-triangle" data-component-type="unknown" data-status="draft" d="M194 44 V75 L220 59 Z" />
+
+    
+    <path id="ACV-001__right-interface-line" data-network-id="ACV-001__main-horizontal-interface" data-interface-port="charge_port" d="M220 59 H268" />
+  </g>
+
+  
+  
+</g>
+<g id="inst-PG-001" transform="translate(1414,50) translate(0,0) rotate(0) scale(0.5) translate(-0,-0)" style="--kc:2.000000">
+<g id="PG-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <circle id="PG-001__dial" cx="64" cy="60" r="44" />
+    
+    <line id="PG-001__needle" x1="81" y1="89.5" x2="48.5" y2="33" />
+    <polygon id="PG-001__needle-arrow" points="47,30.5 65.5,44 49.5,53" fill="#000000" stroke="none" />
+    
+    <line id="PG-001__pressure-sense-line" x1="64" y1="104" x2="64" y2="134" />
+  </g>
+
+  
+</g>
+<g id="inst-QDP-001" transform="translate(1186,560) translate(0,0) rotate(0) scale(0.751174) translate(-0,-10)" style="--kc:1.331250">
+<g id="QDP-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <path id="QDP-001__housing" d="M67 15 H147 V95 H67 Z" />
+    
+    <line id="QDP-001__mating-half-tick" x1="1" y1="38" x2="1" y2="72" />
+    <line id="QDP-001__line-left" x1="0" y1="55" x2="83" y2="55" class="pl-pressure"/>
+    
+    <circle id="QDP-001__poppet-ball" cx="115" cy="55" r="23" />
+    <path id="QDP-001__poppet-jaws" d="M116 20 L83 55 L116 90" />
+    
+    <line id="QDP-001__line-right" x1="138" y1="55" x2="213" y2="55" />
+  </g>
+
+  
+</g>
+<g id="inst-QDR-001" transform="translate(1200,900) translate(0,0) rotate(0) scale(0.751174) translate(-0,-10)" style="--kc:1.331250">
+<g id="QDR-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <path id="QDR-001__housing" d="M67 15 H147 V95 H67 Z" />
+    
+    <line id="QDR-001__mating-half-tick" x1="1" y1="38" x2="1" y2="72" />
+    <line id="QDR-001__line-left" x1="0" y1="55" x2="83" y2="55" class="pl-return"/>
+    
+    <circle id="QDR-001__poppet-ball" cx="115" cy="55" r="23" />
+    <path id="QDR-001__poppet-jaws" d="M116 20 L83 55 L116 90" />
+    
+    <line id="QDR-001__line-right" x1="138" y1="55" x2="213" y2="55" />
+  </g>
+
+  
+</g>
+<g id="inst-USER-001" transform="translate(1498,160) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-001__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-001__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-001__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-001__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-001__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-001</tspan><tspan x="60" y="40.5">MF扰流板</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-002" transform="translate(1498,265) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-002__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-002__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-002__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-002__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-002__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-002</tspan><tspan x="60" y="40.5">襟翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-003" transform="translate(1498,370) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-003__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-003__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-003__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-003__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-003__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-003</tspan><tspan x="60" y="40.5">缝翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-004" transform="translate(1498,475) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-004__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-004__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-004__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-004__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-004__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-004</tspan><tspan x="60" y="40.5">副翼</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-005" transform="translate(1498,580) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-005__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-005__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-005__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-005__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-005__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-005</tspan><tspan x="60" y="40.5">升降舵</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-006" transform="translate(1498,685) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-006__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-006__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-006__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-006__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-006__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-006</tspan><tspan x="60" y="40.5">方向舵</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-007" transform="translate(1498,790) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-007__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-007__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-007__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-007__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-007__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-007</tspan><tspan x="60" y="40.5">反推</tspan></text>
+  </g>
+
+  
+</g>
+<g id="inst-USER-008" transform="translate(1498,895) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="USER-008__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <rect id="USER-008__user-box" x="20" y="8" width="80" height="44" />
+
+    
+    <line id="USER-008__port-stub-left" x1="20" y1="30" x2="0" y2="30" class="pl-pressure"/>
+    <line id="USER-008__port-stub-right" x1="100" y1="30" x2="120" y2="30" class="pl-return"/>
+
+    
+    <text id="USER-008__user-name" data-name-slot="1" x="60" y="34" text-anchor="middle" font-size="12" fill="#000000" stroke="none" font-family="Noto Sans CJK SC, Microsoft YaHei, sans-serif"><tspan x="60" y="27.5">USER-008</tspan><tspan x="60" y="40.5">正常刹车</tspan></text>
+  </g>
+
+  
+</g></g>
+<g id="dangling"><circle class="dang" cx="540.0" cy="290.0" r="5"/>
+<circle class="dang" cx="540.0" cy="610.0" r="5"/>
+<circle class="dang" cx="370.0" cy="290.0" r="5"/>
+<circle class="dang" cx="1346.0" cy="593.8" r="5"/>
+<circle class="dang" cx="1360.0" cy="933.8" r="5"/></g>
+<g id="labels"><text class="lbl" x="169.0" y="956.0" text-anchor="middle">TANK-001</text>
+<text class="lbl" x="169.0" y="969.0" text-anchor="middle">自增压油箱</text>
+<text class="lbl" x="370.0" y="386.0" text-anchor="middle">FSOV-001</text>
+<text class="lbl" x="370.0" y="399.0" text-anchor="middle">防火墙关断活门</text>
+<text class="lbl" x="540.0" y="426.0" text-anchor="middle">EDP-001</text>
+<text class="lbl" x="540.0" y="439.0" text-anchor="middle">发动机驱动泵</text>
+<text class="lbl" x="540.0" y="589.0" text-anchor="middle">EMP-001</text>
+<text class="lbl" x="540.0" y="602.0" text-anchor="middle">电动泵</text>
+<text class="lbl" x="1092.0" y="270.0" text-anchor="start">PF-001</text>
+<text class="lbl" x="1092.0" y="283.0" text-anchor="start">压力油滤</text>
+<text class="lbl" x="492.0" y="116.0" text-anchor="start">CDF-001</text>
+<text class="lbl" x="492.0" y="129.0" text-anchor="start">壳体回油滤</text>
+<text class="lbl" x="1240.0" y="1140.0" text-anchor="middle">RF-001</text>
+<text class="lbl" x="1240.0" y="1153.0" text-anchor="middle">回油滤</text>
+<text class="lbl" x="1370.0" y="269.0" text-anchor="middle">PRV-001</text>
+<text class="lbl" x="1370.0" y="282.0" text-anchor="middle">优先阀</text>
+<text class="lbl" x="510.0" y="824.0" text-anchor="middle">PRV-002</text>
+<text class="lbl" x="510.0" y="837.0" text-anchor="middle">自增压优先阀</text>
+<text class="lbl" x="1252.0" y="206.0" text-anchor="start">ACC-001</text>
+<text class="lbl" x="1252.0" y="219.0" text-anchor="start">系统蓄压器</text>
+<text class="lbl" x="1307.0" y="39.0" text-anchor="middle">ACV-001</text>
+<text class="lbl" x="1307.0" y="52.0" text-anchor="middle">充气活门</text>
+<text class="lbl" x="1445.5" y="29.0" text-anchor="middle">PG-001</text>
+<text class="lbl" x="1445.5" y="42.0" text-anchor="middle">充气压力表</text>
+<text class="lbl" x="1266.0" y="644.0" text-anchor="middle">QDP-001</text>
+<text class="lbl" x="1266.0" y="657.0" text-anchor="middle">地面压力快卸接头</text>
+<text class="lbl" x="1280.0" y="984.0" text-anchor="middle">QDR-001</text>
+<text class="lbl" x="1280.0" y="997.0" text-anchor="middle">地面回油快卸接头</text></g></g>
+<g id="legend"><rect class="lg" x="380.0" y="1020.0" width="540.0" height="290.0"/>
+<text class="lg-t" x="390.0" y="1038.0" font-weight="bold">图例  (T = 1.20)</text>
+<line x1="392.0" y1="1060.0" x2="436.0" y2="1060.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="1064.0">High Pressure Lines  高压 (高于回油压力的全部压力级)  3.0 T</text>
+<line x1="392.0" y1="1082.0" x2="436.0" y2="1082.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1086.0">Low Pressure Lines   低压 (回油、壳体回油)             1.0 T</text>
+<line class="suc-sample-base" x1="392.0" y1="1104.0" x2="436.0" y2="1104.0" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="392.0" y1="1111.1" x2="400.3" y2="1096.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="400.9" y1="1111.1" x2="409.2" y2="1096.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="409.9" y1="1111.1" x2="418.1" y2="1096.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="418.8" y1="1111.1" x2="427.1" y2="1096.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="427.7" y1="1111.1" x2="436.0" y2="1096.9" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1108.0">Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=8)</text>
+<line x1="392.0" y1="1126.0" x2="436.0" y2="1126.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1130.0">Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T</text>
+<line x1="392.0" y1="1148.0" x2="436.0" y2="1148.0" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="1152.0">组件本体 (符号轮廓、内部机构)                          1.5 T</text>
+<text class="lg-t" x="452.0" y="1174.0">  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T</text>
+<text class="lg-t" x="452.0" y="1196.0">  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化</text>
+<path d="M392.0 1207.0 L406.0 1214.0 L392.0 1221.0 Z" fill="#e8e8e8" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="1218.0">系统边界接口(用户未建模)</text>
+<path class="brg-lo" d="M404.0 1236.0 A5 5 0 0 1 414.0 1236.0"/>
+<line x1="409.0" y1="1224.0" x2="409.0" y2="1244.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="1240.0">跨线桥:横线跨过竖线,二者不连通</text>
+<circle class="jn" cx="409.0" cy="1258.0" r="3"/>
+<line x1="392.0" y1="1258.0" x2="426.0" y2="1258.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="1262.0">三通:实心点表示连通</text>
+<circle class="dang" cx="409.0" cy="1280.0" r="5"/>
+<text class="lg-t" x="444.0" y="1284.0">悬空端口:未接线,不得视为已连接</text></g>
+<g id="title"><rect class="tb" x="40.0" y="1330.0" width="1600.0" height="56.0"/>
+<text class="tb-t" x="50.0" y="1351.0">系统 HYD-SYS-1   |   L0 1.1   |   目录 comac-hydraulic-components@0.3-draft   |   成熟度 concept</text>
+<text class="tb-t" x="50.0" y="1370.0">部件 22   |   网络 37   |   气侧支路 2   |   未知项 28   |   悬空端口 5: EDP-001.drive_shaft EMP-001.elec_power FSOV-001.command QDP-001.outlet QDR-001.outlet   | provisional: firewall_shutoff_valve engine_driven_pump electric_motor_driven_pump quick_disconnect_coupling_disconnected_return hydraulic_user   | draft: bootstrap_reservoir priority_valve air_charging_valve pressure_gauge</text></g>
+</svg>

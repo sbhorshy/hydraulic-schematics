@@ -1,0 +1,263 @@
+{
+  "sheet": "1#系统原理图.svg",
+  "validation": "passed",
+  "visual_review": "pending",
+  "fail_count": 0,
+  "warn_count": 6,
+  "checks": [
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (278.0, 686.0)->(298.0, 686.0)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 18 单位但汇于同一端口,按连通处理: (60.0, 686.0)->(42.0, 686.0)"
+    },
+    {
+      "id": "V4",
+      "result": "warn",
+      "detail": "三通点 (409,1258) 不在任何母线 x 上"
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 9 个,须在图签栏计数并标红: ACC-001.gas_port ACV-001.accumulator_gas ACV-001.charge_port EDP-001.drive_shaft EMP-001.elec_power FSOV-001.command PG-001.pressure_sense QDP-001.outlet QDR-001.outlet"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 22 个,不可正式出图: ACC-001(none) ACV-001(draft) CDF-001(none) EDP-001(provisional) EMP-001(provisional) FSOV-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(none) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)"
+    },
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "构图预算 B3：绕行比 2.373 > 1.5 且非边界走廊，超限"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "V2",
+      "polylines": 48,
+      "segments": 102
+    },
+    {
+      "id": "V12",
+      "texts": 44
+    },
+    {
+      "id": "V13",
+      "segments": 102
+    },
+    {
+      "id": "V14",
+      "crossings": 0,
+      "bridged": 0,
+      "unbridged": 0
+    },
+    {
+      "id": "V15",
+      "base_T": 1.2,
+      "allowed_T": {
+        "high": 3.0,
+        "low": 1.0,
+        "symbol": 1.5
+      },
+      "violations": 0,
+      "non_scaling_stroke": 0
+    },
+    {
+      "id": "V17",
+      "S": 8.0,
+      "slash_height": 16.0,
+      "slash_angle_deg": 60.0,
+      "intra_spacing": 10.0,
+      "group_pitch": 100.0,
+      "end_clearance": 32.0,
+      "groups": 5,
+      "slashes": 25,
+      "duplicate_slashes": 0,
+      "legend_sample": [
+        1,
+        5
+      ],
+      "obstacle_hits": 0,
+      "baseline": "continuous"
+    },
+    {
+      "id": "V18",
+      "pipeline_arrows": 0,
+      "arrow_layers": 0
+    },
+    {
+      "id": "V16",
+      "scheme": "A: 轮廓 1.5T 不随管网",
+      "lead_ends": 66,
+      "steps": 0,
+      "orphan_lead_ends": 0
+    },
+    {
+      "id": "V4",
+      "junctions": 21,
+      "bus_x": [
+        620,
+        880,
+        940,
+        1160,
+        1470,
+        1646
+      ]
+    },
+    {
+      "id": "V5",
+      "dangling": [
+        "ACC-001.gas_port",
+        "ACV-001.accumulator_gas",
+        "ACV-001.charge_port",
+        "EDP-001.drive_shaft",
+        "EMP-001.elec_power",
+        "FSOV-001.command",
+        "PG-001.pressure_sense",
+        "QDP-001.outlet",
+        "QDR-001.outlet"
+      ]
+    },
+    {
+      "id": "V6",
+      "canvas": [
+        1680,
+        1390
+      ],
+      "shift_x": 30,
+      "content_x": [
+        70.0,
+        1676.0
+      ],
+      "content_y": [
+        50,
+        1124
+      ]
+    },
+    {
+      "id": "V8",
+      "groups": 0
+    },
+    {
+      "id": "V9",
+      "not_annotated": [
+        "ACC-001(none)",
+        "ACV-001(draft)",
+        "CDF-001(none)",
+        "EDP-001(provisional)",
+        "EMP-001(provisional)",
+        "FSOV-001(provisional)",
+        "PF-001(none)",
+        "PG-001(draft)",
+        "PRV-001(draft)",
+        "PRV-002(draft)",
+        "QDP-001(provisional)",
+        "QDR-001(provisional)",
+        "RF-001(none)",
+        "TANK-001(draft)",
+        "USER-001(provisional)",
+        "USER-002(provisional)",
+        "USER-003(provisional)",
+        "USER-004(provisional)",
+        "USER-005(provisional)",
+        "USER-006(provisional)",
+        "USER-007(provisional)",
+        "USER-008(provisional)"
+      ]
+    },
+    {
+      "id": "V10",
+      "l0_nets": 37,
+      "rendered_polylines": 48
+    },
+    {
+      "id": "V19",
+      "crossings": 0,
+      "turns_total": 21,
+      "turns_max_single": 3,
+      "detour_max": 2.373,
+      "min_segment": 8.0,
+      "box_gap_min": 40.0
+    },
+    {
+      "id": "composition_budget",
+      "source": "rendering-rules.md 数值构图预算（concept 档 v1）",
+      "items": {
+        "B1": "pass",
+        "B2": "pass",
+        "B3": "over",
+        "B4": "pass",
+        "B5": "pass",
+        "B6": "pass"
+      },
+      "not_measured": [
+        "B6.avoid_corridor",
+        "B7"
+      ],
+      "note": "B7 标签净空 6px 未自动测量（需文本包围盒近似），V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。"
+    }
+  ],
+  "composition_budget": {
+    "source": "rendering-rules.md 数值构图预算（concept 档 v1）",
+    "items": [
+      {
+        "id": "B1",
+        "metric": "线线交叉",
+        "measured": 0,
+        "status": "pass"
+      },
+      {
+        "id": "B2",
+        "metric": "折返次数",
+        "measured": {
+          "total": 21,
+          "max_single": 3
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B3",
+        "metric": "绕行比（路线长÷直角曼哈顿距）",
+        "measured": {
+          "max": 2.373,
+          "over_budget": [
+            "2.373"
+          ]
+        },
+        "status": "over"
+      },
+      {
+        "id": "B4",
+        "metric": "最短走线段(px)",
+        "measured": 8.0,
+        "status": "pass"
+      },
+      {
+        "id": "B5",
+        "metric": "节点盒最小净距(px)",
+        "measured": 40.0,
+        "status": "pass"
+      },
+      {
+        "id": "B6",
+        "metric": "容器走廊(px)",
+        "measured": {
+          "group_padding": 20,
+          "avoid_corridor": "not_measured"
+        },
+        "status": "pass",
+        "detail": "避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关"
+      }
+    ],
+    "not_measured": [
+      "B6.avoid_corridor（避让走廊 ≥12）",
+      "B7（标签净空 ≥6）"
+    ],
+    "note": "B6 避让走廊与 B7 标签净空 v1 未实现自动测量（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。"
+  }
+}
