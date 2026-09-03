@@ -27,6 +27,8 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
   换目标系统时只改顶部路径常量与拓扑数据，在任何 CWD 下运行同一份副本结果一致。
 - 守门工具 `check_library.py` 与 `selftest.py` 是例外：它们属于 skill 基础设施，不复制，
   按「随附资产与单源纪律」的原位命令从仓库根直接运行。
+- 布局引擎/寻优/驱动器/确认单（#22 沉淀）同属原位件：驱动器自带沙箱复制，直接原位运行；
+  引擎与确认单按 CLI 传参原位运行，不落工作目录副本。
 
 ## 工作流
 
@@ -60,6 +62,15 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 线宽/线型/走线/镜像/分区框/图签图例的完整约定见 [references/rendering-rules.md](references/rendering-rules.md)。照抄模板脚本的结构（局部回路 + 水平镜像，或 layout.json 显式坐标），只改拓扑数据，不改约定本身。
 
+### Phase 2.5 · 自动布局与自动收敛（#22 沉淀）
+
+L0 链路「人工给坐标」可由三件工具接管（驱动器自带沙箱复制纪律，可直接原位运行）：
+
+- **布局引擎 `layout_engine.py`**：`python layout_engine.py <intent> <catalog> <ref|-> -o <out.layout.json> [--guard-report R.json] [--param KEY=VAL] [--optimize]`。两段式：R1–R14 规则定行位（自由度全收参数表 `P`，`--param` 可覆写；**缺省值按 1# 系统调校，披露**）+ kiwi REQUIRED 守门（规则解自洽即零漂移，不可满足则报错退出，绝不静默出图）。`--optimize` 叠加第三阶段寻优（B1–B7 能量 + V2/V13 硬缺陷 + 不劣化下限，首改进下降 + 抛光帽）。B3 边界走廊豁免判点可由布局 json 的 `boundary_terminals` 键给出（`[[x,y],...]`），缺省为 1# 实测值——新系统接入应在布局中显式给出。
+- **拓扑确认单 `topology_confirm.py`**：`python topology_confirm.py <intent> <受控模板.yaml> -o <确认单.md>`——分段拓扑逐行签认 + 三向机器对账（intent↔受控模板互为背书，对账差异=退出码 1，确认单仍生成供工程师签认或退回）。
+- **模板门禁**：preflight（渲染器钩子与 CLI 同源）在 intent 同目录发现唯一 `*受控模板.yaml` 即启用三向对账；签认按 maturity 分级——**concept 未签认=WARN 披露放行，其余 maturity 未签认=ERROR 扣留产物**（正式出图必须先逐行签认确认单并在模板签认区登记 signed）。
+- **校核驱动器 `validate_driver.py`**：`python validate_driver.py --intent <intent> [--layout-seed S.json] [--ref R.json] [--optimize] [--workdir DIR] [--readback-w W]`——preflight 门禁 → 布局（种子或引擎）→ 渲染 → 校核，按处方表有界收敛（默认两轮）：**P1** 纯传感链误入 paths 自动降级 taps；**P3** 几何硬缺陷（V2/V13/V19）引擎重推+寻优；其余残差上报不烧轮次。退出码 0 收敛（fail 0）/ 1 轮次耗尽 / 2 preflight 残差 / 3 工具链故障。每轮渲染后自动重出 1:1 回读 PNG（卫生不变量）。沙箱自包含（skill 脚本/符号/catalog 逐份复制），规范源一个不碰。
+
 ### Phase 3 · 追溯清单
 
 对照 `scripts/render_aircraft_schematic.py` 中的 `render_manifest` / `self_check`：生成 `<name>_topology.md`，含"连接(边)映射"与"节点(part)映射"两张表，每行注明输入定义行号与实例数；概念级简化（如回油未建模）须在文末"简化说明"里逐条披露。
@@ -76,7 +87,7 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 |---|---|
 | `assets/component-library/` | 描边符号 SVG（kebab-case 规范名）+ component-catalog.json |
 | `assets/contracts/` | `l0-input-contract.schema.json`——L0 intent 结构契约（预检器形状层，也可被编辑器/CI 独立消费） |
-| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`test_suction_markers.py` 专项测试范例 |
+| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器（含模板门禁）、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`layout_engine.py` 布局引擎（规则+守门+寻优）、`proto_optimize.py` 寻优层、`validate_driver.py` 校核驱动器、`topology_confirm.py` 拓扑确认单、`test_suction_markers.py` 专项测试范例 |
 | `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对；`negative-mixed-violations` 为七类违规混样、`positive-preflight-cleared` 为预检正例，供 preflight 回归） |
 
 依赖提示：L0 渲染器与预检器需要 `ruamel.yaml`；预检器形状层另需 `jsonschema`（缺失时形状层降级为 WARN，语义层照跑）；其余仅标准库。

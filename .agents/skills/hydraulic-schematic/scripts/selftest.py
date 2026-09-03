@@ -19,6 +19,11 @@
      （exit 1，且报出端口存在性 E-PORT / role 兼容 E-SENS / 结构契约 E-SHAPE-* 等
      具体 finding id、一次报齐）；正例 positive-preflight-cleared 必须放行（exit 0）。
      与渲染器、CLI 同源调用 scripts/preflight.py。
+  D. 布局引擎烟测（#22 沉淀批）：到站 1# 输入上规则+守门出全量布局（exit 0，
+     nodes/buses 非空、guard 带裁决字段）；未覆盖形态（范例系统的收集链
+     普通滤型）必须 fail-closed——exit 1 且报「未布元件」，绝不静默出图。
+  E. preflight 模板门禁（#22 沉淀批）：intent 同目录空背书受控模板 →
+     对账 E-RECON 必须拦截（exit 1）且 concept 未签认 W-SIGN-UNSIGNED 披露。
 
 明确不在 v2 覆盖内：L0 链路金样（L0 规范源断裂，见地图 Out of scope）、
 构图度量回归（等「构图预算定档」阈值冻结）、PNG 光栅化比对（属感知层人工回读）。
@@ -26,6 +31,7 @@
 失败出口：与渲染器同一退出码约定 0 过 / 1 断，供 CI 或钩子直接调用。
 守门基础设施，在仓库根原位运行，不复制到工作目录。
 """
+import json
 import os
 import shutil
 import subprocess
@@ -203,10 +209,81 @@ def check_preflight():
         raise Fail('正例输出缺 cleared_for_layout 状态标记。输出：\n%s' % out[-400:])
 
 
+# ---------- D. 布局引擎烟测（#22 沉淀批） ----------
+
+ENGINE = os.path.join(HERE, 'layout_engine.py')
+EX_INTENT = os.path.join(SKILL, 'assets', 'examples', 'system-1.intent.yaml')
+EX_LAYOUT = os.path.join(SKILL, 'assets', 'examples', '1#系统.layout.json')
+SKILL_CATALOG = os.path.join(SKILL, 'assets', 'component-library',
+                             'component-catalog.json')
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(SKILL)))
+ARRIVAL_INTENT = os.path.join(REPO, '1#系统原理图', 'proto', 'frozen',
+                              '1#系统.intent.yaml')
+ARRIVAL_LAYOUT = os.path.join(REPO, '1#系统原理图', 'proto', 'frozen',
+                              '1#系统.layout.json')
+
+
+def check_layout_engine():
+    """正例：到站 1# 输入上规则+守门出全量布局（exit 0、nodes/buses 非空、
+    guard 带 zero_drift/drifted 裁决）。负例：未覆盖形态（收集链普通滤型）
+    必须 fail-closed——exit 1 且报「未布元件」清单，绝不静默出图。"""
+    ws = tempfile.mkdtemp(prefix='selftest-engine-')
+    try:
+        out_layout = os.path.join(ws, 'engine.layout.json')
+        guard = os.path.join(ws, 'guard.json')
+        rc, out = run_py([ENGINE, ARRIVAL_INTENT, SKILL_CATALOG,
+                          ARRIVAL_LAYOUT, '-o', out_layout,
+                          '--guard-report', guard], expect_zero=False)
+        if rc != 0:
+            raise Fail('布局引擎退出码 %d（期望 0）。输出尾部：\n%s'
+                       % (rc, out[-800:]))
+        with open(out_layout, encoding='utf-8') as f:
+            layout = json.load(f)
+        if not layout.get('nodes') or not layout.get('buses'):
+            raise Fail('引擎布局缺 nodes/buses')
+        with open(guard, encoding='utf-8') as f:
+            g = json.load(f)
+        if 'zero_drift' not in g or 'drifted' not in g:
+            raise Fail('guard 报告缺 zero_drift/drifted 裁决字段')
+        rc, out = run_py([ENGINE, EX_INTENT, SKILL_CATALOG, EX_LAYOUT,
+                          '-o', os.path.join(ws, 'neg.layout.json')],
+                         expect_zero=False)
+        if rc != 1 or '未布元件' not in out:
+            raise Fail('未覆盖形态未 fail-closed（rc=%d，期望 1 + 未布元件'
+                       '报告）。输出：\n%s' % (rc, out[-600:]))
+    finally:
+        shutil.rmtree(ws, ignore_errors=True)
+
+
+# ---------- E. preflight 模板门禁（#22 沉淀批：三向对账+签认分级） ----------
+
+def check_template_gate():
+    """intent 同目录放一份空背书受控模板 → 对账 E-RECON 必须拦截（exit 1），
+    concept 未签认 → W-SIGN-UNSIGNED 披露。干净模板的放行侧由 C 项正例
+    （无模板不启用门禁）与驱动器到站演练覆盖。"""
+    ws = tempfile.mkdtemp(prefix='selftest-tpl-')
+    try:
+        intent_copy = os.path.join(ws, '1#系统.intent.yaml')
+        shutil.copy2(EX_POS, intent_copy)
+        writeb(os.path.join(ws, '1#清单受控模板.yaml'), '行: []\n'.encode('utf-8'))
+        rc, out = run_py([PREFLIGHT, intent_copy], expect_zero=False)
+        if rc != 1:
+            raise Fail('空背书模板未被对账拦截（退出码 %d，期望 1）。输出：\n%s'
+                       % (rc, out[-800:]))
+        for fid in ('E-RECON', 'W-SIGN-UNSIGNED'):
+            if fid not in out:
+                raise Fail('模板门禁输出缺 %s（对账/签认分级被破坏）。输出：\n%s'
+                           % (fid, out[-800:]))
+    finally:
+        shutil.rmtree(ws, ignore_errors=True)
+
+
 CHECKS = [
     ('A. SysML 链路金样比对（渲染退出码/结构自检/SVG+清单逐字节）', check_sysml_golden),
     ('B. check_library 结构闸门（自带库默认过闸 / 沙箱缺端口组拦截）', check_library_gate),
     ('C. L0 预检器：负例七类违规拦截报齐 / 正例放行', check_preflight),
+    ('D. 布局引擎烟测（范例系统规则+守门出全量布局，#22）', check_layout_engine),
+    ('E. preflight 模板门禁（空背书对账拦截 / concept 未签认披露，#22）', check_template_gate),
 ]
 
 
