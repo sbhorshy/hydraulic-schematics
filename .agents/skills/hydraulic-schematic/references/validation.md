@@ -8,12 +8,12 @@
 
 ## 2. 几何校核 `validate_sheet.py`
 
-模板：skill `scripts/validate_sheet.py`（原位在仓库 `已标注/1#系统原理图/`，以那里为规范源）。
+模板：skill `scripts/validate_sheet.py` 即规范源（单源化，#20 定案；工作区历史副本不再是规范源）。#21 起首选免复制运行：`python <skill>/scripts/validate_sheet.py <workdir>`，报告落 `<workdir>/validation-report.json`。
 
 - 只算几何不动图：线段穿越元件矩形检测（`seg_rect_hit`）、orphan 节点、net 连通性等。
 - 产出 `validation-report.json`，每项判定附坐标或 ID（检查项编号 V1, V2, ...），供人工复核与回归对比。
 - 对 intent/layout/svg 三件套互相核对：intent 中每条 path 有边可对，图上无边多画。
-- 脚本按 HERE 相对路径找输入（同级 svg/layout、上级 intent/catalog）——复制到工作目录后先改这几个常量再运行。
+- 脚本按 HERE 相对路径找输入（同级 svg/layout、上级 intent/catalog）——就地/复制运行时先改这几个常量（历史复制纪律兼容；首选上一条的免复制工作目录参数）。
 - 退出码 1 = validation: failed。
 - 同模式可写专项测试（如 `scripts/test_suction_markers.py` 验吸油路径标记传播）。
 

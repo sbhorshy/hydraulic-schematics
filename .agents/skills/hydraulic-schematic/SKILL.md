@@ -52,7 +52,7 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 组件库**只有一处**：本 skill 的 `assets/component-library/` 即唯一规范源（单源化，#20/#21 定案；旧"已标注规范源→快照"两处库教义随规范源归档作废）。文件按文件名在其中定位，catalog 0.4-draft 登记 22 个组件类型。
 
-**新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完用 `已标注/check_symbol.py <file.svg>` 过入库门禁（§6.4 1–12 条）再入库；模板与规范条文两处同步修订。
+**新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完过符号入库门禁 `check_symbol.py <file.svg>`（6.4 第 1–12 条 + C13 方框基准；脚本暂随工作区携带，规范源归位挂账 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)）再入库；模板与规范条文两处同步修订。
 
 **用户（用油设备）不需要新符号**：intent `parts` 直接写 `<inst>: hydraulic_user`，画成"用户名+长方形框"，左压力进口/右回油出口，名字由 L0 渲染器写入框内名槽（`data-name-slot`）——详见 [references/symbol-library.md](references/symbol-library.md) 的通用用户框一节。
 

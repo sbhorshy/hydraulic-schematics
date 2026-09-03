@@ -1,15 +1,17 @@
 # 符号库与标注规范
 
-## 库的两种位置
+## 库的位置（单源纪律）
 
-| 位置 | 角色 | 判定 |
-|---|---|---|
-| `<工作区>/已标注/`（含 `component-catalog.json`） | **规范源**：标注、目录修订都发生在这里 | 工作区存在即优先 |
-| 本 skill `assets/component-library/` | 自包含快照，供 skill 被带到其他工作区时使用 | 仅当工作区没有库 |
+组件库**只有一处**：本 skill 的 `assets/component-library/` 即**唯一规范源**——描边符号 SVG 与 `component-catalog.json` 都在这里，标注与目录修订直接发生在这里（单源化，#20/#21 定案；旧「工作区规范源→skill 快照」两处库教义随规范源归档作废，镜像工具 `sync_snapshot.py` 一同退役）。
 
-符号/目录/脚本快照的刷新统一走 `scripts/sync_snapshot.py`（含端口回退闸门，用法见 SKILL.md「随附资产与快照同步」）——仓库里做完修订后跑 `--apply` 即可。
+渲染端符号解析顺序（与 SKILL.md Phase 2 同口径）：
 
-目录 JSON 里 `symbol.asset` 的路径相对仓库根（如 `组件库/Check Valve.svg` 指未标注草稿、`已标注/*-stroke.svg` 指已标注符号）。在 skill 快照里这些路径不解析——**按文件名在活动库根下定位**即可，绘图的语义数据以 catalog 各字段为准。
+1. **工作目录相对**——工作目录内同名文件优先（本地覆盖，传统复制纪律仍然成立）；
+2. **catalog 同目录锚定**——catalog 在哪，库就在哪；不带本地 catalog 时即锚定 skill 自带库，工作目录**不再需要** `symbols/` 拷贝。
+
+原快照闸门的端口回退检测（油箱事件：符号编辑丢失 `connection-points`）由库结构校验器承接：改动符号或 catalog 后先跑 `python scripts/check_library.py`（0 过 / 1 断；L1 合法 XML / L2 端口组与 id 唯一 / L3 catalog↔symbol 交叉硬档），再跑 selftest——详见 SKILL.md「随附资产与单源纪律」。
+
+目录 JSON 里 `symbol.asset` 登记的是**库内文件名**（如 `check-valve.svg`），按文件名在活动库根下定位；归档时代的仓库根相对路径（`组件库/…`、`已标注/…`）已随 0.4-draft 回登记清账。绘图的语义数据以 catalog 各字段为准。
 
 ## 目录 JSON（component-catalog.json）
 
@@ -68,7 +70,7 @@
 - **豁免**（本体非方框，省略该属性，门禁不校核）：accumulator（圆角矩形）、球式 check-valve / check-valve-spring、air-charging-valve（弓形）、quick-disconnect-coupling 配对件与原始件、pressure-gauge（圆表盘）、bootstrap 油箱。油滤的**菱形框**不是方框，同样不适用本基准。**hydraulic_user 用户名框**也豁免——它是长方形名容器（120×60 起步），尺寸随名字排版伸缩，不是信封本体。
 - 信封方框是"描边闭合正方"：`fill=none`、非虚线、path 以 Z 收尾/rect/polygon。虚线框是先导回路或装配界线，不算信封。
 - **附件方框**（感温包、接线盒等，含用户确认的"共边正方形"约定件）不设基准，但边长须 **< 60**（基准的 3/4），否则视为第二本体，C13 拦截。
-- 门禁 **C13**（`已标注/check_symbol.py`）按上述判据校核：`single` 须恰有一个本体级方框（边≥60 中恰一个 80×80）；`multi` 逐格校核。
+- 门禁 **C13**（符号入库门禁 `check_symbol.py`：技术规范 6.4 第 1–12 条 + C13 方框基准）按上述判据校核：`single` 须恰有一个本体级方框（边≥60 中恰一个 80×80）；`multi` 逐格校核。该脚本暂随工作区携带，规范源归位挂账 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)。
 - catalog 对应字段 `symbol.envelope_class`，与根属性保持一致。
 
 ## 通用用户框（hydraulic_user）
