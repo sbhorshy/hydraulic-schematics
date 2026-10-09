@@ -72,7 +72,7 @@ Blocked by: #68
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/68
 
-Blocked by: None
+Blocked by: #64
 
 生成图中外接引线与相邻管网保持规定的有效线宽；无论使用 line、path 或 polyline，换一种 SVG 表达都不能让同一线宽错误逃过校核。
 
@@ -102,7 +102,7 @@ Blocked by: #68
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/70
 
-Blocked by: #64
+Blocked by: #64, #65
 
 旋转后的元件和管线具有可读的实际间距；连续直线中的存储切分点不会被误报为短管段。
 

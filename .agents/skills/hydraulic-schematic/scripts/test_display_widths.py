@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
-from test_entrypoints import make_render_workspace, FIXTURE
+from test_entrypoints import make_render_workspace, FIXTURE, SKILL
 
 NS = '{http://www.w3.org/2000/svg}'
 
@@ -244,6 +244,86 @@ class DisplayWidths(unittest.TestCase):
         self.assertEqual(evidence['coverage_status'],'not_checked')
         self.assertTrue(any(e.get('component')=='PRV-001' and e.get('port')=='inlet'
                             for e in evidence['unchecked']),evidence['unchecked'])
+
+    def test_pneumatic_pressure_gauge_12px_override_fails_with_fresh_png(self):
+        from PIL import Image
+        self.run_cli('render_l0_sheet.py')
+        root=ET.parse(self.svg).getroot()
+        lead=next(e for e in root.iter() if e.get('id')=='PG-001__pressure-sense-line')
+        lead.set('style','stroke-width:12px !important')
+        self.save(root)
+        result=subprocess.run([sys.executable,str(SKILL/'scripts/rasterize_sheet.py'),str(self.svg),
+                               '-o',str(self.work/'sheet-readback.png'),'--backend','chrome'],
+                              capture_output=True,text=True,timeout=40)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        image=Image.open(self.work/'sheet-readback.png').convert('L')
+        self.assertGreater(sum((255-image.getpixel((x,111)))/255 for x in range(1460,1493)),8)
+        report=self.validate()
+        browser=json.loads((self.work/'browser-evidence.json').read_text())
+        measured=next(r for r in browser['elements'] if r['id']=='PG-001__pressure-sense-line')
+        self.assertEqual(measured['style']['stroke-width'],'12px')
+        for check in ('V15','V16'):
+            self.assertTrue(any('PG-001' in f for f in self.failures(report,check)),self.failures(report,check))
+
+    def test_both_gas_tap_ends_follow_sense_width_and_keep_internal_strokes(self):
+        self.run_cli('render_l0_sheet.py')
+        report=self.validate()
+        ports={('PG-001','pressure_sense'),('ACC-001','gas_port'),
+               ('ACV-001','charge_port'),('ACV-001','accumulator_gas')}
+        evidence=next(e for e in report['evidence'] if e['id']=='V16')
+        selected=[m for m in evidence['measurements'] if (m['component'],m['port']) in ports]
+        self.assertEqual({(m['component'],m['port']) for m in selected},ports)
+        self.assertTrue(all(abs(m['effective_width']-1.2)<.02 for m in selected),selected)
+        self.assertEqual(self.failures(report),[])
+        browser=json.loads((self.work/'browser-evidence.json').read_text())
+        for identifier in ('PG-001__dial','PG-001__needle','ACV-001__central-left-triangle','ACV-001__middle-interface-line'):
+            row=next(e for e in browser['elements'] if e['id']==identifier)
+            width=float(row['style']['stroke-width'].removeprefix('calc(').removesuffix(')').removesuffix('px'))
+            self.assertAlmostEqual(width,1.8,places=3)
+        # The known open drive-shaft lead remains body width; no connection is invented.
+        shaft=next(e for e in browser['elements'] if e.get('instance')=='EDP-001' and
+                   e['tag']=='line' and e['attrs'].get('x1')=='40' and e['attrs'].get('y2')=='0')
+        self.assertNotIn('pl-',shaft['attrs'].get('class',''))
+        self.assertAlmostEqual(float(shaft['style']['stroke-width'].removeprefix('calc(').removesuffix(')').removesuffix('px')),1.8,places=3)
+
+    def test_gas_source_path_polyline_and_compensated_scale_are_equivalent(self):
+        path=self.work/'symbols/pressure-gauge.svg';tree=ET.parse(path)
+        lead=next(e for e in tree.getroot().iter() if e.get('id')=='pressure-sense-line')
+        parent=next(p for p in tree.getroot().iter() if lead in list(p));parent.remove(lead)
+        group=ET.SubElement(parent,NS+'g',{'transform':'scale(2)'})
+        coords=[float(lead.attrib.pop(a))/2 for a in ('x1','y1','x2','y2')]
+        lead.tag=NS+'path';lead.set('d','M%g %g L%g %g'%tuple(coords));group.append(lead)
+        ET.register_namespace('',NS[1:-1]);tree.write(path,encoding='unicode')
+        path=self.work/'symbols/accumulator.svg';tree=ET.parse(path)
+        lead=next(e for e in tree.getroot().iter(NS+'line') if e.get('y2')=='0')
+        coords=[lead.attrib.pop(a) for a in ('x1','y1','x2','y2')]
+        lead.tag=NS+'polyline';lead.set('points','%s,%s %s,%s'%tuple(coords));tree.write(path,encoding='unicode')
+        self.run_cli('render_l0_sheet.py');report=self.validate()
+        self.assertEqual(self.failures(report),[])
+        measurements=next(e for e in report['evidence'] if e['id']=='V16')['measurements']
+        for inst,port in (('PG-001','pressure_sense'),('ACC-001','gas_port')):
+            row=next(m for m in measurements if m['component']==inst and m['port']==port)
+            self.assertAlmostEqual(row['effective_width'],1.2,places=2)
+
+    def test_gas_css_polyline_and_extra_scale_corruption_are_localized(self):
+        self.run_cli('render_l0_sheet.py');original=self.svg.read_text()
+        for kind,expected in (('css','ACV-001.charge_port'),('polyline','ACC-001.gas_port'),('scale','PG-001.pressure_sense')):
+            with self.subTest(kind=kind):
+                root=ET.fromstring(original)
+                if kind=='css':
+                    style=ET.SubElement(root,NS+'style');style.text='#ACV-001__left-interface-line {stroke-width:1.8px !important;}'
+                else:
+                    inst=next(e for e in root.iter() if e.get('id')=='inst-'+expected.split('.')[0])
+                    lead=next(e for e in inst.iter() if e.get('data-interface-port')==expected.split('.')[1])
+                    coords=[float(lead.attrib.pop(a)) for a in ('x1','y1','x2','y2')]
+                    if kind=='polyline':
+                        lead.tag=NS+'polyline';lead.set('points','%g,%g %g,%g'%tuple(coords));lead.set('style','stroke-width:3.6px')
+                    else:
+                        parent=next(p for p in inst.iter() if lead in list(p));parent.remove(lead)
+                        group=ET.SubElement(parent,NS+'g',{'transform':'scale(2)'})
+                        lead.tag=NS+'path';lead.set('d','M%g %g L%g %g'%tuple(v/2 for v in coords));group.append(lead)
+                self.save(root);report=self.validate()
+                self.assertTrue(any(expected in message for message in self.failures(report)),self.failures(report))
 
 
 if __name__ == '__main__':

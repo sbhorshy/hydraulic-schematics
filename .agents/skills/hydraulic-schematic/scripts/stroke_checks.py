@@ -97,7 +97,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                                          (measurement['element'],cls,effective,expected,item['a'])))
         except (ValueError,TypeError) as error:
             ports = geometry['nodes'].get(row.get('instance'),{}).get('ports',{})
-            matched = [pid for pid,p in ports.items() if p['medium']=='hydraulic' and
+            matched = [pid for pid,p in ports.items() if
                        any(math.dist(p['position'],q)<=POSITION_TOLERANCE for q in row.get('endpoints',[]))]
             pid = row['attrs'].get('data-interface-port')
             if cls or pid or _class(row,'pl-') or matched:
@@ -117,7 +117,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
         for lead in leads:
             pid = lead['port']
             port = node['ports'].get(pid)
-            if not port or port['medium'] != 'hydraulic':
+            if not port:
                 continue
             position = port['position']
             if any(u.get('component') == inst and u.get('port') == pid for u in ev16['unchecked']):
@@ -171,6 +171,11 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                         segment = {'element':row['id'] or row['key'],'position':location,
                                    'effective_width':item['width'],'expected_width':expected}
                         measurement['segments'].append(segment)
+                        ev15['measurements'].append(dict(segment,component=inst,port=pid,kind='external_lead'))
+                        standards=[value*ev15['base_T'] for value in ev15['allowed_T'].values()]
+                        if not any(abs(item['width']-value)<=WIDTH_TOLERANCE for value in standards):
+                            failures.append(('V15','%s.%s effective external lead width %.3f is outside standard widths %s @%s' %
+                                             (inst,pid,item['width'],[round(v,4) for v in standards],location)))
                         if abs(item['width']-expected)>WIDTH_TOLERANCE:
                             failures.append(('V16','%s.%s %s effective lead width %.3f != network %.3f @%s; width may change only at the defined body boundary' %
                                              (inst,pid,segment['element'],item['width'],expected,location)))

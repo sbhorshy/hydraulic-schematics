@@ -791,7 +791,10 @@ class Sheet(object):
             pb = (pb3[0], pb3[1])
             aa = self.abs[(sinst, spid)][2]
             ab = self.abs[(ainst, apid)][2]
-            self.port_lt[(sinst, spid)] = 'sense'
+            # Both declared tap ends carry the branch. Keep an already established
+            # main-network classification; incompatible visible networks remain a validator error.
+            self.port_lt.setdefault((sinst, spid), 'sense')
+            self.port_lt.setdefault((ainst, apid), 'sense')
             S = 18.0
             stub = {'left': (-S, 0), 'right': (S, 0),
                     'up': (0, -S), 'down': (0, S)}[aa]
@@ -976,17 +979,14 @@ class Sheet(object):
         """把符号内部的"端口引线"改判为管线线宽。
 
         判据是几何,不是文件位置:一端落在某个端口红点上、另一端落在
-        本体上的 line/path/polyline,就是这个端口的引线——它走油,故按所在管网的
-        压力等级取宽(3.0/1.0 T),不按组件本体 1.5 T。
-        识别不到所属管网(悬空端口、非液压口如 FSOV.command)时不改,
-        保持本体线宽——因为那里确实没有管线。
+        本体上的 line/path/polyline,就是这个端口的外接引线。按已声明相接
+        管网取宽(3.0/1.0 T),包含 sense 气侧/测量支路,不按组件本体 1.5 T。
+        识别不到所属管网(悬空端口、未建模命令口)时不改,保持本体线宽。
         """
         root = ET.fromstring('<g>' + markup + '</g>')
         leads, _unchecked = source_leads(root, ports)
         for lead in leads:
             pid = lead['port']
-            if ports[pid][4] != 'hydraulic':
-                continue
             lt = self.port_lt.get((inst, pid))
             if not lt:
                 continue
@@ -1134,8 +1134,8 @@ def css(T):
   .sym-outline { fill: none; stroke: currentColor;
                  stroke-width: calc(%(sy).2f * var(--kc)); }
 
-  /* 符号内部的端口引线。它走油,故随管网压力等级,不随组件本体。
-     判据是"是否走油",而非"画在哪个文件里"。
+  /* 符号外接引线随相接管网等级,包含气侧 sense 支路。
+     按已声明连接判断,不以介质排除整类已连接端口。
      端口类直接作用于各类引线图元,覆盖继承的 sym-outline 线宽。
      注:style 内容未包 CDATA,注释里不可出现尖括号,会破坏 XML。 */
   .pl-pressure   { stroke-width: calc(%(hi).2f * var(--kc) * var(--lead-scale, 1)); }

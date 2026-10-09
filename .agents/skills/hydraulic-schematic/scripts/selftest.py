@@ -291,13 +291,17 @@ def check_l0_regressions():
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
-                                timeout=600)
+                                timeout=900)
     except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 600 秒进程保护上限，未通过') from exc
+        raise Fail('L0 专项测试超过 900 秒进程保护上限，未通过') from exc
+    output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
     if result.returncode:
-        output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
         raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'
                    % (result.returncode, output[-5000:]))
+    lines = output.strip().splitlines()
+    summary = next((i for i, line in enumerate(lines) if line.startswith('Ran ')), None)
+    if summary is not None:
+        print('\n'.join(lines[summary:]))
 
 
 CHECKS = [
