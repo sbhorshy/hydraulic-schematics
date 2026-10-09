@@ -4,9 +4,12 @@
 不看图,只算几何。产出 validation-report.json,每项判定附坐标或 ID,
 供感知校核环节(PNG 回读)之前的门禁使用。
 
-用法: python3 validate_sheet.py
+用法: python3 validate_sheet.py [工作目录]
 退出码 1 表示 validation: failed。
 """
+from endpoint_usage import (endpoint_usage, check_disclosure, symbol_contract,
+                            write_contract_failure, resolve_symbol)
+
 import io
 import json
 import math
@@ -99,12 +102,27 @@ def seg_rect_hit(p0, p1, rect, tol=2.0):
     return 0.0
 
 
-def main():
+def main(argv=None):
+    global HERE, SHEET, LAYOUT, INTENT, CATALOG
+    args = list(sys.argv[1:] if argv is None else argv)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    HERE = os.path.abspath(args[0]) if args else script_dir
+    SHEET = os.path.join(HERE, '1#系统原理图.svg')
+    LAYOUT = os.path.join(HERE, '1#系统.layout.json')
+    INTENT = os.path.join(HERE, '1#系统.intent.yaml')
+    CATALOG = os.path.join(HERE, 'component-catalog.json')
+    if not os.path.isfile(CATALOG):
+        CATALOG = os.path.normpath(os.path.join(script_dir, '..', 'assets',
+                                              'component-library', 'component-catalog.json'))
     F, W, ev = [], [], []          # fail, warn, evidence
     intent = load_yaml(INTENT)
     L = json.load(io.open(LAYOUT, encoding='utf-8'))
     cat = json.load(io.open(CATALOG, encoding='utf-8'))
     T = {c['component_type']: c for c in cat['components']}
+    inventory = endpoint_usage(intent, T, L['nodes'])
+    contract_issues = symbol_contract(intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
+    if contract_issues:
+        return write_contract_failure(HERE, inventory, contract_issues, intent.get('unknown') or [])
     SHIFT = L.get('canvas_shift_x', 0)
     CW, CH = L['canvas']['width'], L['canvas']['height']
 
@@ -131,7 +149,7 @@ def main():
     for inst, nd in L['nodes'].items():
         boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
-        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        p = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
         _mk, vb, ps = read_symbol(p)
         vx, vy, vw, vh = vb
         k = min(nd['w'] / float(vw), nd['h'] / float(vh))
@@ -609,7 +627,7 @@ def main():
     # 误报为"引线未改判"。判据是端口 data-medium,不是几何。
     nonhyd = set()      # (inst, 整图 x, 整图 y)
     for inst, nd in (L['nodes'] or {}).items():
-        sp = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        sp = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
         if not os.path.exists(sp):
             continue
         sroot = ET.parse(sp).getroot()
@@ -752,32 +770,14 @@ def main():
     ev.append({'id': 'V4', 'junctions': len(jn), 'bus_x': sorted(bus_x)})
 
     # ---------- V5 悬空端口(不阻止出图,但必须披露) ----------
-    used = set()
-    for p in intent['paths']:
-        for tok in p:
-            if tok.startswith('@'):
-                continue
-            inst = tok.split('.')[0]
-            if inst not in intent['parts']:
-                continue
-            if '.' in tok:
-                used.add((inst, tok.split('.', 1)[1]))
-            else:
-                mp = T[intent['parts'][inst]].get('main_path')
-                if mp:
-                    used.add((inst, mp['in']))
-                    used.add((inst, mp['out']))
-    dang = []
-    for inst, ct in intent['parts'].items():
-        if inst not in L['nodes']:
-            continue
-        for q in T[ct]['ports']:
-            if (inst, q['id']) not in used:
-                dang.append('%s.%s' % (inst, q['id']))
+    dang = inventory['dangling']
     if dang:
         W.append(('V5', '悬空端口 %d 个,须在图签栏计数并标红: %s'
                   % (len(dang), ' '.join(sorted(dang)))))
-    ev.append({'id': 'V5', 'dangling': sorted(dang)})
+    drawing_issues = check_disclosure(root, inventory, ports)
+    F.extend(('V5', item['detail']) for item in drawing_issues)
+    ev.append({'id': 'V5', **inventory, 'drawing_issues': drawing_issues,
+               'contract_issues': contract_issues, 'unknown': intent.get('unknown') or []})
 
     # ---------- V6 内容越出画布(含 shift 后) ----------
     xs, ys = [], []
@@ -851,7 +851,7 @@ def main():
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
-        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
+        p = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
         s = io.open(p, encoding='utf-8').read(4000)
         st = re.search(r'data-symbol-status="([^"]+)"', s)
         st = st.group(1) if st else 'none'
