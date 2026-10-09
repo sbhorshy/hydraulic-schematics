@@ -21,7 +21,8 @@ def make_render_workspace(root, fixture):
     work = root / 'run'
     work.mkdir()
     for name in ('render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
-                 'topology_confirm.py', 'proofreading_evidence.py'):
+                 'topology_confirm.py', 'proofreading_evidence.py',
+                 'sheet_geometry.py', 'endpoint_checks.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
     shutil.copytree(CATALOG.parent, work / 'symbols')
@@ -118,8 +119,8 @@ class LayoutEntrypoints(unittest.TestCase):
             report = json.loads((work / 'validation-report.json').read_text(encoding='utf-8'))
             failures = {c['id'] for c in report['checks'] if c['result'] == 'fail'}
             # 短净距出桩修复已消除原 V17；此未修正种子仍有气侧穿本体，
-            # 且新的 V13 检查会抓住同一支路原先漏检的反向折返。
-            self.assertEqual(failures, {'V2', 'V13'})
+            # 且 V3/V13 独立检查会抓住同一支路原先漏检的反向折返。
+            self.assertEqual(failures, {'V2', 'V3', 'V13'})
             self.assertTrue(any(c['id'] == 'V13' and '自身折返' in c['detail']
                                 and 'ln-sense' in c['detail'] for c in report['checks']))
             self.assertEqual(report['visual_review'], 'pending')
@@ -137,6 +138,23 @@ class LayoutEntrypoints(unittest.TestCase):
             self.assertEqual(report['fail_count'], 0)
             # Geometry success does not certify the perceptual readback stage.
             self.assertEqual(report['visual_review'], 'pending')
+
+    def test_in_place_validation_uses_catalog_symbols_without_local_copies(self):
+        with tempfile.TemporaryDirectory(prefix='l0-catalog-symbols-') as directory:
+            work = Path(directory)
+            fixture = SKILL / 'assets/fixtures/l0-small-seed'
+            for name in ('1#系统.intent.yaml', '1#系统.layout.json'):
+                shutil.copy2(fixture / name, work / name)
+            self.run_script(SKILL / 'scripts/render_l0_sheet.py', work, [work])
+            self.run_script(SKILL / 'scripts/validate_sheet.py', work, [work])
+            report = json.loads((work / 'validation-report.json').read_text(encoding='utf-8'))
+            self.assertEqual(report['geometry']['nodes']['EDP-001']['ports']['pressure_out']['position'],
+                             [650.0, 530.0])
+            self.assertEqual(report['artifacts']['files']['catalog']['path'], str(CATALOG))
+            for key, artifact in report['artifacts']['files'].items():
+                if key.startswith('symbol:'):
+                    self.assertEqual(Path(artifact['path']).parent, CATALOG.parent)
+            self.run_script(SKILL / 'scripts/proofreading_evidence.py', work, ['verify', work])
 
 
 if __name__ == '__main__':

@@ -226,7 +226,7 @@ def coverage_for(report):
             priority = {'fail': 5, 'not_checked': 4, 'warn': 3, 'pass': 2, 'not_applicable': 1}
             chosen = max(explicit, key=lambda e: priority[e['coverage_status']])
             status = chosen['coverage_status']
-            detail = chosen.get('coverage_detail', detail)
+            detail = chosen.get('coverage_detail', chosen.get('detail', detail))
         if any(e['result'] == 'fail' for e in findings):
             status = 'fail'
         elif status == 'pass' and any(e['result'] == 'warn' for e in findings):
