@@ -87,7 +87,7 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
         self.assertEqual(report['perceptual_review'], 'pending')
         self.assertIn('PERCEPTUAL', report['delivery']['blocking_checks'])
         self.assertEqual(report['automated_validation']['status'], 'complete')
-        self.assertEqual(report['delivery']['blocking_checks'], ['PERCEPTUAL'])
+        self.assertEqual(report['delivery']['blocking_checks'], ['PERCEPTUAL', 'READBACK_ITEMS'])
 
     def test_same_size_replaced_png_is_unchecked_after_revalidation(self):
         self.rasterize()
