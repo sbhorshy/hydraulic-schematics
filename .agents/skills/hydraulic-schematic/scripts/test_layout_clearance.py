@@ -101,6 +101,25 @@ class LayoutClearanceCLI(unittest.TestCase):
         self.assertEqual(item['nearest_group']['deficit'],9)
         self.assertEqual(next(c['status'] for c in report['coverage'] if c['id']=='B6.group_padding'),'warn')
 
+    def test_unpainted_group_frame_cannot_certify_padding_or_membership(self):
+        from ruamel.yaml import YAML
+        yaml=YAML();path=self.work/'1#系统.intent.yaml';intent=yaml.load(path)
+        intent['groups']=[{'id':'FILTER','label':'Filter','members':['PF-001'],'reason':'actual frame display'}]
+        yaml.dump(intent,path)
+        self.render()
+        original=self.svg.read_text()
+        for style in ('stroke:none;fill:none', 'stroke:none;fill:black', 'stroke-opacity:0', 'stroke-width:0',
+                      'stroke:rgba(208,0,0,0)'):
+            with self.subTest(style=style):
+                self.svg.write_text(original.replace('</style>','.grp {'+style+';}</style>'))
+                report=self.validate()
+                coverage={c['id']:c['status'] for c in report['coverage']}
+                self.assertEqual(coverage['V8'],'fail')
+                self.assertEqual(coverage['B6.group_padding'],'not_checked')
+                self.assertTrue(any(c.get('kind')=='missing_visible_frame' and c.get('group')=='FILTER'
+                                    for c in report['checks']))
+                self.assertTrue(self.budget(report,'B6')['groups']['unchecked'])
+
     def test_real_short_bend_and_foldback_remain_short(self):
         for points in ('620,530 640,530 640,536 800,536 800,530 820,530',
                        '620,530 640,530 634,530 634,470 800,470 800,530 820,530'):
