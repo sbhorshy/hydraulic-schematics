@@ -17,6 +17,7 @@ import tempfile
 import time
 import xml.etree.ElementTree as ET
 from proofreading_evidence import file_digest, write_png_receipt
+from browser_evidence import font_environment
 
 
 def dimensions(svg, width=None):
@@ -34,6 +35,11 @@ def dimensions(svg, width=None):
 
 
 def renderer(backend='auto'):
+    if backend in ('auto', 'chrome'):
+        for name in ('google-chrome', 'chromium', 'chromium-browser', 'chrome'):
+            exe = shutil.which(name)
+            if exe:
+                return 'chrome', exe
     if backend in ('auto', 'inkscape'):
         exe = shutil.which('inkscape')
         if not exe and os.name == 'nt':
@@ -42,11 +48,6 @@ def renderer(backend='auto'):
                         if os.path.isfile(p)), None)
         if exe:
             return 'inkscape', exe
-    if backend in ('auto', 'chrome'):
-        for name in ('google-chrome', 'chromium', 'chromium-browser', 'chrome'):
-            exe = shutil.which(name)
-            if exe:
-                return 'chrome', exe
     raise RuntimeError('缺少可用的本机 Inkscape/Chrome，未生成回读图')
 
 
@@ -95,7 +96,7 @@ def export(svg, output, width=None, backend='auto', timeout=60):
     version = subprocess.run([executable, '--version'], capture_output=True, text=True,
                              timeout=10).stdout.strip()
     write_png_receipt(svg, output, {'backend': kind, 'version': version,
-                                  'exporter_sha256': file_digest(__file__),
+                                  'exporter_sha256': file_digest(__file__), 'font_environment':font_environment(svg),
                                   'width': w, 'height': h})
     return dict(renderer=kind, width=w, height=h, output=str(output),
                 elapsed_s=round(time.monotonic() - started, 6))

@@ -41,7 +41,8 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
         coverage = {item['id']: item for item in report['coverage']}
         self.assertEqual(coverage['V1']['status'], 'pass')
         self.assertEqual(coverage['B6.avoid_corridor']['status'], 'pass')
-        self.assertEqual(coverage['B7']['status'], 'not_checked')
+        self.assertEqual(coverage['B7']['status'], 'warn')
+        self.assertTrue(coverage['B7']['evidence'][0]['violations'])
         self.assertEqual(coverage['PNG']['status'], 'not_checked')
         self.assertEqual(coverage['PERCEPTUAL']['status'], 'not_checked')
         self.assertEqual(report['phases']['automated']['status'], 'incomplete')
@@ -74,7 +75,7 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
                 path.write_bytes(original)
                 self.evidence_cli('verify')
 
-    def test_driver_does_not_deliver_zero_failures_with_unfinished_checks(self):
+    def test_driver_does_not_deliver_automated_success_without_perceptual_review(self):
         output = Path(self.tmp.name) / 'driver'
         self.run_cli(SKILL / 'scripts/validate_driver.py',
                      '--intent', self.work / '1#系统.intent.yaml',
@@ -85,7 +86,8 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
         self.assertFalse(report['delivery']['ready'])
         self.assertEqual(report['perceptual_review'], 'pending')
         self.assertIn('PERCEPTUAL', report['delivery']['blocking_checks'])
-        self.assertEqual(report['automated_validation']['status'], 'incomplete')
+        self.assertEqual(report['automated_validation']['status'], 'complete')
+        self.assertEqual(report['delivery']['blocking_checks'], ['PERCEPTUAL'])
 
     def test_same_size_replaced_png_is_unchecked_after_revalidation(self):
         self.rasterize()
