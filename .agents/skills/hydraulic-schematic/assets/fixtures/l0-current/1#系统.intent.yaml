@@ -1,0 +1,137 @@
+# Current 23-part concept fixture: original declared paths/taps preserved.
+catalog: comac-hydraulic-components@0.7-draft
+extern: {}
+l0_version: '1.1'
+maturity: concept
+parts:
+  ACC-001: hydro_pneumatic_accumulator
+  ACV-001: air_charging_valve
+  CDF-001: filter_line_shutoff_dp_case_drain
+  CV-002: check_valve_refuel
+  EDP-001: engine_driven_pump
+  EMP-001: electric_motor_driven_pump
+  FSOV-001: firewall_shutoff_valve
+  PF-001: filter_line_shutoff_dp
+  PG-001: pressure_gauge
+  PRV-001: priority_valve
+  PRV-002: priority_valve
+  QDP-001: quick_disconnect_coupling_disconnected
+  QDR-001: quick_disconnect_coupling_disconnected_return
+  RF-001: filter_line_shutoff_dp_return_bypass
+  TANK-001: bootstrap_reservoir
+  USER-001: hydraulic_user
+  USER-002: hydraulic_user
+  USER-003: hydraulic_user
+  USER-004: hydraulic_user
+  USER-005: hydraulic_user
+  USER-006: hydraulic_user
+  USER-007: hydraulic_user
+  USER-008: hydraulic_user
+paths:
+- - TANK-001.suction_out
+  - EMP-001.suction
+- - TANK-001.suction_out
+  - FSOV-001
+  - EDP-001.suction
+- - EDP-001.pressure_out
+  - '@PRESS'
+- - EMP-001.pressure_out
+  - '@PRESS'
+- - '@PRESS'
+  - PF-001
+  - '@MANIFOLD'
+- - '@MANIFOLD'
+  - PRV-001
+  - '@USR'
+- - '@USR'
+  - USER-001.pressure_in
+- - '@USR'
+  - USER-002.pressure_in
+- - '@USR'
+  - USER-003.pressure_in
+- - '@USR'
+  - USER-004.pressure_in
+- - '@USR'
+  - USER-005.pressure_in
+- - '@USR'
+  - USER-006.pressure_in
+- - '@USR'
+  - USER-007.pressure_in
+- - '@USR'
+  - USER-008.pressure_in
+- - '@MANIFOLD'
+  - ACC-001.hydraulic_port
+- - '@PRESS'
+  - PRV-002
+  - TANK-001.bootstrap_pressure_in
+- - '@MANIFOLD'
+  - QDP-001.aircraft_side
+- - USER-001.return_out
+  - '@USERR'
+- - USER-002.return_out
+  - '@USERR'
+- - USER-003.return_out
+  - '@USERR'
+- - USER-004.return_out
+  - '@USERR'
+- - USER-005.return_out
+  - '@USERR'
+- - USER-006.return_out
+  - '@USERR'
+- - USER-007.return_out
+  - '@USERR'
+- - USER-008.return_out
+  - '@USERR'
+- - '@USERR'
+  - RF-001
+  - '@RET'
+- - CV-002
+  - '@USERR'
+- - '@RET'
+  - TANK-001.return_in
+- - '@RET'
+  - QDR-001.aircraft_side
+- - EDP-001.case_drain
+  - '@CASE'
+- - EMP-001.case_drain
+  - '@CASE'
+- - '@CASE'
+  - CDF-001
+  - '@RET'
+system: HYD-SYS-1
+taps:
+- at: ACC-001.gas_port
+  sensor: ACV-001.accumulator_gas
+- at: ACV-001.charge_port
+  sensor: PG-001.pressure_sense
+unknown:
+- ETP-selector-valve-not-in-catalog
+- ETP-unit-not-in-catalog
+- ground-refuel-assembly-not-in-catalog
+- priority-valve-internal-check-flow-pending
+- quick-disconnect-port-semantics-pending
+- filter-line-shutoff-dp-standard-page-pending
+- return-filter-bypass-assembly-constructed
+- return-filter-bypass-cracking-flow-pending
+- return-filter-bypass-branch-position-assumed
+- air-charging-valve-port-sides-user-confirmed
+- pressure-gauge-medium-pneumatic-assumed
+- hydraulic-user-symbol-provisional
+- FSOV-001-suction-side-placement-assumed
+- TANK-001-return-port-count-unconfirmed
+- system-relief-valve-not-declared
+- pump-isolation-check-valves-not-declared
+- EDP-001-drive-shaft-destination
+- EMP-001-elec-power-destination
+- FSOV-001-command-destination
+- QD-open-ends-are-disconnected-position
+- accumulator-charge-source-not-declared
+- system-pressure-class
+- EDP-001-rated-flow
+- EMP-001-rated-flow
+- ACC-001-precharge-pressure
+- ACC-001-volume
+- PF-001-filtration-rating
+- RF-001-filtration-rating
+- CDF-001-filtration-rating
+- operating-modes

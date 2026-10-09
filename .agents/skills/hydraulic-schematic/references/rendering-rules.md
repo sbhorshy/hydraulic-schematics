@@ -11,7 +11,8 @@ l0_version / system / catalog / maturity
 extern:      # 系统边界(地面接头等必然开口)
 parts:       # id: component_type —— 只收目录内类型
 paths:       # 连接; 目录外类型不得出现(L0 规范)
-groups:      # 布 lane 用分组
+groups:      # 布 lane 用分组(布局抽象, 1.0T 退后线宽)
+assemblies:  # 装配声明(可选段): label 必填、members≥2; 驱动装配围框
 unknown:     # 数量/接法存疑, 显式列出, 不代为编造
 ```
 
@@ -40,6 +41,38 @@ unknown:     # 数量/接法存疑, 显式列出, 不代为编造
 - 分区框 `<rect data-zone>` + 分区标题（如 GREEN CIRCUIT / 绿系统）。
 - 标签中英双行（`油箱\nReservoir`），中文主名；字体 fallback `"Microsoft YaHei","Noto Sans CJK SC",sans-serif`。
 - 图签栏（title block）必含：来源文件、范围、成熟度及免责声明（`成熟度: concept 概念图,非工程放行图`）；图例框列全各类线型。
+
+## 装配围框（Assembly Enclosure）
+
+> 出处：标准条文 "Enclosure for an Assembly — used to border a group of symbols
+> where the component extremity is not obvious by the connecting symbology.
+> Elements are not removable in situ."（措辞与 SAE AS1290A 一致；**条款号待手持
+> 原件核对**，沿用 PENDING_STANDARD_ID 挂账口径）。语义承接 archive 技术规范
+> §10.7（装配虚线边界，单源化迁移欠账由本节补位）与 §8.2（`members_removable_in_situ:
+> false`）。调研底稿：仓库 `research/assembly-enclosure-standard.md`（#34）。
+
+- **语义**：围框是一组在位不可拆卸组件（装配，intent `assemblies` 段）的边界标示；
+  围框是绘图抽象——不是部件、不是拓扑对象，不得作为 path 端点连接
+  （负例 `negative-group-in-path` 防线同一口径）。
+- **生成**：先布局成员，取**成员画出足迹（含其标签文字范围）**的包围盒加统一内距
+  （≥14 px，B6 同口径）生成矩形；不做成固定尺寸符号；成员集合变化后重算。
+  画在管线层之下，越框处管线压框线。
+- **线宽与线型**：**1.5T 长虚线**（节距属渲染样式参数，基准 `dasharray: 8 5`）。
+  条文页长虚线为基准图形；示例页链式观感不采信（印刷伪影或 manifold 可拆变体），
+  原件核对若推翻，属样式参数级修订，不动线宽。
+- **越框规则**：管线穿越围框仅表示成员对外接口，不表示与围框连接；管线/引线
+  几何不因穿越改变（线宽仍按压力等级编码，V16 口径），穿越点必须落在成员端口。
+- **标注**：装配名（`assemblies.<id>.label`，如"CDF-001 壳体回油滤装配"）画
+  框外上方左对齐，与分组框标签同位同规格（框顶 - pad - 标签间距，grp-lbl 字号）。
+- **与分组框的关系（拆分定档）**：`groups:` 分组框是**布局抽象**（布 lane/LRU 分区），
+  降为 **1.0T**、节距不变——围框 1.5T 承载标准语义，分组框视觉退后，线宽即语义等级；
+  两者数据源天然分离（intent `groups` vs `assemblies`），图上不得再同形同参。
+- **流向指示**：围框不引入渲染器流向箭头（V18 维持：仅禁渲染器属 `.arw`/arrows 层，
+  符号内运动箭头属受控几何）。边界流向指示默认不做；工程确认需要时走既有
+  "边线 `marker-end`"机制（SysML 链路口径）另立票，不恢复独立箭头层。
+- **校核口径（实现落闸门适配票）**：① 成员封闭性——围框圈入非成员即 FAIL
+  （V8 扩展到 assemblies）；② 围框线宽 ≠1.5T 即 FAIL；③ 管线越框点不在成员
+  端口即 FAIL；④ path 引用装配 id 即 preflight ERROR；⑤ V18 维持。
 
 ## 数值构图预算（concept 档 v1）
 

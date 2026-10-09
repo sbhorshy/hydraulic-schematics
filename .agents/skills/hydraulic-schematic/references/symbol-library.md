@@ -50,6 +50,15 @@
 | `data-medium` | `hydraulic/pneumatic/electrical/mechanical` | 介质 → 决定线类 |
 | `data-flow-capability` | `in/out/bidirectional/none` | 流向能力（枚举以 catalog `enums` 为准） |
 
+**共件与状态对的端口命名**（2026-09-07 定案，源于快卸接头）：一个 SVG 被**多类型共用**（如压力/回油快卸接头）或一个组件有**多状态配对件**（如快卸接头连接位/断开位）时，`data-port-id` 用**侧别语义**（`aircraft_side` / `ground_side`），不用流向语义——各类型接通位流向可能相反，侧别才是共件不变量，且配对件同名同位才能保证状态互换时端口不漂移。此时 SVG 内 `data-port-role` / `data-flow-capability` 只写一个类型的默认值，其余类型在 catalog `ports[].role` / `flow_capability` 覆写（回油快卸即此先例：role=return，流向按侧别反转）。
+
+**本体感测口（body tap，2026-09-07 签认 B 类）**：装在组件本体上的测量件接口（如油箱壁/箱底安装的感温件，测本体油液而非管路内流体），端口加 `data-port-kind="body_tap"`，catalog `ports[].kind: "body_tap"`（枚举 `port_kind`：`flow`/`body_tap`，缺省 `flow`）。语义约束：
+
+- `role=measurement`、`flow_capability=none`、`medium` 按被测介质；
+- 仅供 taps **本体锚**挂接（`{sensor: "TT-001.temp_sense", at: "TANK-001.body_sense_tap"}`），不得串入 `paths`（10.5 防线不破）；
+- 与网络锚 taps（`at` 为被测网络的流口，配 `position: upstream/downstream`）的区别：本体锚的端口不属于任何 path，布局引擎按 R16 在宿主组件旁堆叠传感链，网络锚维持 R10 气侧口径；
+- 选位须避宿主符号的引线走廊：bootstrap 油箱实例锚在底缘 `x=50`（回油立管 x=25 与内部机构 x=76 之间的余隙），不锚左右壁——西侧是回油走廊、东侧是吸油引线，壁锚会逼 tap 线与主干道共线（V13）或交叉（B1 预算 0）。
+
 ## 标注新符号的步骤
 
 1. 复制库内 `_template.svg` 起稿（技术规范 §6.3.1 模板），命名 `<name>-stroke.svg`（中文类型可用中文名）；统一黑描边、无填充，`stroke-width=2` 为基准。
@@ -66,7 +75,9 @@
 |---|---|---|
 | 单方框本体（Single Envelope Valve 等） | `single` | 恰一个 **80×80** 描边闭合方框；弹簧/电机/感温包/接线盒等附件画在方框**外**，尺寸不设基准 |
 | 多联位信封阀（multi） | `multi` | 每格各 **80×80**，分隔线落在 80 的整数倍（N 位合计宽 N×80） |
+| 装配级方框阀（assembly） | `assembly` | 本体方框**随内容**，不守 80×80——集成支路/跨管画的组合阀按内容实际跨距画本体方框 |
 
+- **assembly 框随内容**：本体为方框但集成旁路/先导支路的组合阀，登记 `data-envelope-class="assembly"`，本体方框尺寸随内容、不守 80 基准（用户签认 2026-09-29：priority-valve 定位优先阀本体 162×129 native，属装配级，不属 80×80 体系）。
 - **豁免**（本体非方框，省略该属性，门禁不校核）：accumulator（圆角矩形）、球式 check-valve / check-valve-spring、air-charging-valve（弓形）、quick-disconnect-coupling 配对件与原始件、pressure-gauge（圆表盘）、bootstrap 油箱。油滤的**菱形框**不是方框，同样不适用本基准。**hydraulic_user 用户名框**也豁免——它是长方形名容器（120×60 起步），尺寸随名字排版伸缩，不是信封本体。
 - 信封方框是"描边闭合正方"：`fill=none`、非虚线、path 以 Z 收尾/rect/polygon。虚线框是先导回路或装配界线，不算信封。
 - **附件方框**（感温包、接线盒等，含用户确认的"共边正方形"约定件）不设基准，但边长须 **< 60**（基准的 3/4），否则视为第二本体，C13 拦截。

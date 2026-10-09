@@ -6,7 +6,7 @@
     python .agents/skills/hydraulic-schematic/scripts/selftest.py
     python .agents/skills/hydraulic-schematic/scripts/selftest.py --update-golden   # 重录金样
 
-覆盖面（v2，#21：sync_snapshot 退役后改测 check_library 结构闸门）：
+覆盖面（v3：自包含 L0 样例与有界寻优回归）：
 
   A. SysML 链路端到端：按 SKILL.md 运行纪律复刻真实用法——把 skill 快照的
      render_aircraft_schematic.py 与范例 .sysml 复制进临时工作目录再运行；
@@ -19,14 +19,18 @@
      （exit 1，且报出端口存在性 E-PORT / role 兼容 E-SENS / 结构契约 E-SHAPE-* 等
      具体 finding id、一次报齐）；正例 positive-preflight-cleared 必须放行（exit 0）。
      与渲染器、CLI 同源调用 scripts/preflight.py。
-  D. 布局引擎烟测（#22 沉淀批）：到站 1# 输入上规则+守门出全量布局（exit 0，
+  D. 布局引擎烟测：随 skill 打包的当前 23 部件输入上规则+守门出全量布局（exit 0，
      nodes/buses 非空、guard 带裁决字段）；未覆盖形态（范例系统的收集链
      普通滤型）必须 fail-closed——exit 1 且报「未布元件」，绝不静默出图。
   E. preflight 模板门禁（#22 沉淀批）：intent 同目录空背书受控模板 →
      对账 E-RECON 必须拦截（exit 1）且 concept 未签认 W-SIGN-UNSIGNED 披露。
+  F. L0 入口、有界寻优、驱动器、路线剪枝、光栅化适配器的专项 unittest。
+     入口测试含小型 seed 的预检→渲染→几何全链回归；当前 23 部件 seed 的
+     已知几何缺陷仍须被拦截。外部 PNG 工具采用桩测试，不在主自检启动浏览器。
 
-明确不在 v2 覆盖内：L0 链路金样（L0 规范源断裂，见地图 Out of scope）、
-构图度量回归（等「构图预算定档」阈值冻结）、PNG 光栅化比对（属感知层人工回读）。
+全部输入来自 skill 随附资产，不依赖仓库外层的历史 frozen 目录。
+明确不在主自检覆盖内：真实 PNG 光栅化与感知回读，以及冻结版本与新版路由的
+全 SVG 差分；这些在独立验收中执行，不得把 Python 测试通过宣称为感知通过。
 
 失败出口：与渲染器同一退出码约定 0 过 / 1 断，供 CI 或钩子直接调用。
 守门基础设施，在仓库根原位运行，不复制到工作目录。
@@ -54,7 +58,8 @@ PROD_SVG_NAME = 'aircraft_hydraulic_system_schematic.svg'
 PROD_MD_NAME = 'aircraft_hydraulic_system_topology.md'
 
 # 子进程统一 UTF-8 输出，避免 Windows 控制台代码页干扰解码
-CHILD_ENV = dict(os.environ, PYTHONIOENCODING='utf-8', PYTHONUTF8='1')
+CHILD_ENV = dict(os.environ, PYTHONIOENCODING='utf-8', PYTHONUTF8='1',
+                 PYTHONDONTWRITEBYTECODE='1')
 
 
 class Fail(Exception):
@@ -216,23 +221,21 @@ EX_INTENT = os.path.join(SKILL, 'assets', 'examples', 'system-1.intent.yaml')
 EX_LAYOUT = os.path.join(SKILL, 'assets', 'examples', '1#系统.layout.json')
 SKILL_CATALOG = os.path.join(SKILL, 'assets', 'component-library',
                              'component-catalog.json')
-REPO = os.path.dirname(os.path.dirname(os.path.dirname(SKILL)))
-ARRIVAL_INTENT = os.path.join(REPO, '1#系统原理图', 'proto', 'frozen',
-                              '1#系统.intent.yaml')
-ARRIVAL_LAYOUT = os.path.join(REPO, '1#系统原理图', 'proto', 'frozen',
-                              '1#系统.layout.json')
+CURRENT_FIXTURE = os.path.join(SKILL, 'assets', 'fixtures', 'l0-current')
+CURRENT_INTENT = os.path.join(CURRENT_FIXTURE, '1#系统.intent.yaml')
+CURRENT_LAYOUT = os.path.join(CURRENT_FIXTURE, '1#系统.layout.json')
 
 
 def check_layout_engine():
-    """正例：到站 1# 输入上规则+守门出全量布局（exit 0、nodes/buses 非空、
+    """正例：自包含当前输入上规则+守门出全量布局（exit 0、nodes/buses 非空、
     guard 带 zero_drift/drifted 裁决）。负例：未覆盖形态（收集链普通滤型）
     必须 fail-closed——exit 1 且报「未布元件」清单，绝不静默出图。"""
     ws = tempfile.mkdtemp(prefix='selftest-engine-')
     try:
         out_layout = os.path.join(ws, 'engine.layout.json')
         guard = os.path.join(ws, 'guard.json')
-        rc, out = run_py([ENGINE, ARRIVAL_INTENT, SKILL_CATALOG,
-                          ARRIVAL_LAYOUT, '-o', out_layout,
+        rc, out = run_py([ENGINE, CURRENT_INTENT, SKILL_CATALOG,
+                          CURRENT_LAYOUT, '-o', out_layout,
                           '--guard-report', guard], expect_zero=False)
         if rc != 0:
             raise Fail('布局引擎退出码 %d（期望 0）。输出尾部：\n%s'
@@ -278,12 +281,30 @@ def check_template_gate():
         shutil.rmtree(ws, ignore_errors=True)
 
 
+# ---------- F. 性能与入口专项回归（不启动真实 PNG 工具） ----------
+
+def check_l0_regressions():
+    suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver',
+              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_route_terminals')
+    try:
+        result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
+                                cwd=HERE, env=CHILD_ENV, capture_output=True,
+                                timeout=180)
+    except subprocess.TimeoutExpired as exc:
+        raise Fail('L0 专项测试超过 180 秒，未通过') from exc
+    if result.returncode:
+        output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
+        raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'
+                   % (result.returncode, output[-5000:]))
+
+
 CHECKS = [
     ('A. SysML 链路金样比对（渲染退出码/结构自检/SVG+清单逐字节）', check_sysml_golden),
     ('B. check_library 结构闸门（自带库默认过闸 / 沙箱缺端口组拦截）', check_library_gate),
     ('C. L0 预检器：负例七类违规拦截报齐 / 正例放行', check_preflight),
-    ('D. 布局引擎烟测（范例系统规则+守门出全量布局，#22）', check_layout_engine),
+    ('D. 布局引擎烟测（自包含当前输入出全量布局 / 未覆盖形态拦截）', check_layout_engine),
     ('E. preflight 模板门禁（空背书对账拦截 / concept 未签认披露，#22）', check_template_gate),
+    ('F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器专项测试', check_l0_regressions),
 ]
 
 

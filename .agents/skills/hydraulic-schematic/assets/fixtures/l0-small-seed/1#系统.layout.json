@@ -1,0 +1,85 @@
+{
+  "layout_version": "l0-small-seed-1",
+  "source_l0": "1#系统.intent.yaml",
+  "note": "Supply-only fixture; explicit coordinates. Return, bootstrap and case-drain circuits deliberately unknown.",
+  "canvas": {
+    "width": 1680,
+    "height": 1390
+  },
+  "canvas_shift_x": 30,
+  "style": {
+    "base_line_width_T": 1.2,
+    "symbol_stroke_width": 2,
+    "suction_marker_S": 8
+  },
+  "externs": {
+    "USR-001": {
+      "x": 1120,
+      "y": 530,
+      "anchor": "left",
+      "label": "USR-001"
+    }
+  },
+  "nodes": {
+    "TANK-001": {
+      "x": 60,
+      "y": 120,
+      "w": 218,
+      "h": 564,
+      "symbol": "symbols/bootstrap-type-reservoir.svg"
+    },
+    "EDP-001": {
+      "x": 540,
+      "y": 490,
+      "w": 80,
+      "h": 80,
+      "symbol": "symbols/edp-provisional-stroke.svg"
+    },
+    "PF-001": {
+      "x": 820,
+      "y": 490,
+      "w": 80,
+      "h": 80,
+      "symbol": "symbols/filter-line-shutoff-stroke.svg"
+    }
+  },
+  "buses": {},
+  "labels": {
+    "TANK-001": "TANK-001",
+    "EDP-001": "EDP-001",
+    "PF-001": "PF-001"
+  },
+  "label_pos": {
+    "TANK-001": "below",
+    "EDP-001": "above",
+    "PF-001": "above"
+  },
+  "lanes": [
+    100,
+    850
+  ],
+  "vlanes": [
+    20,
+    1200
+  ],
+  "group_padding": 20,
+  "group_label_gap": 10,
+  "legend": {
+    "x": 380,
+    "y": 1020,
+    "w": 540,
+    "h": 290
+  },
+  "title_block": {
+    "x": 40,
+    "y": 1330,
+    "w": 1600,
+    "h": 56
+  },
+  "boundary_terminals": [
+    [
+      1120,
+      530
+    ]
+  ]
+}

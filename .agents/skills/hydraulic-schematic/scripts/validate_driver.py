@@ -24,8 +24,8 @@ layout_engine.py（规则+守门+--optimize 第三阶段）+ render_l0_sheet.py
   轮内 V1/V3/V4/V6/V7/V8/V11/V12/V14/V15/V17/V18
        渲染器/走线器/布局参数所有，无输入侧机械修法，残差上报。
 
-卫生不变量：每轮渲染后必重出 sheet-readback.png（Inkscape 导出，宽度
-= viewBox 宽 --readback-w，像素 1:1，V16 像素探测以此为准）。种子布局
+卫生不变量：每轮渲染后必重出 sheet-readback.png（Inkscape/Chrome 导出，
+宽度默认从 SVG viewBox 推导，像素 1:1，V16 像素探测以此为准）。种子布局
 仅在第一轮使用；P3 生效后布局一律由引擎重推，种子即弃。
 
 工作区：所有改动发生在 --workdir 沙箱副本（skill 侧脚本/符号/catalog/
@@ -41,18 +41,27 @@ intent 逐份复制，符号从 skill 单源库平铺入沙箱供 catalog 锚定
                               [--layout-seed SEED.json] [--ref REF.json]
                               [--inject a|b|c|d] [--optimize]
                               [--readback-w W] [--keep]
+                              [--max-evals 200] [--max-steps 50]
+                              [--max-seconds 30] [--polish-steps 0]
 退出码: 0 收敛(fail 0) / 1 轮次耗尽仍有 fail（残差上报）/
         2 preflight 残差（输入侧拦截，渲染未启动）/ 3 工具链故障。
 """
 import argparse
+import filecmp
+import hashlib
 import glob
 import io
 import json
 import os
 import shutil
+import signal
 import subprocess
 import sys
 import time
+import threading
+import tempfile
+from contextlib import contextmanager
+from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.dirname(HERE)
@@ -63,41 +72,106 @@ INTENT_NAME = '1#系统.intent.yaml'
 LAYOUT_NAME = '1#系统.layout.json'
 SVG_NAME = '1#系统原理图.svg'
 READBACK = 'sheet-readback.png'
-READBACK_W = 1680                      # 缺省 = 1# viewBox 宽；--readback-w 覆写
 
 SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py',
-           'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py']
+           'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
+           'rasterize_sheet.py']
 PY = sys.executable
-INKSCAPE_CANDIDATES = [
-    r'D:\Program Files\Inkscape\bin\inkscape.exe',
-    r'C:\Program Files\Inkscape\bin\inkscape.exe',
-]
-
-# 轮内几何硬缺陷 → P3；其余 fail 全部残差。V19 仅 B1 交叉走 fail 通道。
+# 轮内几何硬缺陷 → P3；其余 fail 全部残差。
 P3_IDS = {'V2', 'V13', 'V19'}
 
 
-def find_inkscape():
-    p = shutil.which('inkscape')
-    if p:
-        return p
-    for c in INKSCAPE_CANDIDATES:
-        if os.path.isfile(c):
-            return c
-    return None
+def progress(message):
+    print('[driver] ' + message, file=sys.stderr, flush=True)
+
+
+@contextmanager
+def stage(stages, name):
+    started = time.monotonic()
+    item = {'stage': name, 'status': 'running'}
+    stages.append(item)
+    progress(name + ' started')
+    try:
+        yield item
+    except Exception:
+        item['status'] = 'failed'
+        raise
+    else:
+        item['status'] = 'failed' if item.get('failure') else 'completed'
+    finally:
+        item['elapsed_s'] = round(time.monotonic() - started, 6)
+        progress('%s %s %.3fs' % (name, item['status'], item['elapsed_s']))
+
+
+def terminate_process_tree(proc):
+    """终止本次工具的整个进程组，防孙进程继续持有输出管道。"""
+    if os.name == 'posix':
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    elif os.name == 'nt':
+        try:
+            subprocess.run(['taskkill', '/PID', str(proc.pid), '/T', '/F'],
+                           capture_output=True, timeout=5)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        if proc.poll() is None:
+            proc.kill()
+    elif proc.poll() is None:
+        proc.kill()
+    try:
+        proc.wait(timeout=1)
+    except subprocess.TimeoutExpired:
+        pass
 
 
 def run(cmd, cwd, timeout=600):
-    """子进程统一出口：UTF-8 抓输出，非零不在这里抛，由调用方裁决。"""
-    env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    """同时消费双管道，仅透出 stderr；等待父进程及管道均受同一超时约束。"""
+    env = dict(os.environ, PYTHONIOENCODING='utf-8', PYTHONUNBUFFERED='1')
+    process_options = ({'start_new_session': True} if os.name == 'posix' else
+                       {'creationflags': subprocess.CREATE_NEW_PROCESS_GROUP}
+                       if os.name == 'nt' else {})
+    deadline = time.monotonic() + timeout
+    proc = subprocess.Popen([str(c) for c in cmd], cwd=cwd, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            text=True, encoding='utf-8', errors='replace',
+                            **process_options)
+    output, errors = [], []
+    stop_forwarding = threading.Event()
+
+    def consume(pipe, sink, forward=False):
+        try:
+            for line in iter(pipe.readline, ''):
+                sink.append(line)
+                if forward and not stop_forwarding.is_set():
+                    print(line, end='', file=sys.stderr, flush=True)
+        finally:
+            pipe.close()
+
+    # 即便第三方主动逃离进程组且持有管道，收尾也不允许卡住驱动器退出。
+    readers = [threading.Thread(target=consume, args=(proc.stdout, output), daemon=True),
+               threading.Thread(target=consume, args=(proc.stderr, errors, True), daemon=True)]
+    for reader in readers:
+        reader.start()
+    timed_out = False
     try:
-        p = subprocess.run([str(c) for c in cmd], cwd=cwd, env=env,
-                           capture_output=True, timeout=timeout)
+        proc.wait(timeout=max(0, deadline - time.monotonic()))
+        for reader in readers:
+            reader.join(timeout=max(0, deadline - time.monotonic()))
+        timed_out = any(reader.is_alive() for reader in readers)
     except subprocess.TimeoutExpired:
-        return None, '', '超时(%ds): %s' % (timeout, ' '.join(map(str, cmd)))
-    out = p.stdout.decode('utf-8', 'replace')
-    err = p.stderr.decode('utf-8', 'replace')
-    return p.returncode, out, err
+        timed_out = True
+    finally:
+        if timed_out:
+            stop_forwarding.set()
+            terminate_process_tree(proc)
+            cleanup_deadline = time.monotonic() + 0.5
+            for reader in readers:
+                reader.join(timeout=max(0, cleanup_deadline - time.monotonic()))
+    if timed_out:
+        errors.append('超时(%gs): %s' % (timeout, ' '.join(map(str, cmd))))
+    return (None if timed_out else proc.returncode), ''.join(output), ''.join(errors)
 
 
 # ---------- 注入演练（只改沙箱副本；1# 验收样例夹具）----------
@@ -207,30 +281,119 @@ def load_yaml(path):
 
 # ---------- 驱动主流程 ----------
 
-def setup_workdir(wd):
-    if os.path.isdir(wd):
+GENERATED = (LAYOUT_NAME, SVG_NAME, READBACK, 'validation-report.json',
+             'convergence-report.json', 'layout-guard-report.json', 'ref.layout.json')
+MANAGED_FILES = '.driver-managed-files.json'
+
+
+def sync_file(src, dest):
+    """内容未变则保留文件（含 mtime）；--keep 不重复复制整套符号。"""
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    if os.path.isfile(dest) and filecmp.cmp(src, dest, shallow=False):
+        return False
+    shutil.copy2(src, dest)
+    return True
+
+
+def invalidate_outputs(wd):
+    for name in GENERATED:
+        path = os.path.join(wd, name)
+        if os.path.isfile(path) or os.path.islink(path):
+            os.unlink(path)
+
+
+def workspace_path(wd, name):
+    root = Path(wd).resolve()
+    dest = root.joinpath(name)
+    if root not in dest.resolve().parents:
+        raise ValueError('工作区文件路径越界: %s' % name)
+    return dest
+
+
+def setup_workdir(wd, keep=False):
+    root, skill_root = Path(wd).resolve(), Path(SKILL).resolve()
+    # 包括符号库等所有子目录、祖先及其符号链接，先检查再做任何写入。
+    if root == skill_root or root in skill_root.parents or skill_root in root.parents:
+        raise ValueError('工作区必须独立于整个 skill 规范源目录树及其父目录')
+    wd = str(root)
+    manifest = workspace_path(wd, MANAGED_FILES)
+    previous = json.loads(manifest.read_text()) if manifest.is_file() else []
+    if not isinstance(previous, list) or any(not isinstance(name, str) for name in previous):
+        raise ValueError('工作区受管文件清单格式错误')
+    for name in previous:
+        workspace_path(wd, name)
+    if root.is_dir() and not keep:
+        if any(root.iterdir()) and not manifest.is_file():
+            raise ValueError('拒绝清空非驱动器创建的非空目录；请换工作区或用 --keep 保留已有文件')
         shutil.rmtree(wd)
-    os.makedirs(wd)
-    for s in SCRIPTS:
-        shutil.copy2(os.path.join(HERE, s), os.path.join(wd, s))
-    # 符号与 catalog：skill 单源库平铺入沙箱——catalog 同目录锚定解析；
-    # 同时留 symbols/ 副本兼容工作目录相对的旧引用写法。
-    for f in os.listdir(LIB):
-        if f.endswith('.svg'):
-            shutil.copy2(os.path.join(LIB, f), os.path.join(wd, f))
-            sym_dir = os.path.join(wd, 'symbols')
-            if not os.path.isdir(sym_dir):
-                os.makedirs(sym_dir)
-            shutil.copy2(os.path.join(LIB, f), os.path.join(sym_dir, f))
-    shutil.copy2(os.path.join(LIB, CATALOG), os.path.join(wd, CATALOG))
-    # preflight 的 schema 候选路径之一是 ../assets/contracts/
-    pf_schema = os.path.join(wd, '..', 'assets', 'contracts')
-    if not os.path.isdir(pf_schema):
-        src_schema = os.path.join(SKILL, 'assets', 'contracts',
-                                  'l0-input-contract.schema.json')
-        if os.path.isfile(src_schema):
-            os.makedirs(pf_schema)
-            shutil.copy2(src_schema, pf_schema)
+        previous = []
+    root.mkdir(parents=True, exist_ok=True)
+    wanted = {s: os.path.join(HERE, s) for s in SCRIPTS}
+    for name in os.listdir(LIB):
+        if name.endswith('.svg') or name == CATALOG:
+            wanted[name] = os.path.join(LIB, name)
+            if name.endswith('.svg'):
+                wanted[os.path.join('symbols', name)] = os.path.join(LIB, name)
+    schema_name = 'l0-input-contract.schema.json'
+    schema = os.path.join(SKILL, 'assets', 'contracts', schema_name)
+    if os.path.isfile(schema):
+        wanted[os.path.join('assets', 'contracts', schema_name)] = schema
+    # 校验所有目的路径后再复制，禁止 --keep 中的目录符号链接指向沙箱外。
+    destinations = {name: workspace_path(wd, name) for name in wanted}
+    for name in previous:
+        dest = workspace_path(wd, name)
+        if name not in wanted and dest.is_file():
+            dest.unlink()
+    copied = sum(sync_file(src, str(destinations[name])) for name, src in wanted.items())
+    manifest.write_text(json.dumps(sorted(wanted), ensure_ascii=False), encoding='utf-8')
+    invalidate_outputs(wd)
+    # 本轮模板必须仅来自本轮输入目录；避免旧模板意外启用门禁。
+    for path in glob.glob(os.path.join(wd, '*受控模板.yaml')):
+        os.unlink(path)
+    return {'kept': keep, 'copied_files': copied, 'reused_files': len(wanted) - copied}
+
+
+def snapshot_inputs(args):
+    """重建/失效处理前读取所有输入，允许输入文件本身位于工作区。"""
+    files, assets, sources = {}, {}, []
+    files[INTENT_NAME] = Path(args.intent).read_bytes()
+    tpl_src = discover_template(args.intent)
+    if tpl_src:
+        files[os.path.basename(tpl_src)] = Path(tpl_src).read_bytes()
+    if args.catalog:
+        files[CATALOG] = Path(args.catalog).read_bytes()
+    if args.layout_seed:
+        seed_path = Path(args.layout_seed).resolve()
+        seed = json.loads(seed_path.read_text(encoding='utf-8'))
+        for node in seed.get('nodes', {}).values():
+            ref = node.get('symbol')
+            if not isinstance(ref, str):
+                continue
+            source = Path(ref) if os.path.isabs(ref) else seed_path.parent / ref
+            source = source.resolve()
+            if not source.is_file():
+                continue
+            if not os.path.isabs(ref) and seed_path.parent not in source.parents:
+                raise ValueError('种子相对符号路径越界: %s' % ref)
+            # 所有本地覆盖归入受控目录，不允许写出工作区或覆盖脚本。
+            payload = source.read_bytes()
+            digest = hashlib.sha256(payload).hexdigest()
+            dest = 'symbols/seed-%s/%s' % (digest, source.name)
+            node['symbol'] = dest
+            assets[dest] = payload
+            sources.append({'source': str(source), 'destination': dest,
+                            'sha256': hashlib.sha256(payload).hexdigest()})
+        files[LAYOUT_NAME] = json.dumps(seed, ensure_ascii=False, indent=2).encode('utf-8')
+    if args.ref and args.ref.lower() not in ('none', '-'):
+        files['ref.layout.json'] = Path(args.ref).read_bytes()
+    return files, assets, sources, tpl_src
+
+
+def restore_inputs(wd, files, assets):
+    for name, payload in {**files, **assets}.items():
+        dest = workspace_path(wd, name)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(payload)
 
 
 def discover_template(intent_src):
@@ -248,193 +411,198 @@ def preflight_run(wd):
     return json.loads(out)
 
 
-def render_round(wd, inkscape, use_seed, p3_armed, ref_path, readback_w):
-    """一轮 = 布局（种子或引擎）→ 渲染 → 回读重出。返回阶段台账。
-    ref 只承载呈现文案（labels 等，引擎注释明示文案不是坐标决策）。"""
-    step = {}
-    if use_seed:
-        step['layout_source'] = 'seed'
-    else:
-        cmd = [PY, 'layout_engine.py', INTENT_NAME, CATALOG, ref_path,
-               '-o', LAYOUT_NAME]
-        if p3_armed:
-            cmd.append('--optimize')
-        # P3 是首改进下降+抛光帽（#19），分钟级是常态，给足上限。
-        rc, out, err = run(cmd, wd, timeout=2400)
-        if rc != 0:
-            raise RuntimeError('layout_engine 失败 rc=%s\n%s\n%s'
-                               % (rc, out, err))
-        step['layout_source'] = 'engine' + ('+optimize' if p3_armed else '')
-    rc, out, err = run([PY, 'render_l0_sheet.py', '.'], wd)
-    if rc != 0:
-        raise RuntimeError('render_l0_sheet 失败 rc=%s\n%s\n%s' % (rc, out, err))
-    step['rendered'] = SVG_NAME
-    # 卫生不变量：回读图必随本轮 SVG 重出（V16 像素探测 1:1 依赖）。
-    if inkscape:
-        rc, out, err = run([inkscape, SVG_NAME, '-o', READBACK,
-                            '-w', str(readback_w)], wd, timeout=300)
-        if rc != 0:
-            raise RuntimeError('readback 导出失败 rc=%s\n%s' % (rc, err))
-        step['readback'] = 'regenerated@%dw' % readback_w
-    else:
-        step['readback'] = 'MISSING(inkscape 不可用，V16 像素探测降级)'
+def render_round(wd, use_seed, p3_armed, ref_path, readback_w,
+                 budgets=None, step=None):
+    """每轮派生物均失效后重建；预算终止仍要渲染并执行正式校验。"""
+    step = step if step is not None else {}
+    stages = step.setdefault('stages', [])
+    for name in (SVG_NAME, READBACK, 'validation-report.json', 'layout-guard-report.json'):
+        path = Path(wd, name)
+        if path.exists():
+            path.unlink()
+    with stage(stages, 'layout'):
+        if use_seed:
+            step['layout_source'] = 'seed'
+        else:
+            cmd = [PY, 'layout_engine.py', INTENT_NAME, CATALOG, ref_path,
+                   '-o', LAYOUT_NAME, '--guard-report', 'layout-guard-report.json']
+            if p3_armed:
+                cmd.append('--optimize')
+                for name, value in (budgets or {}).items():
+                    cmd += ['--' + name.replace('_', '-'), str(value)]
+            timeout = (budgets or {}).get('max_seconds', 30.0) + 60 if p3_armed else 60
+            rc, out, err = run(cmd, wd, timeout=timeout)
+            if rc != 0:
+                raise RuntimeError('layout_engine 失败 rc=%s\n%s\n%s' % (rc, out, err))
+            step['layout_source'] = 'engine' + ('+optimize' if p3_armed else '')
+            guard = Path(wd, 'layout-guard-report.json')
+            if guard.is_file():
+                info = json.loads(guard.read_text(encoding='utf-8'))
+                if 'optimization' in info:
+                    step['optimization'] = info['optimization']
+    with stage(stages, 'render'):
+        rc, out, err = run([PY, 'render_l0_sheet.py', '.'], wd)
+        if rc != 0 or not Path(wd, SVG_NAME).is_file():
+            raise RuntimeError('render_l0_sheet 失败 rc=%s\n%s\n%s' % (rc, out, err))
+        step['rendered'] = SVG_NAME
+    with stage(stages, 'readback') as timing:
+        cmd = [PY, 'rasterize_sheet.py', SVG_NAME, '-o', READBACK]
+        if readback_w is not None:
+            cmd += ['--width', str(readback_w)]
+        rc, out, err = run(cmd, wd, timeout=120)
+        if rc != 0 or not Path(wd, READBACK).is_file():
+            step['readback'] = 'missing'
+            step['readback_error'] = 'readback 导出失败 rc=%s\n%s' % (rc, err)
+            # 保留失败，但仍收集无需像素的几何校验结果。
+            timing['failure'] = step['readback_error']
+        else:
+            step['readback'] = 'regenerated'
+            step['rasterization'] = json.loads(out)
     return step
 
 
 def validate_run(wd):
+    rep_path = Path(wd, 'validation-report.json')
+    if rep_path.exists():
+        rep_path.unlink()
     rc, out, err = run([PY, 'validate_sheet.py', '.'], wd)
-    rep_path = os.path.join(wd, 'validation-report.json')
-    if not os.path.isfile(rep_path):
-        raise RuntimeError('validate 未产出报告 rc=%s\n%s\n%s' % (rc, out, err))
-    with io.open(rep_path, encoding='utf-8') as f:
-        return rc, json.load(f)
+    if rc not in (0, 1) or not rep_path.is_file():
+        raise RuntimeError('validate 未成功产出本轮报告 rc=%s\n%s\n%s' % (rc, out, err))
+    return rc, json.loads(rep_path.read_text(encoding='utf-8'))
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--intent', required=True,
-                    help='输入 intent（受控清单模板从其同目录自动发现）')
-    ap.add_argument('--workdir', default=os.path.join(HERE, 'driver-run'))
+    ap.add_argument('--intent', required=True, help='输入 intent；自动发现同目录受控模板')
+    ap.add_argument('--workdir', help='独立工作目录；默认在系统临时目录新建沙箱')
     ap.add_argument('--rounds', type=int, default=2)
-    ap.add_argument('--layout-seed', default=None)
-    ap.add_argument('--ref', default=None,
-                    help='引擎参照布局：仅承载 labels 等呈现文案，'
-                         '坐标一律重推；传 none 则无参照')
-    ap.add_argument('--inject', choices=['a', 'b', 'c', 'd'], default=None)
-    ap.add_argument('--optimize', action='store_true',
-                    help='首轮即叠加引擎阶段 3 寻优（#14 定案的到站标准链'
-                         '：规则+守门+寻优）；不加则首轮为规则+守门')
-    ap.add_argument('--readback-w', type=int, default=READBACK_W,
-                    help='回读 PNG 导出宽度（应 = viewBox 宽，1:1）')
-    ap.add_argument('--keep', action='store_true',
-                    help='保留上轮工作区不清理（默认每次重建）')
+    ap.add_argument('--layout-seed')
+    ap.add_argument('--catalog', help='显式 catalog 覆盖；默认使用 skill 规范源')
+    ap.add_argument('--ref', help='仅承载呈现文案的参照布局；none 表示无参照')
+    ap.add_argument('--inject', choices=['a', 'b', 'c', 'd'])
+    ap.add_argument('--optimize', action='store_true', help='首轮从规则重推并寻优，优先于种子')
+    ap.add_argument('--max-evals', type=int, default=200)
+    ap.add_argument('--max-steps', type=int, default=50)
+    ap.add_argument('--max-seconds', type=float, default=30.0)
+    ap.add_argument('--polish-steps', type=int, default=0)
+    ap.add_argument('--readback-w', type=int, default=None,
+                    help='回读宽度；默认按 SVG viewBox 推导，显式值必须为1:1')
+    ap.add_argument('--keep', action='store_true', help='复用未变脚本/符号，刷新输入及本轮产物')
     args = ap.parse_args()
+    from proto_optimize import validate_budgets
+    budgets = dict(max_evals=args.max_evals, max_steps=args.max_steps,
+                   max_seconds=args.max_seconds, polish_steps=args.polish_steps)
+    try:
+        validate_budgets(**budgets)
+        if args.rounds < 1:
+            raise ValueError('--rounds 必须 >= 1')
+        if args.readback_w is not None and args.readback_w < 1:
+            raise ValueError('--readback-w 必须 >= 1')
+        if args.inject == 'b' and not args.layout_seed:
+            raise ValueError('--inject b 需要 --layout-seed')
+        files, assets, sources, tpl_src = snapshot_inputs(args)
+    except (ValueError, OSError) as exc:
+        ap.error(str(exc))
 
-    t0 = time.time()
-    report = {'driver': 'validate-driver-1.1-skill', 'converged': False,
+    started = time.monotonic()
+    report = {'driver': 'validate-driver-1.2-bounded', 'converged': False,
+              'validation_scope': 'automated_structure_geometry_and_pixel_checks',
+              'perceptual_review': 'pending', 'stages': [],
               'rounds': [], 'prescriptions': [], 'residuals': [],
+              'optimization_budgets': budgets, 'local_symbol_sources': sources,
               'inject': None, 'exit_code': None}
-    wd = args.workdir
-    tpl_src = discover_template(args.intent)
+    wd = str(Path(args.workdir).resolve()) if args.workdir else tempfile.mkdtemp(prefix='hydraulic-driver-')
 
-    # ---- 沙箱工作区 ----
-    setup_workdir(wd)
-    shutil.copy2(args.intent, os.path.join(wd, INTENT_NAME))
-    if tpl_src:
-        shutil.copy2(tpl_src, os.path.join(wd, os.path.basename(tpl_src)))
-    seed = None
-    if args.inject == 'b':
-        seed = load_yaml(args.layout_seed)
-        report['inject'] = inject_b(seed)
-        with io.open(os.path.join(wd, LAYOUT_NAME), 'w', encoding='utf-8') as f:
-            json.dump(seed, f, ensure_ascii=False, indent=2)
-    else:
-        if args.layout_seed:
-            shutil.copy2(args.layout_seed, os.path.join(wd, LAYOUT_NAME))
-    intent = load_yaml(os.path.join(wd, INTENT_NAME))
-    if args.inject in ('a', 'c'):
-        report['inject'] = (inject_a(intent) if args.inject == 'a'
-                            else inject_c(intent))
-        dump_intent(intent, os.path.join(wd, INTENT_NAME))
-    elif args.inject == 'd':
-        assert tpl_src, '演练 D 需要 intent 同目录存在受控清单模板'
-        tpl = load_yaml(os.path.join(wd, os.path.basename(tpl_src)))
-        report['inject'] = inject_d(tpl)
-        dump_intent(tpl, os.path.join(wd, os.path.basename(tpl_src)))
-    with io.open(os.path.join(wd, CATALOG), encoding='utf-8') as f:
-        catalog = json.load(f)
-    inkscape = find_inkscape()
-
-    # ---- R0 preflight（输入侧门禁 + P1 处方）----
-    p1_used = 0
-    while True:
-        rep = preflight_run(wd)
-        errs = [f for f in rep['findings'] if f['level'] == 'ERROR']
-        if not errs:
-            report['preflight'] = {'status': rep['status'],
-                                   'findings': len(rep['findings'])}
-            break
-        fixed = p1_taps_demotion(intent, catalog)
-        if fixed and p1_used < 3:
-            p1_used += 1
-            dump_intent(intent, os.path.join(wd, INTENT_NAME))
-            report['prescriptions'].append(
-                {'stage': 'R0', 'id': 'P1', 'round': 0,
-                 'applied': fixed,
-                 'triggered_by': ['%s %s' % (f['id'], f['message'])
-                                  for f in errs]})
-            continue
-        # 处方修不动的输入缺陷：结构化残差，渲染一行不启动。
-        report['preflight'] = {'status': rep['status'],
-                               'findings': len(rep['findings'])}
-        report['residuals'] = [
-            {'stage': 'R0', 'id': f['id'], 'level': f['level'],
-             'object': f['object'], 'message': f['message'],
-             'remedy': f['remedy'],
-             'hint': '处方表无此类的机械修法（语义不可推导），'
-                     '需人工改 intent 后重跑驱动器'}
-            for f in errs]
-        report['exit_code'] = 2
-        report['elapsed_s'] = round(time.time() - t0, 1)
+    def done(code):
+        report['exit_code'] = code
+        report['elapsed_s'] = round(time.monotonic() - started, 3)
         finish(report, wd)
-        return 2
+        return code
 
-    # ---- 有界轮次 ----
-    seed_pending = seed is not None or args.layout_seed
-    p3_armed = bool(args.optimize)
-    if args.ref and args.ref.lower() != 'none' and os.path.isfile(args.ref):
-        shutil.copy2(args.ref, os.path.join(wd, 'ref.layout.json'))
-        ref_path = 'ref.layout.json'
-    else:
-        ref_path = '-'
-    for r in range(1, max(1, args.rounds) + 1):
-        rnd = {'round': r}
-        try:
-            rnd.update(render_round(wd, inkscape,
-                                    use_seed=seed_pending and not p3_armed,
-                                    p3_armed=p3_armed, ref_path=ref_path,
-                                    readback_w=args.readback_w))
-        except RuntimeError as e:
-            report['tool_failure'] = str(e)
-            report['exit_code'] = 3
-            report['elapsed_s'] = round(time.time() - t0, 1)
-            finish(report, wd)
+    try:
+        with stage(report['stages'], 'setup'):
+            report['workspace'] = setup_workdir(wd, keep=args.keep)
+            restore_inputs(wd, files, assets)
+            intent = load_yaml(os.path.join(wd, INTENT_NAME))
+            if args.inject == 'b':
+                seed = json.loads(Path(wd, LAYOUT_NAME).read_text(encoding='utf-8'))
+                report['inject'] = inject_b(seed)
+                Path(wd, LAYOUT_NAME).write_text(json.dumps(seed, ensure_ascii=False, indent=2), encoding='utf-8')
+            if args.inject in ('a', 'c'):
+                report['inject'] = (inject_a(intent) if args.inject == 'a' else inject_c(intent))
+                dump_intent(intent, os.path.join(wd, INTENT_NAME))
+            elif args.inject == 'd':
+                if not tpl_src:
+                    raise ValueError('演练 D 需要 intent 同目录存在受控清单模板')
+                tpl_path = os.path.join(wd, os.path.basename(tpl_src))
+                tpl = load_yaml(tpl_path)
+                report['inject'] = inject_d(tpl)
+                dump_intent(tpl, tpl_path)
+            catalog = json.loads(Path(wd, CATALOG).read_text(encoding='utf-8'))
+        p1_used = 0
+        while True:
+            with stage(report['stages'], 'preflight'):
+                rep = preflight_run(wd)
+            errs = [finding for finding in rep['findings'] if finding['level'] == 'ERROR']
+            report['preflight'] = {'status': rep['status'], 'findings': len(rep['findings'])}
+            if not errs:
+                break
+            fixed = p1_taps_demotion(intent, catalog) if p1_used < 3 else []
+            if fixed:
+                p1_used += 1
+                dump_intent(intent, os.path.join(wd, INTENT_NAME))
+                report['prescriptions'].append(
+                    {'stage': 'R0', 'id': 'P1', 'round': 0, 'applied': fixed,
+                     'triggered_by': ['%s %s' % (f['id'], f['message']) for f in errs]})
+                continue
+            report['residuals'] = [dict(f, stage='R0', hint='无机械修法，需修正输入后重跑') for f in errs]
+            return done(2)
+        seed_pending = bool(args.layout_seed)
+        p3_armed = args.optimize
+        ref_path = 'ref.layout.json' if 'ref.layout.json' in files else '-'
+        for r in range(1, args.rounds + 1):
+            rnd = {'round': r, 'stages': []}
+            report['rounds'].append(rnd)
+            render_round(wd, use_seed=seed_pending and not p3_armed,
+                         p3_armed=p3_armed, ref_path=ref_path,
+                         readback_w=args.readback_w, budgets=budgets, step=rnd)
+            seed_pending = False
+            with stage(rnd['stages'], 'validate'):
+                vrc, vrep = validate_run(wd)
+            fails = [c for c in vrep['checks'] if c['result'] == 'fail']
+            warns = [c for c in vrep['checks'] if c['result'] == 'warn']
+            if rnd.get('readback_error'):
+                fails.append({'id': 'READBACK', 'detail': rnd['readback_error']})
+                report['tool_failure'] = rnd['readback_error']
+            if vrc != 0 and not fails:
+                raise RuntimeError('validate 非零退出但报告无 fail，拒绝收敛')
+            rnd['fail_count'], rnd['warn_count'] = len(fails), len(warns)
+            rnd['fails'] = [{'id': c['id'], 'detail': c['detail']} for c in fails]
+            rnd['budget'] = {it['id']: it['status']
+                             for it in vrep.get('composition_budget', {}).get('items', [])}
+            if not fails:
+                report['converged'] = True
+                break
+            residual = [c for c in fails if c['id'] not in P3_IDS]
+            if residual or p3_armed or r == args.rounds:
+                report['residuals'] = [
+                    {'stage': 'round%d' % r, 'id': c['id'], 'detail': c['detail'],
+                     'hint': P3_HINT if c['id'] in P3_IDS else '无自动修法，需检查残差'}
+                    for c in fails]
+                break
+            report['prescriptions'].append(
+                {'stage': 'round', 'id': 'P3', 'round': r,
+                 'applied': ['引擎重推布局 + 有界寻优',
+                             '触发: ' + '; '.join(c['id'] for c in fails)]})
+            p3_armed = True
+    except (RuntimeError, ValueError, OSError, AssertionError) as exc:
+        report['tool_failure'] = str(exc)
+        # 不在非工作区写报告；setup 的目录保护失败时只报告错误。
+        if not os.path.isdir(wd) or not report.get('workspace'):
+            progress(str(exc))
             return 3
-        seed_pending = False
-        vrc, vrep = validate_run(wd)
-        fails = [c for c in vrep['checks'] if c['result'] == 'fail']
-        warns = [c for c in vrep['checks'] if c['result'] == 'warn']
-        rnd['fail_count'] = len(fails)
-        rnd['warn_count'] = len(warns)
-        rnd['fails'] = [{'id': c['id'], 'detail': c['detail']} for c in fails]
-        rnd['budget'] = {it['id']: it['status']
-                         for it in vrep.get('composition_budget', {}).get('items', [])}
-        report['rounds'].append(rnd)
-        if not fails:
-            report['converged'] = True
-            break
-
-        # ---- 处方表裁决：有修不动的同时在场，立即上报不烧轮次 ----
-        residual = [c for c in fails if c['id'] not in P3_IDS]
-        if residual or p3_armed:
-            report['residuals'] = [
-                {'stage': 'round%d' % r, 'id': c['id'], 'detail': c['detail'],
-                 'hint': (P3_HINT if c['id'] in P3_IDS else
-                          '渲染器/走线器/布局参数所有，无输入侧机械修法，需 AI 介入')}
-                for c in (residual or fails)]
-            break
-        report['prescriptions'].append(
-            {'stage': 'round', 'id': 'P3', 'round': r,
-             'applied': ['引擎重推布局 + --optimize 第三阶段',
-                         '触发: ' + '; '.join('%s %s' % (c['id'], c['detail'][:60])
-                                              for c in fails)]})
-        p3_armed = True
-
-    report['exit_code'] = (0 if report['converged']
-                           else (1 if not report['residuals'] else 1))
-    report['elapsed_s'] = round(time.time() - t0, 1)
-    finish(report, wd)
-    return report['exit_code']
+        return done(3)
+    return done(3 if report.get('tool_failure') else (0 if report['converged'] else 1))
 
 
 P3_HINT = ('P3 已叠加仍不绿：几何缺陷超出邻域寻优可达域，'
@@ -453,8 +621,8 @@ def finish(report, wd):
     for rnd in report['rounds']:
         print('  轮%d 布局=%-16s 回读=%s -> fail %d, warn %d'
               % (rnd['round'], rnd.get('layout_source', 'seed'),
-                 rnd.get('readback', ''), rnd['fail_count'], rnd['warn_count']))
-        for fl in rnd['fails']:
+                 rnd.get('readback', ''), rnd.get('fail_count', 0), rnd.get('warn_count', 0)))
+        for fl in rnd.get('fails', []):
             print('       FAIL %s %s' % (fl['id'], fl['detail'][:80]))
     for p in report['prescriptions']:
         txt = '; '.join(
@@ -464,8 +632,10 @@ def finish(report, wd):
     for r in report['residuals']:
         print('残差 %s [%s]: %s' % (r['id'], r['stage'],
                                     r.get('detail') or r.get('message', '')[:80]))
+    if report.get('tool_failure'):
+        print('工具链故障: %s' % report['tool_failure'])
     print('结论: %s  (%.1fs, 报告 -> %s)'
-          % ('收敛 fail 0' if report['converged'] else
+          % ('自动校核收敛（感知回读待验收）' if report['converged'] else
              ('残差上报，需人工/AI 介入' if report['residuals'] else
               ('轮次耗尽仍有 fail' if report['exit_code'] == 1 else '工具链故障')),
              report['elapsed_s'], path))

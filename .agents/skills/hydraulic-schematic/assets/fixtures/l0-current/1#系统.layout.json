@@ -1,0 +1,278 @@
+{
+  "layout_version": "2.2",
+  "source_l0": "1#系统.intent.yaml",
+  "note": "Current 23-part entry regression; canonical asset names. Known geometry residuals must remain reported.",
+  "canvas": {
+    "width": 1680,
+    "height": 1390
+  },
+  "canvas_shift_x": 30,
+  "style": {
+    "base_line_width_T": 1.2,
+    "symbol_stroke_width": 2,
+    "suction_marker_S": 8
+  },
+  "externs": {},
+  "nodes": {
+    "TANK-001": {
+      "x": 60,
+      "y": 276,
+      "symbol": "symbols/bootstrap-type-reservoir.svg",
+      "w": 218,
+      "h": 564
+    },
+    "FSOV-001": {
+      "x": 302,
+      "y": 283.7,
+      "symbol": "symbols/firewall-shutoff-valve.svg",
+      "w": 362.304,
+      "h": 204.003,
+      "rot": 270
+    },
+    "EDP-001": {
+      "x": 540,
+      "y": 290,
+      "symbol": "symbols/edp-provisional-stroke.svg",
+      "w": 80,
+      "h": 80
+    },
+    "EMP-001": {
+      "x": 540,
+      "y": 610,
+      "symbol": "symbols/emp-provisional-stroke.svg",
+      "w": 80,
+      "h": 80
+    },
+    "PF-001": {
+      "x": 1000,
+      "y": 254,
+      "symbol": "symbols/filter-line-shutoff-dp.svg",
+      "w": 100,
+      "h": 158
+    },
+    "CDF-001": {
+      "x": 420,
+      "y": 100,
+      "symbol": "symbols/filter-line-shutoff-dp.svg",
+      "w": 100,
+      "h": 158,
+      "rot": 270
+    },
+    "RF-001": {
+      "x": 1200,
+      "y": 1012,
+      "symbol": "symbols/filter-line-shutoff-dp-return-bypass.svg",
+      "w": 100,
+      "h": 194,
+      "rot": 180
+    },
+    "PRV-001": {
+      "x": 1300,
+      "y": 290,
+      "symbol": "symbols/priority-valve.svg",
+      "w": 140,
+      "h": 78
+    },
+    "PRV-002": {
+      "x": 440,
+      "y": 730,
+      "symbol": "symbols/priority-valve.svg",
+      "w": 140,
+      "h": 78,
+      "rot": 180
+    },
+    "ACC-001": {
+      "x": 1180,
+      "y": 190,
+      "symbol": "symbols/accumulator.svg",
+      "w": 60,
+      "h": 100
+    },
+    "ACV-001": {
+      "x": 1240,
+      "y": 60,
+      "symbol": "symbols/air-charging-valve.svg",
+      "w": 134,
+      "h": 57
+    },
+    "PG-001": {
+      "x": 1414,
+      "y": 50,
+      "symbol": "symbols/pressure-gauge.svg",
+      "w": 63,
+      "h": 67
+    },
+    "QDP-001": {
+      "x": 1186,
+      "y": 560,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
+      "w": 160,
+      "h": 67.61,
+      "rot": 180
+    },
+    "QDR-001": {
+      "x": 1200,
+      "y": 900,
+      "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
+      "w": 160,
+      "h": 67.61,
+      "rot": 180
+    },
+    "CV-002": {
+      "x": 1400,
+      "y": 1120,
+      "symbol": "symbols/check-valve.svg",
+      "w": 80,
+      "h": 80,
+      "rot": 90
+    },
+    "USER-001": {
+      "x": 1498,
+      "y": 160,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-002": {
+      "x": 1498,
+      "y": 265,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-003": {
+      "x": 1498,
+      "y": 370,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-004": {
+      "x": 1498,
+      "y": 475,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-005": {
+      "x": 1498,
+      "y": 580,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-006": {
+      "x": 1498,
+      "y": 685,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-007": {
+      "x": 1498,
+      "y": 790,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    },
+    "USER-008": {
+      "x": 1498,
+      "y": 895,
+      "symbol": "symbols/hydraulic-user.svg",
+      "w": 120,
+      "h": 60
+    }
+  },
+  "buses": {
+    "PRESS": {
+      "kind": "v",
+      "x": 880
+    },
+    "MANIFOLD": {
+      "kind": "v",
+      "x": 1160
+    },
+    "USR": {
+      "kind": "v",
+      "x": 1470
+    },
+    "USERR": {
+      "kind": "v",
+      "x": 1646
+    },
+    "RET": {
+      "kind": "v",
+      "x": 940
+    },
+    "CASE": {
+      "kind": "v",
+      "x": 620
+    }
+  },
+  "labels": {
+    "TANK-001": "TANK-001\n自增压油箱",
+    "FSOV-001": "FSOV-001\n防火墙关断活门",
+    "EDP-001": "EDP-001\n发动机驱动泵",
+    "EMP-001": "EMP-001\n电动泵",
+    "PF-001": "PF-001\n压力油滤",
+    "CDF-001": "CDF-001\n壳体回油滤",
+    "RF-001": "RF-001\n回油滤",
+    "PRV-001": "PRV-001\n优先阀",
+    "PRV-002": "PRV-002\n自增压优先阀",
+    "ACC-001": "ACC-001\n系统蓄压器",
+    "ACV-001": "ACV-001\n充气活门",
+    "PG-001": "PG-001\n充气压力表",
+    "QDP-001": "QDP-001\n地面压力快卸接头",
+    "QDR-001": "QDR-001\n地面回油快卸接头",
+    "USER-001": "USER-001\nMF扰流板",
+    "USER-002": "USER-002\n襟翼",
+    "USER-003": "USER-003\n缝翼",
+    "USER-004": "USER-004\n副翼",
+    "USER-005": "USER-005\n升降舵",
+    "USER-006": "USER-006\n方向舵",
+    "USER-007": "USER-007\n反推",
+    "USER-008": "USER-008\n正常刹车",
+    "CV-002": "CV-002\n集中加油单向阀"
+  },
+  "label_pos": {
+    "TANK-001": "below",
+    "FSOV-001": "below",
+    "EDP-001": "below",
+    "EMP-001": "above",
+    "PF-001": "right",
+    "CDF-001": "right",
+    "RF-001": "below",
+    "PRV-001": "above",
+    "PRV-002": "below",
+    "ACC-001": "right",
+    "ACV-001": "above",
+    "PG-001": "above",
+    "QDP-001": "below",
+    "QDR-001": "below"
+  },
+  "label_drop": {
+    "TANK-001": 100,
+    "EDP-001": 40
+  },
+  "lanes": [
+    890
+  ],
+  "vlanes": [
+    290,
+    20
+  ],
+  "group_padding": 20,
+  "group_label_gap": 10,
+  "legend": {
+    "x": 380,
+    "y": 1020,
+    "w": 540,
+    "h": 290
+  },
+  "title_block": {
+    "x": 40,
+    "y": 1330,
+    "w": 1600,
+    "h": 56
+  }
+}

@@ -420,6 +420,18 @@ class Sheet(object):
                 out.append(p)
         return out
 
+    @staticmethod
+    def backtracks(points):
+        """是否沿同一直线反向折返；这种候选会在拐点外留下多余线头。"""
+        for a, b, c in zip(points, points[1:], points[2:]):
+            if (max(a[1], b[1], c[1]) - min(a[1], b[1], c[1]) < 1e-6
+                    and (b[0] - a[0]) * (c[0] - b[0]) < -1e-6):
+                return True
+            if (max(a[0], b[0], c[0]) - min(a[0], b[0], c[0]) < 1e-6
+                    and (b[1] - a[1]) * (c[1] - b[1]) < -1e-6):
+                return True
+        return False
+
     def route(self, a, b, exclude=(), lanes=()):
         """正交走线,择优避开元件本体。
 
@@ -430,6 +442,13 @@ class Sheet(object):
         ax, ay, aa = a
         bx, by, ba = b
         S = 20.0
+        # 相向端口各自占一半净距，避免两段固定出桩互相越过。
+        # 保留端口和锚向，只缩短两者之间实际放不下的直线段。
+        gaps = {('right', 'left'): bx - ax, ('left', 'right'): ax - bx,
+                ('down', 'up'): by - ay, ('up', 'down'): ay - by}
+        gap = gaps.get((aa, ba))
+        if gap is not None and gap > 0:
+            S = min(S, gap / 2.0)
         stub = {'left': (-S, 0), 'right': (S, 0), 'up': (0, -S), 'down': (0, S)}
         a1 = (ax + stub[aa][0], ay + stub[aa][1])
         b1 = (bx + stub[ba][0], by + stub[ba][1])
@@ -470,14 +489,22 @@ class Sheet(object):
 
         # 代价权重:穿元件 > 与已画线重叠 > 与文字重叠 > 交叉 > 长度 > 拐点。
         # 前三项是会导致误读的缺陷,必须压过"线短拐点少"的观感偏好。
+        # 剩余项均非负；部分分数已不小于最佳总分时可提前淘汰。
+        # 候选顺序和严格更优(<)保持不变，因此并列时仍选最早候选。
         best, bad = None, None
         for c in cands:
             pts = self.dedup([(ax, ay)] + c + [(bx, by)])
-            if len(pts) < 2:
+            if len(pts) < 2 or self.backtracks(pts):
                 continue
             h = self.hits(pts, obs, skip_ends=True)
+            if bad is not None and h * 10000 >= bad:
+                continue
             ov = self.overlap(pts, self.drawn) + self.overlap(pts, self.buslines)
+            if bad is not None and h * 10000 + ov * 3000 >= bad:
+                continue
             tx = self.hits(pts, self.textboxes, skip_ends=False, tol=0.0)
+            if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                continue
             cr = self.crossings(pts, self.drawn)
             length = sum(abs(pts[k + 1][0] - pts[k][0]) + abs(pts[k + 1][1] - pts[k][1])
                          for k in range(len(pts) - 1))
@@ -485,6 +512,8 @@ class Sheet(object):
                      + cr * 120 + length + len(pts) * 5)
             if bad is None or score < bad:
                 bad, best = score, pts
+        if best is None:
+            raise ValueError('未找到无反向折返的正交路线: %s -> %s' % (a, b))
         for k in range(len(best) - 1):
             self.drawn.append((best[k], best[k + 1]))
         return best
@@ -574,22 +603,27 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             if nd.get('_name_slot'):
                 continue    # 名字已画在框内名槽,不占框外避让包围盒
-            lab = self.L['labels'].get(inst, inst)
-            pos = self.L['label_pos'].get(inst, 'below')
+            lab = (self.L.get('labels') or {}).get(inst, inst)
+            pos = (self.L.get('label_pos') or {}).get(inst, 'below')
             fs = FS.get(pos, 11.0)
             lines = lab.split('\n')
             wid = max(sum(fs if ord(c) > 0x2E80 else fs * 0.55 for c in ln)
                       for ln in lines)
-            cx = nd['x'] + nd['w'] / 2.0
+            # rot90/270 落位后占位盒宽高互换(CDF-001 实例教训:用未旋转的
+            # 声明宽锚定 right 标签,文字落进旋转后的符号墨迹内 28.5px)。
+            rot = int(nd.get('rot', 0)) % 360
+            w_eff, h_eff = ((nd['h'], nd['w']) if rot in (90, 270)
+                            else (nd['w'], nd['h']))
+            cx = nd['x'] + w_eff / 2.0
             lift = self.L.get('label_lift', {}).get(inst, 0)
             drop = self.L.get('label_drop', {}).get(inst, 0)
             if pos == 'below':
-                y0 = nd['y'] + nd['h'] + 16 + drop - fs
+                y0 = nd['y'] + h_eff + 16 + drop - fs
             elif pos == 'above':
                 y0 = nd['y'] - 8 - 13 * (len(lines) - 1) - lift - fs
             else:
                 y0 = nd['y'] + 16 - fs
-            x0 = (nd['x'] + nd['w'] + 12) if pos == 'right' else (cx - wid / 2.0)
+            x0 = (nd['x'] + w_eff + 12) if pos == 'right' else (cx - wid / 2.0)
             self.textboxes.append((x0 - 2, y0 - 2, x0 + wid + 2,
                                    y0 + fs + 13 * (len(lines) - 1) + 4))
         for eid, e in self.L.get('externs', {}).items():
@@ -646,12 +680,15 @@ class Sheet(object):
                 # 元件到母线也要避障:早先直接横拉,穿过了中间的滤本体。
                 cands = [[m, (bx, m[1])]]
                 for ly in self.L.get('lanes', []):
+                    # 先纵后横再纵:只有"直接横拉"一种候选时,自用户回油
+                    # 曾横穿中间的回油滤本体(校核项 V2)。
                     cands.append([m, (m[0], ly), (bx, ly), (bx, m[1])])
-                # 经水平走廊再上/下到母线接入高度。
-                # 只有"直接横拉"和"先纵后横"两种候选时,自用户回油横穿
-                # 了中间的回油滤本体(校核项 V2)。
+                # 经水平走廊直接并入母线(走廊高度即接入高度):母线因其他
+                # 支路延伸覆盖走廊高度后,"先到接入高度、末段沿母线纵走"的
+                # 候选会与母线本体共线重叠(V13;2026-09-07 实例:CDF 出油
+                # 并入 @RET 后母线上延覆盖 lane 100,@RET<-油箱 线中招)。
                 for ly in self.L.get('lanes', []):
-                    cands.append([m, (m[0], ly), (bx, ly), (bx, m[1])])
+                    cands.append([m, (m[0], ly), (bx, ly)])
                 for cx2 in self.L.get('vlanes', []):
                     if abs(cx2 - bx) < 1:
                         continue        # 竖廊与母线同 x 时会沿母线纵走
@@ -670,9 +707,15 @@ class Sheet(object):
                     # 全部母线都算,包括自己要接的这条:支路只应**横向**
                     # 抵达母线,不应沿母线纵走。沿母线走 480 单位在图上
                     # 与母线本体完全重合(校核项 V13)。
+                    if bad is not None and h * 10000 >= bad:
+                        continue
                     ov = (self.overlap(cp, self.drawn)
                           + self.overlap(cp, self.buslines))
+                    if bad is not None and h * 10000 + ov * 3000 >= bad:
+                        continue
                     tx = self.hits(cp, self.textboxes, tol=0.0)
+                    if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                        continue
                     cr = self.crossings(cp, self.drawn)
                     ln = sum(abs(cp[i + 1][0] - cp[i][0]) + abs(cp[i + 1][1] - cp[i][1])
                              for i in range(len(cp) - 1))
@@ -687,7 +730,8 @@ class Sheet(object):
                 if lt == 'suction':
                     self.suction_runs.append((pts, path_k == 0,
                                               path_k == path_nseg - 1))
-                bus_hits.setdefault(bus, []).append((m[1], lt))
+                # 接入高度按实际终点(走廊直接并入时=走廊高度,否则=支路自身高度)
+                bus_hits.setdefault(bus, []).append((pts[-1][1], lt))
                 continue
 
             aw, bw = 'out', 'in'
@@ -784,8 +828,14 @@ class Sheet(object):
                 if len(pts) < 2:
                     continue
                 h = self.hits(pts, obs, skip_ends=True)
+                if bad is not None and h * 10000 >= bad:
+                    continue
                 ov = self.overlap(pts, self.drawn)
+                if bad is not None and h * 10000 + ov * 3000 >= bad:
+                    continue
                 tx = self.hits(pts, self.textboxes, tol=0.0)
+                if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                    continue
                 cr = self.crossings(pts, self.drawn)
                 ln = sum(abs(pts[k + 1][0] - pts[k][0])
                          + abs(pts[k + 1][1] - pts[k][1])
@@ -871,20 +921,25 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             if nd.get('_name_slot'):
                 continue    # 用户框:名字在框内名槽,不再画框外标签
-            lab = self.L['labels'].get(inst, inst)
-            pos = self.L['label_pos'].get(inst, 'below')
-            cx = nd['x'] + nd['w'] / 2.0
+            lab = (self.L.get('labels') or {}).get(inst, inst)
+            pos = (self.L.get('label_pos') or {}).get(inst, 'below')
+            # 与 build_textboxes 同一口径:rot90/270 落位后占位盒宽高互换,
+            # 标签锚定用有效宽高,否则文字落进旋转后的符号墨迹(CDF-001 实例)。
+            rot = int(nd.get('rot', 0)) % 360
+            w_eff, h_eff = ((nd['h'], nd['w']) if rot in (90, 270)
+                            else (nd['w'], nd['h']))
+            cx = nd['x'] + w_eff / 2.0
             lines = lab.split('\n')
             # 分组虚线框会占据元件上方 pad+gap,故框内元件的 above 标签
             # 必须让位到框外,否则与分组标签重叠(渲染已证实)。
             lift = self.L.get('label_lift', {}).get(inst, 0)
             drop = self.L.get('label_drop', {}).get(inst, 0)
             if pos == 'below':
-                y0, anch, cx2 = nd['y'] + nd['h'] + 16 + drop, 'middle', cx
+                y0, anch, cx2 = nd['y'] + h_eff + 16 + drop, 'middle', cx
             elif pos == 'above':
                 y0, anch, cx2 = nd['y'] - 8 - 13 * (len(lines) - 1) - lift, 'middle', cx
             else:
-                y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + nd['w'] + 12
+                y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + w_eff + 12
             for k, ln in enumerate(lines):
                 out.append('<text class="lbl" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
                            % (cx2, y0 + 13 * k, anch, self.esc(ln)))
@@ -979,7 +1034,7 @@ class Sheet(object):
         写入。槽位 x/y 从符号自带属性读,不在此硬编码几何;多行标签以
         单行基线为中心上下展开(行距 13,与图纸标签一致)。
         """
-        lines = [ln for ln in self.L['labels'].get(inst, inst).split('\n') if ln]
+        lines = [ln for ln in (self.L.get('labels') or {}).get(inst, inst).split('\n') if ln]
         if not lines:
             return markup
 
@@ -1019,6 +1074,9 @@ class Sheet(object):
             tag = re.sub(r'\s*stroke-width="[^"]*"', '', tag)
             if 'class="' in tag:
                 return re.sub(r'class="([^"]*)"', r'class="\1 sym-outline"', tag)
+            # 自闭合标签的 class 须插在斜杠前,否则产出 `/ class=..>` 非良构
+            if tag.rstrip().endswith('/>'):
+                return tag.rstrip()[:-2].rstrip() + ' class="sym-outline"/>'
             return tag[:-1].rstrip() + ' class="sym-outline">'
         return re.sub(r'<(?!/)[^>]*>', sub, markup)
 
@@ -1095,7 +1153,10 @@ def css(T):
      4/8/10px,引线恒为 4px)。改为在实例上按 1/k 补偿,
      线宽随图缩放,同时不受符号自身缩放影响。 */
   :root { --kc: 1; }
-  .sym-outline { stroke-width: calc(%(sy).2f * var(--kc)); }
+  /* fill:none 必须图纸级补回:read_symbol 只嵌形状不嵌符号内样式表,
+     缺了它 SVG 默认 fill=black,凡描边符号(油箱壳体等)整只糊成黑块。 */
+  .sym-outline { fill: none; stroke: currentColor;
+                 stroke-width: calc(%(sy).2f * var(--kc)); }
 
   /* 符号内部的端口引线。它走油,故随管网压力等级,不随组件本体。
      判据是"是否走油",而非"画在哪个文件里"。

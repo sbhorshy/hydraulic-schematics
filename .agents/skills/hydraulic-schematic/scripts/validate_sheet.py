@@ -17,31 +17,10 @@ from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# 用法:validate_sheet.py [工作目录]。缺省=脚本就地(传统复制纪律);
-# 工作目录口径与 render_l0_sheet.py 一致,符号经 catalog 锚定到 skill 库(#21)。
-WORKDIR = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else HERE
-SKILL_CATALOG = os.path.normpath(
-    os.path.join(HERE, '..', 'assets', 'component-library', 'component-catalog.json'))
-SHEET = os.path.join(WORKDIR, '1#系统原理图.svg')
-LAYOUT = os.path.join(WORKDIR, '1#系统.layout.json')
-INTENT = os.path.join(WORKDIR, '1#系统.intent.yaml')
-if os.path.isfile(os.path.join(WORKDIR, 'component-catalog.json')):
-    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
-elif os.path.isfile(SKILL_CATALOG):
-    CATALOG = SKILL_CATALOG
-else:
-    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
-CAT_DIR = os.path.dirname(CATALOG)
-
-
-def _resolve_symbol(ref):
-    """布局符号引用 → 实际路径:工作目录相对 → catalog 同目录 → 脚本 HERE。"""
-    for p in (os.path.normpath(os.path.join(WORKDIR, ref)),
-              os.path.join(CAT_DIR, os.path.basename(ref.replace('\\', '/'))),
-              os.path.normpath(os.path.join(HERE, ref))):
-        if os.path.isfile(p):
-            return p
-    return os.path.normpath(os.path.join(WORKDIR, ref))
+SHEET = os.path.join(HERE, '1#系统原理图.svg')
+LAYOUT = os.path.join(HERE, '1#系统.layout.json')
+INTENT = os.path.join(HERE, '1#系统.intent.yaml')
+CATALOG = os.path.join(HERE, 'component-catalog.json')
 NS = 'http://www.w3.org/2000/svg'
 
 # ---------- 构图预算（B1–B7）----------
@@ -146,15 +125,29 @@ def main():
 
     # ---------- 收集元件占位矩形 ----------
     boxes = {}
+    boxes_foot = {}   # 旋转后画布足迹占位,仅 B5 净距使用(其余检查维持声明占位口径)
+    ink_boxes = {}    # 旋转后实际墨迹矩形,仅 V2"穿越本体"使用
     ports = {}
     for inst, nd in L['nodes'].items():
         boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
-        p = _resolve_symbol(nd['symbol'])
+        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
         _mk, vb, ps = read_symbol(p)
         vx, vy, vw, vh = vb
         k = min(nd['w'] / float(vw), nd['h'] / float(vh))
         sw, sh, rot = vw * k, vh * k, int(nd.get('rot', 0)) % 360
+        # 墨迹矩形与 render.py 落位一致(comp 补偿后仍占 (x,y) 起始正矩形),
+        # rot 90/270 时宽高互换。boxes 是未旋转的声明占位,判"本体"会用错:
+        # 走线从旋转符号旁经过时被误判穿越(1# 系统 CDF-001 rot=270 实例)。
+        ink_boxes[inst] = ((nd['x'], nd['y'], nd['x'] + sh, nd['y'] + sw)
+                           if rot in (90, 270)
+                           else (nd['x'], nd['y'], nd['x'] + sw, nd['y'] + sh))
+        # 足迹占位=旋转后画布足迹,与 render 落位补偿一致:rot 90/270 宽高互换、(x,y) 锚定。
+        # B5 净距用足迹口径——非正方形旋转件的声明框(预旋转)不是图上占位
+        # (FSOV-001 归位实例:声明 201.28x114.67 rot270,图上足迹 114.67x201.28)。
+        boxes_foot[inst] = ((nd['x'], nd['y'], nd['x'] + nd['h'], nd['y'] + nd['w'])
+                            if rot in (90, 270)
+                            else (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h']))
         pabs = {}
         for pid, (px, py, anch, role, med) in ps.items():
             lx, ly = (px - vx) * k, (py - vy) * k
@@ -172,9 +165,18 @@ def main():
     for m in re.finditer(r'<polyline class="(ln-[a-z_]+)" points="([^"]+)"', raw):
         pts = [tuple(float(v) for v in q.split(',')) for q in m.group(2).split()]
         polys.append((m.group(1), pts))
+    # 单条管线自身的短折返同样会留下线头，不能套用 V13 的短共线豁免。
+    for cls, pts in polys:
+        for a, b, c in zip(pts, pts[1:], pts[2:]):
+            horizontal = max(a[1], b[1], c[1]) - min(a[1], b[1], c[1]) < 0.1
+            vertical = max(a[0], b[0], c[0]) - min(a[0], b[0], c[0]) < 0.1
+            if ((horizontal and (b[0] - a[0]) * (c[0] - b[0]) < -0.01)
+                    or (vertical and (b[1] - a[1]) * (c[1] - b[1]) < -0.01)):
+                F.append(('V13', '管线自身折返形成越界线头: %s %s -> %s -> %s'
+                          % (cls, a, b, c)))
     for cls, pts in polys:
         for k in range(len(pts) - 1):
-            for inst, bx in boxes.items():
+            for inst, bx in ink_boxes.items():
                 # 段端点落在框边界上时是接线,不是穿越。判距 <=3。
                 on_a = (abs(pts[k][0] - bx[0]) < 3 or abs(pts[k][0] - bx[2]) < 3
                         or abs(pts[k][1] - bx[1]) < 3 or abs(pts[k][1] - bx[3]) < 3)
@@ -361,11 +363,13 @@ def main():
         F.append(('V17', '吸油线存在但未生成任何五斜杠组'))
 
     # 标记不得进入组件或文字。用斜杠包围盒与障碍矩形相交判定。
+    # 组件本体按旋转后墨迹盒判(boxes 是未旋转声明占位,rot 符号会误杀
+    # 墨迹旁的合法斜杠,与 V2 ink_boxes 同理)。
     mark_hits = []
     for m in smarks:
         x0, x1 = sorted((float(m.get('x1')), float(m.get('x2'))))
         y0, y1 = sorted((float(m.get('y1')), float(m.get('y2'))))
-        for inst, bx in boxes.items():
+        for inst, bx in ink_boxes.items():
             if not (x1 < bx[0] or x0 > bx[2] or y1 < bx[1] or y0 > bx[3]):
                 mark_hits.append('组件 %s' % inst)
         for cls, txt, tx0, ty0, tx1, ty1 in texts:
@@ -536,6 +540,13 @@ def main():
         def T(x, y):
             return (a * x + c * y + e, b * x + d * y + f)
         cm = re.search(r'pl-(\w+)', cl or '')
+        # 显式端口引线不能因换成 path/polyline 就逃过 V16。当前渲染器
+        # 仅对 line 绑定 pl-* 管网线宽；其他图元保留此端口的未改判记录。
+        # 端口坐标来自已缩放/旋转的符号真值，不解析任意 path 的命令数值。
+        pid = el.get('data-interface-port')
+        declared = ports.get(inst, {}).get(pid) if pid else None
+        if tg != 'line' and declared and declared[4] == 'hydraulic':
+            pl_ends.append((inst, declared[:2], None))
         if tg == 'line':
             for (x, y) in ((float(el.get('x1')), float(el.get('y1'))),
                            (float(el.get('x2')), float(el.get('y2')))):
@@ -598,7 +609,7 @@ def main():
     # 误报为"引线未改判"。判据是端口 data-medium,不是几何。
     nonhyd = set()      # (inst, 整图 x, 整图 y)
     for inst, nd in (L['nodes'] or {}).items():
-        sp = _resolve_symbol(nd['symbol'])
+        sp = os.path.normpath(os.path.join(HERE, nd['symbol']))
         if not os.path.exists(sp):
             continue
         sroot = ET.parse(sp).getroot()
@@ -660,7 +671,7 @@ def main():
     # 圆弧的中途而非顶点上;油箱的轮廓是描摹填充,根本没有可取顶点的描边。
     # 故顶点匹配失败时改判像素——PNG 上该点周围有无本体墨迹。
     # 这是唯一能同时覆盖弧、填充与描边的判据。
-    png = os.path.join(WORKDIR, 'sheet-readback.png')
+    png = os.path.join(HERE, 'sheet-readback.png')
     ink = None
     if os.path.exists(png):
         try:
@@ -840,7 +851,7 @@ def main():
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
-        p = _resolve_symbol(nd['symbol'])
+        p = os.path.normpath(os.path.join(HERE, nd['symbol']))
         s = io.open(p, encoding='utf-8').read(4000)
         st = re.search(r'data-symbol-status="([^"]+)"', s)
         st = st.group(1) if st else 'none'
@@ -919,7 +930,7 @@ def main():
 
     # B5 节点盒净距：矩形间最小距离（轴向或对角，欧氏）。
     b5_gap = None
-    bl = sorted(boxes.items())
+    bl = sorted(boxes_foot.items())  # B5 用足迹口径(FSOV-001 归位暴露:非正方形旋转件声明框≠图上占位)
     for i in range(len(bl)):
         for j in range(i + 1, len(bl)):
             r1, r2 = bl[i][1], bl[j][1]
@@ -1042,7 +1053,7 @@ def main():
                     '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
         },
     }
-    out = os.path.join(WORKDIR, 'validation-report.json')
+    out = os.path.join(HERE, 'validation-report.json')
     io.open(out, 'w', encoding='utf-8').write(
         json.dumps(rep, ensure_ascii=False, indent=2))
 

@@ -24,7 +24,9 @@ B3 预算边界豁免（边界端子走廊 ≤4）与 validate 同判，豁免�
       [--catalog CAT.json] [-o 前缀] [--kick N] [--pure-budget]
 输出: <前缀>.layout.json / <前缀>-opt-log.json
 """
+import argparse
 import copy
+import math
 import io
 import json
 import os
@@ -383,89 +385,149 @@ def apply_move(L, m):
 
 # ---------- 搜索：固定种子首改进下降 + 随机踢散重启（#14 换策略）----------
 
-# 违限清零且 B3 入预算后的抛光步上限。绿线之后的全是"总长再短几步"的
-# 收益递减，而抛光尾的长度随种子波动可达数分钟（seed19 实测 8m37s）——
-# 驱动器的 P3 步要的是可预测性，25 步已捕获 1# 实测大部分长度收益。
-POLISH_STEPS = 25
+# 预算覆盖种子面板及每个实际评估候选。时间预算在评估间检查，单次评估
+# 不会被中断；max_evals/max_steps 是可复现的首要界限。
+MAX_EVALS, MAX_STEPS, MAX_SECONDS, POLISH_STEPS = 200, 50, 30.0, 0
 
 
-def climb(L0, intent, catalog, log, tag, seed=19):
-    """首改进下降：洗牌邻域、遇第一个改进即接受；整轮无改进=局部最优。
-    取代原全邻域最陡下降——每接受一步的评估成本从 ~邻域全体 降到
-    ~期望一半，同预算下走得多；1# 实测终态持平或更优（seed7 与最陡下降
-    的丁逐位相同、seed19 总长再短 60）而墙钟大降（eval-p3-speedup*.py）。
-    固定种子保确定性；绿线（违限 0 且 B3 入预算）后最多再走 POLISH_STEPS。"""
+def validate_budgets(max_evals, max_steps, max_seconds, polish_steps):
+    for name, value, minimum in (('max_evals', max_evals, 1),
+                                  ('max_steps', max_steps, 0),
+                                  ('polish_steps', polish_steps, 0)):
+        if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+            raise ValueError('%s 必须为 >= %d 的整数' % (name, minimum))
+    if (isinstance(max_seconds, bool) or not isinstance(max_seconds, (int, float))
+            or not math.isfinite(max_seconds) or max_seconds < 0):
+        raise ValueError('max_seconds 必须为有限非负数')
+
+
+def optimizer_progress(event):
+    """进度只写 stderr，供驱动器实时透出，保持 stdout 的结构化契约。"""
+    print('[optimize:%s] %s evals=%d steps=%d defects=%d elapsed=%.2fs%s'
+          % (event['tag'], event['event'], event['evals'], event['steps'],
+             event['energy'][0], event['elapsed_s'],
+             (' stop=' + event['stop_reason']) if event.get('stop_reason') else ''),
+          file=sys.stderr, flush=True)
+
+
+def climb(L0, intent, catalog, log, tag, seed=19, *,
+          max_evals=MAX_EVALS, max_steps=MAX_STEPS, max_seconds=MAX_SECONDS,
+          polish_steps=POLISH_STEPS, initial_bp=None, progress=None):
+    """固定随机种子的首改进下降；预算耗尽返回目前最优布局，返回三元组不变。
+
+    max_evals 含种子评估；initial_bp 可复用调用方刚测量的种子，仍计一次。
+    max_steps 限接受的改善步；0 polish 在种子已达标时不探测任何邻居。
+    时间限在评估之间检查，因此可能多花一份评估时间。最终停止记录追加到
+    log，包含 stop_reason/evals/steps/elapsed_s，绝不代表完整校验已通过。
+    """
+    validate_budgets(max_evals, max_steps, max_seconds, polish_steps)
+    started = time.monotonic()
     rng = random.Random(seed)
-    bp = bpanel(L0, intent, catalog)
+    bp = initial_bp if initial_bp is not None else bpanel(L0, intent, catalog)
     cur, e = L0, energy(bp)
-    log.append({'tag': tag, 'step': 0, 'move': None, 'energy': e, 'bp': bp})
-    step = 0
-    polish = POLISH_STEPS
+    evals, steps, polished = 1, 0, 0
+    budgets = dict(max_evals=max_evals, max_steps=max_steps,
+                   max_seconds=max_seconds, polish_steps=polish_steps)
+    emit = progress if progress is not None else optimizer_progress
+
+    def event(kind, **extra):
+        return dict(tag=tag, event=kind, step=steps, steps=steps, evals=evals,
+                    elapsed_s=round(time.monotonic() - started, 6),
+                    energy=e, bp=bp, **extra)
+
+    def budget_stop():
+        if evals >= max_evals:
+            return 'max_evals'
+        if steps >= max_steps:
+            return 'max_steps'
+        if time.monotonic() - started >= max_seconds:
+            return 'max_seconds'
+        return None
+
+    log.append(event('start', move=None))
+    emit(log[-1])
+    last_progress = time.monotonic()
     while True:
-        step += 1
-        msl = neighbors(cur)
-        rng.shuffle(msl)
+        at_target = e[0] == 0 and e[1] == 0.0
+        if at_target and polished >= polish_steps:
+            reason = 'target_reached' if polish_steps == 0 else 'polish_steps'
+            break
+        reason = budget_stop()
+        if reason:
+            break
+        moves = neighbors(cur)
+        rng.shuffle(moves)
         found = None
-        for m in msl:
-            cand = apply_move(cur, m)
+        for move in moves:
+            reason = budget_stop()
+            if reason:
+                break
+            cand = apply_move(cur, move)
             if cand is None:
                 continue
             cbp = bpanel(cand, intent, catalog)
+            evals += 1
             ce = energy(cbp)
             if ce < e:
-                found = (cand, cbp, ce, m)
+                found = (cand, cbp, ce, move)
                 break
+            if evals % 10 == 0 or time.monotonic() - last_progress >= 1:
+                emit(event('progress'))
+                last_progress = time.monotonic()
         if found is None:
+            reason = reason or budget_stop() or 'local_minimum'
             break
-        cur, bp, e = found[0], found[1], found[2]
-        log.append({'tag': tag, 'step': step, 'move': repr(found[3]),
-                    'energy': e, 'bp': bp})
-        print('  [%s] step %d %s -> %s b3=%.3f len=%d'
-              % (tag, step, found[3], e[:2], bp['b3'], bp['length']))
-        if e[0] == 0 and e[1] == 0.0:
-            polish -= 1
-            if polish <= 0:
-                print('  [%s] 抛光帽 %d 步用尽，绿线后收工' % (tag, POLISH_STEPS))
-                break
+        cur, bp, e, move = found
+        steps += 1
+        # 达标的那一步不是额外抛光，抛光只计从已达标状态出发的改善。
+        if at_target:
+            polished += 1
+        log.append(event('accepted', move=repr(move)))
+        emit(log[-1])
+        last_progress = time.monotonic()
+    log.append(event('stop', stop_reason=reason, budgets=budgets,
+                     polish_steps_used=polished, move=None))
+    emit(log[-1])
     return cur, bp, e
 
 
 def main():
-    argv = sys.argv[1:]
-    val_flags = {'-o', '--kick', '--intent', '--catalog'}
-    pos = [a for i, a in enumerate(argv)
-           if not a.startswith('-') and (i == 0 or argv[i - 1] not in val_flags)]
-    if not pos:
-        print('用法: python proto_optimize.py <种子.layout.json> '
-              '[--intent INTENT.yaml] [--catalog CAT.json] '
-              '[-o 前缀] [--kick N] [--pure-budget]')
-        return 2
-    seed_path = pos[0]
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('seed_path')
+    ap.add_argument('--intent')
+    ap.add_argument('--catalog')
+    ap.add_argument('-o', dest='prefix')
+    ap.add_argument('--kick', type=int, default=0,
+                    help='额外随机重启次数（每次独立应用搜索预算；默认关闭）')
+    ap.add_argument('--pure-budget', action='store_true')
+    ap.add_argument('--max-evals', type=int, default=MAX_EVALS)
+    ap.add_argument('--max-steps', type=int, default=MAX_STEPS)
+    ap.add_argument('--max-seconds', type=float, default=MAX_SECONDS)
+    ap.add_argument('--polish-steps', type=int, default=POLISH_STEPS)
+    args = ap.parse_args()
+    try:
+        validate_budgets(args.max_evals, args.max_steps, args.max_seconds,
+                         args.polish_steps)
+        if args.kick < 0:
+            raise ValueError('--kick 必须 >= 0')
+    except ValueError as exc:
+        ap.error(str(exc))
+    seed_path = args.seed_path
     seed_dir = os.path.dirname(os.path.abspath(seed_path))
-    intent_p = None
-    if '--intent' in argv:
-        intent_p = argv[argv.index('--intent') + 1]
-    else:
+    intent_p = args.intent
+    if not intent_p:
         import glob as _glob
         hits = sorted(_glob.glob(os.path.join(seed_dir, '*.intent.yaml')))
         intent_p = hits[0] if len(hits) == 1 else None
     if not intent_p:
-        print('未定位 intent：用 --intent 指定，或种子目录下恰有一个 *.intent.yaml')
-        return 2
-    if '--catalog' in argv:
-        cat_p = argv[argv.index('--catalog') + 1]
-    else:
-        cand = os.path.join(seed_dir, 'component-catalog.json')
-        cat_p = cand if os.path.isfile(cand) else os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), '..', 'assets',
-            'component-library', 'component-catalog.json')
-    prefix = os.path.splitext(seed_path)[0] + '-opt'
-    kicks = 4
-    if '-o' in argv:
-        prefix = argv[argv.index('-o') + 1]
-    if '--kick' in argv:
-        kicks = int(argv[argv.index('--kick') + 1])
+        ap.error('未定位 intent：用 --intent 指定，或种子目录下恰有一个 *.intent.yaml')
+    cand = os.path.join(seed_dir, 'component-catalog.json')
+    cat_p = args.catalog or (cand if os.path.isfile(cand) else os.path.join(
+        HERE, '..', 'assets', 'component-library', 'component-catalog.json'))
+    prefix = args.prefix or os.path.splitext(seed_path)[0] + '-opt'
     out_prefix = prefix if os.path.dirname(prefix) else os.path.join(seed_dir, prefix)
+    budgets = dict(max_evals=args.max_evals, max_steps=args.max_steps,
+                   max_seconds=args.max_seconds, polish_steps=args.polish_steps)
 
     intent = R.load_yaml(intent_p)
     with io.open(cat_p, encoding='utf-8') as f:
@@ -477,22 +539,26 @@ def main():
     bp0 = bpanel(copy.deepcopy(seed), intent, catalog)
     print('种子评估 %.2fs: %s' % (time.time() - t0, bp0))
     print('种子能量: %s' % (energy(bp0),))
-    if '--pure-budget' not in argv:
+    NO_REGRESSION.clear()
+    if not args.pure_budget:
         NO_REGRESSION.update(b1=bp0['b1'], b2tot=bp0['b2tot'],
                              b2max=bp0['b2max'], b4=bp0['b4'],
                              b5=bp0['b5'])
         print('不劣化下限(取种子值):', dict(NO_REGRESSION))
 
     log = []
-    bestL, bestbp, beste = climb(seed, intent, catalog, log, 'main')
+    bestL, bestbp, beste = climb(seed, intent, catalog, log, 'main',
+                                   initial_bp=bp0, **budgets)
     rng = random.Random(19)
-    for k in range(kicks):
+    for k in range(args.kick):
         L = copy.deepcopy(bestL)
         pool = neighbors(L)
+        if not pool:
+            break
         for _ in range(3):
             m = rng.choice(pool)
             L = apply_move(L, m) or L
-        L2, bp2, e2 = climb(L, intent, catalog, log, 'kick%d' % k)
+        L2, bp2, e2 = climb(L, intent, catalog, log, 'kick%d' % k, **budgets)
         if e2 < beste:
             bestL, bestbp, beste = L2, bp2, e2
         print('kick%d -> %s (best %s)' % (k, e2[:2], beste[:2]))
@@ -504,6 +570,7 @@ def main():
                  encoding='utf-8') as f:
         json.dump({'seed': os.path.basename(seed_path), 'seed_bp': bp0,
                    'final_bp': bestbp, 'final_energy': beste,
+                   'optimization': log[-1], 'budgets_per_search': budgets,
                    'log': log}, f, ensure_ascii=False, indent=1)
     print('最终: %s bp=%s' % (beste, bestbp))
     print('写出 %s.layout.json / -opt-log.json' % out_prefix)

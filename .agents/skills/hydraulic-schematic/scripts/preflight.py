@@ -34,6 +34,7 @@ REQUIRED_SECTIONS = ('l0_version', 'system', 'catalog', 'maturity',
 
 def default_schema_path():
     cands = (
+        os.path.join(HERE, 'assets', 'contracts', SCHEMA_NAME),                # 自包含驱动沙箱
         os.path.join(HERE, '..', 'assets', 'contracts', SCHEMA_NAME),          # skill 快照侧
         os.path.join(HERE, '..', '..', '.agents', 'skills', 'hydraulic-schematic',
                      'assets', 'contracts', SCHEMA_NAME),                      # 规范源侧
@@ -188,6 +189,36 @@ def semantic_findings(intent, catalog, source_text):
                     "medium 兼容: paths 属液压主路，%s 的 medium=%s"
                     % (tok, ports[pid].get('medium')),
                     "该端口属电气/气侧，走 taps 或专线，不入 paths")
+
+    # taps 语义核对：两端都必须是「已声明实例.已登记端口」。本体感测口
+    # （role=measurement/kind=body_tap，挂油箱壁等本体安装座）与网络锚
+    # （at 为被测网络的流口）在此同权存在性核对——渲染期 wire_taps 都按
+    # 端口锚点画专线，差别只在布局规则与悬空豁免，不在合法性。
+    for ti, t in enumerate(intent.get('taps') or []):
+        for key in ('sensor', 'at'):
+            tok = str(t.get(key) or '')
+            inst, _, pid = tok.partition('.')
+            if inst in externs:
+                add('E-TAP-%d-%s-EXT' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 引用边界标记 %s：传感支路两端须是元件端口"
+                    % (key, inst),
+                    "把 %s 改为 parts 中已声明实例的显式端口" % tok)
+                continue
+            if inst not in parts or not pid:
+                add('E-TAP-%d-%s-TOK' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 不是「实例.端口」形，或实例未在 parts 声明: %s"
+                    % (key, tok),
+                    "写成已声明实例的显式端口，如 TANK-001.body_sense_tap")
+                continue
+            ct = types.get(parts[inst])
+            if ct is None:
+                continue
+            ports = {p['id']: p for p in ct.get('ports', [])}
+            if pid not in ports:
+                add('E-TAP-%d-%s-PORT' % (ti, key), 'ERROR', None, tok,
+                    "端口存在性: 类型 %s 无端口 %s（可用: %s）"
+                    % (parts[inst], pid, ', '.join(sorted(ports))),
+                    "改成列出的真实端口 id")
     return findings
 
 

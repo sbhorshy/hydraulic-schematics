@@ -36,8 +36,9 @@ LIB = os.path.join(SKILL, 'assets', 'component-library')
 # 无名 white-walk 会被 L2 拦下——白名单是挂账不是赦免。
 WHITELIST = {
     'quick-disconnect-coupling.svg': (
-        '连接位变体：端口语义待工程确认（unknown: quick-disconnect-port-'
-        'semantics-pending）', '#22'),
+        '连接位变体：无端口组，待重绘补齐；断开位侧别语义已工程确认'
+        '（2026-09-07，右=机侧座端 aircraft_side / 左=地面接口 ground_side，'
+        'unknown: quick-disconnect-port-redraw-pending）', '#22'),
 }
 
 

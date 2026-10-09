@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 134"
-     width="126" height="134"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 63 67"
+     width="63" height="67"
      data-component-type="pressure_gauge"
      data-symbol-version="1.2"
      data-symbol-status="draft"
      data-symbol-form="stroke_geometry"
      data-symbol-source-ref="REDRAWN_FROM:Pressure Gauge.svg">
+<!-- 2026-09-29 画布重表达 k=1(符号规范化 campaign):按渲染缩放率 k=0.5 均匀缩放全部几何,viewBox 0 0 126 134 → 0 0 63 67;占位 63×67 不变,图上几何不变,渲染缩放补偿归一。 -->
 
   <!-- 描边几何重绘,取代根目录 potrace 描摹填充版 Pressure Gauge.svg。
        几何依据:对原描摹件按 4.0 px/单位实测(3x 渲染 + 像素行程分析),沿用原 viewBox 126x114:
@@ -30,17 +31,17 @@
   <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
      stroke-linecap="round" stroke-linejoin="round">
     <!-- 表盘圆 -->
-    <circle id="dial" cx="64" cy="60" r="44"/>
+    <circle id="dial" cx="32" cy="30" r="22"/>
     <!-- 指针:沿 60° 对角线,尖端指向左上 -->
-    <line id="needle" x1="81" y1="89.5" x2="48.5" y2="33"/>
-    <polygon id="needle-arrow" points="47,30.5 65.5,44 49.5,53"
+    <line id="needle" x1="40.5" y1="44.75" x2="24.25" y2="16.5"/>
+    <polygon id="needle-arrow" points="23.5,15.25 32.75,22 24.75,26.5"
              fill="#000000" stroke="none"/>
     <!-- 取压引线:表盘底部向下,端头为取压口 -->
-    <line id="pressure-sense-line" x1="64" y1="104" x2="64" y2="134"/>
+    <line id="pressure-sense-line" x1="32" y1="52" x2="32" y2="67"/>
   </g>
 
   <g id="connection-points" fill="#ff0000">
-    <circle id="port-pressure-sense" cx="64" cy="134" r="2"
+    <circle id="port-pressure-sense" cx="32" cy="67" r="1"
             data-port-id="pressure_sense"
             data-medium="pneumatic"
             data-port-role="measurement"

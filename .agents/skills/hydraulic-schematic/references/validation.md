@@ -21,7 +21,7 @@
 
 ## 3. 感知回读（PNG）
 
-1. 用 Chrome headless 或 Inkscape 把 SVG 光栅化为 PNG。
+1. 用 `python <skill>/scripts/rasterize_sheet.py <svg> -o <workdir>/sheet-readback.png` 光栅化；自动选择本机 Inkscape 或 Chrome，并核对 PNG 与 viewBox 的 1:1 尺寸。驱动器每轮自动执行。
 2. 逐分区读图确认：符号未变形、镜像正确、走线无穿越、标签/端口点对位、图签图例齐全。
 3. 回读发现的每个疑点要修正后重新光栅化再回读；一次都跳过不得——validate_sheet 明确规定"无回读图的校核项记为未校核，不静默放过"。
 
@@ -52,6 +52,8 @@
 - 渲染脚本退出码 0；
 - `validation-report.json` 全绿；
 - 最新一版 PNG 已人工级回读且记录在哪张图上校了什么。
+
+驱动器 `converged=true` 只表示自动校核通过，`perceptual_review=pending` 仍须读最新图完成。
 
 三者齐备才宣告完成；修图必须重跑全链路（自检 → 几何 → 回读），且总轮数受「有界收敛」两轮上限约束——
 两轮后仍不收敛的，交付物是未收敛项清单与工程师决策请求，不是图。
