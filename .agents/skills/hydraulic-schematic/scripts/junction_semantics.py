@@ -174,6 +174,9 @@ def check_junctions(topology, browser):
         dots=[m for m in local if m['painted'] and not m['unchecked']]
         arcs=[b for b in bridges if math.dist(b['position'],position)<=TOLERANCE]
         suspect=[s for s in segments if s.get('svg_id') in by_id and on(position,s['start'],s['end']) and effects(by_id[s['svg_id']])]
+        event['measurement_status'] = 'not_checked' if event['kind']=='unchecked' or suspect else 'measured'
+        event['bridge_ids'] = [b['svg_id'] for b in arcs]
+        event['visible_horizontal'] = any(axis(s)=='h' and on(position,s['start'],s['end']) for s in straight)
         if event['kind']=='unchecked' or suspect:
             unchecked.append({'check':'both',**context,'detail':'Incident pipe identity or display effects are unsupported'})
             continue

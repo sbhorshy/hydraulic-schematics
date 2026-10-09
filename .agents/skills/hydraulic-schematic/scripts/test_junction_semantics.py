@@ -253,6 +253,14 @@ class JunctionCLI(unittest.TestCase):
         findings=[c for c in self.validate()['checks'] if c['id']=='V14']
         self.assertTrue(any(c.get('kind')=='bridge_gap' for c in findings),findings)
 
+    def test_correct_bridge_does_not_exempt_existing_zero_crossing_budget(self):
+        self.crossing()
+        report=self.validate()
+        self.assertFalse([c for c in report['checks'] if c['id']=='V14'])
+        budget=next(item for item in report['composition_budget']['items'] if item['id']=='B1')
+        self.assertEqual(budget['measured'],1)
+        self.assertEqual(budget['status'],'fail')
+
 
 if __name__=='__main__':
     unittest.main()

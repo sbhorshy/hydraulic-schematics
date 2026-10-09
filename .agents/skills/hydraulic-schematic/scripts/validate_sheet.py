@@ -526,32 +526,14 @@ def main(argv=None):
         if man > 0:
             ratios.append((length / man, pts))
 
-    # B1 交叉：正交段几何交点，端点相接（T 型汇入/三通）不算。
-    # 预算恒为 0，不承认跨线桥豁免——有桥也是超预算，须改道。
-    b1_cross = []
-    for i in range(len(segs_all)):
-        _c1, a1, b1 = segs_all[i]
-        h1 = abs(b1[1] - a1[1]) < 0.6
-        for j in range(i + 1, len(segs_all)):
-            _c2, a2, b2 = segs_all[j]
-            h2 = abs(b2[1] - a2[1]) < 0.6
-            if h1 == h2:
-                continue
-            if h1:
-                x, y = a2[0], a1[1]
-            else:
-                x, y = a1[0], a2[1]
-            def on(p, s, e):
-                return (min(s[0], e[0]) - 0.5 <= x <= max(s[0], e[0]) + 0.5
-                        and min(s[1], e[1]) - 0.5 <= y <= max(s[1], e[1]) + 0.5)
-            if not (on((x, y), a1, b1) and on((x, y), a2, b2)):
-                continue
-            ends = {(round(q[0], 1), round(q[1], 1))
-                    for q in (segs_all[i][1], segs_all[i][2],
-                              segs_all[j][1], segs_all[j][2])}
-            if (round(x, 1), round(y, 1)) in ends:
-                continue
-            b1_cross.append((x, y))
+    # B1 retains the zero-crossing policy, including real bridged crossings.
+    # Facing loose ends diagnose a missing bridge but do not invent a route.
+    crossing_evidence = next(e for e in junction_evidence if e['id']=='V14')
+    crossing_events = [e for e in crossing_evidence.get('events',[]) if e['kind']=='crossing']
+    b1_cross = [tuple(e['position']) for e in crossing_events
+                if e.get('measurement_status')=='measured' and (e.get('visible_horizontal') or e.get('bridge_ids'))]
+    b1_unchecked = (crossing_evidence['coverage_status']=='not_checked' or
+                    any(not e.get('visible_horizontal') and not e.get('bridge_ids') for e in crossing_events))
 
     # B5 uses the final transformed source footprints, including nested transforms.
     b5_nearest = nearest_components(geometry)
@@ -573,7 +555,8 @@ def main(argv=None):
         F.append(('V19', '构图预算 B1：交叉 %d 处 > 0，须改道消除'
                   % len(set(b1_cross))))
     else:
-        add('B1', 0, 'pass')
+        add('B1', 0, 'not_measured' if b1_unchecked else 'pass',
+            'Crossing route/display evidence incomplete.' if b1_unchecked else None)
 
     # B2 折返：单条 ≤3 且全图 ≤40。超限走 WARN；落在边界端子上的
     # 存量走线按表注¹披露为 exempt。
