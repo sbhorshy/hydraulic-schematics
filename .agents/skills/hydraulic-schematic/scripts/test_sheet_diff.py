@@ -56,6 +56,33 @@ class SheetDiffCLI(unittest.TestCase):
         copied.write_text(copied.read_text() + '\n<!-- altered frozen symbol -->\n')
         self.diff_cli('verify', frozen, expected=2)
 
+    def test_legacy_frozen_package_with_unbound_required_symbol_is_rejected(self):
+        # Reproduce the old Windows-reference snapshot shape, including internally
+        # consistent public digests; this is an absent binding, not byte tampering.
+        import hashlib
+        def digest(value):
+            return hashlib.sha256(json.dumps(value,ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False).encode()).hexdigest()
+        frozen=self.base/'legacy-unbound';self.diff_cli('freeze',self.work,'--output',frozen)
+        manifest_path=frozen/'version.json';manifest=json.loads(manifest_path.read_text())
+        report_path=frozen/'validation-report.json';report=json.loads(report_path.read_text())
+        key='symbol:EDP-001';manifest['files'][key]={'path':None,'sha256':None}
+        report['artifacts']['files'][key]['sha256']=None
+        fingerprint=digest({'files':{k:v['sha256'] for k,v in manifest['files'].items()},'versions':report['artifacts']['versions']})
+        report['artifacts']['fingerprint']=manifest['artifact_fingerprint']=fingerprint
+        report['report_fingerprint']=digest({k:v for k,v in report.items() if k!='report_fingerprint'})
+        report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2))
+        manifest['report_sha256']=hashlib.sha256(report_path.read_bytes()).hexdigest()
+        manifest['integrity']=digest({k:v for k,v in manifest.items() if k!='integrity'})
+        manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2))
+        rejected=self.diff_cli('verify',frozen,expected=2)
+        self.assertIn('symbol:EDP-001',rejected.stdout+rejected.stderr)
+        scope=self.base/'scope.json';scope.write_text(json.dumps({'global':True,'note':'An old incomplete package must not compare.'}))
+        output=self.base/'unbound-comparison'
+        self.diff_cli('compare',frozen,self.work,'--scope',scope,'--output',output,expected=2)
+        comparison=json.loads((output/'change-report.json').read_text())
+        self.assertEqual(comparison['status'],'not_comparable')
+        self.assertIsNone(comparison['pixels'])
+
     def test_local_lead_repair_reports_unchanged_topology_and_local_pixels(self):
         svg = self.work / '1#系统原理图.svg'
         correct = svg.read_text()

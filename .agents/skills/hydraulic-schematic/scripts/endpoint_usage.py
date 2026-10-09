@@ -5,6 +5,7 @@ when followed by another token. Taps use both declared endpoints regardless of
 gas/measurement/body_tap semantics.
 Unknowns describe uncertainty; they neither create nor consume ports.
 """
+from svg_paint import color_rgba, computed_length
 from collections import Counter
 import math
 from pathlib import Path
@@ -184,23 +185,15 @@ def check_disclosure(root, inventory, geometry):
 
 
 def _red_paint(value):
-    if value == 'none':
-        return False
-    match = re.fullmatch(r'rgba?\(([-+0-9., /]+)\)', value)
-    if not match:
-        return None  # paint server or unsupported color space: no invented pass
-    values = [float(v) for v in re.findall(r'[-+]?(?:\d*\.\d+|\d+\.?\d*)', match[1])]
-    if len(values) not in (3,4):
-        return None
-    r,g,b = values[:3]
-    return r > 0 and r > 2*g and r > 2*b and (len(values)==3 or values[3]>0)
+    color=color_rgba(value)
+    if color is None:return None
+    r,g,b,alpha=color
+    return r>0 and r>2*g and r>2*b and alpha>0
 
 
 def _positive_display_number(value):
-    try:
-        return float(value.removeprefix('calc(').removesuffix(')').removesuffix('px')) > 0
-    except ValueError:
-        return None
+    value=computed_length(value)
+    return value>0 if value is not None else None
 
 
 def _red_marker_paint(style):

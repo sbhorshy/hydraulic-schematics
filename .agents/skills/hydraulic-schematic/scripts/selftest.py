@@ -287,18 +287,22 @@ def check_template_gate():
 def check_l0_regressions():
     # End-to-end browser suites share this aggregate hang guard; it is not a performance assertion.
     suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
-              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths',
+              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
               'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
-                                timeout=600)
+                                timeout=900)
     except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 600 秒进程保护上限，未通过') from exc
+        raise Fail('L0 专项测试超过 900 秒进程保护上限，未通过') from exc
+    output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
     if result.returncode:
-        output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
         raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'
                    % (result.returncode, output[-5000:]))
+    lines = output.strip().splitlines()
+    summary = next((i for i, line in enumerate(lines) if line.startswith('Ran ')), None)
+    if summary is not None:
+        print('\n'.join(lines[summary:]))
 
 
 CHECKS = [

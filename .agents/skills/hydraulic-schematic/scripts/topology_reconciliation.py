@@ -6,6 +6,7 @@ trunks and bridge-split runs are representation, never extra logical edges.
 """
 import json
 from pathlib import Path
+from svg_paint import color_rgba, has_dash_gaps, computed_length
 
 
 def declared_topology(intent, catalog):
@@ -50,14 +51,29 @@ def write_manifest(workdir, intent, catalog, fragments):
         item['svg_ids'] = [f['id'] for f in fragments if f['anchor'] == item['anchor']]
     target = Path(workdir) / '1#系统原理图-topology'
     target.with_suffix('.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    lines = ['# 输入追溯清单', '', '母线共享主干不增加逻辑边；跨线桥与折线拆段保留原输入连接。', '',
-             '| 输入锚点 | 对象 / 连接 | SVG 图元 |', '| --- | --- | --- |']
-    for item in manifest['nodes'] + manifest['ports'] + manifest['externs'] + manifest['buses'] + manifest['edges']:
-        label = ' ↔ '.join(item['endpoints']) if 'endpoints' in item else item['id']
-        ids = ', '.join(item.get('svg_ids', []))
-        lines.append('| `%s` | `%s` | %s |' % (item['anchor'], label, ids))
-    lines += ['', '## 未知项（只披露，不生成连接）', '']
-    lines += ['- ' + str(value) for value in manifest['unknown']]
+    layout_path=Path(workdir)/'1#系统.layout.json'
+    selected=json.loads(layout_path.read_text(encoding='utf-8')).get('nodes',{}) if layout_path.is_file() else {}
+    types={c['component_type']:c for c in catalog['components']}
+    lines = ['# 输入追溯清单', '',
+             '来源使用可解析的 intent 锚点；不推测 YAML 物理行号。母线共享主干不增加逻辑边，跨线桥与折线拆段保留原输入连接。', '',
+             '## 连接(边)映射', '',
+             '| 输入锚点 | intent 连接 | 图上逻辑边 | 逻辑实例数 | SVG 片段 |',
+             '| --- | --- | --- | --- | --- |']
+    for item in manifest['edges']:
+        lines.append('| `%s` | `%s` | `%s` | 1 | %s |' %
+                     (item['anchor'],' ↔ '.join(item['endpoints']),item['anchor'],', '.join(item['svg_ids'])))
+    lines += ['', '## 节点(part)映射', '',
+              '| 输入锚点 | part 声明 | 图上元件 | 符号形式 |', '| --- | --- | --- | --- |']
+    for item in manifest['nodes']:
+        symbol=selected.get(item['id'],{}).get('symbol') or types[item['type']].get('symbol',{}).get('asset','未提供')
+        lines.append('| `%s` | `%s: %s` | %s | `%s` |' %
+                     (item['anchor'],item['id'],item['type'],', '.join(item['svg_ids']),symbol))
+    lines += ['', '## 端口 / 母线 / 边界辅助映射', '',
+              '| 输入锚点 | 对象 | SVG 图元 |', '| --- | --- | --- |']
+    for item in manifest['ports'] + manifest['buses'] + manifest['externs']:
+        lines.append('| `%s` | `%s` | %s |' % (item['anchor'],item['id'],', '.join(item.get('svg_ids',[]))))
+    lines += ['', '## 简化说明 / 未知项', '', '以下未知项只披露，不生成连接；逻辑实例数不按 SVG 片段数累加。', '']
+    lines += ['- ' + str(value) for value in manifest['unknown']] or ['- 无声明的未知项。']
     target.with_suffix('.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     return manifest
 
@@ -106,8 +122,20 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
                 return False
             style = row['style']
             check_effects(el, row)
-            return (row['visible'] and style.get('stroke') not in ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)')
-                    and float(style.get('stroke-opacity','1')) > 0 and float(style.get('stroke-width','1').replace('px','')) > 0)
+            if has_dash_gaps(style.get('stroke-dasharray')) is not False:
+                unchecked.append({'svg_id':el.get('id'),'position':row['bbox'],'detail':'Dashed/unresolved stroke cannot certify continuous painted connectivity'})
+            width=computed_length(style.get('stroke-width','1'))
+            if not row['visible'] or float(style.get('stroke-opacity','1'))<=0 or width==0:
+                return False
+            if width is None:
+                unchecked.append({'svg_id':el.get('id'),'position':row['bbox'],'detail':'Unresolved computed stroke width '+style.get('stroke-width','')})
+                return True
+            color=color_rgba(style.get('stroke'))
+            if color is None:
+                unchecked.append({'svg_id':el.get('id'),'detail':'Unsupported stroke paint '+str(style.get('stroke'))})
+                return True  # provisional geometry is disclosed as not_checked below
+            return (row['visible'] and color[3]>0 and color[:3]!=(255.,255.,255.)
+                    and float(style.get('stroke-opacity','1')) > 0 and width > 0)
         while el is not None:
             style = dict(re.findall(r'([\w-]+)\s*:\s*([^;]+)', el.get('style', '')))
             if (style.get('display', el.get('display')) == 'none' or

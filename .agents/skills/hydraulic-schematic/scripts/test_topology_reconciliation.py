@@ -55,6 +55,24 @@ class TopologyCLI(unittest.TestCase):
                 self.assertTrue(line.get('id'))
         self.assertTrue((self.work / '1#系统原理图-topology.md').exists())
 
+    def test_markdown_manifest_separates_logical_edges_nodes_and_svg_fragments(self):
+        import shutil
+        for name in ('1#系统.intent.yaml','1#系统.layout.json'):
+            shutil.copy2(SKILL/'assets/fixtures/l0-current'/name,self.work/name)
+        self.render()
+        doc=(self.work/'1#系统原理图-topology.md').read_text()
+        self.assertIn('## 连接(边)映射',doc)
+        self.assertIn('## 节点(part)映射',doc)
+        self.assertIn('| 逻辑实例数 | SVG 片段 |',doc)
+        data=json.loads((self.work/'1#系统原理图-topology.json').read_text())
+        split=next(e for e in data['edges'] if len(e['svg_ids'])>1)
+        row=next(line for line in doc.splitlines() if line.startswith('| `'+split['anchor']+'` |'))
+        self.assertIn('| 1 |',row)
+        for svg_id in split['svg_ids']:self.assertIn(svg_id,row)
+        for section in ('## 端口 / 母线 / 边界辅助映射','## 简化说明 / 未知项'):
+            self.assertIn(section,doc)
+        self.assertIn('parts.EDP-001',doc)
+
     def test_deleted_connection_fails_at_its_input_anchor(self):
         def damage(root):
             group = next(e for e in root.iter() if e.get('id') == 'lines')

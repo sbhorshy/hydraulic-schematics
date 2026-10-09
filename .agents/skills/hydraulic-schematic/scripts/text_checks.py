@@ -1,4 +1,5 @@
 """Rendered text measurement, containment and clearance in root SVG units."""
+from svg_paint import color_rgba, computed_length
 import math
 import re
 import xml.etree.ElementTree as ET
@@ -103,14 +104,11 @@ def glyph_paint(row):
         value=style.get(paint,'none')
         if value=='none' or float(style.get(paint+'-opacity','1'))<=0:
             results.append(False);continue
-        color=re.fullmatch(r'rgba?\(([^)]+)\)',value)
-        if not color: results.append(None);continue
-        rgba=[float(v.strip()) for v in color[1].split(',')]
-        alpha=rgba[3] if len(rgba)==4 else 1
-        try:
-            width=float(style.get('stroke-width','0').removeprefix('calc(').removesuffix(')').removesuffix('px')) if paint=='stroke' else 1
-        except ValueError:
-            results.append(None);continue
+        color=color_rgba(value)
+        if color is None:results.append(None);continue
+        alpha=color[3]
+        width=computed_length(style.get('stroke-width','0')) if paint=='stroke' else 1
+        if width is None:results.append(None);continue
         results.append(alpha>0 and width>0)
     return True if True in results else None if None in results else False
 
@@ -252,12 +250,11 @@ def check_text(browser, geometry, budget=6., layout=None, intent=None, resolve_s
     for row in rows:
         if not row.get('visible') or row['tag'] in ('text','tspan','g','svg'): continue
         style=row['style']
-        stroke=style['stroke'] not in ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)') and float(style['stroke-opacity'])>0
-        fill=row['tag']!='line' and style['fill'] not in ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)') and float(style['fill-opacity'])>0
+        stroke_color=color_rgba(style['stroke']);fill_color=color_rgba(style['fill'])
+        stroke=(stroke_color is None or (stroke_color[3]>0 and stroke_color[:3]!=(255.,255.,255.))) and float(style['stroke-opacity'])>0
+        fill=row['tag']!='line' and (fill_color is None or (fill_color[3]>0 and fill_color[:3]!=(255.,255.,255.))) and float(style['fill-opacity'])>0
         if not stroke and not fill: continue
-        try:
-            width=float(style['stroke-width'].removeprefix('calc(').removesuffix(')').removesuffix('px')) if stroke else 0.
-        except ValueError: width=None
+        width=computed_length(style['stroke-width']) if stroke else 0.
         matrix=row['matrix']; max_radius=(width or 0)*math.hypot(*matrix[:4])/2
         nearby=[t for t in records if bbox_gap(t['bbox'],row['bbox'])<=budget+max_radius]
         if not nearby: continue
