@@ -395,7 +395,7 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
     return {**expected, 'coordinate_system':'root_svg_user_units', 'endpoint_tolerance':.1,
             'expected_edges':expected['edges'], 'actual_edges':actual,
             'segments':[{**s,'start':positions[s['a']],'end':positions[s['b']]} for s in atomic],
-            'vertices':[{'position':p,'terminals':sorted(labels[i]),'degree':len(graph[i])} for i,p in enumerate(positions)],
+            'vertices':[{'position':p,'terminals':sorted(labels[i]),'degree':len({n for n,_ in graph[i]})} for i,p in enumerate(positions)],
             'bridges':bridge_records,'networks':networks,'findings':findings,
             'display_evidence':{'status':browser_evidence['status'],'reason':browser_evidence.get('reason'),'unchecked':unchecked},
             'coverage_status':'pass' if measured and not geometry['issues'] and not unchecked else 'not_checked'}

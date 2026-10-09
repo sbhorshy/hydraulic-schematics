@@ -223,6 +223,12 @@ class TopologyCLI(unittest.TestCase):
         self.assertEqual(coverage['status'],'not_checked',result.stdout+result.stderr)
         self.assertIn('Display/geometry reconciliation incomplete',coverage['detail'])
 
+    def test_shared_overlaid_suction_trunk_has_one_physical_incidence(self):
+        self.render_connected_current()
+        topology=self.validate()['topology']
+        tank=next(v for v in topology['vertices'] if 'TANK-001.suction_out' in v['terminals'])
+        self.assertEqual(tank['degree'],1)
+
 
 if __name__ == '__main__':
     unittest.main()
