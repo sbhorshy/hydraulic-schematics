@@ -112,9 +112,15 @@ def write_contract_failure(workdir, inventory, issues, unknown):
     return 1
 
 
-def check_disclosure(root, inventory, ports):
+def check_disclosure(root, inventory, geometry):
     """Compare actual sheet circles and printed title against the input inventory."""
+    from sheet_geometry import walk, point as transform_point
+
     issues = []
+    try:
+        matrices = dict(walk(root))
+    except ValueError as exc:
+        return [{'kind': 'dangling_marker_geometry', 'detail': str(exc)}]
     parents = {child: parent for parent in root.iter() for child in parent}
 
     def hidden(element):
@@ -154,15 +160,16 @@ def check_disclosure(root, inventory, ports):
         if endpoint not in expected:
             continue
         inst, pid = endpoint.split('.', 1)
-        point = ports.get(inst, {}).get(pid)
+        port = geometry['nodes'].get(inst, {}).get('ports', {}).get(pid)
         try:
-            xy = (float(marker.get('cx')), float(marker.get('cy')))
+            xy = transform_point(matrices[marker], (float(marker.get('cx')), float(marker.get('cy'))))
             visible = (float(marker.get('r', '0')) > 0 and not hidden(marker)
+                       and all(math.isfinite(v) for v in xy)
                        and marker.tag.rsplit('}', 1)[-1] == 'circle'
                        and 'dang' in marker.get('class', '').split())
         except (TypeError, ValueError):
             xy, visible = None, False
-        if not visible or not point or any(abs(xy[k] - point[k]) > 0.2 for k in (0, 1)):
+        if not visible or not port or any(abs(xy[k] - port['position'][k]) > 0.2 for k in (0, 1)):
             issues.append({'kind': 'dangling_marker', 'endpoint': endpoint,
                            'xy': xy, 'detail': '%s 悬空红圈不可见或偏离端口' % endpoint})
     title = next((e for e in root.iter() if e.get('id') == 'title'), None)

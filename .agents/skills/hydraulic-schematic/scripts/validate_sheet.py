@@ -16,6 +16,8 @@ import math
 import os
 import re
 import sys
+from sheet_geometry import load_geometry
+from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
 from proofreading_evidence import assess_png, enrich_report, resolve_catalog, write_report
@@ -153,6 +155,12 @@ def main(argv=None):
     if dup:
         F.append(('V1', '整图存在重复 id: %s' % ' '.join(dup)))
 
+    geometry = load_geometry(root, L, symbol_path)
+    endpoint_findings, endpoint_evidence = check_endpoints(geometry, intent, cat)
+    endpoint_findings.extend(check_bodies(geometry, endpoint_evidence['terminals']))
+    F.extend((c['id'], c['detail']) for c in endpoint_findings)
+    ev.append(endpoint_evidence)
+
     # ---------- 收集元件占位矩形 ----------
     boxes = {}
     boxes_foot = {}   # 旋转后画布足迹占位,仅 B5 净距使用(其余检查维持声明占位口径)
@@ -204,30 +212,12 @@ def main(argv=None):
                     or (vertical and (b[1] - a[1]) * (c[1] - b[1]) < -0.01)):
                 F.append(('V13', '管线自身折返形成越界线头: %s %s -> %s -> %s'
                           % (cls, a, b, c)))
-    for cls, pts in polys:
-        for k in range(len(pts) - 1):
-            for inst, bx in ink_boxes.items():
-                # 段端点落在框边界上时是接线,不是穿越。判距 <=3。
-                on_a = (abs(pts[k][0] - bx[0]) < 3 or abs(pts[k][0] - bx[2]) < 3
-                        or abs(pts[k][1] - bx[1]) < 3 or abs(pts[k][1] - bx[3]) < 3)
-                on_b = (abs(pts[k + 1][0] - bx[0]) < 3 or abs(pts[k + 1][0] - bx[2]) < 3
-                        or abs(pts[k + 1][1] - bx[1]) < 3 or abs(pts[k + 1][1] - bx[3]) < 3)
-                # 段的任何端点在此框的端口上时,穿越不计:那正是接线目标。
-                # 端口列表来自布局,坐标是旋转缩放后的绝对位置。
-                port_at = []
-                for pid, (px, py, anch, role, med) in ports.get(inst, {}).items():
-                    if abs(pts[k][0] - px) < 3 and abs(pts[k][1] - py) < 3:
-                        port_at.append(pid)
-                    if abs(pts[k + 1][0] - px) < 3 and abs(pts[k + 1][1] - py) < 3:
-                        port_at.append(pid)
-                if on_a or on_b or port_at:
-                    continue
-                hit = seg_rect_hit(pts[k], pts[k + 1], bx, tol=3.0)
-                if hit > 6.0:
-                    F.append(('V2', '管线穿越 %s 本体 %.0f 单位,段 %s->%s'
-                              % (inst, hit, pts[k], pts[k + 1])))
-    ev.append({'id': 'V2', 'polylines': len(polys),
-               'segments': sum(len(p) - 1 for _c, p in polys)})
+    ev.append({'id': 'V2', 'polylines': len(geometry['pipes']),
+               'segments': sum(len(p['points']) - 1 for p in geometry['pipes']),
+               'coverage_status': 'not_checked' if geometry['issues'] else 'pass',
+               'detail': 'Final SVG segments clipped against transformed symbol footprints',
+               'coordinate_system': geometry['coordinate_system'],
+               'interior_tolerance': endpoint_evidence['endpoint_tolerance']})
 
     # 三通点先收集,V14 需要它判断交叉是否为连通节点。
     jn = [(float(m.group(1)), float(m.group(2)))
@@ -764,16 +754,6 @@ def main(argv=None):
                 F.append(('V11', '斜线段 (%.0f,%.0f)->(%.0f,%.0f),管线须正交'
                           % (x0, y0, x1, y1)))
 
-    # ---------- V3 越过端口后折返(会被读作支路的线头) ----------
-    # 判据:折线首段或末段的方向与该端口锚点方向相反。
-    for cls, pts in polys:
-        if len(pts) < 3:
-            continue
-        for (a, b, tag) in ((pts[0], pts[1], '首'), (pts[-1], pts[-2], '末')):
-            d = (b[0] - a[0], b[1] - a[1])
-            if abs(d[0]) + abs(d[1]) < 0.5:
-                F.append(('V3', '%s段零长,端点重合于 %s' % (tag, a)))
-
     # ---------- V4 三通实心点必须在母线内部 ----------
     bus_x = {b['x'] for b in L['buses'].values()}
     for (x, y) in jn:
@@ -786,9 +766,10 @@ def main(argv=None):
     if dang:
         W.append(('V5', '悬空端口 %d 个,须在图签栏计数并标红: %s'
                   % (len(dang), ' '.join(sorted(dang)))))
-    drawing_issues = check_disclosure(root, inventory, ports)
+    drawing_issues = check_disclosure(root, inventory, geometry)
     F.extend(('V5', item['detail']) for item in drawing_issues)
     ev.append({'id': 'V5', **inventory, 'drawing_issues': drawing_issues,
+               'marker_tolerance': 0.2, 'coordinate_system': geometry['coordinate_system'],
                'contract_issues': contract_issues, 'unknown': intent.get('unknown') or []})
 
     # ---------- V6 内容越出画布(含 shift 后) ----------
@@ -1048,7 +1029,10 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
+    for finding in endpoint_findings:
+        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail']).update(finding)
     rep = {
+        'geometry': geometry,
         'sheet': os.path.basename(SHEET),
         'validation': 'failed' if F else 'passed',
         'visual_review': 'pending',

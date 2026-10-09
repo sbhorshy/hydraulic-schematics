@@ -147,6 +147,21 @@ class DanglingPorts(unittest.TestCase):
         _, evidence = self.validate()
         self.assertTrue(any(q['kind'] == 'dangling_marker' for q in evidence['drawing_issues']))
 
+    def test_red_circle_positions_use_actual_svg_transforms(self):
+        self.render()
+        root = ET.parse(self.svg).getroot()
+        sheet = next(e for e in root.iter() if e.get('id') == 'sheet')
+        sheet.set('transform', 'translate(5,-7) ' + sheet.get('transform', ''))
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        self.svg.write_text(ET.tostring(root, encoding='unicode'))
+        _, evidence = self.validate()
+        self.assertEqual(evidence['drawing_issues'], [])
+        group = next(e for e in root.iter() if e.get('id') == 'dangling')
+        group.set('transform', 'translate(3,0)')
+        self.svg.write_text(ET.tostring(root, encoding='unicode'))
+        _, evidence = self.validate()
+        self.assertTrue(any(q['kind'] == 'dangling_marker' for q in evidence['drawing_issues']))
+
     def test_broken_local_port_group_blocks_render_and_validation_with_same_contract(self):
         self.render()
         symbol = self.work / 'symbols/air-charging-valve.svg'

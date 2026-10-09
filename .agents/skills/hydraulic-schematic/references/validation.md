@@ -21,6 +21,31 @@
 
 负例（故意画错的样例，用于确认校验逻辑能报红）随 skill 附带：`assets/examples/negative-*.intent.yaml` + 对应 `.expected-report.json`。改校验逻辑时先跑它们确认能红。
 
+### V2/V3 实际接管几何（#64）
+
+`sheet_geometry.load_geometry(svg_root, layout, resolve_symbol)` 是供校核复用的边界：
+使用最终 SVG 的实例及祖先累积变换、实际采用的符号文件端口与 viewBox，返回
+`nodes[实例].{matrix,footprint,ports}`、`pipes[].points` 和 `issues`。端口记录
+`position`、已旋转的单位 `direction`、`anchor_direction`、`role`、`medium`。
+所有结果和报告定位采用 **root SVG 用户坐标**，包含 `sheet` 的画布偏移；不能再加一次
+`canvas_shift_x`。`footprint` 是变换后的符号 viewBox 足迹，不是未旋转的 layout 占位框，
+也不声称测量了轮廓墨迹。`walk`/`transform`/`multiply`/`point` 可用于同坐标系的后续校核。
+
+V3 按输入 `paths` 相邻连接的声明端口（裸实例只按目录 `main_path` 展开）及 `taps`
+两端逐口检查实际管段端点、首末段的外向锚向及管线自身折返。连接锚点格式为
+`paths[i][k->k+1]` 或 `taps[i]`；失败包含组件、端口、定位、实测误差/管段。
+端点的欧氏距离容差固定为 **0.1 用户单位**，仅覆盖 SVG 坐标保留一位小数产生的
+最大约 0.071 单位误差，报告同时记录该值和原因。2 单位断口、反向接管和 6 单位折返
+均阻断通过。此检查不代替逐边拓扑对账：错误连接仍使用相同端口集合的情况由后续对账检查负责。
+
+V2 对归一化后的整条管段裁切求交；端点仅接近某个边界坐标不构成豁免。
+仅真实首末端口的接管段、沿该端口向外锚向，允许离开其自身符号足迹；不豁免其他本体
+或路线中间段。旋转、缩放、非零 viewBox 原点及最终 SVG 的额外平移均共用归一化结果。
+不支持的变换或管线构造明确报错，不能记作通过；当前管线几何支持 `line`/`polyline`，
+曲线路径接管尚不支持。报告 `geometry` 暴露本轮归一化证据；几何通过仍不代表感知回读完成。
+
+专项回归：`python -m unittest test_port_geometry`（在 `scripts/` 运行），已纳入 `selftest.py`。
+
 ## 3. 感知回读（PNG）
 
 1. 用 `python <skill>/scripts/rasterize_sheet.py <svg> -o <workdir>/sheet-readback.png` 光栅化；自动选择本机 Inkscape 或 Chrome，并核对 PNG 与 viewBox 的 1:1 尺寸。驱动器每轮自动执行。
