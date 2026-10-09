@@ -16,6 +16,7 @@ import sys
 import tempfile
 import time
 import xml.etree.ElementTree as ET
+from proofreading_evidence import file_digest, write_png_receipt
 
 
 def dimensions(svg, width=None):
@@ -65,6 +66,8 @@ def export(svg, output, width=None, backend='auto', timeout=60):
     output.parent.mkdir(parents=True, exist_ok=True)
     # Failed exports never leave an old image looking current.
     output.unlink(missing_ok=True)
+    Path(str(output) + '.evidence.json').unlink(missing_ok=True)
+    source_digest = file_digest(svg)
     w, h = dimensions(svg, width)
     kind, executable = renderer(backend)
     with tempfile.TemporaryDirectory(prefix='sheet-raster-', dir=output.parent) as tmp:
@@ -86,7 +89,14 @@ def export(svg, output, width=None, backend='auto', timeout=60):
             raise RuntimeError('%s 转换失败 rc=%s: %s' % (kind, proc.returncode, proc.stderr[-1800:]))
         if png_dimensions(temporary) != (w, h):
             raise RuntimeError('PNG 尺寸与 SVG viewBox 不同，拒绝像素校核')
+        if source_digest != file_digest(svg):
+            raise RuntimeError('SVG changed during rasterization; readback discarded')
         os.replace(temporary, output)
+    version = subprocess.run([executable, '--version'], capture_output=True, text=True,
+                             timeout=10).stdout.strip()
+    write_png_receipt(svg, output, {'backend': kind, 'version': version,
+                                  'exporter_sha256': file_digest(__file__),
+                                  'width': w, 'height': h})
     return dict(renderer=kind, width=w, height=h, output=str(output),
                 elapsed_s=round(time.monotonic() - started, 6))
 
