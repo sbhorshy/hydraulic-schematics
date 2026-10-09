@@ -77,7 +77,8 @@ READBACK = 'sheet-readback.png'
 
 SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
-           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py', 'readback_review.py']
+           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
+           'sheet_version.py', 'sheet_diff.py', 'readback_review.py']
 PY = sys.executable
 # 轮内几何硬缺陷 → P3；其余 fail 全部残差。
 P3_IDS = {'V2', 'V13', 'V19'}
@@ -492,6 +493,9 @@ def main():
     ap.add_argument('--readback-w', type=int, default=None,
                     help='回读宽度；默认按 SVG viewBox 推导，显式值必须为1:1')
     ap.add_argument('--keep', action='store_true', help='复用未变脚本/符号，刷新输入及本轮产物')
+    ap.add_argument('--compare-against', help='已冻结的旧版 sheet_diff freeze 目录')
+    ap.add_argument('--change-scope', help='本轮预期影响范围 JSON；必须与 --compare-against 配对')
+    ap.add_argument('--comparison-output', help='新差分目录；缺省新建独立临时目录，禁止覆盖历史差分')
     args = ap.parse_args()
     from proto_optimize import validate_budgets
     budgets = dict(max_evals=args.max_evals, max_steps=args.max_steps,
@@ -504,6 +508,22 @@ def main():
             raise ValueError('--readback-w 必须 >= 1')
         if args.inject == 'b' and not args.layout_seed:
             raise ValueError('--inject b 需要 --layout-seed')
+        if bool(args.compare_against) != bool(args.change_scope):
+            raise ValueError('--compare-against 与 --change-scope 必须一起提供')
+        if args.comparison_output and not args.compare_against:
+            raise ValueError('--comparison-output 需要 --compare-against')
+        if args.compare_against:
+            baseline = Path(args.compare_against).resolve()
+            if not (baseline / 'version.json').is_file():
+                raise ValueError('比较基准必须先通过 sheet_diff freeze 冻结')
+            if args.workdir:
+                destination = Path(args.workdir).resolve()
+                if baseline == destination or baseline in destination.parents or destination in baseline.parents:
+                    raise ValueError('冻结基准必须独立于本轮驱动器工作目录')
+            args.compare_against = str(baseline)
+            args.change_scope = str(Path(args.change_scope).resolve())
+            if args.comparison_output:
+                args.comparison_output = str(Path(args.comparison_output).resolve())
         files, assets, sources, tpl_src = snapshot_inputs(args)
     except (ValueError, OSError) as exc:
         ap.error(str(exc))
@@ -537,6 +557,28 @@ def main():
                 code=3
         else:
             report['local_readback']={'status':'not_generated','complete':False,'detail':'No verified final PNG/report was produced.'}
+
+        if args.compare_against:
+            report['change_comparison'] = {'status': 'not_checked', 'reason': 'Full validation did not produce usable final evidence.'}
+            if code in (0, 1, 4) and Path(wd, 'validation-report.json').is_file():
+                output = (Path(args.comparison_output) if args.comparison_output else
+                          Path(tempfile.mkdtemp(prefix='hydraulic-change-')) / 'comparison')
+                with stage(report['stages'], 'change_comparison'):
+                    rc, out, err = run([PY, 'sheet_diff.py', 'compare', args.compare_against, wd,
+                                        '--scope', args.change_scope, '--output', str(output)], wd, timeout=180)
+                try:
+                    summary = json.loads(out)
+                except ValueError:
+                    summary = {'status': 'not_comparable', 'reason': err or out}
+                report['change_comparison'] = summary
+                if rc not in (0, 1, 2):
+                    report['tool_failure'] = '差分工具失败: ' + (err or out)
+                    code = 3
+                if rc != 0 or summary.get('status') != 'pass':
+                    report['delivery'] = {'ready': False, 'status': 'incomplete',
+                        'blocking_checks': sorted(set(report['delivery'].get('blocking_checks', [])) | {'CHANGE_SCOPE'})}
+                    if code in (0, 4):
+                        code = 1 if summary.get('status') == 'fail' else 4
         report['exit_code'] = code
         report['elapsed_s'] = round(time.monotonic() - started, 3)
         finish(report, wd)

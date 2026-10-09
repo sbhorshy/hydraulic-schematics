@@ -1,0 +1,6 @@
+{
+  "nodes": ["PF-001"],
+  "edges": [],
+  "include_adjacent_edges": true,
+  "note": "调整 PF-001 的朝向或外接引线；核对相邻管线的关联变化，保持端口连通关系不变。"
+}
