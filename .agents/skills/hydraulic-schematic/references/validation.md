@@ -268,6 +268,46 @@ PNG 自动导出优先采用与测量一致的 Chrome。PNG receipt、浏览器�
 不构成线宽豁免。渲染器记录 taps 的 sensor/at 两端归属，已有主网归属保留；
 校核器仍会明确报告不兼容的相接线宽。V15 同时检查已测外接引线是否在规定线宽内，
 V16 检查与相接管网及本体边界的连续性。未接端口不编造网络，本体与指针等内部机构保持原规定线宽。
+### 本轮 PNG 的局部回读清单（#72）
+
+完整驱动器在最后一轮校核后生成 `readback.html` 和 `readback-manifest.json`，
+自动校核有残差时同样生成。一次最终 PNG 导出后，Pillow 只解码一次并批量裁图，
+不为每个端口启动渲染器；输出对象数、裁图数及耗时。已有 SVG/PNG 可独立运行：
+
+```bash
+python <skill>/scripts/readback_review.py generate <workdir>
+python <skill>/scripts/readback_review.py verify <workdir>
+```
+
+仅使用已通过版本验证的报告与 PNG。清单覆盖全部声明端口、外部接口、系统接点/
+交叉/桥弧、所有元件全貌（包含复杂符号）以及自动失败、警告和未校核疑点。
+端口上下文包含已测得的引线/本体边界；相邻小区域合并后仍逐对象记录覆盖关系，
+大型元件全貌作为独立上下文。未取得几何或目标位于图外时明确保留未覆盖记录。
+无可靠局部定位的疑点指向全图，不编造坐标。默认局部为 4× 最近邻 PNG 像素；
+可用 `--scale 1..8` 调整。页面是静态审阅报告，局部链接会高亮全图对应 ROI，
+不是交互编辑器；像素嵌入页面，外部同名文件替换不会悄悄替换页面中的已绑定图像。
+
+每项默认为 `unviewed`。看过相应局部后，显式记录对象 ID、结论、审阅人及备注：
+
+```bash
+python <skill>/scripts/readback_review.py record-item <workdir> port:PRV-001.inlet \
+  --decision questioned --reviewer "Reviewer" --note "接点线宽需确认"
+```
+
+结论支持 `confirmed` / `questioned` / `unviewed`，可显式列出多个对象 ID；没有
+自动“全部确认”。记录绑定当前输入/图像/自动证据、裁图内容及清单，更新后仍能
+重校核而不形成指纹循环。`READBACK_ITEMS` 与 `PERCEPTUAL` 同属独立审阅状态，
+不参与稳定自动校核签名。清单、任一实际裁图或静态页面被替换后拒绝沿用有效确认。
+
+逐项记录保存在 `readback-items-review.json` 的版本历史；图像位于
+`readback/<绑定版本>/`。同一内容版本重新生成或驱动器 `--keep` 重跑会保留显式
+结论；源内容改变则新清单默认未查看。需要保留审阅历史时使用驱动器既有 `--keep`。
+
+局部生成不写入整图感知签认；看过整图也不自动确认所有局部。二者分别显示于
+`phases.perceptual` / `phases.local_readback`。有当前清单时，任何未查看、存疑、
+未覆盖或失效项都会通过 `READBACK_ITEMS` 阻断完整交付；没有清单的独立旧用法
+仍遵循原整图签认契约。自动几何失败仍保留原失败出口，局部图供定位，不替代修复。
+
 ### 版本影响与图像差分（#73）
 
 `sheet_diff.py` 通过独立 CLI 先冻结完整证据，再比较两个版本。冻结目录保留原始

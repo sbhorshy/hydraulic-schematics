@@ -24,7 +24,7 @@ def make_render_workspace(root, fixture):
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
                  'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
-                 'sheet_version.py', 'sheet_diff.py'):
+                 'sheet_version.py', 'sheet_diff.py', 'readback_review.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
     shutil.copytree(CATALOG.parent, work / 'symbols')
