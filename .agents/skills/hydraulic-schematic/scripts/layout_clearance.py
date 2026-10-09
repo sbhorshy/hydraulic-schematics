@@ -5,6 +5,7 @@ Ports, branches, real bends/reversals and bridge boundaries remain semantic ends
 """
 from collections import defaultdict
 import math
+import re
 
 from endpoint_checks import ENDPOINT_TOLERANCE
 
@@ -148,7 +149,7 @@ def measure_groups(geometry, intent, browser, budget):
             unchecked.append({'group':group['id'],'detail':'Missing/duplicate/hidden measured group frame'})
             continue
         try:
-            frame=display_rectangle(frames[0],browser)
+            frame=display_rectangle(frames[0],browser,require_outline=True)
         except ValueError as error:
             unchecked.append({'group':group['id'],'detail':str(error)})
             continue
@@ -249,9 +250,13 @@ def canvas_bounds(geometry, topology, browser):
                      'objects':objects}
 
 
-def display_rectangle(row, browser):
+class InvisibleFrameError(ValueError):
+    """The browser proves that the declared frame has no visible paint."""
+
+
+def display_rectangle(row, browser, require_outline=False):
     """Measured orthogonal frame bounds, with unsupported paint effects disclosed."""
-    if not row['visible']: raise ValueError('Frame is hidden')
+    if not row['visible']: raise InvisibleFrameError('Frame is hidden')
     a,b,c,d,_,_=row['matrix']
     if (abs(a)>1e-6 and abs(b)>1e-6) or (abs(c)>1e-6 and abs(d)>1e-6):
         raise ValueError('Nonorthogonal frame transform is unsupported')
@@ -261,13 +266,30 @@ def display_rectangle(row, browser):
                        if item['tag']==ancestor['tag'] and item['attrs']==ancestor['attrs'])
     if any(item['style'].get(effect,'none')!='none' for item in related for effect in ('clip-path','mask','filter')):
         raise ValueError('Frame clipping/mask/filter is unsupported')
+    painted=False
+    for kind in (('stroke',) if require_outline else ('stroke','fill')):
+        value=row['style'].get(kind,'none')
+        if value=='none': continue
+        color=re.fullmatch(r'rgba?\(([^)]+)\)',value)
+        if not color: raise ValueError('Frame paint needs additional display evidence')
+        components=[float(v.strip()) for v in color[1].split(',')]
+        if len(components) not in (3,4):
+            raise ValueError('Frame paint needs additional display evidence')
+        alpha=components[3] if len(components)==4 else 1
+        opacity=float(row['style'].get(kind+'-opacity','1'))
+        width=(float(row['style'].get('stroke-width','0').removeprefix('calc(').removesuffix(')').removesuffix('px'))
+               if kind=='stroke' else 1)
+        painted=painted or (alpha>0 and opacity>0 and width>0)
+    if not painted:
+        raise InvisibleFrameError('Frame has no visible outline' if require_outline else
+                                  'Frame has no visible stroke or fill')
     return row['bbox']
 
 
 def frame_checks(geometry, topology, browser, intent, layout, runs, clip_length):
     """V7/V8 compare actual displayed frames to normalized footprint/pipe geometry."""
     rows=browser.get('elements',[]) if browser.get('status')=='pass' else []
-    frames,unchecked={},[]
+    frames,unchecked,findings={},[],[]
     expected=[('legend','lg',None),('title_block','tb',None)]
     expected += [('group:'+g['id'],'grp',g['id']) for g in intent.get('groups') or []]
     for name,cls,gid in expected:
@@ -276,12 +298,15 @@ def frame_checks(geometry, topology, browser, intent, layout, runs, clip_length)
                  and (gid is None or row['attrs'].get('data-group')==gid)]
         try:
             if len(matches)!=1: raise ValueError('Missing or duplicate actual frame')
-            frames[name]=display_rectangle(matches[0],browser)
+            frames[name]=display_rectangle(matches[0],browser,require_outline=gid is not None)
         except ValueError as error:
             unchecked.append({'frame':name,'detail':str(error)})
+            if gid is not None and isinstance(error,InvisibleFrameError):
+                findings.append({'id':'V8','kind':'missing_visible_frame','result':'fail',
+                                 'group':gid,'frame':name,'position':matches[0]['bbox'],
+                                 'detail':'Declared group %s has no visible frame: %s' % (gid,error)})
     def overlap(a,b):
         return not (a[2]<b[0] or a[0]>b[2] or a[3]<b[1] or a[1]>b[3])
-    findings=[]
     def add(check,kind,detail,**context):
         findings.append({'id':check,'kind':kind,'result':'fail','detail':detail,**context})
     if 'legend' in frames and 'title_block' in frames and overlap(frames['legend'],frames['title_block']):
