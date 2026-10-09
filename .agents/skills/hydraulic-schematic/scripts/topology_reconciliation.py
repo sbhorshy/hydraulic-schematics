@@ -242,6 +242,16 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
         bridge_records.append({'svg_id': el.get('id'), 'position': point(matrix, ((x1+x2)/2, y1)),
                                'endpoints': [a,b], 'anchor': el.get('data-edge')})
 
+    # A real same-network crossing is a semantic branch even when it occurs
+    # inside two stored straight segments. Marker circles never create vertices.
+    from junction_semantics import input_networks, intersection_events
+    crossings = intersection_events([
+        {'start':positions[s['a']],'end':positions[s['b']],'anchor':s['anchor']}
+        for s in segments if not s['bridge']], input_networks(expected))
+    for event in crossings:
+        if event['kind']=='junction':
+            vertex(event['position'])
+
     labels = defaultdict(set)
     for inst, node in geometry['nodes'].items():
         instance=by_id.get('inst-' + inst)

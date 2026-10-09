@@ -18,6 +18,7 @@ import re
 import sys
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
+from junction_semantics import check_junctions
 from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
@@ -292,38 +293,6 @@ def main(argv=None):
                       % (ov, a1, b1, a2, b2)))
     ev.append({'id': 'V13', 'segments': len(segs_all)})
 
-    # ---------- V14 非连通交叉须有跨线桥(规范 10.6.2) ----------
-    jset = {(round(x, 1), round(y, 1)) for (x, y) in jn}
-    cross = []
-    for i in range(len(segs_all)):
-        c1, a1, b1 = segs_all[i]
-        if abs(b1[1] - a1[1]) >= 0.6:
-            continue
-        y = a1[1]
-        x1lo, x1hi = sorted((a1[0], b1[0]))
-        for j in range(len(segs_all)):
-            c2, a2, b2 = segs_all[j]
-            if abs(b2[0] - a2[0]) >= 0.6:
-                continue
-            x = a2[0]
-            y2lo, y2hi = sorted((a2[1], b2[1]))
-            if x1lo + 1 < x < x1hi - 1 and y2lo + 1 < y < y2hi - 1:
-                if (round(x, 1), round(y, 1)) not in jset:
-                    cross.append((x, y))
-    # 跨线桥圆弧的圆心即交叉点,自 <path class="brg"> 的起点加半径求得。
-    brg = set()
-    for m in re.finditer(r'<path class="brg" d="M([\-\d.]+) ([\-\d.]+) '
-                         r'A([\d.]+)', raw):
-        bx0, by0, r0 = float(m.group(1)), float(m.group(2)), float(m.group(3))
-        brg.add((round(bx0 + r0, 1), round(by0, 1)))
-    nobridge = [(x, y) for (x, y) in sorted(set(cross))
-                if (round(x, 1), round(y, 1)) not in brg]
-    for (x, y) in nobridge:
-        F.append(('V14', '非连通交叉 (%.0f,%.0f) 无三通点也无跨线桥:'
-                         '读图无法判断是否连通' % (x, y)))
-    ev.append({'id': 'V14', 'crossings': len(set(cross)),
-               'bridged': len(brg), 'unbridged': len(nobridge)})
-
     baseT = float(L.get('style', {}).get('base_line_width_T', 1.0))
     width_failures, width_evidence = check_widths(SHEET, L, geometry, symbol_path, browser=browser)
     F.extend(width_failures)
@@ -477,13 +446,6 @@ def main(argv=None):
                 F.append(('V11', '斜线段 (%.0f,%.0f)->(%.0f,%.0f),管线须正交'
                           % (x0, y0, x1, y1)))
 
-    # ---------- V4 三通实心点必须在母线内部 ----------
-    bus_x = {b['x'] for b in L['buses'].values()}
-    for (x, y) in jn:
-        if round(x, 1) not in {round(v, 1) for v in bus_x}:
-            W.append(('V4', '三通点 (%g,%g) 不在任何母线 x 上' % (x, y)))
-    ev.append({'id': 'V4', 'junctions': len(jn), 'bus_x': sorted(bus_x)})
-
     # ---------- V5 悬空端口(不阻止出图,但必须披露) ----------
     dang = inventory['dangling']
     if dang:
@@ -522,6 +484,10 @@ def main(argv=None):
                'expected_edges': len(topology['expected_edges']),
                'actual_edges': len(topology['actual_edges']),
                'endpoint_tolerance': 0.1})
+
+    junction_findings,junction_evidence = check_junctions(topology,browser)
+    F.extend((c['id'],c['detail']) for c in junction_findings)
+    ev.extend(junction_evidence)
 
     bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser)
     F.extend((c['id'],c['detail']) for c in bounds_findings)
@@ -723,7 +689,7 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings + bounds_findings + frame_findings:
+    for finding in endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,

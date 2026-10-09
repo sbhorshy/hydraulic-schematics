@@ -6,7 +6,8 @@
 """
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
-from topology_reconciliation import write_manifest
+from topology_reconciliation import write_manifest, declared_topology
+from junction_semantics import renderer_events, merge_collinear
 from lead_geometry import source_leads, perpendicular_scale
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
@@ -569,6 +570,7 @@ class Sheet(object):
 
         改法:只在跨越线自身的几何上开口,不擦任何像素。竖线完好。
         """
+        pts = merge_collinear(pts)
         cs = {(x, y) for (x, y, _lt) in cross}
         runs, cur = [], [pts[0]]
         for k in range(len(pts) - 1):
@@ -1325,7 +1327,11 @@ def main(argv=None):
 
     # 先求交叉,再把跨越线打断,最后出图元。顺序不能反:
     # 打断后的折线不能再用来求交叉(断口处已无线段)。
-    cross = s.find_crossings(junc, s.polys)
+    crossing_events = renderer_events(s.polys, s.poly_anchors, declared_topology(intent,catalog))
+    junction_events = [e for e in crossing_events if e['kind']=='junction']
+    junc = [tuple(e['position']) for e in junction_events]
+    line_types = dict(zip(s.poly_anchors,(lt for lt,_ in s.polys)))
+    cross = [(*e['position'],line_types[e['horizontal_anchors'][0]]) for e in crossing_events if e['kind']=='crossing']
     segs, fragments = [], []
     for index, ((lt, pts), anchor) in enumerate(zip(s.polys, s.poly_anchors)):
         for part, run in enumerate(s.split_h(pts, cross)):
@@ -1418,7 +1424,8 @@ def main(argv=None):
     body.append('<g id="suction-markers">%s</g>' % '\n'.join(smarks))
     body.append('<g id="bridges">%s</g>' % '\n'.join(arcs))
     body.append('<g id="junctions">%s</g>' % '\n'.join(
-        '<circle class="jn" cx="%.1f" cy="%.1f" r="3"/>' % j for j in junc))
+        '<circle class="jn" cx="%.1f" cy="%.1f" r="3" id="junction-%d" data-edges="%s"/>'
+        % (*e['position'],index,' '.join(e['input_anchors'])) for index,e in enumerate(junction_events)))
     body.append('<g id="externs">%s</g>' % '\n'.join(s.externs_marks()))
     body.append('<g id="symbols">%s</g>' % '\n'.join(s.symbols()))
     body.append('<g id="dangling">%s</g>' % '\n'.join(dmarks))
