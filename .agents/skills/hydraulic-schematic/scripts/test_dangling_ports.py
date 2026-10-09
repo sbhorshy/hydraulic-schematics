@@ -219,6 +219,110 @@ class DanglingPorts(unittest.TestCase):
         after = json.loads((work / 'validation-report.json').read_text())
         self.assertEqual(next(e for e in after['evidence'] if e['id'] == 'V5'), before)
 
+    def rasterize(self):
+        result = subprocess.run([sys.executable,str(SCRIPTS/'rasterize_sheet.py'),str(self.svg),
+                                 '-o',str(self.work/'sheet-readback.png'),'--backend','chrome'],
+                                capture_output=True,text=True,timeout=30)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+
+    def red_pixels_at_ports(self, report):
+        from PIL import Image
+        image = Image.open(self.work/'sheet-readback.png').convert('RGB')
+        counts = {}
+        for endpoint in OPEN_PORTS:
+            inst,pid = endpoint.split('.',1)
+            x,y = map(round,report['geometry']['nodes'][inst]['ports'][pid]['position'])
+            pixels = image.crop((x-8,y-8,x+9,y+9)).getdata()
+            counts[endpoint] = sum(r>100 and r>2*g and r>2*b for r,g,b in pixels)
+        return counts
+
+    def test_stylesheet_hidden_circles_fail_with_actual_png_evidence(self):
+        self.render()
+        self.svg.write_text(self.svg.read_text().replace('.dang {', '.dang { display:none;'))
+        self.rasterize()
+        report,evidence = self.validate()
+        self.assertTrue(all(n==0 for n in self.red_pixels_at_ports(report).values()))
+        failures = [c for c in report['checks'] if c['id']=='V5' and c['result']=='fail']
+        self.assertTrue(failures, evidence)
+        self.assertEqual(evidence['dangling'], OPEN_PORTS)
+        self.assertEqual(evidence['contract_issues'], [])
+
+    def test_circle_without_red_paint_fails_despite_visible_geometry(self):
+        self.render()
+        original = self.svg.read_text()
+        for declaration in ('stroke:black', 'stroke:none;fill:none', 'stroke-opacity:0', 'stroke-width:0'):
+            with self.subTest(declaration=declaration):
+                self.svg.write_text(original.replace('</style>', '.dang { '+declaration+'; }</style>'))
+                self.rasterize()
+                report,evidence = self.validate()
+                self.assertTrue(all(n==0 for n in self.red_pixels_at_ports(report).values()))
+                self.assertTrue(any(c['id']=='V5' and c['result']=='fail' for c in report['checks']), evidence)
+                self.assertTrue(all(m['status']=='fail' for m in evidence['marker_display']['measurements']))
+
+    def test_ancestor_css_hiding_and_zero_opacity_remove_visible_markers(self):
+        self.render()
+        original = self.svg.read_text()
+        for declaration in ('display:none', 'visibility:hidden', 'opacity:0'):
+            with self.subTest(declaration=declaration):
+                self.svg.write_text(original.replace('</style>', '#dangling { '+declaration+'; }</style>'))
+                self.rasterize()
+                report,evidence = self.validate()
+                self.assertTrue(all(n==0 for n in self.red_pixels_at_ports(report).values()))
+                self.assertTrue(any(c['id']=='V5' and c['result']=='fail' for c in report['checks']))
+                self.assertTrue(all(not m['visible'] for m in evidence['marker_display']['measurements']))
+
+    def test_visible_rotated_and_shifted_circles_pass_actual_display_check(self):
+        self.render()
+        root = ET.parse(self.svg).getroot()
+        sheet = next(e for e in root.iter() if e.get('id')=='sheet')
+        sheet.set('transform', 'translate(1685,1383) rotate(180) '+sheet.get('transform',''))
+        style = next(e for e in root.iter() if e.tag.endswith('style'))
+        # visibility is inherited; a child's explicit visible overrides hidden.
+        style.text += '#dangling { visibility:hidden; } .dang { visibility:visible; }'
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        self.svg.write_text(ET.tostring(root,encoding='unicode'))
+        self.rasterize()
+        report,evidence = self.validate()
+        self.assertTrue(all(n>0 for n in self.red_pixels_at_ports(report).values()))
+        self.assertEqual(evidence['drawing_issues'], [])
+        self.assertEqual(evidence['marker_display']['status'],'pass')
+        self.assertEqual(len(evidence['marker_display']['measurements']),len(OPEN_PORTS))
+        self.assertEqual(evidence['dangling'],OPEN_PORTS)
+
+    def test_unavailable_browser_is_unchecked_but_known_omissions_still_fail(self):
+        import os
+        self.render()
+        self.validate()  # A cached prior measurement must not become current evidence without Chrome.
+        def without_browser():
+            result = subprocess.run([sys.executable,str(self.work/'validate_sheet.py')],cwd=self.work,
+                                    env=dict(os.environ,PATH=''),capture_output=True,text=True,timeout=30)
+            self.assertIn(result.returncode,(0,1),result.stderr)
+            return json.loads((self.work/'validation-report.json').read_text())
+        report = without_browser()
+        self.assertEqual(next(c for c in report['coverage'] if c['id']=='V5')['status'],'not_checked')
+        evidence = next(e for e in report['evidence'] if e['id']=='V5')
+        self.assertEqual(len(evidence['marker_display']['unchecked']),len(OPEN_PORTS))
+        root = ET.parse(self.svg).getroot()
+        group = next(e for e in root.iter() if e.get('id')=='dangling')
+        group.remove(next(e for e in group if e.get('data-port')=='EDP-001.drive_shaft'))
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        self.svg.write_text(ET.tostring(root,encoding='unicode'))
+        report = without_browser()
+        self.assertTrue(any(c['id']=='V5' and c['result']=='fail' and 'EDP-001.drive_shaft' in c['detail']
+                            for c in report['checks']))
+        self.assertEqual(next(c for c in report['coverage'] if c['id']=='V5')['status'],'fail')
+
+    def test_ancestor_clipping_that_removes_circles_is_not_checked(self):
+        self.render()
+        self.svg.write_text(self.svg.read_text().replace('</style>',
+                            '#dangling { clip-path:inset(50%); }</style>'))
+        self.rasterize()
+        report,evidence = self.validate()
+        self.assertTrue(all(n==0 for n in self.red_pixels_at_ports(report).values()))
+        self.assertEqual(next(c for c in report['coverage'] if c['id']=='V5')['status'],'not_checked')
+        self.assertEqual(evidence['marker_display']['status'],'not_checked')
+        self.assertEqual(len(evidence['marker_display']['unchecked']),len(OPEN_PORTS))
+
 
 if __name__ == '__main__':
     unittest.main()
