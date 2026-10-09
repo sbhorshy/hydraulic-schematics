@@ -6,7 +6,6 @@ gas/measurement/body_tap semantics.
 Unknowns describe uncertainty; they neither create nor consume ports.
 """
 from collections import Counter
-import json
 import math
 from pathlib import Path
 import re
@@ -94,14 +93,20 @@ def symbol_contract(intent, types, nodes, workdir, catalog_dir):
 
 def write_contract_failure(workdir, inventory, issues, unknown):
     """Keep an actionable report even when broken assets prevent rendering."""
+    from proofreading_evidence import enrich_report, write_report
+
     report = {'sheet': '1#系统原理图.svg', 'validation': 'failed',
               'visual_review': 'pending', 'fail_count': len(issues), 'warn_count': 0,
               'checks': [{'id': 'V5', 'result': 'fail', 'detail': q['detail']} for q in issues],
               'evidence': [{'id': 'V5', **inventory, 'contract_issues': issues,
                             'drawing_issues': [], 'drawing_status': 'not_checked',
                             'reason': '符号端口契约失败，未继续几何/披露校核', 'unknown': unknown}]}
-    (Path(workdir) / 'validation-report.json').write_text(
-        json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    report['evidence'].extend(
+        {'id': check, 'coverage_status': 'not_checked',
+         'coverage_detail': 'Symbol port contract failure prevented this check.'}
+        for check in [*(('V%d' % i) for i in range(1, 20) if i != 5), 'B6.avoid_corridor', 'B7'])
+    enrich_report(report, workdir)
+    write_report(report, Path(workdir) / 'validation-report.json')
     for item in issues:
         print('FAIL V5 ' + item['detail'])
     return 1

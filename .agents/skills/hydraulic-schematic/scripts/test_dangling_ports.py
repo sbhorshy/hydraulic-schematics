@@ -92,6 +92,8 @@ class DanglingPorts(unittest.TestCase):
         issues = evidence.get('contract_issues', [])
         self.assertTrue(any(i.get('endpoint') == 'TANK-001.body_sense_tap' for i in issues), issues)
         self.assertTrue(any(c['id'] == 'V5' and c['result'] == 'fail' for c in report['checks']))
+        self.assertIn('artifacts', report)
+        self.assertTrue(all(q['status'] != 'pass' for q in report['coverage']))
 
     def test_missing_connected_port_marker_is_drawing_error(self):
         self.render()

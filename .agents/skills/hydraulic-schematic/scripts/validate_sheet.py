@@ -18,6 +18,7 @@ import re
 import sys
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
+from proofreading_evidence import assess_png, enrich_report, resolve_catalog, write_report
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHEET = os.path.join(HERE, '1#系统原理图.svg')
@@ -81,6 +82,10 @@ def load_yaml(p):
         return y.load(f)
 
 
+def symbol_path(ref):
+    return resolve_symbol(ref, HERE, os.path.dirname(CATALOG))
+
+
 def seg_rect_hit(p0, p1, rect, tol=2.0):
     """线段是否穿越矩形内部(仅正交段)。返回穿越长度。"""
     x0, y0 = p0
@@ -110,10 +115,12 @@ def main(argv=None):
     SHEET = os.path.join(HERE, '1#系统原理图.svg')
     LAYOUT = os.path.join(HERE, '1#系统.layout.json')
     INTENT = os.path.join(HERE, '1#系统.intent.yaml')
-    CATALOG = os.path.join(HERE, 'component-catalog.json')
-    if not os.path.isfile(CATALOG):
-        CATALOG = os.path.normpath(os.path.join(script_dir, '..', 'assets',
-                                              'component-library', 'component-catalog.json'))
+    CATALOG = str(resolve_catalog(HERE, tool_dir=script_dir))
+    # A failed or interrupted run must not leave the last successful report current.
+    for name in ('validation-report.json', 'validation-report.json.sha256'):
+        path = os.path.join(HERE, name)
+        if os.path.isfile(path):
+            os.unlink(path)
     F, W, ev = [], [], []          # fail, warn, evidence
     intent = load_yaml(INTENT)
     L = json.load(io.open(LAYOUT, encoding='utf-8'))
@@ -131,10 +138,15 @@ def main(argv=None):
     try:
         root = ET.fromstring(raw.encode('utf-8'))
     except Exception as e:
-        print(json.dumps({'validation': 'failed',
-                          'checks': [{'id': 'V1', 'result': 'fail',
-                                      'detail': 'SVG 不可解析: %s' % e}]},
-                         ensure_ascii=False, indent=2))
+        rep = {'sheet': os.path.basename(SHEET), 'validation': 'failed',
+               'fail_count': 1, 'warn_count': 0, 'visual_review': 'pending',
+               'checks': [{'id': 'V1', 'result': 'fail', 'detail': 'SVG 不可解析: %s' % e}],
+               'evidence': [{'id': 'V%d' % i, 'coverage_status': 'not_checked',
+                             'coverage_detail': 'SVG parse failure prevented this check.'}
+                            for i in range(2, 20)]}
+        enrich_report(rep, HERE, catalog_path=CATALOG)
+        write_report(rep, os.path.join(HERE, 'validation-report.json'))
+        print(json.dumps(rep, ensure_ascii=False, indent=2))
         return 1
     ids = [e.get('id') for e in root.iter() if e.get('id')]
     dup = sorted({i for i in ids if ids.count(i) > 1})
@@ -149,7 +161,7 @@ def main(argv=None):
     for inst, nd in L['nodes'].items():
         boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
-        p = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
+        p = symbol_path(nd['symbol'])
         _mk, vb, ps = read_symbol(p)
         vx, vy, vw, vh = vb
         k = min(nd['w'] / float(vw), nd['h'] / float(vh))
@@ -627,7 +639,7 @@ def main(argv=None):
     # 误报为"引线未改判"。判据是端口 data-medium,不是几何。
     nonhyd = set()      # (inst, 整图 x, 整图 y)
     for inst, nd in (L['nodes'] or {}).items():
-        sp = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
+        sp = symbol_path(nd['symbol'])
         if not os.path.exists(sp):
             continue
         sroot = ET.parse(sp).getroot()
@@ -691,7 +703,7 @@ def main(argv=None):
     # 这是唯一能同时覆盖弧、填充与描边的判据。
     png = os.path.join(HERE, 'sheet-readback.png')
     ink = None
-    if os.path.exists(png):
+    if assess_png(HERE)['status'] == 'pass':
         try:
             from PIL import Image
             import numpy as np
@@ -851,7 +863,7 @@ def main(argv=None):
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
-        p = resolve_symbol(nd['symbol'], HERE, os.path.dirname(CATALOG))
+        p = symbol_path(nd['symbol'])
         s = io.open(p, encoding='utf-8').read(4000)
         st = re.search(r'data-symbol-status="([^"]+)"', s)
         st = st.group(1) if st else 'none'
@@ -1053,9 +1065,9 @@ def main(argv=None):
                     '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
         },
     }
+    enrich_report(rep, HERE, catalog_path=CATALOG)
     out = os.path.join(HERE, 'validation-report.json')
-    io.open(out, 'w', encoding='utf-8').write(
-        json.dumps(rep, ensure_ascii=False, indent=2))
+    write_report(rep, out)
 
     print('validation: %s   (fail %d, warn %d)' % (rep['validation'], len(F), len(W)))
     for i, d in F:

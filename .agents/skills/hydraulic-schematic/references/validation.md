@@ -15,6 +15,8 @@
 - 对 intent/layout/svg 三件套互相核对：intent 中每条 path 有边可对，图上无边多画。
 - 脚本按 HERE 相对路径找输入（同级 svg/layout、上级 intent/catalog）——就地/复制运行时先改这几个常量（历史复制纪律兼容；首选上一条的免复制工作目录参数）。
 - 退出码 1 = validation: failed。
+- `validation`、`checks`、`fail_count`、`warn_count` 保留原含义：已执行检查的结果。完整覆盖读 `coverage`：`pass`、`fail`、`warn`、`not_checked`、`not_applicable`；后两者必须带原因，零失败可以同时存在未校核项。
+- 自动测量完成状态读 `phases.automated`；感知状态读 `phases.perceptual`。独立几何 CLI 允许在缺 PNG 或可选测量能力时返回 0 并披露 `not_checked`，交付以 `delivery.ready` 为准。
 - 同模式可写专项测试（如 `scripts/test_suction_markers.py` 验吸油路径标记传播）。
 
 负例（故意画错的样例，用于确认校验逻辑能报红）随 skill 附带：`assets/examples/negative-*.intent.yaml` + 对应 `.expected-report.json`。改校验逻辑时先跑它们确认能红。
@@ -24,6 +26,11 @@
 1. 用 `python <skill>/scripts/rasterize_sheet.py <svg> -o <workdir>/sheet-readback.png` 光栅化；自动选择本机 Inkscape 或 Chrome，并核对 PNG 与 viewBox 的 1:1 尺寸。驱动器每轮自动执行。
 2. 逐分区读图确认：符号未变形、镜像正确、走线无穿越、标签/端口点对位、图签图例齐全。
 3. 回读发现的每个疑点要修正后重新光栅化再回读；一次都跳过不得——validate_sheet 明确规定"无回读图的校核项记为未校核，不静默放过"。
+4. 先运行 `python <skill>/scripts/proofreading_evidence.py verify <workdir>` 核实报告与图像版本。读完当前图后用 `record-review <workdir> --reviewer <姓名> --decision confirmed --note <实际检查内容>` 记录明确结论；有疑点使用 `questioned`。随后重新运行校核，使报告显示本轮签认状态。
+
+输入、布局、实际采用的 catalog/符号、脚本和依赖版本、SVG、PNG 均按 SHA-256 绑定。PNG 旁的 `.evidence.json` 记录光栅化来源；报告旁的 `.sha256` 校验报告内容。回读记录绑定产物指纹和自动校核证据。修改或替换任一产物后先重新渲染、光栅化、校核；旧回读显示 `invalidated`。内容未变可复用回读，但每次驱动仍执行正式校核。导出 PNG 只生成证据，感知状态仍为 `pending`。
+
+局部图或版本差分消费者通过 `proofreading_evidence.verify_report(workdir)` 核实版本，要求 `status=current` 且 `png.status=pass` 后读取图像。新增测量检查在自身 evidence 记录中提供 `coverage_status` 和 `coverage_detail`；未实现或测量不可用时填 `not_checked`。实际失败始终覆盖显式通过状态。
 
 ## 4. 有界收敛：修正最多两轮
 
@@ -53,7 +60,7 @@
 - `validation-report.json` 全绿；
 - 最新一版 PNG 已人工级回读且记录在哪张图上校了什么。
 
-驱动器 `converged=true` 只表示自动校核通过，`perceptual_review=pending` 仍须读最新图完成。
+驱动器 `converged=true` 保留“已执行检查零失败”的兼容含义；完整自动测量查看 `automated_validation.status`，交付查看 `delivery.ready`。必检项未校核或感知未签认时退出码为 4（证据未齐备）；0 仅表示完整证据通过，1/2/3 继续表示几何残差、输入残差、工具故障。
 
 三者齐备才宣告完成；修图必须重跑全链路（自检 → 几何 → 回读），且总轮数受「有界收敛」两轮上限约束——
 两轮后仍不收敛的，交付物是未收敛项清单与工程师决策请求，不是图。
