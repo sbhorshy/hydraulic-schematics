@@ -4,6 +4,8 @@
 
 测试边界已由用户批准的各票验收标准确认：独立校核 CLI、完整驱动器 CLI、生成的 SVG/PNG/追溯清单/报告。禁止以修改私有实现后同算法重算期望值代替行为测试。
 
+实施依赖补充：#65 的可见连接、#67 的可见红圈以及 #69 的文字实际范围均须复用 #68 的浏览器显示证据采集器，核对最终 CSS 与变换；缺少实际显示证据时明确未校核。对应 GitHub 原生依赖已同步。
+
 ## 01 · #64 逐端口检查旋转后的接管位置与方向
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/64
@@ -25,7 +27,7 @@ Blocked by: None
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/65
 
-Blocked by: #64
+Blocked by: #64, #68
 
 从唯一 L0 输入生成图与追溯清单后，系统逐条验证图上实际连接的两端与输入一致；即使连接总数相同，错接设备、端口或母线也会被拦截。
 
@@ -55,7 +57,7 @@ Blocked by: #65
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/67
 
-Blocked by: None
+Blocked by: #68
 
 完成出图后，悬空口报告只列真正未接的端口，并与红圈和图签计数一致；已连接的气侧测量支路不会继续误报悬空。
 
@@ -85,7 +87,7 @@ Blocked by: None
 
 https://github.com/sbhorshy/hydraulic-schematics/issues/69
 
-Blocked by: None
+Blocked by: #68
 
 图纸生成后能发现压字、文字出框、图签截断和标签净空不足，并提供对应文字和区域的定位。
 
