@@ -9,7 +9,9 @@
 #
 # 状态：草案（concept），不可用于工程放行。
 # 目录：本工作目录扩展副本 component-catalog.json（0.3-draft，
-#       基于 skill 快照新增 8 类型 + 收录 hydraulic_user，见 build_catalog.py）。
+#       基于 skill 快照新增 8 类型 + 收录 hydraulic_user，见 build_catalog.py；
+#       2026-09-07 起个别新增类型（回油滤组件 bypass 等）经手工登记，
+#       生成器未同步（QD v1.3 侧别同步亦是手工），重跑 build_catalog.py 会回退 QD 端口名）。
 # 布局与架构判断沿 system-1.intent.yaml 审查卡结论（FSOV 装吸油侧、
 # 双泵并联无隔离单向阀、蓄压器置于压力滤下游等），新增件的安装位置
 # 由我判断并在对应行注明。
@@ -30,7 +32,7 @@ parts:
   EMP-001: electric_motor_driven_pump                    # 清单2 EMP
   PF-001: filter_line_shutoff_dp                         # 清单5 压力油滤
   CDF-001: filter_line_shutoff_dp_case_drain             # 清单6 壳体回油滤（清单只声明 1 只，双泵合流接入）
-  RF-001: filter_line_shutoff_dp_return                  # 清单7 回油滤
+  RF-001: filter_line_shutoff_dp_return_bypass          # 清单7 回油滤(组件:本体+弹簧单向阀旁通,2026-09-07 用户口径)
   PRV-001: priority_valve                                # 清单9 优先阀（用户供压优先级）
   PRV-002: priority_valve                                # 清单14 自增压优先阀（油箱增压优先级）
   ACC-001: hydro_pneumatic_accumulator                   # 清单15 系统蓄压器
@@ -38,6 +40,7 @@ parts:
   PG-001: pressure_gauge                                 # 清单16 充气压力表（同上组件）
   QDP-001: quick_disconnect_coupling_disconnected        # 清单8 地面压力快卸接头（断开位）
   QDR-001: quick_disconnect_coupling_disconnected_return # 清单4 地面回油快卸接头（断开位）
+  CV-002: check_valve_refuel                             # 清单"地面加油单向阀"（集中加油隔离），2026-09-07 落位:回油滤前支路;变体 role=return(回油路细线)
   USER-001: hydraulic_user                               # 清单18 MF扰流板
   USER-002: hydraulic_user                               # 清单18 襟翼
   USER-003: hydraulic_user                               # 清单18 缝翼
@@ -61,8 +64,8 @@ paths:
   - ["EMP-001.pressure_out", "@PRESS"]
   - ["@PRESS", "PF-001", "@MANIFOLD"]
 
-  # 分配母线：优先阀 -> 用户供压母线(@USR)分赴八只用户；蓄压器液压口；
-  # 自增压优先阀 -> 油箱增压口；地面压力快卸接头支路（断开位，地面侧开放）。
+  # 分配母线：优先阀 -> 用户供压母线(@USR)分赴八只用户；地面压力快卸接头支路（断开位，地面侧开放）。
+  # ACC-001 液端 2026-09-07 用户口径移出 @MANIFOLD,改挂自增压支路 PRV-002 下游(见下组)。
   - ["@MANIFOLD", "PRV-001", "@USR"]
   - ["@USR", "USER-001.pressure_in"]
   - ["@USR", "USER-002.pressure_in"]
@@ -74,11 +77,12 @@ paths:
   - ["@USR", "USER-008.pressure_in"]
   - ["@MANIFOLD", "ACC-001.hydraulic_port"]
   - ["@PRESS", "PRV-002", "TANK-001.bootstrap_pressure_in"]
-  - ["@MANIFOLD", "QDP-001.inlet"]
+  - ["@MANIFOLD", "QDP-001.aircraft_side"]   # 2026-09-07 侧别同步:机侧座端接压力总管(v1.3 口径,原 inlet)
 
   # 主回油：八只用户回油 -> 收集母线(@USERR) -> 回油滤 RF-001 -> @RET；
   # 母线分赴油箱与地面回油快卸接头。回油滤仍串在用户回油汇入回油母线
-  # 之前(v2.3 语义不变:先过滤再分配)。
+  # 之前(v2.3 语义不变:先过滤再分配);壳体回油滤出油亦并入 @RET
+  # (2026-09-07 用户口径:与回油滤出口合流为一条回油路)。
   - ["USER-001.return_out", "@USERR"]
   - ["USER-002.return_out", "@USERR"]
   - ["USER-003.return_out", "@USERR"]
@@ -88,14 +92,15 @@ paths:
   - ["USER-007.return_out", "@USERR"]
   - ["USER-008.return_out", "@USERR"]
   - ["@USERR", "RF-001", "@RET"]
+  - ["CV-002", "@USERR"]                     # 集中加油支路(2026-09-07 落位):单向阀出口入回油滤前母线,允许加油进入、防倒灌;阀入口接集中加油组件(未建模)
   - ["@RET", "TANK-001.return_in"]
-  - ["@RET", "QDR-001.inlet"]
+  - ["@RET", "QDR-001.aircraft_side"]        # 2026-09-07 侧别同步(原 inlet)
 
   # 壳体回油：双泵合流（清单只声明 1 只壳体回油滤）经 @CASE 母线入滤，
-  # 出滤直回油箱。
+  # 出滤并入 @RET 回油母线（2026-09-07 用户口径，原"出滤直回油箱"改接枢纽）。
   - ["EDP-001.case_drain", "@CASE"]
   - ["EMP-001.case_drain", "@CASE"]
-  - ["@CASE", "CDF-001", "TANK-001.return_in"]
+  - ["@CASE", "CDF-001", "@RET"]
 
 # 气侧/测量支路（预检处方：气侧件不入 paths，走 taps）。
 taps:
@@ -103,16 +108,20 @@ taps:
   - {sensor: "PG-001.pressure_sense", at: "ACV-001.charge_port"}  # 压力表接充气活门充气口
 
 unknown:
-  # ---- 清单中未入图的 4 项 ----
+  # ---- 清单中未入图的 3 项 ----
   - ETP-selector-valve-not-in-catalog      # 能源转换装置选择阀：类型与符号均未登记，未建模
   - ETP-unit-not-in-catalog                # 能源转换装置：判读疑似 PTU，类型与符号均未登记，未建模
   - ground-refuel-assembly-not-in-catalog  # 集中加油组件：类型与符号均未登记，未建模
-  - ground-refuel-check-valve-connection-unknown  # 地面加油单向阀：类型受控(check_valve)，但加油口拓扑未声明，不画
+  # （原 ground-refuel-check-valve-connection-unknown 已于 2026-09-07 落位:
+  #   集中加油单向阀 CV-002,回油滤前支路,见 parts/paths）
   # ---- 符号侧未确认项（门禁 C12 登记）----
   - priority-valve-internal-check-flow-pending   # 优先阀符号内两只单向阀流向 PENDING
   - quick-disconnect-port-semantics-pending      # 快卸接头符号端口语义待工程确认
   - filter-line-shutoff-dp-standard-page-pending # 滤符号无标准页依据（clause-6.1.6 构型）
-  - air-charging-valve-port-orientation-assumed  # 左=蓄压器侧/右=充气源为形位判读，未经标准页
+  - return-filter-bypass-assembly-constructed    # 回油滤组件符号无标准页，由本体 v4.3 + check-valve-spring x0.5 rot90 构造（provisional）
+  - return-filter-bypass-cracking-flow-pending   # 旁通弹簧单向阀开启设定值与允许流向（与主路同向）为判断，待工程确认
+  - return-filter-bypass-branch-position-assumed # 旁通支路"端口处分叉、符号内无三通"为绘图抽象，实件分叉位置待图纸核对
+  - air-charging-valve-port-sides-user-confirmed  # ACV 端口侧别 2026-09-07 用户口径确认：左=地面充气侧/右=气侧（符号 v1.2 已对调；仍无标准页，draft）
   - pressure-gauge-medium-pneumatic-assumed      # 测压介质按"蓄压器充气压力表"用途定为气侧
   - hydraulic-user-symbol-provisional            # 用户名框符号 provisional 无标准页（skill 通用用户框规范），按 concept 披露
   # ---- 架构判断（沿 system-1 审查卡）----

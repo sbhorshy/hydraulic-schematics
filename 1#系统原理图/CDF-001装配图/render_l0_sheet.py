@@ -10,6 +10,31 @@ import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同�
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 NS = 'http://www.w3.org/2000/svg'
+# 单源化(#20/#21):catalog 与符号库同居,catalog 在哪,库就在哪。
+# 就地运行时缺省指向 skill 自带库;工作目录里有本地 catalog 则以它为锚。
+SKILL_LIB = os.path.normpath(os.path.join(HERE, '..', '..',
+                                          '.agents', 'skills',
+                                          'hydraulic-schematic',
+                                          'assets', 'component-library'))
+SKILL_CATALOG = os.path.join(SKILL_LIB, 'component-catalog.json')
+
+
+def resolve_asset(ref, cat_dir=None, workdir=None):
+    """布局节点符号引用 → 实际文件路径。
+
+    优先级:工作目录相对(本地覆盖,传统复制纪律)→ catalog 同目录
+    (单源化:basename 落到 catalog 所在库)→ 脚本 HERE 相对(兼容)。
+    """
+    cands = []
+    if workdir:
+        cands.append(os.path.normpath(os.path.join(workdir, ref)))
+    if cat_dir:
+        cands.append(os.path.join(cat_dir, os.path.basename(ref.replace('\\', '/'))))
+    cands.append(os.path.normpath(os.path.join(HERE, ref)))
+    for p in cands:
+        if os.path.isfile(p):
+            return p
+    return cands[0]
 
 
 def load_yaml(path):
@@ -63,6 +88,12 @@ def path_line_type(tokens):
     if first in ('suction_out', 'suction_filter_in') and last == 'suction':
         return 'suction'
     return None
+
+
+def _label_w(txt):
+    """标签文字宽估算——与校验器 V12 文字盒同款公式(CJK=字号,ASCII=0.55 字号),
+    保证围框围合口径与校核文字包围盒一致(#38 judge 横向切字教训)。"""
+    return sum(10.5 if ord(ch) > 0x2E80 else 10.5 * 0.55 for ch in txt)
 
 
 def suction_marker_geometry(S):
@@ -147,7 +178,6 @@ def suction_markers(pts, blocked=(), S=8.0,
         ngroup = int((max_center - min_center) // pitch) + 1
         pos0 = (min_center + max_center - (ngroup - 1) * pitch) / 2.0
         centers = [pos0 + j * pitch for j in range(ngroup)]
-        placed = False
         for pos in centers:
             gc = []
             for j in range(count):
@@ -161,33 +191,13 @@ def suction_markers(pts, blocked=(), S=8.0,
                 gc.append((a, b))
             if not any(hits_box(a, b) for a, b in gc):
                 out.extend(gc)
-                placed = True
-        if not placed and centers:
-            # 居中列整列撞障碍(串联件 FSOV 占据中点时):从终端侧向起端扫描
-            # 单组候选位,取首个无碰撞的完整组。斜杠整段缺位比组位偏离中位
-            # 更影响读图(2026-09-07 FSOV->EDP 段无一斜杠)。
-            pos = max_center
-            while pos >= min_center - 1e-9:
-                gc = []
-                for j in range(count):
-                    off = (j - (count - 1) / 2.0) * spacing
-                    if horiz:
-                        cx, cy = p0[0] + sign * (pos + off), p0[1]
-                        a, b = (cx - dx, cy + dy), (cx + dx, cy - dy)
-                    else:
-                        cx, cy = p0[0], p0[1] + sign * (pos + off)
-                        a, b = (cx - dy, cy - dx), (cx + dy, cy + dx)
-                    gc.append((a, b))
-                if not any(hits_box(a, b) for a, b in gc):
-                    out.extend(gc)
-                    break
-                pos -= spacing
     return out
 
 
 class Sheet(object):
-    def __init__(self, intent, layout, catalog):
+    def __init__(self, intent, layout, catalog, cat_dir=None, workdir=None):
         self.i, self.L, self.cat = intent, layout, catalog
+        self.cat_dir, self.workdir = cat_dir, workdir
         self.types = {c['component_type']: c for c in catalog['components']}
         self.sym = {}      # inst -> (markup, wh, ports)
         self.abs = {}      # (inst, port) -> (x, y, anchor)
@@ -213,7 +223,10 @@ class Sheet(object):
     # ---------- 端口绝对坐标 ----------
     def place(self):
         for inst, nd in self.L['nodes'].items():
-            path = os.path.normpath(os.path.join(HERE, nd['symbol']))
+            path = resolve_asset(nd['symbol'], self.cat_dir, self.workdir)
+            if not os.path.isfile(path):
+                sys.exit('符号文件不存在: %s (节点 %s;工作目录与 catalog 库均未命中)'
+                         % (nd['symbol'], inst))
             markup, vb, ports = read_symbol(path)
             # 用户框类符号带名槽(data-name-slot):实例名渲染期写入框内,
             # 框外标签随之省略(名字不画两遍)。
@@ -328,23 +341,6 @@ class Sheet(object):
             if inst in exclude:
                 continue
             out.append((nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h']))
-        return out
-
-    def ink_obstacles(self, exclude=()):
-        """旋转后实际墨迹矩形。rot 90/270 时宽高互换,声明占位 (x,y,w,h)
-        与符号真实落位不同:FSOV rot270 声明盒右缘 460,墨迹右缘 407.5。
-        斜杠等"贴着符号画"的标记按墨迹盒判碰撞,否则占位区空置部分
-        会把整组标记误杀。"""
-        out = []
-        for inst, nd in self.L['nodes'].items():
-            if inst in exclude:
-                continue
-            W, H = nd.get('_W', nd['w']), nd.get('_H', nd['h'])
-            rot = int(nd.get('rot', 0)) % 360
-            if rot in (90, 270):
-                out.append((nd['x'], nd['y'], nd['x'] + H, nd['y'] + W))
-            else:
-                out.append((nd['x'], nd['y'], nd['x'] + W, nd['y'] + H))
         return out
 
     @staticmethod
@@ -748,7 +744,7 @@ class Sheet(object):
                     junctions.append((bx, y))
         return segs, junctions, bus_hits, self.polys
 
-    # ---------- taps 气侧/测量支路(L0 规范 11.1;本副本增量) ----------
+    # ---------- taps 气侧/测量支路(L0 规范 11.1) ----------
     def wire_taps(self):
         """渲染 taps:传感器端口到被测端口的气侧专线。返回空三通表。
 
@@ -766,22 +762,34 @@ class Sheet(object):
             pa = (pa3[0], pa3[1])
             pb = (pb3[0], pb3[1])
             aa = self.abs[(sinst, spid)][2]
+            ab = self.abs[(ainst, apid)][2]
             self.port_lt[(sinst, spid)] = 'sense'
             S = 18.0
             stub = {'left': (-S, 0), 'right': (S, 0),
                     'up': (0, -S), 'down': (0, S)}[aa]
             a1 = (pa[0] + stub[0], pa[1] + stub[1])
+            stubb = {'left': (-S, 0), 'right': (S, 0),
+                     'up': (0, -S), 'down': (0, S)}[ab]
+            # 终点也按锚向先出桩:最后一段必沿端口锚向进入,逆着锚向
+            # 从元件体内反向出线的候选从形状上就不存在了。早先终点不带
+            # 锚向桩,且两端元件盒都被排除出障碍,穿本体逆锚的候选反而
+            # 以最短胜出(V2:感温线横穿充气活门本体)。
+            b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
             cands = []
-            if abs(a1[0] - pb[0]) < 0.5 or abs(a1[1] - pb[1]) < 0.5:
-                cands.append([a1, pb])
-            # 先按 sensor 锚点出线,再一折进入 at 端口;两种折向择优。
+            if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+                cands.append([a1, b1])
+            # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
             # 先纵后横的形状不会倒折回端口正上方,排前。
-            cands.append([a1, (pb[0], a1[1]), pb])
-            cands.append([a1, (a1[0], pb[1]), pb])
-            obs = self.obstacles(exclude=(sinst, ainst))
+            cands.append([a1, (b1[0], a1[1]), b1])
+            cands.append([a1, (a1[0], b1[1]), b1])
+            # 评分段自 a1 起算(端口桩只有 18px 且向外,B5≥40 保证桩不碰
+            # 邻盒),障碍全量不豁免:回折穿传感器本体的候选由此拿到应有
+            # 的代价。早先两端元件盒都豁免,穿本体逆锚的候选反而以最短
+            # 胜出(V2:感温线横穿充气活门本体)。
+            obs = self.obstacles()
             best, bad = None, None
             for c in cands:
-                pts = self.dedup([pa] + c)
+                pts = self.dedup(c + [pb])
                 if len(pts) < 2:
                     continue
                 h = self.hits(pts, obs, skip_ends=True)
@@ -795,6 +803,7 @@ class Sheet(object):
                       + cr * 120 + ln + len(pts) * 5)
                 if bad is None or sc < bad:
                     bad, best = sc, pts
+            best = self.dedup([pa] + best)      # 绘制/追溯补回端口桩
             for k in range(len(best) - 1):
                 self.drawn.append((best[k], best[k + 1]))
             self.polys.append(('sense', best))
@@ -826,6 +835,67 @@ class Sheet(object):
                     box[0] - pad, box[1] - pad - gap, self.esc(g['label'])))
         return out
 
+    # ---------- 装配围框(Assembly Enclosure;rendering-rules"装配围框"节,#37 定档) ----------
+    def enclosures(self):
+        """intent assemblies 段 -> 1.5T 长虚线围框 + 框外上方标签。
+
+        框几何由成员包围盒+内距推导(B6 同口径,layout 无新键);
+        画在管线层之下(groups 层),越框处管线压框线;
+        data-assembly 供追溯与闸门(#39)定位。原型实现,规范源改动随 #39。
+        """
+        out = []
+        pad = self.L.get('group_padding', 14)
+        gap = self.L.get('group_label_gap', 8)
+        for aid, a in (self.i.get('assemblies') or {}).items():
+            box = None
+            for m in a['members']:
+                nd = self.L['nodes'].get(m)
+                if not nd:
+                    self.warn.append('装配 %s 成员无节点: %s' % (aid, m))
+                    continue
+                x0, y0 = nd['x'], nd['y']
+                x1, y1 = x0 + nd['w'], y0 + nd['h']
+                # 标签属成员的画出足迹:按 V12 同款字宽公式估文字盒,围框连同
+                # 标签一起围合——纵向与横向切字都堵死(#38 judge 两轮)
+                nlines = self.L['labels'].get(m, m).split('\n')
+                lpos = self.L['label_pos'].get(m, 'below')
+                cx = nd['x'] + nd['w'] / 2.0
+                if lpos == 'below':
+                    yb = nd['y'] + nd['h'] + 16
+                    for k, ln in enumerate(nlines):
+                        w = _label_w(ln)
+                        x0 = min(x0, cx - w / 2 - 2)
+                        x1 = max(x1, cx + w / 2 + 2)
+                        y1 = max(y1, yb + 13 * k + 10.5 * 0.22 + 2)
+                elif lpos == 'above':
+                    ye = nd['y'] - 8 - 13 * (len(nlines) - 1)
+                    for k, ln in enumerate(nlines):
+                        w = _label_w(ln)
+                        x0 = min(x0, cx - w / 2 - 2)
+                        x1 = max(x1, cx + w / 2 + 2)
+                    y0 = min(y0, ye - 10.5 * 0.80 - 2)
+                    y1 = max(y1, nd['y'] - 8 + 10.5 * 0.22 + 2)
+                else:               # right:文字锚 start,起于节点右缘外
+                    tx = nd['x'] + nd['w'] + 12
+                    for k, ln in enumerate(nlines):
+                        w = _label_w(ln)
+                        x1 = max(x1, tx + w + 2)
+                        y1 = max(y1, nd['y'] + 16 + 13 * k + 10.5 * 0.22 + 2)
+                box = (x0, y0, x1, y1) if box is None else (
+                    min(box[0], x0), min(box[1], y0), max(box[2], x1), max(box[3], y1))
+            if box is None:
+                self.warn.append('装配无成员落在布局中: %s' % aid)
+                continue
+            out.append(
+                '<rect class="enc" data-assembly="%s" x="%.1f" y="%.1f" '
+                'width="%.1f" height="%.1f"/>'
+                '<text class="enc-lbl" x="%.1f" y="%.1f">%s</text>' % (
+                    aid,
+                    box[0] - pad, box[1] - pad,
+                    box[2] - box[0] + 2 * pad, box[3] - box[1] + 2 * pad,
+                    box[0] - pad, box[1] - pad - gap, self.esc(a['label'])))
+        return out
+
     # ---------- 悬空端口检测 ----------
     def dangling(self):
         """列出布局中已绘制但未被任何 path 使用的端口。
@@ -848,6 +918,7 @@ class Sheet(object):
                     if mp:
                         used.add((inst, mp['in']))
                         used.add((inst, mp['out']))
+        # taps 已接的端口不悬空:sensor 端口由支路本身使用,at 端口归被测件。
         for t in self.i.get('taps') or []:
             sinst, spid = t['sensor'].split('.', 1)
             used.add((sinst, spid))
@@ -1018,9 +1089,6 @@ class Sheet(object):
             tag = re.sub(r'\s*stroke-width="[^"]*"', '', tag)
             if 'class="' in tag:
                 return re.sub(r'class="([^"]*)"', r'class="\1 sym-outline"', tag)
-            # 自闭合标签的 class 须插在斜杠前,否则产出 `/ class=..>` 非良构
-            if tag.rstrip().endswith('/>'):
-                return tag.rstrip()[:-2].rstrip() + ' class="sym-outline"/>'
             return tag[:-1].rstrip() + ' class="sym-outline">'
         return re.sub(r'<(?!/)[^>]*>', sub, markup)
 
@@ -1046,11 +1114,11 @@ class Sheet(object):
 # 只按线宽分两级,不用线型。故此前我自拟的 case_drain 虚线必须撤除:
 # 它是我编的非标准约定,且与 10.7 的装配虚线边界在图上无法区分。
 PRESSURE_CLASS = {
-    'sense': 'low',        # 气侧支路(充气活门/压力表):1.0 T 实线,归低压级
     'pressure': 'high',
     'return': 'low',       # 回油压力是分级基准,自身不高于它
     'suction': 'low',      # 低于回油压力
     'case_drain': 'low',
+    'sense': 'low',        # 气侧支路(充气活门/压力表):1.0 T 实线,归低压级
 }
 WIDTH_T = {'high': 3.0, 'low': 1.0}
 SYMBOL_T = 1.5   # 组件本体线宽(企业标准)。介于低压 1.0T 与高压 3.0T 之间。
@@ -1068,6 +1136,9 @@ def css(T):
   .grp  { fill: none; stroke: #000; stroke-width: %(gb).2f;
           stroke-dasharray: 8 5; }
   .grp-lbl { font-size: 10.5px; fill: #000; }
+  .enc  { fill: none; stroke: #000; stroke-width: %(ew).2f;
+          stroke-dasharray: 8 5; }
+  .enc-lbl { font-size: 10.5px; fill: #000; }
   .ext-mark { stroke: #000; stroke-width: %(lo).2f; }
   polyline { fill: none; stroke: #000;
              stroke-linecap: butt; stroke-linejoin: miter; }
@@ -1107,7 +1178,7 @@ def css(T):
   line.pl-return     { stroke-width: calc(%(lo).2f * var(--kc)); }
   line.pl-suction    { stroke-width: calc(%(lo).2f * var(--kc)); }
   line.pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc)); }
-""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': 1.5 * T}
+""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': 1.0 * T, 'ew': 1.5 * T}
 
 
 def legend(L, T):
@@ -1122,9 +1193,9 @@ def legend(L, T):
     rows = [
         ('High Pressure Lines  高压 (高于回油压力的全部压力级)  3.0 T', hi),
         ('Low Pressure Lines   低压 (回油、壳体回油)             1.0 T', lo),
-        ('Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T', lo),
         ('Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=%g)' % S,
          ('suction', lo)),
+        ('Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T', lo),
         ('组件本体 (符号轮廓、内部机构)                          1.5 T', sy),
         ('  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T', None),
         ('  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化', None),
@@ -1193,37 +1264,69 @@ def legend(L, T):
     return out
 
 
-def title_block(L, intent, nnet, dnames):
+def title_block(L, intent, nnet, dnames, catalog=None):
     t = L['title_block']
     x, y, w, h = t['x'], t['y'], t['w'], t['h']
     out = ['<rect class="tb" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>' % (x, y, w, h)]
     row1 = ('系统 %s   |   L0 %s   |   目录 %s   |   成熟度 %s'
             % (intent['system'], intent['l0_version'], intent['catalog'], intent['maturity']))
-    row2 = ('部件 %d   |   网络 %d   |   气侧支路 %d   |   未知项 %d   '
-            '|   临时/草稿符号: EDP EMP FWSOV provisional; 油箱 draft(描摹); '
-            '优先阀 充气活门 压力表 draft   |   悬空端口 %d: %s'
+    # 临时/草稿符号按目录 symbol_status 实测披露(按类型去重),不再硬编码清单。
+    prov, draft = [], []
+    if catalog:
+        status_of = {}
+        for c in catalog.get('components', []):
+            sym = c.get('symbol') or {}
+            base = os.path.basename((sym.get('asset') or '').replace('\\', '/'))
+            if base:
+                status_of[base] = (c['component_type'], sym.get('symbol_status'))
+        for inst, nd in L['nodes'].items():
+            base = os.path.basename((nd.get('symbol') or '').replace('\\', '/'))
+            hit = status_of.get(base)
+            if not hit:
+                continue
+            typ, st = hit
+            if st == 'provisional' and typ not in prov:
+                prov.append(typ)
+            elif st == 'draft' and typ not in draft:
+                draft.append(typ)
+    row2 = ('部件 %d   |   网络 %d   |   气侧支路 %d   |   未知项 %d   |   悬空端口 %d: %s   | '
+            'provisional: %s   | draft: %s'
             % (len(intent['parts']), nnet, len(intent.get('taps') or []),
-               len(intent['unknown']),
-               len(dnames), ' '.join(dnames) if dnames else '无'))
+               len(intent['unknown']), len(dnames),
+               ' '.join(dnames) if dnames else '无',
+               ' '.join(prov) if prov else '—',
+               ' '.join(draft) if draft else '—'))
     out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 21, row1))
     out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 40, row2))
     return out
 
 
-def main():
-    src = os.path.join(HERE, '1#系统.intent.yaml')
+def main(argv=None):
+    # 用法:render_l0_sheet.py [工作目录]。缺省=脚本就地(传统复制纪律);
+    # 给出工作目录则输入/输出都在该目录,符号经 catalog 锚定到 skill 库,
+    # 工作目录不再需要 symbols/ 拷贝(单源化,#21)。
+    a = list(sys.argv[1:] if argv is None else argv)
+    workdir = a[0] if a else HERE
+    src = os.path.join(workdir, 'case_drain_filter.intent.yaml')
     intent = load_yaml(src)
-    with io.open(os.path.join(HERE, 'component-catalog.json'),
-                 encoding='utf-8') as f:
+    catalog_path = os.path.join(workdir, 'component-catalog.json')
+    if not os.path.isfile(catalog_path):
+        catalog_path = SKILL_CATALOG
+    cat_dir = os.path.dirname(catalog_path)
+    with io.open(catalog_path, encoding='utf-8') as f:
         catalog = json.load(f)
     # 预检器钩子（#4/#8）：parse 后、布局前强制断言；ERROR 则报齐并退出，布局一行不执行。
-    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read())
+    # 模板门禁（#22）：intent 同目录唯一 *受控模板.yaml 即启用三向对账+签认分级。
+    _tplp = preflight.default_template_path(src)
+    _tpl = preflight.load_yaml_text(_tplp)[0] if _tplp else None
+    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read(),
+                              template=_tpl)
     if not rep['ok']:
         preflight.emit_preflight_failure(rep)
         sys.exit(1)
-    with io.open(os.path.join(HERE, '1#系统.layout.json'), encoding='utf-8') as f:
+    with io.open(os.path.join(workdir, 'case_drain_filter.layout.json'), encoding='utf-8') as f:
         layout = json.load(f)
-    s = Sheet(intent, layout, catalog)
+    s = Sheet(intent, layout, catalog, cat_dir=cat_dir, workdir=workdir)
     s.place()
     s.build_textboxes()
     _segs, junc, bus, polys = s.wire()
@@ -1246,7 +1349,7 @@ def main():
     # 吸油线型:连续 1.0 T 基线 + 周期性五斜杠组。
     # 不能用 stroke-dasharray——参考图中的基线是连续的,斜杠是独立标记。
     # 标记避开元件、文字、图例/图签及三通/跨线桥邻域。
-    blocked = list(s.ink_obstacles()) + list(s.textboxes)
+    blocked = list(s.obstacles()) + list(s.textboxes)
     for key in ('legend', 'title_block'):
         q = layout.get(key)
         if q:
@@ -1306,13 +1409,13 @@ def main():
     # 若 extern.x=60 则文字被裁在画布外。整体右移让位。
     SHIFT = layout.get('canvas_shift_x', 0)
     P.append('<text class="banner" x="%d" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>' % 40)
-    P.append('<text class="lbl" x="%d" y="44">1# 液压系统原理图  '
-             '(由 1#系统.intent.yaml 生成,源清单 1#系统组件.json;'
-             ' EDP/EMP/FWSOV provisional,油箱 draft,优先阀/充气活门/压力表 draft,'
-             '用户名框 provisional,不可用于工程放行)</text>' % 40)
+    P.append('<text class="lbl" x="%d" y="44">HYD-SYS-1 壳体回油滤组件 CDF-001 装配展开图  '
+             '(由 %s 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>'
+             % (40, os.path.basename(src)))
     dmarks, dnames = s.dangling()
     body = []
     body.append('<g id="groups">%s</g>' % '\n'.join(s.groups()))
+    body.append('<g id="enclosures">%s</g>' % '\n'.join(s.enclosures()))
     body.append('<g id="lines">%s</g>' % '\n'.join(segs))
     body.append('<g id="suction-markers">%s</g>' % '\n'.join(smarks))
     body.append('<g id="bridges">%s</g>' % '\n'.join(s.bridge_arcs(cross)))
@@ -1325,24 +1428,20 @@ def main():
     P.append('<g id="sheet" transform="translate(%d,0)">%s</g>' % (SHIFT, '\n'.join(body)))
     P.append('<g id="legend">%s</g>' % '\n'.join(legend(layout, T)))
     nnet = sum(len(p) - 1 for p in intent['paths'])
-    P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames)))
+    P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames, catalog)))
     P.append('</svg>')
 
-    outp = os.path.join(HERE, '1#系统原理图.svg')
+    outp = os.path.join(workdir, 'case_drain_filter装配图.svg')
     with io.open(outp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(P))
     print('wrote', outp)
-    write_manifest(os.path.join(HERE, '1#系统_topology.md'),
-                   intent, layout, s, path_polys, tap_polys, dnames)
     print('nets=%d  segments=%d  junctions=%d  buses=%s'
           % (nnet, len(segs), len(junc), {k: len(v) for k, v in bus.items()}))
     for w in s.warn:
         print('WARN', w)
 
 
-
-
-# ---------- 结构自检(rendering-rules"结构自检";本副本增量) ----------
+# ---------- 结构自检(rendering-rules"结构自检") ----------
 def near_pt(p, q, tol=1.0):
     return abs(p[0] - q[0]) <= tol and abs(p[1] - q[1]) <= tol
 
@@ -1385,189 +1484,6 @@ def self_check(intent, layout, s, path_polys, tap_polys):
         for m in missing:
             print('  -', m)
         sys.exit(1)
-
-
-# ---------- 追溯清单(rendering-rules;本副本增量) ----------
-# 构图预算披露文本:跑完 validate_sheet 后按 validation-report.json 实测回填。
-BUDGET_DISCLOSURE = (
-    'B1 交叉 0、B2 折返单条 3/全图 20、B4 最短段 8.0、B5 节点净距 40.0、'
-    'B6 达标;B3 油箱回油线(@RET->TANK.return_in,顶绕走廊 y=100)'
-    '绕行比 2.373 > 1.5 走 WARN 通道——根因是油箱单一 return_in 端口'
-    '(unknown: TANK-001-return-port-count-unconfirmed),'
-    '确认多回油口后本线可拆直。用户供压/回油支路全部绕行比 1.0。'
-    'V4 的"三通点不在母线"为图例示例点,非实体三通;'
-    'V5 计 9 个悬空端口系校核器未计 taps 连通,图面实际标红 5 个'
-    '(EDP-001.drive_shaft、EMP-001.elec_power、FSOV-001.command、'
-    'QDP-001.outlet、QDR-001.outlet,后两者为断开位语义);'
-    'V9 计 22 个 provisional/draft 符号,按 CONCEPT 档降级使用并在图签披露。')
-
-
-def write_manifest(path, intent, layout, s, path_polys, tap_polys, dnames):
-    L = []
-    L.append('# %s 追溯清单' % intent['system'])
-    L.append('')
-    L.append('来源: `1#系统.intent.yaml`(L0 v%s,目录 %s,成熟度 %s),'
-             '由工程师手写组件清单 `1#系统组件.json` 落成。'
-             % (intent['l0_version'], intent['catalog'], intent['maturity']))
-    L.append('图面: `1#系统原理图.svg`,布局 `1#系统.layout.json`。')
-    L.append('')
-    L.append('## 节点(part)映射')
-    L.append('')
-    L.append('| intent 行 | 实例 | 类型 | 清单项 | 图上元件 | 符号文件 |')
-    L.append('|---|---|---|---|---|---|')
-    item_map = [
-        ('TANK-001', '清单17 bootstrap-type-reservoir(油箱)'),
-        ('FSOV-001', '清单3 firewall-shutoff-valve(FWSOV)'),
-        ('EDP-001', '清单1 EDP'),
-        ('EMP-001', '清单2 EMP'),
-        ('PF-001', '清单5 filter-line-shutoff-dp(压力油滤)'),
-        ('CDF-001', '清单6 filter-line-shutoff-dp(壳体回油滤)'),
-        ('RF-001', '清单7 filter-line-shutoff-dp(回油滤)'),
-        ('PRV-001', '清单9 priority-valve(优先阀)'),
-        ('PRV-002', '清单14 priority-valve(自增压优先阀)'),
-        ('ACC-001', '清单15 accumulator(系统蓄压器)'),
-        ('ACV-001', '清单16 air-charging-valve(充气活门)'),
-        ('PG-001', '清单16 pressure-gauge(充气压力表)'),
-        ('QDP-001', '清单8 quick-disconnect(地面压力快卸接头)'),
-        ('QDR-001', '清单4 quick-disconnect(地面回油快卸接头)'),
-        ('USER-001', '清单18 用户:MF扰流板'),
-        ('USER-002', '清单18 用户:襟翼'),
-        ('USER-003', '清单18 用户:缝翼'),
-        ('USER-004', '清单18 用户:副翼'),
-        ('USER-005', '清单18 用户:升降舵'),
-        ('USER-006', '清单18 用户:方向舵'),
-        ('USER-007', '清单18 用户:反推'),
-        ('USER-008', '清单18 用户:正常刹车'),
-    ]
-    items = dict(item_map)
-    for inst, typ in intent['parts'].items():
-        nd = layout['nodes'].get(inst, {})
-        L.append('| %d | %s | %s | %s | inst-%s | %s |'
-                 % (line_no(intent, 'parts', inst), inst, typ,
-                    items.get(inst, ''), inst,
-                    os.path.basename(nd.get('symbol', '缺'))))
-    for eid, etyp in intent.get('extern', {}).items():
-        e = layout['externs'][eid]
-        L.append('| %d | %s | extern:%s | 清单18 用户(未建模为组件) | 边界标记 (%d,%d) | — |'
-                 % (line_no(intent, 'extern', eid), eid, etyp, e['x'], e['y']))
-    L.append('')
-    L.append('## 连接(边)映射')
-    L.append('')
-    L.append('| intent 行 | 语句 | 图上折线(端点) | 线型 | 实例数 |')
-    L.append('|---|---|---|---|---|')
-    lm = line_map_all(intent)
-    for pi, p in enumerate(intent['paths']):
-        line = lm['paths'][pi] if pi < len(lm['paths']) else 0
-        for k in range(len(p) - 1):
-            a, b = p[k], p[k + 1]
-            a_bus, b_bus = a.startswith('@'), b.startswith('@')
-            qa = bus_point(layout, a) if a_bus else s.port(a, 'out')
-            qb = bus_point(layout, b) if b_bus else s.port(b, 'in')
-            # 母线段按实端(端口侧)匹配折线取线型;母线侧坐标是占位 (x,0)。
-            lt = [l for l, pts in path_polys
-                  if (near_pt(pts[0], qa, 1.0) or near_pt(pts[-1], qa, 1.0)
-                      or a_bus)
-                  and (near_pt(pts[0], qb, 1.0) or near_pt(pts[-1], qb, 1.0)
-                       or b_bus)
-                  and (near_pt(pts[0], qa, 1.0) or near_pt(pts[0], qb, 1.0)
-                       or near_pt(pts[-1], qa, 1.0) or near_pt(pts[-1], qb, 1.0))]
-            L.append('| %d | `%s -> %s` | (%.0f,%.0f)->(%.0f,%.0f) | %s | 1 |'
-                     % (line, a, b, qa[0], qa[1], qb[0], qb[1],
-                        lt[0] if lt else '?'))
-    L.append('')
-    L.append('## 气侧支路(taps,规范 11.1)')
-    L.append('')
-    L.append('| intent 行 | 语句 | 图上支路(端点) |')
-    L.append('|---|---|---|')
-    for ti, t in enumerate(intent.get('taps') or []):
-        line = lm['taps'][ti] if ti < len(lm['taps']) else 0
-        _lt, pts = tap_polys[ti]
-        L.append('| %d | `%s` | (%.0f,%.0f)->(%.0f,%.0f) |'
-                 % (line, json.dumps(t, ensure_ascii=False),
-                    pts[0][0], pts[0][1], pts[-1][0], pts[-1][1]))
-    L.append('')
-    L.append('## 简化说明(概念级抽象,逐条披露)')
-    L.append('')
-    L.append('1. 清单 18 项中 4 项未入图:能源转换装置选择阀、能源转换装置'
-             '(判读疑似 PTU)、集中加油组件——类型与符号均未登记;地面加油单向阀'
-             '——类型受控(check_valve)但加油口拓扑未声明。对应 unknown: '
-             'ETP-selector-valve-not-in-catalog / ETP-unit-not-in-catalog / '
-             'ground-refuel-assembly-not-in-catalog / '
-             'ground-refuel-check-valve-connection-unknown。')
-    L.append('2. 用户按 skill 更新后的通用用户框规范(hydraulic_user)绘制:'
-             '清单第 18 项用户名单逐项落为 USER-001..008 八只名框,名字由渲染器'
-             '写入符号名槽(v2.3 的"至用户/自用户"边界标记废除)。供压经 @USR '
-             '分配母线接自优先阀 PRV-001;回油经 @USERR 收集母线下行接入回油滤 '
-             'RF-001,过滤后汇入 @RET——回油先过滤再分配,v2.3 语义不变;'
-             '两条母线是并联用户的绘图抽象,用户内部作动器/马达不在本图建模'
-             '(concept,unknown: hydraulic-user-symbol-provisional)。')
-    L.append('3. 壳体回油滤清单只声明 1 只,双泵壳体回油经 @CASE 母线合流入滤'
-             '(unknown: TANK-001-return-port-count-unconfirmed 同源问题:'
-             '主回油+壳体回油共用油箱 return_in 端口)。')
-    L.append('4. FWSOV 装吸油侧沿 system-1 审查卡 D-1 判断;若实际在压力侧须重接'
-             '(unknown: FSOV-001-suction-side-placement-assumed)。')
-    L.append('5. 气侧件(充气活门/充气压力表)按预检处方走 taps 专线,不入液压 paths;'
-             '充气源去向未声明,charge_port 由压力表接入即为末端'
-             '(unknown: accumulator-charge-source-not-declared)。')
-    L.append('6. 两只地面快卸接头画为断开位:机侧接入母线支路,地面侧开放,'
-             '悬空端口红圈是断开位语义而非缺线'
-             '(unknown: QD-open-ends-are-disconnected-position)。')
-    L.append('7. 悬空端口 %d 个: %s。其中 EDP.drive_shaft、EMP.elec_power、'
-             'FSOV.command 为动力源/命令端去向未声明。'
-             % (len(dnames), ' '.join(dnames)))
-    L.append('8. 目录为本工作目录扩展副本(0.3-draft):基于 skill 快照新增 '
-             '8 个类型(油滤三变体/快卸接头两变体/优先阀/充气活门/充气压力表),'
-             '并随 skill 更新收录 hydraulic_user(通用用户名框,符号副本 '
-             'symbols/hydraulic-user.svg,provisional,unknown 已登记);'
-             '详见 build_catalog.py。这些类型尚未回登记规范源 '
-             '已标注/component-catalog.json,冻结前须补。')
-    L.append('9. 构图预算披露(validation-report.json):' + BUDGET_DISCLOSURE)
-    L.append('')
-    with io.open(path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(L))
-    print('wrote', path)
-
-
-def bus_point(layout, tok):
-    x = layout['buses'][tok[1:]]['x']
-    return (float(x), 0.0)
-
-
-def line_no(intent, section, key):
-    """预检器行号映射:与 preflight.line_map 同源,惰性调用。"""
-    global _LINE_MAP_CACHE
-    try:
-        return _LINE_MAP_CACHE[section][key]
-    except NameError:
-        import preflight as _pf
-        with io.open(os.path.join(HERE, '1#系统.intent.yaml'),
-                     encoding='utf-8') as f:
-            _LINE_MAP_CACHE = _pf.line_map(f.read())
-        return _LINE_MAP_CACHE[section][key]
-
-
-def line_map_all(intent):
-    import preflight as _pf
-    global _LINE_MAP_CACHE
-    try:
-        _LINE_MAP_CACHE
-    except NameError:
-        with io.open(os.path.join(HERE, '1#系统.intent.yaml'),
-                     encoding='utf-8') as f:
-            _LINE_MAP_CACHE = _pf.line_map(f.read())
-    lm = dict(_LINE_MAP_CACHE)
-    # taps 行本地补扫(preflight.line_map 不扫 taps)
-    lm['taps'] = []
-    section = None
-    with io.open(os.path.join(HERE, '1#系统.intent.yaml'),
-                 encoding='utf-8') as f:
-        for i, raw in enumerate(f.read().splitlines(), 1):
-            if re.match(r'^\S', raw):
-                section = raw.split(':')[0].strip()
-                continue
-            if section == 'taps' and re.match(r'^\s*-\s*\{', raw):
-                lm['taps'].append(i)
-    return lm
 
 
 if __name__ == '__main__':

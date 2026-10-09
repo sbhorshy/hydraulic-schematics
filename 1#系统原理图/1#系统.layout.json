@@ -1,5 +1,5 @@
 {
-  "layout_version": "1.0",
+  "layout_version": "2.2",
   "source_l0": "1#系统.intent.yaml",
   "source_components_json": "./1#系统组件.json",
   "note": "油箱置左,回路闭合。压力侧两条母线:@PRESS(泵汇合+滤+自增压优先阀+地面压力接头) x=880,@MANIFOLD(分配:优先阀/蓄压器) x=1160;用户供压母线 @USR x=1470,用户回油收集母线 @USERR x=1646。回油母线 @RET x=940,壳体回油母线 @CASE x=620。吸油走廊 x=290。全部坐标手工给定,无自动布局。",
@@ -10,7 +10,20 @@
     "2.2 修:QDP 上移 (1186,560),@MANIFOLD 母线底回到 593.8,RF->@RET 支路 (y=728) 不再跨母线。",
     "2.3 修:PF 移 (1000,254) 让开 @RET 顶绕竖线 940;CDF 节点宽收 60,消除进线短桩穿自身节点盒 (V2)。",
     "2.4 用户落名框:skill 通用用户框规范(hydraulic_user)生效,废除 USR-001/002 边界标记,清单 18 名单逐项落 USER-001..008 八只 120x60 名框(x=1498,节距 105,y=160..895),名字渲染期写入符号名槽。供压母线 @USR x=1470(PRV-001.outlet 12px 尾+用户 10px 尾);回油收集母线 @USERR x=1646(用户 10px 尾),母线下行延伸至 y=1040 接回油滤 RF-001(移 (1200,1012) rot180,与 QDR 净距 44px),出滤左行 y=1040 汇入 @RET 底端——回油先过滤再分配,v2.3 语义不变。图例移 (380,1020) 让出回油走廊。USER-001 与 PG 净距 43.4px 满足 B5=40;用户列节距 105(净距 45)。",
-    "2.5 目录随 skill 更新:catalog 收录 hydraulic_user(用户名框,provisional),intent extern 清空。"
+    "2.5 目录随 skill 更新:catalog 收录 hydraulic_user(用户名框,provisional),intent extern 清空。",
+    "2.5 修:本体符号 v4.3 两端加导管(画布 80x158->100x158,端口距 80->100),PF 改 100 宽、CDF 改 75x118.5(维持 0.75 落位缩放,墨迹尺寸不变);RF-001 改挂回油滤组件 filter-line-shutoff-dp-return-bypass.svg v1.1(本体+弹簧单向阀旁通,2026-09-07 用户口径;画布 100x194,旁通回路占位下方,rot180 落位后在上方,与 QDR-001 净距仍 44px;端口 y 由 1056 移 1092,@USERR/@RET 随接入点自动伸缩)。",
+    "1.1 editor-proto:FSOV-001 归位 w/h 130x90→201.28x114.67（本体方框 junction 跨距 240 native×1/3=80，方框基准；DXF 件进 80 基准体系，符号画布重表达挂符号规范化 campaign）",
+    "1.2 symbol-campaign:CDF-001 换指专用符号 filter-line-shutoff-dp-case-drain.svg（画布重表达 ×0.75,75x118.5 k=1;共用 dp 文件 0.75 缩放率无依据,全库符号画布归一图上单位,图上几何不变）",
+    "1.3 symbol-campaign:CDF-001 与 PF-001 同符号同尺寸 75x118.5→100x158（用户 2026-09-29 定:0.75 缩小无依据;专用 case-drain 符号文件撤销,回归与 dp 共用,画布即图上单位 k=1）",
+    "1.4 symbol-campaign:声明占位对齐墨迹——FSOV-001 h 114.67→113.34（114.67 是 viewBox 收紧前高 344 的 1/3,收紧后陈旧）、QDP/QDR h 68→67.61（老圆整值）;墨迹与 k 不动,B5 净距按真实占位判定",
+    "1.5 rollback:FSOV-001 整链回退——DXF 组合件(201.28x113.34 rot270)回退为 fsov-provisional-stroke.svg 80x80 @(330,290) 无旋转（HEAD 状态;用户 2026-09-29 令「版本回退,之前是80*80的」。DXF 件本体方框实测 66.67x33.33 非 80,「junction 跨距=80」≠「本体=80」;DXF 件留库备选,layer-2 multi 重表达待立项）",
+    "1.6 undo:撤销 1.5 回退（用户 2026-09-29「你搞错了,撤销」）——FSOV-001 恢复 DXF 件 firewall-shutoff-valve.svg 201.28x113.34 rot270 @(330,270.7),catalog 端口表同步回 main_upper/main_lower",
+    "1.7 fsov-multi-redraw:FSOV-001 等比例放大重绘 ×2.4——方框 160x80(两格各 80,multi 基准,C13 PASS),符号 v1.6 闭合包络+envelope-class=multi;占位 201.28x113.34 → 483.072x272.01,现位放不下(×2.4 后与 EDP/PRV-002 碰),移 @(330,270.7) → @(596,272) rot270(扫描择近空位)",
+    "1.8 fsov-placement-blocked:×2.4 后全图扫描证明无 272 宽无碰撞空位——CASE 干线 x=620 与压力干线 x=880 间距 260<272(结构性的),候选锦标赛最优仍 fail 11+(596,850,rot0)=11/(636,100,rot270)=12/(596,272,rot270)=13;暂落 @(596,272) rot270 待用户定夺(动邻件/远置/回退图上尺寸三选)",
+    "1.9 fsov-60:用户令「把firewall-shutoff-valve.svg改成60*60吧」——符号 v1.7 画布/占位 60x60(墨迹 60x33.78 居中,摘 envelope-class 框随内容同 PRV);FSOV-001 回原锚 @(330,270.7) rot270;选1 的 EDP/EMP 左移撤销回 x=500。1.7/1.8 的 ×2.4 安放阻塞就此了结",
+    "2.0 fsov-cell60:用户澄清「是方框60*60,不是整个」——符号 v1.8 方框两格各 60×60（总框 120×60），画布=墨迹 362.304x204.003；FSOV-001 落 @(290,394) rot0（TANK/EDP 之间，吸油向自然位）；选1 授权执行:CASE 母线 x 620→660（让开 362 宽占位，收集 EDP/EMP/CDF 集液口径不变）",
+    "2.1 fsov-cell60-placement:v1.8 方框两格各 60×60 落位——rot270 占位 204.003x362.304 @(294,333)（TANK/EDP 夹缝,吸油向 TANK→FSOV→EDP 自然贯通,零新增 V2 预期);CASE 母线回 620（rot270 宽 204 不再需要让位);EDP/EMP 保持 x=500",
+    "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）"
   ],
   "canvas": {
     "width": 1680,
@@ -32,21 +45,22 @@
       "h": 564
     },
     "FSOV-001": {
-      "x": 330,
-      "y": 290,
-      "symbol": "symbols/fsov-provisional-stroke.svg",
-      "w": 80,
-      "h": 80
+      "x": 302,
+      "y": 283.7,
+      "symbol": "symbols/firewall-shutoff-valve.svg",
+      "w": 362.304,
+      "h": 204.003,
+      "rot": 270
     },
     "EDP-001": {
-      "x": 500,
+      "x": 540,
       "y": 290,
       "symbol": "symbols/edp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "EMP-001": {
-      "x": 500,
+      "x": 540,
       "y": 610,
       "symbol": "symbols/emp-provisional-stroke.svg",
       "w": 80,
@@ -56,23 +70,23 @@
       "x": 1000,
       "y": 254,
       "symbol": "symbols/filter-line-shutoff-dp.svg",
-      "w": 80,
-      "h": 112
+      "w": 100,
+      "h": 158
     },
     "CDF-001": {
       "x": 420,
       "y": 100,
       "symbol": "symbols/filter-line-shutoff-dp.svg",
-      "w": 60,
-      "h": 80,
+      "w": 100,
+      "h": 158,
       "rot": 270
     },
     "RF-001": {
       "x": 1200,
       "y": 1012,
-      "symbol": "symbols/filter-line-shutoff-dp.svg",
-      "w": 80,
-      "h": 112,
+      "symbol": "symbols/filter-line-shutoff-dp-return-bypass.svg",
+      "w": 100,
+      "h": 194,
       "rot": 180
     },
     "PRV-001": {
@@ -116,14 +130,24 @@
       "y": 560,
       "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
       "w": 160,
-      "h": 68
+      "h": 67.61,
+      "rot": 180
     },
     "QDR-001": {
       "x": 1200,
       "y": 900,
       "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
       "w": 160,
-      "h": 68
+      "h": 67.61,
+      "rot": 180
+    },
+    "CV-002": {
+      "x": 1400,
+      "y": 1120,
+      "symbol": "symbols/check-valve.svg",
+      "w": 80,
+      "h": 80,
+      "rot": 90
     },
     "USER-001": {
       "x": 1498,
@@ -252,9 +276,9 @@
     "TANK-001": 100,
     "EDP-001": 40
   },
-  "lanes_note": "水平走廊 100:供 @RET->油箱 顶绕(从图头文字之下、CDF 顶 112 之上通过);CDF 出油走 vlanes 20 于走廊西侧下行,与油箱支路竖廊 42 保持 22px。",
+  "lanes_note": "水平走廊 890:供 @RET->油箱 支路在油箱(底 840,bootstrap 桩至 858)与 QDR 支路(933.8)之间东行并入 @RET(x=940),接入高度即 890;原走廊 100 因 CDF 出油并入 @RET 后母线上延,且 100 正穿 CDF 出油口端口点(505.5,100),弃用。",
   "lanes": [
-    100
+    890
   ],
   "vlanes_note": "竖廊 290:油箱(278)与 FSOV(330) 之间供 TANK->FSOV 吸油上行;20:油箱西侧供 CDF 出油与回油接入 return_in。",
   "vlanes": [

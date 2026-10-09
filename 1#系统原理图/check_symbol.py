@@ -238,6 +238,8 @@ def check(path, cat):
                 npts = len(re.findall(r'-?[\d.]+', e.get('points') or '')) // 2
                 if npts <= 4 and (e.get('stroke') or '').strip().lower() == 'none':
                     continue
+            if e.tag.split('}')[-1] == 'text':
+                continue  # 文字为排版件非描摹轮廓(hydraulic_user 名槽占位文本)
             traced.append('%s(fill=%s, %d 顶点)' % (e.tag.split('}')[-1], f, verts))
     if traced:
         E.append('C8 symbol 组内存在填充图元,疑为描摹轮廓: %s' % ' '.join(traced))
@@ -320,8 +322,10 @@ def check(path, cat):
     #       豁免清单见 symbol-library.md「方框本体基准」) ----
     env = root.get('data-envelope-class')
     if env:
-        if env not in ('single', 'multi'):
-            E.append('C13 data-envelope-class=%r 不在枚举 single/multi' % env)
+        # assembly=装配级方框,框随内容,不守 80 基准,无方框校核
+        # (用户签认 2026-09-29:priority-valve 本体 162x129 native 属此类)。
+        if env not in ('single', 'multi', 'assembly'):
+            E.append('C13 data-envelope-class=%r 不在枚举 single/multi/assembly' % env)
         elif env == 'single':
             rects = envelope_rects(root)
             big = [r for r in rects if r[0] >= 60 or r[1] >= 60]
@@ -332,7 +336,7 @@ def check(path, cat):
                          % (ENVELOPE, ENVELOPE, len(body), rects))
             elif len(big) != 1:
                 E.append('C13 附件方框达本体级(边>=60),疑第二本体: %s' % big)
-        else:
+        elif env == 'multi':
             rects = envelope_rects(root)
             bodies = [r for r in rects if r[0] >= 60 or r[1] >= 60]
             # 两种合规画法:各格独立闭合方框(每格 80x80),或一体包络

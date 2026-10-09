@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 由 Drawing2.dxf (AutoCAD 2018) 转换:坐标 x10,Y 轴翻转(y' = 343.66 - 10·y,
+     SVG y 向下,视角与 AutoCAD 一致)。全部为可编辑矢量图元,按元件分组、图元带语义 id
+     (id 方位以 SVG 视觉上下为准)。
+     v1.1:增补主油路 main-line——自二位二通阀下油口正交走线至右侧单向阀下油口
+     (CAD 原图两元件间无连线);走线 M147.15 240.26 H364.43 V209.86,零交叉、两处直角折弯。
+     v1.2:修两处转换缺陷——
+       1) pump-arc 弧线 Y 翻转后 sweep 档未纠正,弧向反了(鼓向阀体一侧),
+          改回 sweep=0,弧向左包,两个方向箭头尖端重新与弧端相接;
+       2) 阀流向箭头 valve-flow-arrow:ezdxf 对带镜像的 INSERT 求解块内 SOLID 时
+          x 坐标取反,箭头被甩到电动机旁;按 AutoCAD 变换语义(x 取反还原)归位至
+          阀左块内部通路下方,尖朝下(常开工位流向,与下油口出油方向一致)。
+     v1.3:单向阀两段油口均接回主油路——新增 main-run-upper:主阀上油口端头
+       (147.35,0) 水平右行至单向阀正上方,下折接入上油口 (364.54,67.83);
+       加下油口原有的 main-run,单向阀前(下口进油)后(上口出油)皆有油路,
+       与主阀竖线构成回路。零交叉。
+     v1.4:主油路上下两端各延 50 引出图外并加系统接口 port-main-upper/lower
+       (红点,与库端口同款 r=2);上下分叉点为真实三通,补实心节点
+       junction-upper/lower(r=4.5,库规 JUNC_R);viewBox 高度 300.28 -> 400.28。
+     v1.5:入库规整(2026-09-07)——connection-points 组提为 svg 根级直系子(库规:
+       read_symbol 只扫根层);根补 data-symbol-version/form/status;viewBox 裁至
+       "-181.12 -52 603.83 344",端口红点缘距 2(门禁 V2 边界容差 3 内)。 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 362.304 204.0034" width="362.304" height="204.0034"
+     data-symbol-version="1.8" data-symbol-form="stroke_geometry" data-symbol-status="annotated"
+     data-symbol-source-ref="CONVERTED_FROM:Drawing2.dxf" data-component-type="firewall_shutoff_valve">
+<!-- 2026-09-30 v1.8 方框每格 60×60(用户澄清「是方框60*60,不是整个」):自 v1.7 放大 S=6.0384,方框 120×60(两格各 60×60);画布=墨迹紧贴 362.304×204.0034;不守 80 基准(装配件框随内容,同 priority-valve,用户 60 定制)。 -->
+
+<!-- 2026-09-30 v1.7 画布 60×60(用户令「把firewall-shutoff-valve.svg改成60*60吧」):等比 k=0.124205,墨迹 60×33.7843 垂直居中,触边油口延长线/锚点贴新边界;摘除 envelope-class(60 体系不守 80 基准,装配件框随内容,同 priority-valve);v1.6 的 ×2.4/80 基准重绘退役。 -->
+
+<!-- 2026-09-29 等比例放大重绘(用户令「重绘,符号等比例放大就行」):全几何 ×2.4(方框 66.67x33.33 → 160.00x80.00,两格各 80.00x80.00,达 multi 80 基准);散线方框改闭合描边 path 置入 g id="symbol" 挂 受 C13 检;画布 201.28x113.3352 → 483.072x272.00448,占位 483.072x272.01,渲染缩放率恒 1。 -->
+
+<!-- 2026-09-29 画布重表达 k=1(符号规范化 campaign):按渲染缩放率 k=0.333339 均匀缩放全部几何,viewBox -181.12 -50 603.83 340 → -60.3743 -16.6669 201.28 113.3352;占位 201.28×114.67 不变,图上几何不变,渲染缩放补偿归一。 -->
+    <g id="symbol">
+    <path id="envelope-box" d="M 167.091 71.8029 H 287.0927 V 131.8041 H 167.091 Z" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+<g id="drawing" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 传动轴双线 + 定量泵(半弧+双三角,CAD 主图散画图元);弧+双箭头为旋转/流向指示 -->
+    <g id="pump-shaft">
+      <line x1="124.4182" y1="104.8034" x2="166.8627" y2="104.8034" id="shaft-lower"/>
+      <line x1="124.3041" y1="92.8033" x2="166.8627" y2="92.8033" id="shaft-upper"/>
+      <polygon points="142.5745 82.759 147.3986 85.9092 154.4303 69.8652" fill="#000000" stroke="none" id="pump-triangle-upper"/>
+      <polygon points="142.5745 116.7437 147.3986 113.5935 154.4303 129.6381" fill="#000000" stroke="none" id="pump-triangle-lower"/>
+      <path d="M 154.6464 69.7571 A 42.1867 42.1867 0 0 0 154.6766 129.7697" id="pump-arc"/>
+    </g>
+    <!-- 二位二通阀(常开):双方块,左块 position1 为通油工位(上下油口);右块为另一工位(通路+节流位标记) -->
+    <g id="valve-2way-no">
+      <line x1="197.0855" y1="71.9291" x2="197.0855" y2="30.0003" id="port-upper"/>
+      <line x1="196.9654" y1="131.8041" x2="196.9654" y2="174.1707" id="port-lower"/>
+      <line x1="197.0674" y1="71.8029" x2="197.0674" y2="131.9001" id="position1-passage"/>
+      <line x1="257.0565" y1="86.8995" x2="257.0565" y2="71.8029" id="position2-passage-upper"/>
+      <line x1="251.0863" y1="86.8995" x2="263.0864" y2="86.8995" id="position2-tick-upper"/>
+      <line x1="263.0864" y1="116.9001" x2="251.0863" y2="116.9001" id="position2-tick-lower"/>
+      <line x1="257.0565" y1="131.8041" x2="257.0565" y2="116.9001" id="position2-passage-lower"/>
+      <line x1="227.074" y1="72.0191" x2="227.074" y2="132.0203" id="box-mid"/>
+      <!-- 流向箭头:常开工位流动方向,通路下方、尖朝下(与下油口出油方向一致)。
+           转换修正:ezdxf 对带镜像 INSERT 的块内 SOLID 把 x 取反,已按 AutoCAD 变换语义归位 -->
+      <polygon points="194.3073 116.7799 199.3475 116.7799 196.8271 131.9001" fill="#000000" stroke="none" id="valve-flow-arrow"/>
+    </g>
+    <!-- 单向阀(带弹簧):V 形座+球+弹簧,油口上下,流向自下而上顶开球阀 -->
+    <g id="check-valve">
+      <line x1="310.3611" y1="108.9614" x2="327.329" y2="125.9299" id="seat-left"/>
+      <line x1="327.329" y1="125.9299" x2="344.3035" y2="108.9614" id="seat-right"/>
+      <circle cx="327.2994" cy="111.1636" r="9.9899" id="ball"/>
+      <line x1="327.3356" y1="125.9118" x2="327.3356" y2="155.9124" id="port-bottom"/>
+      <line x1="327.4014" y1="100.6997" x2="327.4014" y2="70.6991" id="port-top"/>
+      <g id="spring">
+        <line x1="339.1498" y1="84.1213" x2="316.6549" y2="77.3588" id="spring-1"/>
+        <line x1="316.7274" y1="90.8837" x2="339.1498" y2="84.1213" id="spring-2"/>
+        <line x1="339.1498" y1="97.6455" x2="316.7274" y2="90.8837" id="spring-3"/>
+        <line x1="316.6549" y1="104.3179" x2="339.1498" y2="97.6455" id="spring-4"/>
+      </g>
+    </g>
+    <!-- 电动机 M -->
+    <g id="motor-m">
+      <text id="motor-text" x="94.8494" y="105.5419" font-size="19.2003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">M</text>
+      <circle cx="94.8494" cy="98.9232" r="30.0006" id="motor-circle"/>
+    </g>
+    <!-- 主油路(增补):二位二通阀下油口 -> 单向阀下油口,正交走线,两处直角折弯 -->
+    <g id="main-line">
+      <path id="main-run" d="M 196.9654 174.1586 H 327.3356 V 155.9184"/>
+      <!-- 上段回路(增补):主阀上油口 -> 单向阀上油口 -->
+      <path id="main-run-upper" d="M 197.0855 30.0003 H 327.4014 V 70.6991"/>
+      <!-- 上下端引出:主油路延至系统接口 -->
+      <line id="main-run-upper-ext" x1="197.0855" y1="30.0003" x2="197.0855" y2="0"/>
+      <line id="main-run-lower-ext" x1="196.9654" y1="174.1707" x2="196.9654" y2="204.0034"/>
+      <!-- 真实三通分叉点(上:引出+回路分支;下:引出+回路分支) -->
+      <circle id="junction-upper" cx="197.0855" cy="30.0003" r="2.6998" fill="#000000" stroke="none"/>
+      <circle id="junction-lower" cx="196.9654" cy="174.1586" r="2.6998" fill="#000000" stroke="none"/>
+    </g>
+  </g>
+  <!-- 系统接口(增补):主油路上下端,红点与库端口同款;库规:本组须为 svg 根级直系子 -->
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-main-upper" cx="197.0855" cy="0" r="1.1998"
+            data-port-id="main_upper" data-medium="hydraulic" data-port-role="pressure"
+            data-flow-capability="bidirectional" data-anchor-direction="up"/>
+    <circle id="port-main-lower" cx="196.9654" cy="204.0034" r="1.1998"
+            data-port-id="main_lower" data-medium="hydraulic" data-port-role="pressure"
+            data-flow-capability="bidirectional" data-anchor-direction="down"/>
+  </g>
+</svg>

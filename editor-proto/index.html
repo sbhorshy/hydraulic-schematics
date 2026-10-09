@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>editor-proto · #60 拖拽写回闭环</title>
+<style>
+  :root { --bg:#f7f6f3; --ink:#1b1b18; --line:#8a8a82; --red:#c4442a; --amber:#8a5a00; --ok:#2b7649; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:13px/1.5 -apple-system,"Microsoft YaHei",system-ui,sans-serif; background:var(--bg); color:var(--ink); display:flex; height:100vh; }
+  #stage { flex:1; overflow:auto; padding:8px; position:relative; }
+  #stage svg { background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.15); max-width:100%; height:auto; }
+  #side { width:330px; border-left:1px solid var(--line); padding:10px 12px; overflow:auto; background:#fff; }
+  h1 { font-size:14px; margin:0 0 6px; }
+  .note { color:#5c5c55; font-size:11px; margin-bottom:8px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; background:#999; }
+  .dot.ok { background:var(--ok); } .dot.bad { background:var(--red); }
+  .chips { margin:6px 0; }
+  .chip { display:inline-block; background:#f1f0ec; border-radius:3px; padding:1px 7px; margin:0 4px 4px 0; font-size:11px; }
+  .banner { background:#fdf3f1; color:var(--red); border:1px solid var(--red); border-radius:6px; padding:6px 8px; margin:8px 0; font-size:12px; white-space:pre-wrap; display:none; }
+  .issue { border-left:3px solid #ccc; padding:3px 6px; margin:4px 0; font-size:11px; cursor:pointer; word-break:break-all; }
+  .issue.red { border-color:var(--red); } .issue.yellow { border-color:var(--amber); } .issue.gray { border-color:#ccc; color:#5c5c55; }
+  pre#log { background:#f7f7f4; font-size:10px; padding:6px; white-space:pre-wrap; word-break:break-all; max-height:130px; overflow:auto; }
+  g[id^="inst-"] { cursor:grab; }
+  g.proto-drag { cursor:grabbing; }
+  g.proto-red { outline:none; }
+  .proto-bad { filter: drop-shadow(0 0 2px var(--red)); }
+  .proto-warn { filter: drop-shadow(0 0 2px var(--amber)); }
+  svg .proto-guide { stroke:#2f6fed; stroke-width:0.8; stroke-dasharray:6 4; pointer-events:none; }
+  svg .proto-sel { stroke:#2f6fed; stroke-width:1.2; fill:none; stroke-dasharray:5 3; pointer-events:none; }
+  #proto-hits rect { cursor: grab; }
+  #proto-hits rect:hover { fill: #2f6fed; fill-opacity: 0.06; }
+  body.proto-dragging, body.proto-dragging * { cursor: grabbing !important; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="side">
+  <h1>editor-proto · 最小原型</h1>
+  <div class="note">画布=标准链产物 · 编辑器无导出（#59） · 校验权威=validate_sheet（零重实现） · 撤销=git（#58）</div>
+  <div class="chips">
+    <label class="chip"><input type="checkbox" id="alignOn" checked> 对齐吸附</label>
+    <label class="chip">栅格
+      <select id="gridSize" style="border:none;background:transparent;font:inherit">
+        <option value="0">关</option><option value="2">2</option><option value="5">5</option>
+        <option value="10">10</option><option value="20">20</option>
+      </select>
+    </label>
+  </div>
+  <div id="selbox" style="display:none;margin:6px 0;padding:6px;background:#f1f0ec;border-radius:6px;font-size:12px">
+    选中 <b id="selId"></b> · rot <span id="selRot">0</span> · 连线 <span id="selConns">?</span> 条
+    <button id="rotBtn" style="margin:0 4px">旋转 90°</button>
+    <button id="deselBtn">取消</button>
+    <div id="selHint" class="note" style="display:none;color:#8a5a00"></div>
+    <div class="note">原地点击=选中 · R=旋转 · Esc=取消</div>
+  </div>
+  <div><span class="dot" id="dot"></span><span id="state">加载中…</span></div>
+  <div class="chips" id="latency"></div>
+  <div class="chip" id="ver">layout ?</div>
+  <div class="banner" id="banner"></div>
+  <div id="issues"></div>
+  <h1 style="margin-top:10px;font-size:12px">revision_log 尾部</h1>
+  <pre id="log"></pre>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+let layoutIndex = null;   // {id:{x,y,w,h,rot?}} —— 对齐参考线/夹取/选中用（GET /api/layout）
+let origTransform = null; // 拖拽中的 inst 原始 transform
+let drag = null;
+let selectedId = null;    // 原地点击选中的节点（旋转作用对象）
+
+function svgDoc(text){ // 剥 xml 声明后注入
+  return text.replace(/<\?xml[^?]*\?>\s*/, '');
+}
+
+async function api(path, opts) {
+  const ctrl = new AbortController();          // 5s 超时：服务重启窗口内失败要快速可见，
+  const t = setTimeout(() => ctrl.abort(), 5000); // 否则拖拽视觉停在失配态等不到回弹
+  try {
+    const r = await fetch(path, Object.assign({ signal: ctrl.signal }, opts));
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+
+function setSide(d) {
+  const passed = !!d.passed;
+  $('dot').className = 'dot ' + (passed ? 'ok' : 'bad');
+  $('state').textContent = passed ? '过闸（成品有效）' : '未过闸（无成品，手调已落盘）';
+  const lat = d.latency;
+  $('latency').innerHTML = lat
+    ? ['render_ms', 'validate_ms', 'total_ms'].map((k, i) =>
+        lat[k] != null ? `<span class="chip">${['渲染', '校核', '合计'][i]} ${lat[k]} ms</span>` : '').join('')
+    : '';
+  const m = d.layout_meta || {};
+  if (m.version) $('ver').textContent = 'layout ' + m.version;
+  if (m.revision_log_tail) $('log').textContent = m.revision_log_tail.join('\n');
+  $('banner').style.display = d.render_stderr ? 'block' : 'none';
+  if (d.render_stderr) $('banner').textContent = '渲染失败：\n' + d.render_stderr;
+  const box = $('issues'); box.innerHTML = '';
+  (d.issues || []).forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'issue ' + it.sev;
+    div.textContent = `${it.id} [${it.result}] ${it.detail}`;
+    div.onclick = () => highlight(it.detail);
+    box.appendChild(div);
+  });
+}
+
+function ghostOverlay(issues) { // 违规残影：只显示不判定（#59 2a）
+  document.querySelectorAll('.proto-bad,.proto-warn').forEach(g =>
+    g.classList.remove('proto-bad', 'proto-warn'));
+  const re = /\b([A-Z]{2,}[A-Z0-9]*-\d+)\b/g;
+  (issues || []).forEach(it => {
+    if (it.sev === 'gray') return;
+    let m; const seen = new Set();
+    while ((m = re.exec(it.detail))) {
+      const g = document.getElementById('inst-' + m[1]);
+      if (g && !seen.has(m[1])) { g.classList.add(it.sev === 'red' ? 'proto-bad' : 'proto-warn'); seen.add(m[1]); }
+    }
+  });
+}
+
+function highlight(detail) { // 侧栏条目点击 → 定位实例
+  const m = /\b([A-Z]{2,}[A-Z0-9]*-\d+)\b/.exec(detail || '');
+  if (!m) return;
+  const g = document.getElementById('inst-' + m[1]);
+  if (g) { g.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function buildHitLayer() { // 透明命中垫：描边镂空/小尺寸/被管线压住的图标也能点中（垫在顶层）
+  const svg = stage.querySelector('svg');
+  if (!svg) return;
+  const old = svg.querySelector('#proto-hits');
+  if (old) old.remove();
+  const layer = document.createElementNS(SVG_NS, 'g');
+  layer.id = 'proto-hits';
+  svg.appendChild(layer); // 最后追加=最顶层，命中优先于底下管线
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return;
+  const inv = ctm.inverse();
+  const PAD = 3; // user units 外扩，照顾缩得很小的符号
+  document.querySelectorAll('g[id^="inst-"]').forEach(g => {
+    const rb = g.getBoundingClientRect();
+    if (rb.width < 2 && rb.height < 2) return;
+    const p1 = new DOMPoint(rb.left, rb.top).matrixTransform(inv);
+    const p2 = new DOMPoint(rb.right, rb.bottom).matrixTransform(inv);
+    const r = document.createElementNS(SVG_NS, 'rect');
+    r.setAttribute('x', Math.min(p1.x, p2.x) - PAD);
+    r.setAttribute('y', Math.min(p1.y, p2.y) - PAD);
+    r.setAttribute('width', Math.abs(p2.x - p1.x) + PAD * 2);
+    r.setAttribute('height', Math.abs(p2.y - p1.y) + PAD * 2);
+    r.setAttribute('fill', '#fff');
+    r.setAttribute('fill-opacity', '0');
+    r.setAttribute('pointer-events', 'all');
+    r.addEventListener('pointerdown', ev => startDrag(ev, g));
+    layer.appendChild(r);
+  });
+}
+
+function decorate() {
+  layoutIndex = null;
+  api('/api/layout').then(l => {
+    layoutIndex = l.nodes || {};
+    window.__canvas = l.canvas || {};
+    window.__conns = l.conns || {};
+    if (selectedId && layoutIndex[selectedId]) { drawSel(); select(selectedId); } // 布局到达后刷新选中框/rot/连线提示
+  });
+  document.querySelectorAll('g[id^="inst-"]').forEach(g => {
+    g.addEventListener('pointerdown', ev => startDrag(ev, g));
+  });
+  buildHitLayer();
+}
+
+function guidesLayer(svg) {
+  let layer = svg.querySelector('#proto-guides');
+  if (!layer) {
+    layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    layer.id = 'proto-guides';
+    svg.appendChild(layer);
+  }
+  return layer;
+}
+
+function clearGuides(svg) {
+  const layer = svg.querySelector('#proto-guides');
+  if (layer) layer.innerHTML = '';
+}
+
+function drawGuide(svg, x1, y1, x2, y2) {
+  const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+  ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+  ln.setAttribute('class', 'proto-guide');
+  guidesLayer(svg).appendChild(ln);
+}
+
+function startDrag(ev, g) {
+  if (ev.button !== 0) return;
+  ev.preventDefault();
+  const svg = g.ownerSVGElement;
+  const ctm = svg.getScreenCTM().inverse();
+  const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm);
+  origTransform = g.getAttribute('transform');
+  const id = g.id.replace(/^inst-/, '');
+  const nd = (layoutIndex || {})[id] || {};
+  drag = { g, svg, id, x0: pt.x, y0: pt.y, dx: 0, dy: 0, nd };
+  g.classList.add('proto-drag');
+  document.body.classList.add('proto-dragging');
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp, { once: true });
+  window.addEventListener('pointercancel', onUp, { once: true });
+}
+
+function onMove(ev) {
+  if (!drag) return;
+  const ctm = drag.svg.getScreenCTM().inverse();
+  const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm);
+  drag.rawdx = pt.x - drag.x0; drag.rawdy = pt.y - drag.y0;
+  drag.dx = drag.rawdx; drag.dy = drag.rawdy;
+  clampDelta(drag); // 夹取始终生效；对齐只在松手时一次定格
+  drag.g.setAttribute('transform', `translate(${drag.dx},${drag.dy}) ` + origTransform);
+  drawHints(drag);
+}
+
+const TH = 10; // 对齐吸附半径（user units）
+
+function axisBest(cands, edges) { // 每轴取最近候选（≤TH），返回 {c, off} 或 null
+  let best = null;
+  cands.forEach(c => edges.forEach(e => {
+    const dd = Math.abs(e - c);
+    if (dd <= TH && (!best || dd < best.dd)) best = { c, off: c - e, dd };
+  }));
+  return best;
+}
+
+function guideCands(d) {
+  const cands = { v: [], h: [] };
+  Object.entries(layoutIndex || {}).forEach(([oid, o]) => {
+    if (oid === d.id || o.x == null) return;
+    cands.v.push(o.x, o.x + o.w / 2, o.x + o.w);
+    cands.h.push(o.y, o.y + o.h / 2, o.y + o.h);
+  });
+  return cands;
+}
+
+function clampDelta(d) { // 画布夹取（始终生效，与吸附无关）
+  const nd = d.nd, W = window.__canvas || {};
+  if (nd.w) d.dx = Math.min(Math.max(d.dx, -nd.x), Math.max((W.width || 1e6) - nd.w - nd.x, 0));
+  if (nd.h) d.dy = Math.min(Math.max(d.dy, -nd.y), Math.max((W.height || 1e6) - nd.h - nd.y, 0));
+}
+
+function drawHints(d) { // 拖拽中参考线只作提示、不改位移（实时改位移=抖动根源）
+  clearGuides(d.svg);
+  if (!document.getElementById('alignOn').checked) return;
+  const cands = guideCands(d);
+  const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
+  const bv = axisBest(cands.v, [d.nd.x + d.dx, d.nd.x + d.dx + d.nd.w / 2, d.nd.x + d.dx + d.nd.w]);
+  const bh = axisBest(cands.h, [d.nd.y + d.dy, d.nd.y + d.dy + d.nd.h / 2, d.nd.y + d.dy + d.nd.h]);
+  if (bv) drawGuide(d.svg, bv.c, 0, bv.c, H);
+  if (bh) drawGuide(d.svg, 0, bh.c, Wd, bh.c);
+}
+
+async function onUp(ev) {
+  const d = drag; drag = null;
+  if (!d) return;
+  window.removeEventListener('pointermove', onMove);
+  d.g.classList.remove('proto-drag');
+  document.body.classList.remove('proto-dragging');
+  const dist = Math.abs(d.rawdx || 0) + Math.abs(d.rawdy || 0);
+  if (dist < 3) { // 原地点击=选中，位移归零
+    d.g.setAttribute('transform', origTransform);
+    clearGuides(d.svg);
+    select(d.id);
+    return;
+  }
+  // 落点一次性吸附：先对齐（每轴最近候选）后栅格——拖拽全程跟手零跳动
+  let nx = d.nd.x + d.dx, ny = d.nd.y + d.dy;
+  if (document.getElementById('alignOn').checked) {
+    const cands = guideCands(d);
+    const bv = axisBest(cands.v, [nx, nx + d.nd.w / 2, nx + d.nd.w]);
+    const bh = axisBest(cands.h, [ny, ny + d.nd.h / 2, ny + d.nd.h]);
+    if (bv) nx += bv.off;
+    if (bh) ny += bh.off;
+    const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
+    if (bv) drawGuide(d.svg, bv.c, 0, bv.c, H); // 参考线定格吸附结果，等换帧
+    if (bh) drawGuide(d.svg, 0, bh.c, Wd, bh.c);
+  }
+  const grid = parseInt($('gridSize').value, 10) || 0;
+  if (grid > 1) { nx = Math.round(nx / grid) * grid; ny = Math.round(ny / grid) * grid; }
+  let res;
+  try {
+    res = await postDelta({ node: d.id,
+      dx: Math.round((nx - d.nd.x) * 10) / 10,
+      dy: Math.round((ny - d.nd.y) * 10) / 10 });
+  } catch (e) { // 服务未响应（重启窗口/断连）：回弹+提示，防「符号已拖走、线在旧位」的失配定格
+    d.g.setAttribute('transform', origTransform);
+    clearGuides(d.svg);
+    $('banner').style.display = 'block';
+    $('banner').textContent = '服务未响应——拖拽已回弹，稍候刷新页面重试';
+    return;
+  }
+  // 拖拽位保持不回弹，等链产物换帧；失败才回弹
+  if (!res.ok && d.g.isConnected) d.g.setAttribute('transform', origTransform);
+}
+
+async function postDelta(body) {
+  $('state').textContent = '闭环中：写回 → 渲染 → 校核…';
+  const res = await api('/api/delta', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (res.ok && res.svg) {
+    stage.innerHTML = svgDoc(res.svg);
+    decorate();
+    ghostOverlay(res.issues);
+    setSide(res);
+    if (selectedId && (layoutIndex || {})[selectedId]) drawSel(); // 选中跨刷新保持
+  } else {
+    setSide(Object.assign({ passed: false }, res));
+  }
+  return res;
+}
+
+function select(id) { // 原地点击选中：虚线框 + 侧栏旋转控制（含连线/干涉提示）
+  selectedId = id;
+  $('selbox').style.display = 'block';
+  $('selId').textContent = id;
+  const n = (window.__conns || {})[id] || 0;
+  $('selConns').textContent = n;
+  const hint = $('selHint');
+  if (n > 0) {
+    hint.style.display = 'block';
+    hint.textContent = '⚠ 有连线：旋转会改变端口方位，管线按新端口重连，可能干涉本体——校核红灯即披露，转回原方位可消除。';
+  } else {
+    hint.style.display = 'none';
+  }
+  drawSel();
+}
+
+function drawSel() {
+  const svg = stage.querySelector('svg');
+  if (!svg) return;
+  clearGuides(svg);
+  const nd = (layoutIndex || {})[selectedId] || {};
+  if (nd.x == null) return;
+  $('selRot').textContent = nd.rot || 0;
+  const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  r.setAttribute('x', nd.x); r.setAttribute('y', nd.y);
+  r.setAttribute('width', nd.w); r.setAttribute('height', nd.h);
+  r.setAttribute('class', 'proto-sel'); // 声明占位框（rot 90/270 时墨迹宽高互换，以链产物为准）
+  guidesLayer(svg).appendChild(r);
+}
+
+function deselect() {
+  selectedId = null;
+  $('selbox').style.display = 'none';
+  const svg = stage.querySelector('svg');
+  if (svg) clearGuides(svg);
+}
+
+async function rotateSel() {
+  if (!selectedId) return;
+  const cur = ((layoutIndex || {})[selectedId] || {}).rot || 0;
+  await postDelta({ node: selectedId, dx: 0, dy: 0, rot: (cur + 90) % 360 });
+}
+
+$('rotBtn').onclick = rotateSel;
+$('deselBtn').onclick = deselect;
+window.addEventListener('keydown', ev => {
+  if (/^(r|R)$/.test(ev.key)) rotateSel();
+  if (ev.key === 'Escape') deselect();
+});
+
+(async function init() {
+  const d = await api('/api/sheet');
+  if (!d.ok) { $('state').textContent = '加载失败：' + (d.error || ''); return; }
+  stage.innerHTML = svgDoc(d.svg);
+  decorate();
+  ghostOverlay(d.issues);
+  setSide(d);
+})();
+</script>
+</body>
+</html>

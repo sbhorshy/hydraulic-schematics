@@ -1,22 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"
-     width="80" height="112"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 158"
+     width="100" height="158"
      data-component-type="filter_line_shutoff_dp"
-     data-symbol-version="3.1"
+     data-symbol-version="4.3"
      data-symbol-form="stroke_geometry"
      data-symbol-source-ref="PENDING_STANDARD_ID:clause-6.1.6">
 
   <!-- filter-line-shutoff-stroke.svg v2.1 + 压差指示器。
-       line shutoff 部分原样保留,未改动。
 
-       指示器几何取自原 Filter.svg 实测,按菱形半宽比例 0.92 缩放:
-         原指示器圆 (63.5,35) r=19        -> 本版 (40,22) r=17.5
-         原竖管 X 53..73(宽20) Y 54..91   -> 本版 x 30.5/49.5,长 23
-         原菱形中心 (64.5,117.2) 半宽23.7 -> 本版 (40,84) 半宽22
-       竖管与指示器圆的交点由 dx=9.5,r=17.5 解得 dy=14.7,即 y=36.7。
+       v4.3 两端增加导管(2026-09-07 用户口径,恢复模板「本体与边界之间
+       留出引线段」约定,v4.2 的"短桩取消"作废):画布 80x158 -> 100x158,
+       菱形与指示器整体右移 +10(半对角 40 几何不动),两端各加一段
+       导管 (0,114)-(10,114) / (90,114)-(100,114);端口圆心仍落在
+       viewBox 边界 (0,114)/(100,114),端口间距 80 -> 100。
+       布局占位 80x158 -> 100x158(case-drain 变体 60x120 -> 75x118.5,
+       保持 0.75 落位缩放)。
+       回油滤组件 filter-line-shutoff-dp-return-bypass.svg v1.1 同步
+       本版几何(本体部分逐坐标 +10)。
 
-       *** 液压中心线 Y=84,不是 40 ***
-       指示器占据顶部约 40 单位。布局器必须按 port 实测坐标接线,
+       v4.2 菱形本体与压差指示器同按 1.75 等比放大(v4.1 只放了菱形,
+       用户复核:指示器也要等比例放大)。全符号唯一缩放系数 1.75
+       (=28/16,使大圆再次等于菱形内切半径 40/sqrt(2)~=28.28,
+         与原版 r16~=内切半径 16.22 同一Fit纪律):
+         菱形 M18 84 L40 60 L62 84 L40 108 Z (44x48,描摹遗留比例,v3.1)
+           -> 中心 (50,114) 半对角 40:M10 114 L50 74 L90 114 L50 154 Z
+              (恰 80x80,顶点落 x=10/90;v4.3 起顶点不再即油口)
+         指示器(附件):圆 r12->r21、X +-8->+-14、竖管 +-9.5->+-16.5、
+           颈距 16->28(圆底-顶点,与 v3.1 颈距/半径比 1.33 一致);
+           竖管下端仍接菱形上边(y=124-x,x=33.5/66.5 处 90.5),
+           上端圆缘 dx=16.5,r=21 解得 37.99,取 38.4 略入(v3.1 +0.37 纪律)。
+         内部 line shutoff 细部(与 v4.1 同,整体随中心 +10):
+           大圆 r28;小球 (30.5/62,114) r8(偏移+半径=27.5,净距 0.5);
+           交叉 X +-14;竖直虚线 76..152(顶点内缩 2,对称)。
+         画布 0 0 80 128 -> v4.2 0 0 80 158 -> v4.3 0 0 100 158
+         (内容 y 4..154,四边留 4;v4.3 左右各让 10 给导管);
+         液压中心线 Y=114(v4.2 起定快,v4.3 不变)。
+       历史:v2.1 指示器按原 Filter.svg 随菱形同系数缩放(0.92);
+       v3.1 修竖管悬空并手调小指示器(r17.5->12);v4.0 相切缺陷废弃;
+       v4.1 只放大菱形;v4.2 全符号统一 1.75;v4.3 两端加导管。
+
+       *** 液压中心线 Y=114,不是 40 ***
+       指示器占据顶部约 70 单位(圆顶 y=4,颈距至顶点 y=74)。
+       布局器必须按 port 实测坐标接线,
        不得假定各符号中心线一致(check-valve-stroke.svg 为 Y=40)。
 
        *** 不新增任何端口 ***
@@ -33,36 +58,37 @@
   <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
      stroke-linecap="round" stroke-linejoin="round">
 
-    <!-- ===== 压差指示器 ===== -->
-    <circle cx="40" cy="32" r="12"/>
-    <line x1="32" y1="24" x2="48" y2="40"/>
-    <line x1="48" y1="24" x2="32" y2="40"/>
-    <!-- 竖管:下端落在菱形上边(y=70.36 解得),上端接指示器圆(y=36.7)
-         v3.0 曾取下端 y=60(菱形顶点),该处菱形宽度为零,
-         竖管两侧各悬空 9.5,渲染出可见缺口。v3.1 修正。 -->
-    <line x1="30.5" y1="39.7" x2="30.5" y2="70.36"/>
-    <line x1="49.5" y1="39.7" x2="49.5" y2="70.36"/>
+    <!-- ===== 压差指示器(附件,x1.75) ===== -->
+    <circle id="dp-indicator-ball" cx="50" cy="25" r="21"/>
+    <line id="dp-indicator-x-1" x1="36" y1="11" x2="64" y2="39"/>
+    <line id="dp-indicator-x-2" x1="64" y1="11" x2="36" y2="39"/>
+    <!-- 竖管:下端落在菱形上边(x=33.5/66.5 处 y=124-x=90.5),
+         上端接指示器圆(圆缘 37.99,取 38.4 略入)。 -->
+    <line id="dp-indicator-tube-l" x1="33.5" y1="38.4" x2="33.5" y2="90.5"/>
+    <line id="dp-indicator-tube-r" x1="66.5" y1="38.4" x2="66.5" y2="90.5"/>
 
-    <!-- ===== 滤体 ===== -->
-    <line x1="0" y1="84" x2="18" y2="84"/>
-    <line x1="62" y1="84" x2="80" y2="84"/>
-    <path d="M18 84 L40 60 L62 84 L40 108 Z"/>
+    <!-- ===== 滤体(菱形本体,恰 80x80) ===== -->
+    <path id="filter-housing" d="M10 114 L50 74 L90 114 L50 154 Z"/>
 
-    <!-- ===== line shutoff 特征(v2.1 原样) ===== -->
-    <circle cx="40" cy="84" r="16"/>
-    <circle cx="29" cy="84" r="4.5"/>
-    <circle cx="47" cy="84" r="4.5"/>
-    <line x1="32" y1="76" x2="48" y2="92"/>
-    <line x1="32" y1="92" x2="48" y2="76"/>
-    <line x1="40" y1="62" x2="40" y2="108" stroke-dasharray="5"/>
+    <!-- ===== line shutoff 特征(绕 (50,114) 等比 x1.75) ===== -->
+    <circle id="shutoff-ring" cx="50" cy="114" r="28"/>
+    <circle id="shutoff-ball-l" cx="30.5" cy="114" r="8"/>
+    <circle id="shutoff-ball-r" cx="62" cy="114" r="8"/>
+    <line id="shutoff-x-1" x1="36" y1="100" x2="64" y2="128"/>
+    <line id="shutoff-x-2" x1="36" y1="128" x2="64" y2="100"/>
+    <line id="shutoff-centerline" x1="50" y1="76" x2="50" y2="152" stroke-dasharray="5"/>
+
+    <!-- ===== 两端导管(v4.3 新增,自边界至菱形左右顶点) ===== -->
+    <line id="port-lead-l" x1="0" y1="114" x2="10" y2="114"/>
+    <line id="port-lead-r" x1="90" y1="114" x2="100" y2="114"/>
   </g>
 
   <g id="connection-points" fill="#ff0000">
-    <circle id="port-inlet" cx="0" cy="84" r="2"
+    <circle id="port-inlet" cx="0" cy="114" r="2"
             data-port-id="inlet" data-medium="hydraulic"
             data-port-role="pressure" data-flow-capability="in"
             data-anchor-direction="left"/>
-    <circle id="port-outlet" cx="80" cy="84" r="2"
+    <circle id="port-outlet" cx="100" cy="114" r="2"
             data-port-id="outlet" data-medium="hydraulic"
             data-port-role="pressure" data-flow-capability="out"
             data-anchor-direction="right"/>

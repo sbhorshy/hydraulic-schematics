@@ -1,0 +1,77 @@
+{
+  "layout_version": "1.0",
+  "source_l0": "case_drain_filter.intent.yaml",
+  "source_sysml": "../1#系统.sysml",
+  "note": "单一水平主路 y=300:边界三角 -> 本体(v4.2 符号 80x158 原大,中心线 y=114,节点 y=186 使端口落 y=300) -> 单向阀(rot180 使进口朝左:check_valve 原生进口在右且 allow_mirror=false) -> 边界三角。",
+  "revision_log": [
+    "1.0 初版:两只节点、一条 path、两个 return 边界;无母线/走廊/分组。",
+    "1.1 修:BODY 节点 h 158 -> 112(符号原生 80x112;158 是初版笔误,端口按 viewBox 实测 y=84 落位故闸门未拦),围框按成员盒围合不再含 46px 死空隙。",
+    "1.2 修:符号库 filter-line-shutoff-dp.svg 已换 v4.2 重绘(80x158,端口中心线 y=114),BODY 节点改 y=186/h=158 原大对齐,主路回直;1.1 的 h=112 系按旧 80x112 符号的误判,作废。",
+    "1.3 修:CV-001 x 540->460,组件盒距 160->80(用户反馈过远;B5 下限 40 的 2 倍);CASE-OUT 730->650 保持出线段长度与构图平衡,围框随足迹自动收窄。",
+    "1.4 试:CV-001 x 460->420,盒距 80->40(=B5 下限,用户要求);40 下双方 below 说明行横向相碰(415 vs 391),CV 标签改 above 错开;CASE-OUT 650->610 保持出线段 110。"
+  ],
+  "canvas": {
+    "width": 1000,
+    "height": 860
+  },
+  "canvas_shift_x": 30,
+  "style": {
+    "base_line_width_T": 1.2,
+    "symbol_stroke_width": 2,
+    "suction_marker_S": 8
+  },
+  "externs": {
+    "CASE-IN": {
+      "x": 130,
+      "y": 300,
+      "anchor": "right",
+      "label": "自 @CASE 母线\nEDP-001 / EMP-001\n壳体回油合流"
+    },
+    "CASE-OUT": {
+      "x": 641.0,
+      "y": 300,
+      "anchor": "left",
+      "label": "至 TANK-001.return_in\n油箱回油口"
+    }
+  },
+  "buses": {},
+  "nodes": {
+    "CDF-001-BODY": {
+      "x": 300,
+      "y": 186.0,
+      "symbol": "filter-line-shutoff-dp.svg",
+      "w": 80.0,
+      "h": 158.0
+    },
+    "CDF-001-CV": {
+      "x": 451.0,
+      "y": 260.0,
+      "symbol": "check-valve.svg",
+      "w": 80.0,
+      "h": 80.0,
+      "rot": 180
+    }
+  },
+  "labels": {
+    "CDF-001-BODY": "CDF-001-BODY\n油滤本体 (滤芯 + 压差传感器)",
+    "CDF-001-CV": "CDF-001-CV\n单向阀 (防倒灌,流向待确认)"
+  },
+  "label_pos": {
+    "CDF-001-BODY": "below",
+    "CDF-001-CV": "below"
+  },
+  "group_padding": 14,
+  "group_label_gap": 10,
+  "legend": {
+    "x": 300,
+    "y": 470,
+    "w": 560,
+    "h": 310
+  },
+  "title_block": {
+    "x": 40,
+    "y": 800,
+    "w": 920,
+    "h": 56
+  }
+}

@@ -4,7 +4,7 @@
      data-component-type="hydro_pneumatic_accumulator"
      data-symbol-version="1.0"
      data-symbol-form="stroke_geometry"
-     data-symbol-source-ref="REDRAWN_FROM:Hydro-Pneumatic Accumulator.svg">
+     data-symbol-source-ref="REDRAWN_FROM:Hydro-Pneumatic Accumulator.svg" data-symbol-status="annotated">
 
   <!-- 重绘自库内 Hydro-Pneumatic Accumulator.svg(147x256pt 描摹填充)。
        原文件两个端口的 id 都是 "port-pressure-in"(重复 id,SVG 非法,

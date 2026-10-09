@@ -20,8 +20,9 @@ updates = {
                            '本工作目录副本已带 connection-points(描边 provisional,无标准页)。'),
     'electric_motor_driven_pump': ('emp-provisional-stroke.svg', 'provisional',
                                    '本工作目录副本已带 connection-points(描边 provisional)。'),
-    'firewall_shutoff_valve': ('fsov-provisional-stroke.svg', 'provisional',
-                               '本工作目录副本已带 connection-points(描边 provisional,无标准页)。'),
+    'firewall_shutoff_valve': ('firewall-shutoff-valve.svg', 'annotated',
+                               'CAD 转换(Drawing2.dxf)v1.4 副本,2026-09-07 替换 provisional 描边;'
+                               '两口 main_upper/main_lower 双向,ports/main_path 继承规范源。'),
     'hydro_pneumatic_accumulator': ('accumulator.svg', 'annotated',
                                     '重描绘边件,端口标注齐全;旧"两处 port-pressure-in 重 id"缺陷已随重绘消除。'),
     'bootstrap_reservoir': ('reservoir-bootstrap-annotated.svg', 'annotated',
@@ -49,7 +50,7 @@ new_entries = [
     #      沿用 pressure_filter/return_filter/case_drain_filter 共用 Filter.svg 的既有先例)----
     {'component_type': 'filter_line_shutoff_dp',
      'display_name': '压力油滤(线端关断+压差指示)',
-     'description': '1#系统组件清单"filter-line-shutoff-dp(压力油滤)"。压差指示器占符号上半,布局占位须按 80x112。',
+     'description': '1#系统组件清单"filter-line-shutoff-dp(压力油滤)"。压差指示器占符号上半,布局占位须按 80x158。',
      'connection_role': 'inline',
      'symbol': {'asset': SYMDIR + 'filter-line-shutoff-dp.svg', 'symbol_status': 'annotated',
                 'note': 'draft;符号注释含未确认项(无标准页 clause-6.1.6 构型),已登记 intent unknown。'},
@@ -141,17 +142,34 @@ new_entries = [
      'main_path': None,
      'main_path_note': 'sensing_only 禁止入 paths;经 taps 声明。',
      'layout': {'allowed_rotations_deg': [0, 90, 180, 270], 'allow_mirror': False}},
+    # ---- 集中加油单向阀(2026-09-07 落位:回油滤前支路)----
+    #      与 check_valve 共用 check-valve.svg,role 按回油路取 return(线型走回油细线),
+    #      沿用油滤三变体共用符号先例。
+    {'component_type': 'check_valve_refuel',
+     'display_name': '集中加油单向阀',
+     'description': '集中加油支路隔离单向阀。与 check_valve 共用 check-valve.svg,role=return。',
+     'connection_role': 'inline',
+     'symbol': {'asset': SYMDIR + 'check-valve.svg', 'symbol_status': 'annotated',
+                'note': '与 check_valve 共用同一符号文件;本类型 role 定为 return。'},
+     'ports': [port('inlet', 'port-inlet', 'hydraulic', 'return', 'in', 'right'),
+               port('outlet', 'port-outlet', 'hydraulic', 'return', 'out', 'left')],
+     'main_path': {'in': 'inlet', 'out': 'outlet'},
+     'layout': {'allowed_rotations_deg': [0, 90, 180, 270], 'allow_mirror': False}},
 ]
 
 have = {c['component_type'] for c in cat['components']}
 added = 0
+skipped = []
 for e in new_entries:
+    # #21 回登记后规范源已含 22 类型:重复项跳过而非报错,脚本改为可重跑的幂等覆盖。
     if e['component_type'] in have:
-        raise SystemExit('类型已存在: ' + e['component_type'])
+        skipped.append(e['component_type'])
+        continue
     cat['components'].append(e)
     added += 1
 
 with io.open(WORK, 'w', encoding='utf-8') as f:
     json.dump(cat, f, ensure_ascii=False, indent=2)
     f.write('\n')
-print('catalog 0.3-draft: 新增 %d 类型,共 %d' % (added, len(cat['components'])))
+print('catalog 0.3-draft: 新增 %d 类型,跳过已存在 %d,共 %d'
+      % (added, len(skipped), len(cat['components'])))
