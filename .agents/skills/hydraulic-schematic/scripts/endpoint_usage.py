@@ -163,7 +163,7 @@ def check_disclosure(root, inventory, geometry):
         port = geometry['nodes'].get(inst, {}).get('ports', {}).get(pid)
         try:
             xy = transform_point(matrices[marker], (float(marker.get('cx')), float(marker.get('cy'))))
-            visible = (float(marker.get('r', '0')) > 0 and not hidden(marker)
+            visible = (float(marker.get('r', '0')) > 0
                        and all(math.isfinite(v) for v in xy)
                        and marker.tag.rsplit('}', 1)[-1] == 'circle'
                        and 'dang' in marker.get('class', '').split())
@@ -181,3 +181,84 @@ def check_disclosure(root, inventory, geometry):
                        'detail': '图签悬空端口计数/清单与输入未接端口不一致，预期 %d: %s'
                        % (len(expected), ' '.join(sorted(expected)) or '无')})
     return issues
+
+
+def _red_paint(value):
+    if value == 'none':
+        return False
+    match = re.fullmatch(r'rgba?\(([-+0-9., /]+)\)', value)
+    if not match:
+        return None  # paint server or unsupported color space: no invented pass
+    values = [float(v) for v in re.findall(r'[-+]?(?:\d*\.\d+|\d+\.?\d*)', match[1])]
+    if len(values) not in (3,4):
+        return None
+    r,g,b = values[:3]
+    return r > 0 and r > 2*g and r > 2*b and (len(values)==3 or values[3]>0)
+
+
+def _positive_display_number(value):
+    try:
+        return float(value.removeprefix('calc(').removesuffix(')').removesuffix('px')) > 0
+    except ValueError:
+        return None
+
+
+def _red_marker_paint(style):
+    results = []
+    for paint in ('stroke','fill'):
+        values = [_red_paint(style.get(paint,'none')),
+                  _positive_display_number(style.get(paint+'-opacity','1'))]
+        if paint == 'stroke':
+            values.append(_positive_display_number(style.get('stroke-width','0')))
+        results.append(False if False in values else None if None in values else True)
+    return True if True in results else None if None in results else False
+
+
+def check_marker_display(inventory, geometry, browser):
+    """Verify actual displayed red-circle markers without changing the inventory."""
+    from sheet_geometry import point as transform_point
+
+    issues, measurements, unchecked = [], [], []
+    for endpoint in inventory['dangling']:
+        inst, pid = endpoint.split('.', 1)
+        port = geometry['nodes'].get(inst, {}).get('ports', {}).get(pid)
+        expected = port['position'] if port else None
+        rows = [r for r in browser.get('elements', [])
+                if r['attrs'].get('data-port') == endpoint
+                and any(a['id'] == 'dangling' for a in r.get('ancestors', []))]
+        if browser.get('status') != 'pass' or len(rows) != 1:
+            unchecked.append({'endpoint': endpoint, 'position': expected,
+                              'reason': browser.get('reason') or 'No unique browser marker measurement'})
+            continue
+        row = rows[0]
+        style = row['style']
+        xy = transform_point(row['matrix'], (float(row['attrs'].get('cx', 0)),
+                                             float(row['attrs'].get('cy', 0))))
+        visible = row.get('visible', False)
+        red = _red_marker_paint(style)
+        effects = [a.get('effects', {}) for a in row.get('ancestors', [])]
+        unsupported = (red is None or any(v.get(k,'none') != 'none' for v in [style]+effects
+                                         for k in ('clip-path','mask','filter')))
+        if unsupported:
+            unchecked.append({'endpoint':endpoint,'position':xy,
+                              'reason':'Marker paint or clipping/masking/filtering needs additional display evidence'})
+        box = row['bbox']
+        valid = (visible and red is not False and box[2]>box[0] and box[3]>box[1] and row['tag'] == 'circle' and expected is not None
+                 and all(abs(xy[k]-expected[k]) <= .2 for k in (0, 1)))
+        measurements.append({'endpoint': endpoint, 'element': row['id'] or row['key'],
+                             'position': xy, 'expected_position': expected, 'bbox': row['bbox'],
+                             'visible': visible, 'opacity': row['opacity'],
+                             'stroke': style['stroke'], 'fill': style['fill'], 'red_paint': red,
+                             'stroke_width':style['stroke-width'], 'stroke_opacity':style['stroke-opacity'],
+                             'fill_opacity':style['fill-opacity'],
+                             'status': 'fail' if not valid else 'not_checked' if unsupported else 'pass'})
+        if not valid:
+            issues.append({'kind': 'dangling_marker', 'endpoint': endpoint, 'xy': xy,
+                           'detail': '%s 悬空红圈在实际浏览器中不可见、没有红色描画或偏离端口 @%s' % (endpoint, xy)})
+    status = 'not_checked' if unchecked else 'pass'
+    return issues, {'coverage_status': status,
+                    'coverage_detail': 'Actual browser marker display evidence is incomplete.' if unchecked else
+                                       'Actual browser marker visibility, red paint and placement checked.',
+                    'marker_display': {'status': 'fail' if issues else status,
+                                       'measurements': measurements, 'unchecked': unchecked,
+                                       'browser_evidence': 'browser-evidence.json'}}

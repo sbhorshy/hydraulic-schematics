@@ -7,7 +7,7 @@
 用法: python3 validate_sheet.py [工作目录]
 退出码 1 表示 validation: failed。
 """
-from endpoint_usage import (endpoint_usage, check_disclosure, symbol_contract,
+from endpoint_usage import (endpoint_usage, check_disclosure, check_marker_display, symbol_contract,
                             write_contract_failure, resolve_symbol)
 
 import io
@@ -21,6 +21,7 @@ from topology_reconciliation import reconcile_topology
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
+from browser_evidence import collect
 from stroke_checks import check_widths
 from proofreading_evidence import assess_png, enrich_report, resolve_catalog, write_report
 
@@ -157,6 +158,7 @@ def main(argv=None):
     if dup:
         F.append(('V1', '整图存在重复 id: %s' % ' '.join(dup)))
 
+    browser = collect(SHEET)
     geometry = load_geometry(root, L, symbol_path)
     endpoint_findings, endpoint_evidence = check_endpoints(geometry, intent, cat)
     endpoint_findings.extend(check_bodies(geometry, endpoint_evidence['terminals']))
@@ -331,7 +333,7 @@ def main(argv=None):
                'bridged': len(brg), 'unbridged': len(nobridge)})
 
     baseT = float(L.get('style', {}).get('base_line_width_T', 1.0))
-    width_failures, width_evidence = check_widths(SHEET, L, geometry, symbol_path)
+    width_failures, width_evidence = check_widths(SHEET, L, geometry, symbol_path, browser=browser)
     F.extend(width_failures)
     ev.extend(width_evidence)
 
@@ -496,8 +498,10 @@ def main(argv=None):
         W.append(('V5', '悬空端口 %d 个,须在图签栏计数并标红: %s'
                   % (len(dang), ' '.join(sorted(dang)))))
     drawing_issues = check_disclosure(root, inventory, geometry)
+    display_issues, display_evidence = check_marker_display(inventory, geometry, browser)
+    drawing_issues.extend(display_issues)
     F.extend(('V5', item['detail']) for item in drawing_issues)
-    ev.append({'id': 'V5', **inventory, 'drawing_issues': drawing_issues,
+    ev.append({'id': 'V5', **inventory, **display_evidence, 'drawing_issues': drawing_issues,
                'marker_tolerance': 0.2, 'coordinate_system': geometry['coordinate_system'],
                'contract_issues': contract_issues, 'unknown': intent.get('unknown') or []})
 
@@ -585,12 +589,7 @@ def main(argv=None):
     ev.append({'id': 'V9', 'not_annotated': sorted(notready)})
 
     # ---------- V10 Independent visible connectivity and input traceability ----------
-    try:
-        from browser_evidence import collect
-        topology_browser = collect(SHEET)
-    except ImportError:
-        topology_browser = {'status':'not_checked','reason':'Browser display collector unavailable'}
-    topology = reconcile_topology(root, geometry, intent, cat, L, topology_browser)
+    topology = reconcile_topology(root, geometry, intent, cat, L, browser_evidence=browser)
     topology_findings = topology['findings']
     F.extend((c['id'], c['detail']) for c in topology_findings)
     ev.append({'id': 'V10', 'coverage_status': topology['coverage_status'],
