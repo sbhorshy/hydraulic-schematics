@@ -21,7 +21,7 @@ def make_render_workspace(root, fixture):
     work = root / 'run'
     work.mkdir()
     for name in ('render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
-                 'topology_confirm.py'):
+                 'topology_confirm.py', 'proofreading_evidence.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
     shutil.copytree(CATALOG.parent, work / 'symbols')

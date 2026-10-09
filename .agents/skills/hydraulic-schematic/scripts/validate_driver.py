@@ -43,8 +43,8 @@ intent 逐份复制，符号从 skill 单源库平铺入沙箱供 catalog 锚定
                               [--readback-w W] [--keep]
                               [--max-evals 200] [--max-steps 50]
                               [--max-seconds 30] [--polish-steps 0]
-退出码: 0 收敛(fail 0) / 1 轮次耗尽仍有 fail（残差上报）/
-        2 preflight 残差（输入侧拦截，渲染未启动）/ 3 工具链故障。
+退出码: 0 完整证据通过 / 1 轮次耗尽仍有 fail（残差上报）/
+        2 preflight 残差 / 3 工具链故障 / 4 必检证据或感知签认未齐备。
 """
 import argparse
 import filecmp
@@ -62,6 +62,7 @@ import threading
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
+from proofreading_evidence import verify_report
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.dirname(HERE)
@@ -73,7 +74,7 @@ LAYOUT_NAME = '1#系统.layout.json'
 SVG_NAME = '1#系统原理图.svg'
 READBACK = 'sheet-readback.png'
 
-SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py',
+SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
            'rasterize_sheet.py']
 PY = sys.executable
@@ -282,6 +283,7 @@ def load_yaml(path):
 # ---------- 驱动主流程 ----------
 
 GENERATED = (LAYOUT_NAME, SVG_NAME, READBACK, 'validation-report.json',
+             READBACK + '.evidence.json', 'validation-report.json.sha256',
              'convergence-report.json', 'layout-guard-report.json', 'ref.layout.json')
 MANAGED_FILES = '.driver-managed-files.json'
 
@@ -511,6 +513,9 @@ def main():
               'rounds': [], 'prescriptions': [], 'residuals': [],
               'optimization_budgets': budgets, 'local_symbol_sources': sources,
               'inject': None, 'exit_code': None}
+    report['automated_validation'] = {'status': 'not_checked'}
+    report['delivery'] = {'ready': False, 'status': 'incomplete',
+                          'blocking_checks': ['VALIDATION', 'PERCEPTUAL']}
     wd = str(Path(args.workdir).resolve()) if args.workdir else tempfile.mkdtemp(prefix='hydraulic-driver-')
 
     def done(code):
@@ -569,6 +574,17 @@ def main():
             seed_pending = False
             with stage(rnd['stages'], 'validate'):
                 vrc, vrep = validate_run(wd)
+            report['automated_validation'] = vrep.get('phases', {}).get(
+                'automated', {'status': 'incomplete', 'detail': 'Legacy report lacks coverage evidence.'})
+            report['perceptual_review'] = vrep.get('phases', {}).get('perceptual', {}).get('status', 'pending')
+            report['delivery'] = vrep.get('delivery', {
+                'ready': False, 'status': 'incomplete', 'blocking_checks': ['COVERAGE', 'PERCEPTUAL']})
+            if vrep.get('report_schema') == 'proofreading-evidence-v1':
+                verification = verify_report(wd)
+                if verification['status'] != 'current':
+                    raise RuntimeError('Validation artifact evidence is invalidated: %s' % verification)
+            report['artifact_fingerprint'] = vrep.get('artifacts', {}).get('fingerprint')
+            rnd['coverage'] = vrep.get('coverage', [])
             fails = [c for c in vrep['checks'] if c['result'] == 'fail']
             warns = [c for c in vrep['checks'] if c['result'] == 'warn']
             if rnd.get('readback_error'):
@@ -602,7 +618,8 @@ def main():
             progress(str(exc))
             return 3
         return done(3)
-    return done(3 if report.get('tool_failure') else (0 if report['converged'] else 1))
+    return done(3 if report.get('tool_failure') else
+                (1 if not report['converged'] else (0 if report['delivery']['ready'] else 4)))
 
 
 P3_HINT = ('P3 已叠加仍不绿：几何缺陷超出邻域寻优可达域，'
@@ -635,7 +652,9 @@ def finish(report, wd):
     if report.get('tool_failure'):
         print('工具链故障: %s' % report['tool_failure'])
     print('结论: %s  (%.1fs, 报告 -> %s)'
-          % ('自动校核收敛（感知回读待验收）' if report['converged'] else
+          % (('交付证据齐备' if report['delivery']['ready'] else
+              '已执行校核零失败；交付证据未齐备（%s）' % ', '.join(report['delivery']['blocking_checks']))
+             if report['converged'] else
              ('残差上报，需人工/AI 介入' if report['residuals'] else
               ('轮次耗尽仍有 fail' if report['exit_code'] == 1 else '工具链故障')),
              report['elapsed_s'], path))

@@ -281,10 +281,10 @@ def check_template_gate():
         shutil.rmtree(ws, ignore_errors=True)
 
 
-# ---------- F. 性能与入口专项回归（不启动真实 PNG 工具） ----------
+# ---------- F. 性能、入口与证据专项回归（证据用例启动本机 Chrome） ----------
 
 def check_l0_regressions():
-    suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver',
+    suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_route_terminals')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],

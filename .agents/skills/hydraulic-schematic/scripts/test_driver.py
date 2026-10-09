@@ -100,7 +100,7 @@ class DriverTests(unittest.TestCase):
         self.intent = self.wd / D.INTENT_NAME
         self.intent.write_text('parts: {}\npaths: []\nrevision: embedded\n')
         code, _, _ = self.invoke(['--keep'])
-        self.assertEqual(code, 0)
+        self.assertEqual(code, 4)  # Legacy fixture has no complete coverage/review evidence.
         self.assertIn('embedded', self.intent.read_text())
 
     def test_skill_tree_and_ancestors_are_protected_even_through_symlinks(self):
@@ -180,7 +180,7 @@ class DriverTests(unittest.TestCase):
         self.assertIn('--max-evals', layout_cmd)
         self.assertEqual(layout_cmd[layout_cmd.index('--max-evals') + 1], '2')
         self.assertEqual(timeout, 64)
-        self.assertEqual(code, 0)
+        self.assertEqual(code, 4)  # Executed checks passed; delivery evidence is still incomplete.
         self.assertEqual(report['perceptual_review'], 'pending')
         self.assertEqual(report['rounds'][0]['optimization']['stop_reason'], 'max_evals')
         stages = report['stages'] + report['rounds'][0]['stages']
