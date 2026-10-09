@@ -6,6 +6,7 @@
 """
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
+from topology_reconciliation import write_manifest
 from lead_geometry import source_leads, perpendicular_scale
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
@@ -203,6 +204,7 @@ class Sheet(object):
         self.warn = []
         self.drawn = []      # 已画线段,供避重叠用
         self.textboxes = []  # 文字包围盒,供避压字用
+        self.poly_anchors = []
         self.polys = []      # (line_type, 点串),供求交叉与打断用
         # (点串,start_terminal,end_terminal)。同一 intent path 内的 FSOV 等
         # 串联部件不终止吸油流道,其两侧 net 共享路径级端部语义。
@@ -730,6 +732,7 @@ class Sheet(object):
                 for q in range(len(pts) - 1):
                     self.drawn.append((pts[q], pts[q + 1]))
                 self.polys.append((lt, pts))
+                self.poly_anchors.append('paths[%d][%d->%d]' % (pi, path_k, path_k + 1))
                 if lt == 'suction':
                     self.suction_runs.append((pts, path_k == 0,
                                               path_k == path_nseg - 1))
@@ -761,6 +764,7 @@ class Sheet(object):
             # 油箱本体而不去找下方走廊(校核项 V2 反复报同一处)。
             rp = self.route(pa, pb, exclude=(), lanes=self.L.get('lanes', []))
             self.polys.append((lt, rp))
+            self.poly_anchors.append('paths[%d][%d->%d]' % (pi, path_k, path_k + 1))
             if lt == 'suction':
                 self.suction_runs.append((rp, path_k == 0,
                                           path_k == path_nseg - 1))
@@ -774,6 +778,7 @@ class Sheet(object):
             ys = sorted(h[0] for h in hits)
             lt = hits[0][1]
             self.polys.append((lt, [(bx, ys[0]), (bx, ys[-1])]))
+            self.poly_anchors.append('buses.' + bus)
             for y, _ in hits:
                 # 只有母线内部接入点才是三通。两端是拐角,不是节点。
                 # 早先版本在此加了 len(hits)>2 的条件,导致蓄压器和压力滤的
@@ -791,7 +796,7 @@ class Sheet(object):
         线型归 sense(1.0 T)。起自 sensor 端口锚点方向,末端直接进 at 端口。
         """
         juncs = []
-        for t in self.i.get('taps') or []:
+        for ti, t in enumerate(self.i.get('taps') or []):
             stok, atok = t['sensor'], t['at']
             sinst, spid = stok.split('.', 1)
             ainst, apid = atok.split('.', 1)
@@ -851,6 +856,7 @@ class Sheet(object):
             for k in range(len(best) - 1):
                 self.drawn.append((best[k], best[k + 1]))
             self.polys.append(('sense', best))
+            self.poly_anchors.append('taps[%d]' % ti)
         return juncs
 
     # ---------- 分组虚线框(技术规范 10.7) ----------
@@ -956,8 +962,9 @@ class Sheet(object):
             # become false body ink/lead anchors in geometric or pixel checks.
             mk += '\n' + '\n'.join(
                 '<metadata data-node="%s" data-port="%s.%s" data-port-id="%s" '
+                'id="port-%s-%s" data-input-anchor="parts.%s.ports.%s" '
                 'data-x="%g" data-y="%g" data-anchor-direction="%s"/>'
-                % (inst, inst, pid, pid, point[0], point[1], point[2])
+                % (inst, inst, pid, pid, inst, pid, inst, pid, point[0], point[1], point[2])
                 for pid, point in sorted(ports.items()))
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
@@ -966,8 +973,8 @@ class Sheet(object):
             # 补偿静默失效。
             comp = ('' if abs(k - 1.0) < 1e-9
                     else ' style="--kc:%.6f"' % (1.0 / k))
-            out.append('<g id="inst-%s" transform="%s"%s>\n%s\n</g>'
-                       % (inst, tf, comp, mk))
+            out.append('<g id="inst-%s" data-node="%s" data-input-anchor="parts.%s" transform="%s"%s>\n%s\n</g>'
+                       % (inst, inst, inst, tf, comp, mk))
         return out
 
     @staticmethod
@@ -1076,7 +1083,7 @@ class Sheet(object):
                 d = 'M%.1f %.1f L%.1f %.1f L%.1f %.1f Z' % (
                     e['x'] + 12, e['y'] - 8, e['x'], e['y'], e['x'] + 12, e['y'] + 8)
             fill = '#ffffff' if k in ('outlet', 'inlet') else '#e8e8e8'
-            out.append('<path class="ext-mark" d="%s" fill="%s"/>' % (d, fill))
+            out.append('<path id="extern-%s" data-extern="%s" data-input-anchor="extern.%s" class="ext-mark" d="%s" fill="%s"/>' % (eid, eid, eid, d, fill))
         return out
 
 
@@ -1319,10 +1326,24 @@ def main(argv=None):
     # 先求交叉,再把跨越线打断,最后出图元。顺序不能反:
     # 打断后的折线不能再用来求交叉(断口处已无线段)。
     cross = s.find_crossings(junc, s.polys)
-    segs = []
-    for lt, pts in s.polys:
-        for run in s.split_h(pts, cross):
-            segs.append(s.polyline(run, lt))
+    segs, fragments = [], []
+    for index, ((lt, pts), anchor) in enumerate(zip(s.polys, s.poly_anchors)):
+        for part, run in enumerate(s.split_h(pts, cross)):
+            sid = 'wire-%d-%d' % (index, part)
+            attr = 'data-bus' if anchor.startswith('buses.') else 'data-edge'
+            value = '@' + anchor[6:] if attr == 'data-bus' else anchor
+            segs.append(s.polyline(run, lt).replace('/>',
+                ' id="%s" %s="%s" data-input-anchor="%s"/>' % (sid, attr, value, anchor)))
+            fragments.append({'id': sid, 'anchor': anchor, 'kind': 'run'})
+    arcs = []
+    for index, ((x, y, lt), markup) in enumerate(zip(cross, s.bridge_arcs(cross))):
+        anchors = [anchor for (line_type, pts), anchor in zip(s.polys, s.poly_anchors)
+                   if line_type == lt and any(abs(a[1] - y) < .1 and abs(b[1] - y) < .1
+                   and min(a[0], b[0]) < x < max(a[0], b[0]) for a, b in zip(pts, pts[1:]))]
+        anchor = anchors[0] if len(anchors) == 1 else ''
+        sid = 'bridge-%d' % index
+        arcs.append(markup.replace('<path ', '<path id="%s" data-edge="%s" data-input-anchor="%s" ' % (sid, anchor, anchor)))
+        fragments.append({'id': sid, 'anchor': anchor, 'kind': 'bridge'})
 
     # 吸油线型:连续 1.0 T 基线 + 周期性五斜杠组。
     # 不能用 stroke-dasharray——参考图中的基线是连续的,斜杠是独立标记。
@@ -1395,7 +1416,7 @@ def main(argv=None):
     body.append('<g id="groups">%s</g>' % '\n'.join(s.groups()))
     body.append('<g id="lines">%s</g>' % '\n'.join(segs))
     body.append('<g id="suction-markers">%s</g>' % '\n'.join(smarks))
-    body.append('<g id="bridges">%s</g>' % '\n'.join(s.bridge_arcs(cross)))
+    body.append('<g id="bridges">%s</g>' % '\n'.join(arcs))
     body.append('<g id="junctions">%s</g>' % '\n'.join(
         '<circle class="jn" cx="%.1f" cy="%.1f" r="3"/>' % j for j in junc))
     body.append('<g id="externs">%s</g>' % '\n'.join(s.externs_marks()))
@@ -1411,6 +1432,7 @@ def main(argv=None):
     outp = os.path.join(workdir, '1#系统原理图.svg')
     with io.open(outp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(P))
+    write_manifest(workdir, intent, catalog, fragments)
     print('wrote', outp)
     print('nets=%d  segments=%d  junctions=%d  buses=%s'
           % (nnet, len(segs), len(junc), {k: len(v) for k, v in bus.items()}))
