@@ -857,11 +857,18 @@ def main(argv=None):
     ev.append({'id': 'V9', 'not_annotated': sorted(notready)})
 
     # ---------- V10 Independent visible connectivity and input traceability ----------
-    topology = reconcile_topology(root, geometry, intent, cat, L)
+    try:
+        from browser_evidence import collect
+        topology_browser = collect(SHEET)
+    except ImportError:
+        topology_browser = {'status':'not_checked','reason':'Browser display collector unavailable'}
+    topology = reconcile_topology(root, geometry, intent, cat, L, topology_browser)
     topology_findings = topology['findings']
     F.extend((c['id'], c['detail']) for c in topology_findings)
     ev.append({'id': 'V10', 'coverage_status': topology['coverage_status'],
-               'coverage_detail': 'Input edges reconciled against visible SVG geometry and catalog ports',
+               'coverage_detail': ('Input edges reconciled against browser-visible SVG geometry and catalog ports'
+                                   if topology['coverage_status'] == 'pass' else
+                                   'Display/geometry reconciliation incomplete: ' + str(topology.get('display_evidence'))),
                'expected_edges': len(topology['expected_edges']),
                'actual_edges': len(topology['actual_edges']),
                'endpoint_tolerance': 0.1})
@@ -1034,7 +1041,7 @@ def main(argv=None):
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
     for finding in endpoint_findings + topology_findings:
-        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail']).update(finding)
+        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
         'topology': topology,

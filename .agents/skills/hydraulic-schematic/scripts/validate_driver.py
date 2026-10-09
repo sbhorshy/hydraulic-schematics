@@ -282,7 +282,7 @@ def load_yaml(path):
 
 # ---------- 驱动主流程 ----------
 
-GENERATED = (LAYOUT_NAME, SVG_NAME, READBACK, 'validation-report.json',
+GENERATED = (LAYOUT_NAME, SVG_NAME, READBACK, '1#系统原理图-topology.json', '1#系统原理图-topology.md', 'validation-report.json',
              READBACK + '.evidence.json', 'validation-report.json.sha256',
              'convergence-report.json', 'layout-guard-report.json', 'ref.layout.json')
 MANAGED_FILES = '.driver-managed-files.json'
@@ -418,7 +418,8 @@ def render_round(wd, use_seed, p3_armed, ref_path, readback_w,
     """每轮派生物均失效后重建；预算终止仍要渲染并执行正式校验。"""
     step = step if step is not None else {}
     stages = step.setdefault('stages', [])
-    for name in (SVG_NAME, READBACK, 'validation-report.json', 'layout-guard-report.json'):
+    for name in (SVG_NAME, READBACK, 'validation-report.json', 'layout-guard-report.json',
+                 '1#系统原理图-topology.json', '1#系统原理图-topology.md'):
         path = Path(wd, name)
         if path.exists():
             path.unlink()

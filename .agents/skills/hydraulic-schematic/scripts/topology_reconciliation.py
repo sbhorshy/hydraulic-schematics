@@ -40,6 +40,12 @@ def declared_topology(intent, catalog):
 def write_manifest(workdir, intent, catalog, fragments):
     manifest = declared_topology(intent, catalog)
     manifest['fragments'] = fragments
+    for item in manifest['nodes']:
+        item['svg_ids'] = ['inst-' + item['id']]
+    for item in manifest['ports']:
+        item['svg_ids'] = ['port-' + item['component'] + '-' + item['id'].split('.',1)[1]]
+    for item in manifest['externs']:
+        item['svg_ids'] = ['extern-' + item['id']]
     for item in manifest['edges'] + manifest['buses']:
         item['svg_ids'] = [f['id'] for f in fragments if f['anchor'] == item['anchor']]
     target = Path(workdir) / '1#系统原理图-topology'
@@ -56,7 +62,7 @@ def write_manifest(workdir, intent, catalog, fragments):
     return manifest
 
 
-def reconcile_topology(root, geometry, intent, catalog, layout):
+def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence=None):
     """Rebuild terminal-to-terminal edges from geometry, then compare to input.
 
     Proper interior crossings stay separate; endpoint incidence creates a T.
@@ -80,8 +86,23 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         fail('unsupported_geometry', None, str(error))
         return {**expected, 'expected_edges': expected['edges'], 'actual_edges': [],
                 'findings': findings, 'coverage_status': 'not_checked'}
+    browser_evidence = browser_evidence or {'status':'not_checked','reason':'Browser display evidence unavailable'}
+    measured = browser_evidence.get('status') == 'pass'
+    browser_rows = {row['key']:row for row in browser_evidence.get('elements',[])}
+    element_keys = {el:index for index,(el,_) in enumerate(elements)}
+    unchecked = []
     parent = {c: e for e in root.iter() for c in e}
     def visible(el):
+        if measured:
+            row = browser_rows.get(element_keys[el])
+            if row is None:
+                unchecked.append({'svg_id':el.get('id'),'detail':'Missing browser element measurement'})
+                return False
+            style = row['style']
+            if any(style.get(k,'none') != 'none' for k in ('clip-path','mask','filter')):
+                unchecked.append({'svg_id':el.get('id'),'detail':'Unsupported clipping/mask/filter affects visibility'})
+            return (row['visible'] and style.get('stroke') not in ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)')
+                    and float(style.get('stroke-opacity','1')) > 0 and float(style.get('stroke-width','1').replace('px','')) > 0)
         while el is not None:
             style = dict(re.findall(r'([\w-]+)\s*:\s*([^;]+)', el.get('style', '')))
             if (style.get('display', el.get('display')) == 'none' or
@@ -101,6 +122,31 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         matches = [e for e, _ in elements if e.get('id') == 'inst-' + node['id']]
         if len(matches) != 1 or matches[0].get('data-node') != node['id'] or matches[0].get('data-input-anchor') != node['anchor']:
             fail('node_anchor', node['anchor'], 'Missing/duplicate/invalid node anchor ' + node['id'], component=node['id'])
+    for port in expected['ports']:
+        inst, pid = port['component'], port['id'].split('.',1)[1]
+        matches = [(e,m) for e,m in elements if e.tag.rsplit('}',1)[-1] == 'metadata' and e.get('data-port') == port['id']]
+        source = geometry['nodes'].get(inst,{}).get('ports',{}).get(pid)
+        valid = len(matches) == 1 and source is not None
+        if valid:
+            el, matrix = matches[0]
+            try:
+                position = point(matrix,(float(el.get('data-x')),float(el.get('data-y'))))
+                valid = (el.get('data-node') == inst and el.get('data-port-id') == pid and
+                         el.get('data-input-anchor') == port['anchor'] and
+                         el.get('id') == 'port-' + inst + '-' + pid and
+                         parent.get(el) is by_id.get('inst-' + inst) and
+                         math.dist(position,source['position']) <= .1)
+            except (ValueError,TypeError):
+                valid = False
+        if not valid:
+            fail('port_anchor', port['anchor'], 'Missing/duplicate/invalid port anchor ' + port['id'], component=inst,port=pid)
+    node_ids = {n['id'] for n in expected['nodes']}
+    port_ids = {p['id'] for p in expected['ports']}
+    for el,_ in elements:
+        if el.get('data-node') and el.get('data-node') not in node_ids:
+            fail('unresolved_node_anchor',el.get('data-input-anchor'),'Node anchor refers to no input: ' + el.get('data-node'))
+        if el.tag.rsplit('}',1)[-1] == 'metadata' and el.get('data-port') is not None and el.get('data-port') not in port_ids:
+            fail('unresolved_port_anchor',el.get('data-input-anchor'),'Port anchor refers to no input: ' + str(el.get('data-port')))
     valid_anchors = {e['anchor'] for e in expected['edges'] + expected['buses']}
     seen_ids = Counter(e.get('id') for e, _ in elements if e.get('id'))
     segments, positions = [], []
@@ -115,7 +161,31 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         va, vb = vertex(a), vertex(b)
         if va != vb:
             segments.append({'a': va, 'b': vb, 'svg_id': sid, 'anchor': anchor, 'bridge': bridge})
-    for pipe in geometry['pipes']:
+    pipes = list(geometry['pipes'])
+    for el,matrix in elements:
+        ancestor=parent.get(el); in_lines=False
+        while ancestor is not None:
+            if ancestor.get('id') == 'lines': in_lines=True; break
+            ancestor=parent.get(ancestor)
+        if not in_lines or any(c.startswith('ln-') for c in el.get('class','').split()):
+            continue
+        tag=el.tag.rsplit('}',1)[-1]
+        if tag not in ('line','polyline','path','polygon','rect','circle','ellipse','use') or not visible(el):
+            continue
+        try:
+            if tag == 'line':
+                pts=[(float(el.get('x'+n)),float(el.get('y'+n))) for n in ('1','2')]
+            elif tag == 'polyline':
+                nums=[float(v) for v in re.findall(NUMBER,el.get('points',''))]
+                pts=list(zip(nums[::2],nums[1::2]))
+            else:
+                raise ValueError('Unsupported additional pipe element ' + tag)
+            pipes.append({'svg_id':el.get('id'),'class':el.get('class',''),
+                          'points':[point(matrix,p) for p in pts]})
+        except (TypeError,ValueError) as error:
+            fail('unsupported_geometry',el.get('data-input-anchor'),str(error),svg_id=el.get('id'))
+            unchecked.append({'svg_id':el.get('id'),'detail':str(error)})
+    for pipe in pipes:
         sid = pipe['svg_id']
         el = by_id.get(sid)
         # Anonymous pipes remain actual geometry; absent IDs must not hide additions.
@@ -125,11 +195,21 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
             continue
         anchor = el.get('data-input-anchor') if el is not None else None
         claim = el.get('data-edge') if el is not None else None
-        if anchor not in valid_anchors or (not anchor.startswith('buses.') and claim != anchor):
+        if (anchor not in valid_anchors or (not anchor.startswith('buses.') and claim != anchor)
+                or (anchor.startswith('buses.') and el.get('data-bus') != '@' + anchor[6:])):
             fail('edge_anchor', anchor, 'Missing or unresolved input anchor for pipe ' + str(sid), svg_id=sid)
         if not sid or seen_ids[sid] != 1:
             fail('duplicate_or_missing_anchor', anchor, 'Pipe SVG ID is missing or duplicated: ' + str(sid), svg_id=sid)
-        for a, b in zip(pipe['points'], pipe['points'][1:]):
+        pts = pipe['points']
+        row = browser_rows.get(element_keys.get(el)) if el is not None else None
+        if row:
+            attrs = row['attrs']
+            if row['tag'] == 'polyline':
+                values=[float(v) for v in re.findall(NUMBER,attrs.get('points',''))]
+                pts=[point(row['matrix'],xy) for xy in zip(values[::2],values[1::2])]
+            elif row['tag'] == 'line':
+                pts=[point(row['matrix'],(float(attrs['x'+n]),float(attrs['y'+n]))) for n in ('1','2')]
+        for a, b in zip(pts, pts[1:]):
             add_segment(a, b, sid, anchor)
     bridge_records = []
     for el, matrix in elements:
@@ -141,6 +221,8 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         if not any(c.startswith('brg-') for c in el.get('class', '').split()) or not visible(el):
             continue
         # The renderer's single circular half-arc is an independently parsed path.
+        if el.get('data-edge') not in valid_anchors or el.get('data-input-anchor') != el.get('data-edge') or not el.get('id') or seen_ids[el.get('id')] != 1:
+            fail('edge_anchor',el.get('data-edge'),'Missing/duplicate/unresolved bridge anchor',svg_id=el.get('id'))
         match = re.fullmatch(r'\s*M\s*(' + NUMBER + r')[ ,]+(' + NUMBER + r')\s*A\s*(' + NUMBER + r')[ ,]+(' + NUMBER + r')[ ,]+0[ ,]+0[ ,]+[01][ ,]+(' + NUMBER + r')[ ,]+(' + NUMBER + r')\s*', el.get('d', ''))
         if not match:
             fail('unsupported_bridge', el.get('data-edge'), 'Unsupported visible bridge geometry', svg_id=el.get('id'))
@@ -149,6 +231,7 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         if abs(y1-y2) > .1 or abs(abs(x2-x1)-2*rx) > .1 or abs(rx-ry) > .1:
             fail('unsupported_bridge', el.get('data-edge'), 'Bridge is not a continuous semicircle', svg_id=el.get('id'))
             continue
+        matrix = browser_rows.get(element_keys[el],{}).get('matrix',matrix)
         a, b = point(matrix, (x1, y1)), point(matrix, (x2, y2))
         add_segment(a, b, el.get('id'), el.get('data-edge'), True)
         bridge_records.append({'svg_id': el.get('id'), 'position': point(matrix, ((x1+x2)/2, y1)),
@@ -156,6 +239,13 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
 
     labels = defaultdict(set)
     for inst, node in geometry['nodes'].items():
+        instance=by_id.get('inst-' + inst)
+        row=browser_rows.get(element_keys.get(instance),{})
+        if row and not row['visible']:
+            fail('hidden_node','parts.' + inst,'Component is not visible: ' + inst,component=inst)
+            continue
+        if row and any(abs(a-b)>1e-5 for a,b in zip(row['matrix'],node['matrix'])):
+            unchecked.append({'component':inst,'detail':'CSS instance transform is outside normalized port geometry'})
         for pid, port in node['ports'].items():
             labels[vertex(port['position'])].add(inst + '.' + pid)
     for ext in expected['externs']:
@@ -168,6 +258,7 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
         if len(nums) != 6:
             fail('extern_geometry', ext['anchor'], 'Unsupported external marker ' + ext['id'])
             continue
+        matrix = browser_rows.get(element_keys[el],{}).get('matrix',matrix)
         labels[vertex(point(matrix, nums[2:4]))].add(ext['id'])
 
     def on_segment(p, a, b):
@@ -213,6 +304,19 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
             idx=len(atomic)
             atomic.append({**s,'a':u,'b':v})
             graph[u].append((v,idx)); graph[v].append((u,idx))
+    for bus in expected['buses']:
+        edges = [s for s in atomic if s['anchor'] == bus['anchor']]
+        adjacency = defaultdict(set)
+        for seg in edges:
+            adjacency[seg['a']].add(seg['b']); adjacency[seg['b']].add(seg['a'])
+        pending = set(adjacency); count = 0
+        while pending:
+            count += 1; todo = [pending.pop()]; component = set(todo)
+            while todo:
+                for n in adjacency[todo.pop()] - component:
+                    component.add(n); pending.discard(n); todo.append(n)
+        if count > 1:
+            fail('disconnected_bus',bus['anchor'],'Visible bus trunk is disconnected: ' + bus['id'])
     # Reconstruct each claimed fragment group geometrically. An anchor associates
     # fragments with an input definition; its alleged endpoints are never trusted.
     # Every group's actual terminal contacts and continuity must prove that claim.
@@ -293,4 +397,5 @@ def reconcile_topology(root, geometry, intent, catalog, layout):
             'segments':[{**s,'start':positions[s['a']],'end':positions[s['b']]} for s in atomic],
             'vertices':[{'position':p,'terminals':sorted(labels[i]),'degree':len(graph[i])} for i,p in enumerate(positions)],
             'bridges':bridge_records,'networks':networks,'findings':findings,
-            'coverage_status':'not_checked' if geometry['issues'] else 'pass'}
+            'display_evidence':{'status':browser_evidence['status'],'reason':browser_evidence.get('reason'),'unchecked':unchecked},
+            'coverage_status':'pass' if measured and not geometry['issues'] and not unchecked else 'not_checked'}

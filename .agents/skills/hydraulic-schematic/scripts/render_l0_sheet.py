@@ -961,8 +961,9 @@ class Sheet(object):
             # become false body ink/lead anchors in geometric or pixel checks.
             mk += '\n' + '\n'.join(
                 '<metadata data-node="%s" data-port="%s.%s" data-port-id="%s" '
+                'id="port-%s-%s" data-input-anchor="parts.%s.ports.%s" '
                 'data-x="%g" data-y="%g" data-anchor-direction="%s"/>'
-                % (inst, inst, pid, pid, point[0], point[1], point[2])
+                % (inst, inst, pid, pid, inst, pid, inst, pid, point[0], point[1], point[2])
                 for pid, point in sorted(ports.items()))
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
