@@ -7,6 +7,7 @@
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
 from topology_reconciliation import write_manifest
+from lead_geometry import source_leads, perpendicular_scale
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
@@ -990,37 +991,32 @@ class Sheet(object):
         """把符号内部的"端口引线"改判为管线线宽。
 
         判据是几何,不是文件位置:一端落在某个端口红点上、另一端落在
-        本体上的 <line>,就是这个端口的引线——它走油,故按所在管网的
+        本体上的 line/path/polyline,就是这个端口的引线——它走油,故按所在管网的
         压力等级取宽(3.0/1.0 T),不按组件本体 1.5 T。
         识别不到所属管网(悬空端口、非液压口如 FSOV.command)时不改,
         保持本体线宽——因为那里确实没有管线。
         """
-        px = {}
-        for pid, (x, y, _a, _r, med) in ports.items():
-            if med != 'hydraulic':
-                continue          # 电、气信号口不是管线
+        root = ET.fromstring('<g>' + markup + '</g>')
+        leads, _unchecked = source_leads(root, ports)
+        for lead in leads:
+            pid = lead['port']
+            if ports[pid][4] != 'hydraulic':
+                continue
             lt = self.port_lt.get((inst, pid))
-            if lt:
-                px[(round(x, 1), round(y, 1))] = lt
-
-        def sub(m):
-            tag = m.group(0)
-            g = {k: float(v) for k, v in
-                 re.findall(r'\b(x1|y1|x2|y2)="([-\d.]+)"', tag)}
-            if len(g) < 4:
-                return tag
-            e = [(round(g['x1'], 1), round(g['y1'], 1)),
-                 (round(g['x2'], 1), round(g['y2'], 1))]
-            hit = [px[p] for p in e if p in px]
-            if len(hit) != 1:
-                return tag        # 两端都是端口或都不是,不是引线
-            tag = re.sub(r'\s*stroke-width="[^"]*"', '', tag)
-            if 'class="' in tag:
-                return re.sub(r'class="([^"]*)"',
-                              r'class="\1 pl-%s"' % hit[0], tag)
-            return tag[:-2].rstrip() + ' class="pl-%s"/>' % hit[0]
-
-        return re.sub(r'<line [^>]*/>', sub, markup)
+            if not lt:
+                continue
+            el = lead['element']
+            el.attrib.pop('stroke-width', None)
+            classes = el.get('class', '').split()
+            classes.append('pl-' + lt)
+            el.set('class', ' '.join(classes))
+            el.set('data-interface-port', pid)
+            # Compensate source-local nesting as well as the instance scale.
+            a, b = lead['local_segments'][0]
+            scale = perpendicular_scale(lead['matrix'], (b[0]-a[0], b[1]-a[1]))
+            if abs(scale-1) > 1e-8:
+                el.set('style', el.get('style', '') + ';--lead-scale:%.9g' % (1/scale))
+        return ''.join(ET.tostring(el, encoding='unicode') for el in root)
 
     def fill_name_slot(self, markup, inst):
         """把用户框符号的名槽文本替换为实例标签(hydraulic_user)。
@@ -1155,12 +1151,13 @@ def css(T):
 
   /* 符号内部的端口引线。它走油,故随管网压力等级,不随组件本体。
      判据是"是否走油",而非"画在哪个文件里"。
-     选择器带 line 提高特异性,压过父 g 元素继承来的 sym-outline。
+     端口类直接作用于各类引线图元,覆盖继承的 sym-outline 线宽。
      注:style 内容未包 CDATA,注释里不可出现尖括号,会破坏 XML。 */
-  line.pl-pressure   { stroke-width: calc(%(hi).2f * var(--kc)); }
-  line.pl-return     { stroke-width: calc(%(lo).2f * var(--kc)); }
-  line.pl-suction    { stroke-width: calc(%(lo).2f * var(--kc)); }
-  line.pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc)); }
+  .pl-pressure   { stroke-width: calc(%(hi).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-return     { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-suction    { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-sense      { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
 """ % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': 1.5 * T}
 
 

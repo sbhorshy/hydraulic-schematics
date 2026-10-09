@@ -63,7 +63,8 @@ def build_snapshot(workdir, catalog_path=None, tool_dir=None):
     for key, name in [('input', INTENT), ('layout', LAYOUT), ('svg', SVG), ('png', PNG),
                       ('topology_manifest', '1#系统原理图-topology.json'),
                       ('topology_manifest_markdown', '1#系统原理图-topology.md'),
-                      ('png_provenance', PNG + '.evidence.json')]:
+                      ('png_provenance', PNG + '.evidence.json'),
+                      ('browser_evidence', 'browser-evidence.json')]:
         add(key, workdir / name)
     add('catalog', catalog)
     for path in sorted(workdir.glob('*受控模板.yaml')):
