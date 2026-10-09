@@ -531,32 +531,15 @@ class Sheet(object):
         return '<polyline class="%s" points="%s"/>' % (cls, d)
 
     def find_crossings(self, junc, polys):
-        """列出需要跨线桥的非连通交叉点。
+        """Plan nonconnected crossings from input networks before bridge splits.
 
-        约定:**水平线跨越竖直线**。水平线在交叉处断开并以半圆弧跨过,
-        竖直线保持连续。这与"被跨线连续"的读图习惯一致。
+        The junc argument remains for existing callers; circles cannot authorize
+        connectivity. This geometry-only path is also used by candidate scoring.
         """
-        jset = {(round(x, 1), round(y, 1)) for (x, y) in junc}
-        allseg = []
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                allseg.append((pts[k], pts[k + 1]))
-        vs = [(a, b) for (a, b) in allseg if abs(b[0] - a[0]) < 0.6]
-        out = set()
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                a, b = pts[k], pts[k + 1]
-                if abs(b[1] - a[1]) >= 0.6:
-                    continue
-                y = a[1]
-                lo, hi = sorted((a[0], b[0]))
-                for (va, vb) in vs:
-                    x = va[0]
-                    vlo, vhi = sorted((va[1], vb[1]))
-                    if lo + 1 < x < hi - 1 and vlo + 1 < y < vhi - 1:
-                        if (round(x, 1), round(y, 1)) not in jset:
-                            out.add((round(x, 1), round(y, 1), _c))
-        return sorted(out)
+        events = renderer_events(polys,self.poly_anchors,declared_topology(self.i,self.cat))
+        line_types = dict(zip(self.poly_anchors,(lt for lt,_ in polys)))
+        return [(*e['position'],line_types[e['horizontal_anchors'][0]])
+                for e in events if e['kind']=='crossing']
 
     @staticmethod
     def split_h(pts, cross, R=5.0):
@@ -1330,8 +1313,7 @@ def main(argv=None):
     crossing_events = renderer_events(s.polys, s.poly_anchors, declared_topology(intent,catalog))
     junction_events = [e for e in crossing_events if e['kind']=='junction']
     junc = [tuple(e['position']) for e in junction_events]
-    line_types = dict(zip(s.poly_anchors,(lt for lt,_ in s.polys)))
-    cross = [(*e['position'],line_types[e['horizontal_anchors'][0]]) for e in crossing_events if e['kind']=='crossing']
+    cross = s.find_crossings(junc,s.polys)
     segs, fragments = [], []
     for index, ((lt, pts), anchor) in enumerate(zip(s.polys, s.poly_anchors)):
         for part, run in enumerate(s.split_h(pts, cross)):

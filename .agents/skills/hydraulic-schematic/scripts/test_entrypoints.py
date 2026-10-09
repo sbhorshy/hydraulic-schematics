@@ -121,7 +121,9 @@ class LayoutEntrypoints(unittest.TestCase):
             failures = {c['id'] for c in report['checks'] if c['result'] == 'fail'}
             # 短净距出桩修复已消除原 V17；此未修正种子仍有气侧穿本体，
             # 且 V3/V13 独立检查会抓住同一支路原先漏检的反向折返。
-            self.assertEqual(failures, {'V2', 'V3', 'V10', 'V13', 'V14'})
+            # V19 also retains the documented B1 zero-crossing gate: the real
+            # PRESS/RET crossing at root (970,368) counts even with its bridge.
+            self.assertEqual(failures, {'V2', 'V3', 'V10', 'V13', 'V14', 'V19'})
             self.assertTrue(any(c['id'] == 'V13' and '自身折返' in c['detail']
                                 and 'ln-sense' in c['detail'] for c in report['checks']))
             self.assertEqual(report['visual_review'], 'pending')

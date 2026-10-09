@@ -261,6 +261,22 @@ class JunctionCLI(unittest.TestCase):
         self.assertEqual(budget['measured'],1)
         self.assertEqual(budget['status'],'fail')
 
+    def test_optimizer_cli_b1_matches_final_bridged_crossing_budget(self):
+        self.current()
+        self.assertFalse((self.work/'browser-evidence.json').exists())
+        result=subprocess.run([sys.executable,str(SKILL/'scripts/proto_optimize.py'),
+            str(self.work/'1#系统.layout.json'),'--intent',str(self.work/'1#系统.intent.yaml'),
+            '--catalog',str(self.work/'component-catalog.json'),'--max-evals','1','--max-steps','0',
+            '-o',str(self.work/'candidate')],capture_output=True,text=True)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertFalse((self.work/'browser-evidence.json').exists(),'Candidate B1 needs no browser measurements')
+        candidate=json.loads((self.work/'candidate-opt-log.json').read_text())
+        self.assertEqual(candidate['seed_bp']['b1'],1)
+        report=self.validate()
+        budget=next(item for item in report['composition_budget']['items'] if item['id']=='B1')
+        self.assertEqual(candidate['seed_bp']['b1'],budget['measured'])
+        self.assertEqual(candidate['final_bp']['b1'],budget['measured'])
+
 
 if __name__=='__main__':
     unittest.main()
