@@ -18,7 +18,7 @@ import re
 import sys
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
-from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups
+from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
@@ -167,11 +167,9 @@ def main(argv=None):
     ev.append(endpoint_evidence)
 
     # ---------- 收集元件占位矩形 ----------
-    boxes = {}
     ink_boxes = {}    # 旋转后实际墨迹矩形,仅 V2"穿越本体"使用
     ports = {}
     for inst, nd in L['nodes'].items():
-        boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
         p = symbol_path(nd['symbol'])
         _mk, vb, ps = read_symbol(p)
@@ -499,75 +497,6 @@ def main(argv=None):
                'marker_tolerance': 0.2, 'coordinate_system': geometry['coordinate_system'],
                'contract_issues': contract_issues, 'unknown': intent.get('unknown') or []})
 
-    # ---------- V6 内容越出画布(含 shift 后) ----------
-    xs, ys = [], []
-    for _c, pts in polys:
-        for (x, y) in pts:
-            xs.append(x + SHIFT)
-            ys.append(y)
-    for inst, (x0, y0, x1, y1) in boxes.items():
-        xs += [x0 + SHIFT, x1 + SHIFT]
-        ys += [y0, y1]
-    if xs:
-        if min(xs) < 0 or max(xs) > CW:
-            F.append(('V6', '图形 x 范围 %.0f..%.0f 越出画布宽 %d'
-                      % (min(xs), max(xs), CW)))
-        if min(ys) < 0 or max(ys) > CH:
-            F.append(('V6', '图形 y 范围 %.0f..%.0f 越出画布高 %d'
-                      % (min(ys), max(ys), CH)))
-    # 左侧边界说明文字向左伸出约 110,须在 shift 内
-    for eid, e in L.get('externs', {}).items():
-        if e['anchor'] == 'right' and e['x'] + SHIFT - 110 < 0:
-            W.append(('V6', '%s 的说明文字可能被左缘裁切(x=%g, shift=%g)'
-                      % (eid, e['x'], SHIFT)))
-    ev.append({'id': 'V6', 'canvas': [CW, CH], 'shift_x': SHIFT,
-               'content_x': [round(min(xs), 1), round(max(xs), 1)] if xs else None,
-               'content_y': [round(min(ys), 1), round(max(ys), 1)] if ys else None})
-
-    # ---------- V7 图例/图签栏遮挡 ----------
-    # 图例与图签栏互相重叠。二者都画在 sheet 组之外(不随 shift 平移),
-    # 早先只检查它们与元件、与管线,没检查它们**彼此**——于是图例底部
-    # 三行文字压在图签栏上,两层文字叠印,全都不可读。
-    lg, tb = L.get('legend'), L.get('title_block')
-    if lg and tb:
-        a = (lg['x'], lg['y'], lg['x'] + lg['w'], lg['y'] + lg['h'])
-        b = (tb['x'], tb['y'], tb['x'] + tb['w'], tb['y'] + tb['h'])
-        if not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3]):
-            F.append(('V7', '图例 y %g..%g 与图签栏 y %g..%g 重叠,文字叠印'
-                      % (a[1], a[3], b[1], b[3])))
-
-    for key in ('legend', 'title_block'):
-        r = L.get(key)
-        if not r:
-            continue
-        rect = (r['x'] - SHIFT, r['y'], r['x'] + r['w'] - SHIFT, r['y'] + r['h'])
-        for inst, bx in boxes.items():
-            if not (bx[2] < rect[0] or bx[0] > rect[2]
-                    or bx[3] < rect[1] or bx[1] > rect[3]):
-                F.append(('V7', '%s 与元件 %s 重叠' % (key, inst)))
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                if seg_rect_hit(pts[k], pts[k + 1], rect, tol=0) > 8:
-                    F.append(('V7', '%s 压住管线,段 %s->%s' % (key, pts[k], pts[k + 1])))
-                    break
-
-    # ---------- V8 分组框与标签 ----------
-    pad = L.get('group_padding', 14)
-    for g in intent.get('groups') or []:
-        mem = [m for m in g['members'] if m in boxes]
-        if not mem:
-            continue
-        gx0 = min(boxes[m][0] for m in mem) - pad
-        gy0 = min(boxes[m][1] for m in mem) - pad
-        gx1 = max(boxes[m][2] for m in mem) + pad
-        gy1 = max(boxes[m][3] for m in mem) + pad
-        for inst, bx in boxes.items():
-            if inst in mem:
-                continue
-            if not (bx[2] < gx0 or bx[0] > gx1 or bx[3] < gy0 or bx[1] > gy1):
-                F.append(('V8', '分组 %s 的虚线框圈进了非成员 %s' % (g['id'], inst)))
-    ev.append({'id': 'V8', 'groups': len(intent.get('groups') or [])})
-
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
@@ -593,6 +522,14 @@ def main(argv=None):
                'expected_edges': len(topology['expected_edges']),
                'actual_edges': len(topology['actual_edges']),
                'endpoint_tolerance': 0.1})
+
+    bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser)
+    F.extend((c['id'],c['detail']) for c in bounds_findings)
+    ev.append(bounds_evidence)
+    budget_runs = measure_runs(geometry, topology)
+    frame_findings, frame_evidence = frame_checks(geometry, topology, browser, intent, L, budget_runs, seg_rect_hit)
+    F.extend((c['id'],c['detail']) for c in frame_findings)
+    ev.extend(frame_evidence)
 
     # ---------- 构图预算面板（B1–B7，V19）----------
     # 折返数：方向变化次数，U 形回折(180°)也算一次（与
@@ -713,7 +650,6 @@ def main(argv=None):
         b3_status, b3_detail)
 
     # B4 measures actual turns/interfaces, not arbitrary SVG storage cuts.
-    budget_runs = measure_runs(geometry, topology)
     nearest_run = min(budget_runs,key=lambda r:r['length']) if budget_runs else None
     min_seg = nearest_run['length'] if nearest_run else None
     b4_over = min_seg is not None and min_seg < BUDGET['B4']['budget']
@@ -747,6 +683,9 @@ def main(argv=None):
     corridors = measure_corridors(geometry, topology, budget_runs, BUDGET['B6']['budget_avoid_corridor'], browser)
     corridor_gap = corridors['nearest']['distance'] if corridors['nearest'] else None
     group_measurement = measure_groups(geometry, intent, browser, BUDGET['B6']['budget_group_padding'])
+    if intent.get('groups') and (geometry['issues'] or topology.get('display_evidence',{}).get('unchecked')):
+        group_measurement['status'] = 'not_checked'
+        group_measurement['unchecked'].extend(geometry['issues'] or topology['display_evidence']['unchecked'])
     gp = group_measurement['nearest']['distance'] if group_measurement['nearest'] else None
     b6_over = ((gp is not None and gp < BUDGET['B6']['budget_group_padding'])
                or (corridor_gap is not None and corridor_gap < BUDGET['B6']['budget_avoid_corridor']))
@@ -784,7 +723,7 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings:
+    for finding in endpoint_findings + topology_findings + bounds_findings + frame_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
