@@ -258,16 +258,14 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
         else:
             try:
                 parts=segments(row['tag'],row['attrs'])
+                if not parts:raise ValueError('No linear body segments; measure the primitive transform')
                 factors=[perpendicular_scale(row['matrix'],(b[0]-a[0],b[1]-a[1])) for a,b in parts]
             except ValueError:
                 a,b,c,d,_,_=row['matrix']
                 if abs(a*a+b*b-c*c-d*d)<1e-7 and abs(a*c+b*d)<1e-7:
                     factors=[math.hypot(a,b)]
-                elif row['tag'] in ('circle','ellipse','rect'):
-                    trace=a*a+b*b+c*c+d*d;disc=math.sqrt(max(0.,trace*trace-4*(a*d-b*c)**2))
-                    factors=[math.sqrt(max(0.,(trace-disc)/2)),math.sqrt((trace+disc)/2)]
                 else:
-                    reason='Curved body under nonuniform transform requires additional directional width evidence'
+                    reason='Nonlinear/primitive body under nonuniform transform requires additional directional width evidence'
             if not reason:
                 widths=[width*f for f in factors]
                 expected=1.5*ev15['base_T']

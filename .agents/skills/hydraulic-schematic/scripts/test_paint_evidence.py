@@ -128,6 +128,63 @@ class PaintEvidenceCLI(unittest.TestCase):
         unchecked=report['topology']['display_evidence']['unchecked']
         self.assertTrue(any(u.get('svg_id')=='wire-1-0' and u.get('position') for u in unchecked),unchecked)
 
+    def test_each_body_primitive_rejects_a_12px_stroke(self):
+        original=self.svg.read_text()
+        shapes={'circle':{'cx':'40','cy':'40','r':'16'},
+                'ellipse':{'cx':'40','cy':'40','rx':'16','ry':'12'},
+                'rect':{'x':'24','y':'24','width':'32','height':'32'},
+                'polygon':{'points':'24,40 40,24 56,40 40,56'}}
+        for tag,attrs in shapes.items():
+            with self.subTest(tag=tag):
+                root=ET.fromstring(original)
+                body=next(e for e in root.iter() if e.get('id')=='PF-001__symbol')
+                shape=next(e for e in body if e.tag==NS+'circle')
+                shape.tag=NS+tag;shape.attrib.clear();shape.attrib.update(attrs)
+                shape.set('id','damaged-body');shape.set('style','stroke-width:12px!important')
+                self.save(root);report=self.measure()
+                self.assertEqual(self.coverage(report,'V15'),'fail')
+                self.assertTrue(any(c['id']=='V15' and c['result']=='fail' and 'damaged-body' in c['detail']
+                                    for c in report['checks']),report['checks'])
+
+    def test_source_scaled_body_primitives_keep_prescribed_display_width(self):
+        source=self.work/'symbols/filter-line-shutoff-stroke.svg';original=source.read_text()
+        # Doubled coordinates followed by source-local 0.5 scale preserve the
+        # real body geometry. The prescribed visible stroke must remain 1.8.
+        shapes={'circle':{'cx':'80','cy':'80','r':'32'},
+                'ellipse':{'cx':'80','cy':'80','rx':'32','ry':'24'},
+                'rect':{'x':'48','y':'48','width':'64','height':'64'},
+                'polygon':{'points':'48,80 80,48 112,80 80,112'}}
+        for tag,attrs in shapes.items():
+            with self.subTest(tag=tag):
+                root=ET.fromstring(original);body=next(e for e in root.iter() if e.get('id')=='symbol')
+                shape=next(e for e in body if e.tag==NS+'circle');body.remove(shape)
+                group=ET.SubElement(body,NS+'g',{'transform':'scale(0.5)'})
+                shape.tag=NS+tag;shape.attrib.clear();shape.attrib.update(attrs);shape.set('id','scaled-body');group.append(shape)
+                ET.register_namespace('',NS[1:-1]);source.write_text(ET.tostring(root,encoding='unicode'))
+                self.run_cli('render_l0_sheet.py',self.work);report=self.measure()
+                self.assertEqual(self.coverage(report,'V15'),'pass')
+                measured=next(m for e in report['evidence'] if e['id']=='V15' for m in e['measurements'] if m['element']=='PF-001__scaled-body')
+                self.assertTrue(measured['effective_widths'])
+                for value in measured['effective_widths']:self.assertAlmostEqual(value,1.8,places=4)
+                with Image.open(self.work/'sheet-readback.png') as image:
+                    self.assertGreater(sum(255-v for v in image.convert('L').crop((873,512,907,548)).getdata()),0)
+
+    def test_nonuniform_body_primitives_are_explicitly_unchecked(self):
+        original=self.svg.read_text()
+        shapes={'circle':{'cx':'40','cy':'40','r':'16'},
+                'ellipse':{'cx':'40','cy':'40','rx':'16','ry':'12'},
+                'rect':{'x':'24','y':'24','width':'32','height':'32'},
+                'polygon':{'points':'24,40 40,24 56,40 40,56'}}
+        for tag,attrs in shapes.items():
+            with self.subTest(tag=tag):
+                root=ET.fromstring(original);body=next(e for e in root.iter() if e.get('id')=='PF-001__symbol')
+                shape=next(e for e in body if e.tag==NS+'circle');shape.tag=NS+tag;shape.attrib.clear();shape.attrib.update(attrs)
+                shape.set('id','nonuniform-body');shape.set('transform','translate(40 40) scale(2 1) translate(-40 -40)')
+                self.save(root);report=self.measure()
+                self.assertEqual(self.coverage(report,'V15'),'not_checked')
+                evidence=next(e for e in report['evidence'] if e['id']=='V16')
+                self.assertTrue(any(u.get('element')=='nonuniform-body' and u.get('position') and 'nonuniform' in u['reason'] for u in evidence['unchecked']))
+
     def test_transparent_colored_geometry_does_not_create_a_text_obstacle(self):
         from PIL import ImageChops
         baseline=self.measure()
