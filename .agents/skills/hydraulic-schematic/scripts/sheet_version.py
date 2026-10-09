@@ -5,12 +5,50 @@ Historical scripts are retained as evidence, never executed by the comparison.
 """
 import json
 from pathlib import Path
+import re
 import shutil
+import xml.etree.ElementTree as ET
+from urllib.parse import urlsplit, unquote
 
-from proofreading_evidence import (SVG, PNG, REPORT, assess_png, digest_json,
+from proofreading_evidence import (SVG, PNG, REPORT, assess_png, digest_json, digest_bytes,
                                    file_digest, verify_report)
 
 MANIFEST = 'version.json'
+
+
+def _font_binding(installed, resources):
+    pairs = [(item['ref'], item['sha256']) for item in resources]
+    return digest_bytes(json.dumps([installed, pairs], ensure_ascii=False).encode()) if pairs else installed
+
+
+def _font_inputs(version):
+    if version.get('manifest'):
+        manifest = version['manifest']
+        return manifest['installed_font_environment'], [
+            {**item, 'source': _inside(version['root'], item['path'])}
+            for item in manifest['font_resources']]
+    from browser_evidence import font_environment
+    svg = version['files']['svg']
+    root = ET.parse(svg).getroot()
+    styles = '\n'.join(e.text or '' for e in root.iter() if e.tag.rsplit('}', 1)[-1] == 'style')
+    resources = []
+    for ref in re.findall(r'url\(\s*["\']?([^\)"\']+)', styles):
+        ref = ref.strip()
+        if ref.startswith(('#', 'data:')):
+            continue
+        url = urlsplit(ref)
+        if url.scheme not in ('', 'file'):
+            raise ValueError('External CSS resources cannot be frozen without their content: ' + ref)
+        path = Path(unquote(url.path))
+        if not path.is_absolute():
+            path = svg.parent / path
+        if not path.is_file():
+            raise ValueError('Missing local CSS resource cannot be frozen: ' + ref)
+        resources.append({'ref': ref, 'source': path, 'sha256': file_digest(path)})
+    installed = font_environment()
+    if _font_binding(installed, resources) != version['report']['artifacts']['versions'].get('font_environment'):
+        raise ValueError('Font resources changed since validation; cannot freeze their historical version')
+    return installed, resources
 
 
 def _inside(root, relative):
@@ -58,10 +96,15 @@ def read_version(path):
                                'versions': expected['versions']})
     if fingerprint != expected['fingerprint'] or fingerprint != manifest['artifact_fingerprint']:
         raise ValueError('Frozen artifact fingerprint differs from original validation')
+    for resource in manifest['font_resources']:
+        if file_digest(_inside(root, resource['path'])) != resource['sha256']:
+            raise ValueError('Frozen CSS/font resource changed: ' + resource['ref'])
+    if _font_binding(manifest['installed_font_environment'], manifest['font_resources']) != expected['versions'].get('font_environment'):
+        raise ValueError('Frozen font/resource binding differs from original validation')
     png = assess_png(root)
     if png['status'] != 'pass' or files.get('svg') != root / SVG or files.get('png') != root / PNG:
         raise ValueError('Frozen SVG/PNG provenance is not current: ' + str(png))
-    return {'root': root, 'report': report, 'files': files, 'report_path': report_path,
+    return {'root': root, 'report': report, 'files': files, 'report_path': report_path, 'manifest': manifest,
             'verification': {'status': 'current', 'png': png, 'kind': 'frozen',
                              'fingerprint': fingerprint,
                              'perceptual_review': report.get('phases', {}).get('perceptual', {})}}
@@ -70,6 +113,7 @@ def read_version(path):
 def freeze_version(source, output):
     """Copy verified evidence; refuse stale inputs or overwrite of prior history."""
     version = read_version(source)
+    installed_fonts, resource_inputs = _font_inputs(version)
     target = Path(output).resolve()
     if target == version['root'] or version['root'] in target.parents:
         raise ValueError('Frozen version must be outside its source directory')
@@ -93,10 +137,18 @@ def freeze_version(source, output):
                 shutil.copyfile(source_path, copied)
             files[logical] = {'path': relative, 'sha256': original['files'][logical]['sha256']}
         shutil.copyfile(version['report_path'], target / REPORT)
+        resources = []
+        for resource in resource_inputs:
+            relative = 'resources/' + digest_json(resource['ref'])[:16] + '-' + Path(unquote(urlsplit(resource['ref']).path)).name
+            copied = _inside(target, relative)
+            copied.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(resource['source'], copied)
+            resources.append({'ref': resource['ref'], 'path': relative, 'sha256': resource['sha256']})
         manifest = {'schema': 'frozen-sheet-v1', 'artifact_fingerprint': original['fingerprint'],
                     'validation_fingerprint': version['report']['validation_fingerprint'],
                     'report_sha256': file_digest(target / REPORT), 'files': files,
-                    'versions': original['versions'], 'source': str(version['root'])}
+                    'versions': original['versions'], 'source': str(version['root']),
+                    'installed_font_environment': installed_fonts, 'font_resources': resources}
         manifest['integrity'] = digest_json(manifest)
         (target / MANIFEST).write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
         # Detect concurrent source mutation or an incomplete copy before publishing success.

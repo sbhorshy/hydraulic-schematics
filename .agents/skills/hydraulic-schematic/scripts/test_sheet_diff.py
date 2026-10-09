@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
+import shutil
 
 from test_entrypoints import SKILL, make_render_workspace
 
@@ -202,6 +203,156 @@ class SheetDiffCLI(unittest.TestCase):
         self.assertFalse(report['delivery']['ready'])
         self.assertEqual(report['perceptual_review'], 'pending')
         self.assertFalse(json.loads((comparison / 'change-report.json').read_text())['delivery_certified'])
+
+    def test_changed_tspan_paint_is_attributed_to_its_declared_label_node(self):
+        svg = self.work / '1#系统原理图.svg'
+        root = ET.parse(svg).getroot()
+        text = next(e for e in root.iter() if e.get('data-label-for') == 'PF-001')
+        label = text.text
+        text.text = None
+        span = ET.SubElement(text, '{http://www.w3.org/2000/svg}tspan')
+        span.text = label
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        svg.write_text(ET.tostring(root, encoding='unicode'))
+        self.refresh()
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        span.set('opacity', '0')
+        svg.write_text(ET.tostring(root, encoding='unicode'))
+        self.refresh(expected=1)
+        scope = self.base / 'scope.json'
+        scope.write_text(json.dumps({'nodes': ['PF-001'], 'note': 'Review only this label paint change.'}))
+        output = self.base / 'comparison'
+        self.diff_cli('compare', before, self.work, '--scope', scope, '--output', output)
+        report = json.loads((output / 'change-report.json').read_text())
+        self.assertEqual(report['objects']['changed_nodes'], ['PF-001'])
+        self.assertEqual(report['versions']['after']['validation'], 'failed')
+
+    def test_frozen_local_font_resources_survive_source_removal_and_scope_mask_relocation(self):
+        font_source = Path(subprocess.check_output(['fc-match', '-f', '%{file}', 'sans-serif'], text=True))
+        font = self.work / 'font-assets/probe.ttf'
+        font.parent.mkdir()
+        shutil.copyfile(font_source, font)
+        svg = self.work / '1#系统原理图.svg'
+        correct = svg.read_text().replace('</style>',
+            '@font-face{font-family:FrozenFont;src:url("font-assets/probe.ttf");}'
+            '#labels text{font-family:FrozenFont;}</style>')
+        root = ET.fromstring(correct)
+        node = next(e for e in root.iter() if e.get('id') == 'inst-PF-001')
+        next(e for e in node.iter() if e.get('data-interface-port') == 'inlet').set('style', 'stroke-width:1.8px')
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        svg.write_text(ET.tostring(root, encoding='unicode'))
+        self.refresh(expected=1)
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        manifest = json.loads((before / 'version.json').read_text())
+        self.assertEqual(manifest['font_resources'][0]['ref'], 'font-assets/probe.ttf')
+        self.assertTrue((before / manifest['font_resources'][0]['path']).is_file())
+        svg.write_text(correct)
+        self.refresh(expected=None)
+        after = self.base / 'after'
+        self.diff_cli('freeze', self.work, '--output', after)
+        font.unlink()
+        scope = self.base / 'scope.json'
+        scope.write_text(json.dumps({'nodes': ['PF-001'], 'note': 'Repair this lead using frozen resources.'}))
+        output = self.base / 'comparison'
+        self.diff_cli('compare', before, after, '--scope', scope, '--output', output)
+        report = json.loads((output / 'change-report.json').read_text())
+        self.assertEqual(report['status'], 'pass')
+        self.assertEqual(report['timing']['derived_rasterizations'], 2)
+
+    def test_rotating_target_allows_its_connected_routes_without_granting_topology_changes(self):
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        layout = self.work / '1#系统.layout.json'
+        data = json.loads(layout.read_text())
+        data['nodes']['PF-001']['rot'] = 90
+        layout.write_text(json.dumps(data))
+        self.run_cli(self.work / 'render_l0_sheet.py')
+        self.refresh(expected=None)
+        scope = self.base / 'scope.json'
+        scope.write_text(json.dumps({'nodes': ['PF-001'], 'include_adjacent_edges': True,
+                                     'note': 'Rotate the filter and review attached rerouted pipes.'}))
+        output = self.base / 'comparison'
+        self.diff_cli('compare', before, self.work, '--scope', scope, '--output', output)
+        report = json.loads((output / 'change-report.json').read_text())
+        self.assertTrue(report['topology']['unchanged'])
+        self.assertEqual(report['objects']['changed_nodes'], ['PF-001'])
+        self.assertEqual(report['objects']['changed_edges'], ['paths[1][0->1]', 'paths[1][1->2]'])
+        self.assertEqual(report['objects']['unexpected'], [])
+        self.assertEqual(report['pixels']['unexpected'], 0)
+
+    def test_changed_installed_fonts_block_local_masks_but_not_global_png_comparison(self):
+        import os
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        svg = self.work / '1#系统原理图.svg'
+        root = ET.parse(svg).getroot()
+        node = next(e for e in root.iter() if e.get('id') == 'inst-PF-001')
+        next(e for e in node.iter() if e.get('data-interface-port') == 'inlet').set('style', 'stroke-width:1.8px')
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        svg.write_text(ET.tostring(root, encoding='unicode'))
+        self.refresh(expected=1)
+        after = self.base / 'after'
+        self.diff_cli('freeze', self.work, '--output', after)
+        # Fontconfig is an external system boundary; no installed font is mutated.
+        fake_font = self.base / 'changed-font-version'
+        fake_font.write_bytes(b'a different installed-font inventory')
+        binaries = self.base / 'bin'
+        binaries.mkdir()
+        fc_list = binaries / 'fc-list'
+        fc_list.write_text('#!' + sys.executable + '\nprint(' + repr(str(fake_font)) + ')\n')
+        fc_list.chmod(0o755)
+        env = {**os.environ, 'PATH': str(binaries) + os.pathsep + os.environ['PATH']}
+        for global_change in (False, True):
+            scope = self.base / ('scope-%s.json' % global_change)
+            scope.write_text(json.dumps({'nodes': ['PF-001'], 'global': global_change,
+                                         'note': 'Review the recorded before/after images.'}))
+            output = self.base / ('comparison-%s' % global_change)
+            result = subprocess.run([sys.executable, str(SKILL / 'scripts/sheet_diff.py'), 'compare',
+                str(before), str(after), '--scope', str(scope), '--output', str(output)],
+                env=env, capture_output=True, text=True, timeout=120)
+            self.assertEqual(result.returncode, 0 if global_change else 2, result.stdout + result.stderr)
+            report = json.loads((output / 'change-report.json').read_text())
+            self.assertEqual(report['status'], 'pass' if global_change else 'not_comparable')
+            self.assertFalse(list(output.glob('*-scope.png')))
+
+    def test_stale_png_and_rectangular_ignore_masks_cannot_produce_a_pass(self):
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        scope = self.base / 'scope.json'
+        scope.write_text(json.dumps({'nodes': ['PF-001'], 'note': 'Unsupported broad ignore region.',
+                                     'mask': [0, 0, 1680, 1390]}))
+        self.diff_cli('compare', before, self.work, '--scope', scope,
+                      '--output', self.base / 'mask-rejected', expected=2)
+        scope.write_text(json.dumps({'global': True, 'note': 'Check an altered PNG.'}))
+        png = before / 'sheet-readback.png'
+        png.write_bytes(png.read_bytes() + b'changed')
+        output = self.base / 'stale-rejected'
+        self.diff_cli('compare', before, self.work, '--scope', scope, '--output', output, expected=2)
+        report = json.loads((output / 'change-report.json').read_text())
+        self.assertEqual(report['status'], 'not_comparable')
+        self.assertIsNone(report['pixels'])
+
+    def test_removed_input_port_anchor_is_reported_even_when_pixels_and_connections_match(self):
+        before = self.base / 'before'
+        self.diff_cli('freeze', self.work, '--output', before)
+        svg = self.work / '1#系统原理图.svg'
+        root = ET.parse(svg).getroot()
+        node = next(e for e in root.iter() if e.get('id') == 'inst-PF-001')
+        marker = next(e for e in node if e.get('data-port') == 'PF-001.inlet')
+        node.remove(marker)
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        svg.write_text(ET.tostring(root, encoding='unicode'))
+        self.refresh(expected=1)
+        scope = self.base / 'scope.json'
+        scope.write_text(json.dumps({'global': True, 'note': 'Global visual review does not permit lost traceability.'}))
+        output = self.base / 'comparison'
+        self.diff_cli('compare', before, self.work, '--scope', scope, '--output', output, expected=1)
+        report = json.loads((output / 'change-report.json').read_text())
+        self.assertEqual(report['pixels']['changed'], 0)
+        self.assertTrue(any(f['kind'] == 'unexpected_topology' and 'anchor' in f['detail']
+                            for f in report['findings']))
 
 
 if __name__ == '__main__':

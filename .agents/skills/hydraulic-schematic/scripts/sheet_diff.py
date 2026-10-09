@@ -1,7 +1,6 @@
 """Freeze verified sheet versions and compare declared changes without signing review."""
 import argparse
 import json
-import math
 from pathlib import Path
 import re
 import sys
@@ -9,7 +8,7 @@ import time
 import xml.etree.ElementTree as ET
 
 from sheet_version import freeze_version, read_version
-from proofreading_evidence import digest_json, file_digest
+from proofreading_evidence import file_digest
 
 
 def _model(version):
@@ -21,6 +20,12 @@ def _model(version):
     browser = json.loads(browser_path.read_text(encoding='utf-8')) if browser_path else {}
     if browser.get('status') != 'pass':
         raise ValueError('Current browser measurements are required for object attribution')
+    renderer = version['verification']['png']['receipt']['renderer']
+    if (renderer.get('backend') != browser.get('renderer', {}).get('backend') or
+            renderer.get('version') != browser.get('renderer', {}).get('version') or
+            browser.get('font_environment') is None or
+            renderer.get('font_environment') != browser.get('font_environment')):
+        raise ValueError('PNG and measured objects lack matching renderer/font-version evidence')
     return {'version': version, 'topology': topology, 'geometry': report['geometry'], 'browser': browser}
 
 
@@ -30,11 +35,15 @@ def _relations(topology):
         for edge in topology[key]:
             grouped.setdefault(edge['anchor'], []).append(sorted(edge['endpoints']))
         return {k: sorted(v) for k, v in grouped.items()}
+    anchor_kinds = {'node_anchor', 'port_anchor', 'unresolved_node_anchor', 'unresolved_port_anchor',
+                    'edge_anchor', 'duplicate_or_missing_anchor', 'extern_anchor'}
+    anchor_findings = [{k: f.get(k) for k in ('kind', 'anchor', 'component', 'port', 'svg_id')}
+                       for f in topology.get('findings', []) if f.get('kind') in anchor_kinds]
     return {'declared': edges('expected_edges'), 'actual': edges('actual_edges'),
             'networks': sorted(sorted(n['terminals']) for n in topology['networks']),
             'nodes': sorted((n['id'], n['type']) for n in topology['nodes']),
             'ports': sorted((p['id'], p['catalog_anchor']) for p in topology['ports']),
-            'unknown': topology['unknown']}
+            'unknown': topology['unknown'], 'anchor_findings': sorted(anchor_findings, key=lambda f: json.dumps(f, sort_keys=True))}
 
 
 def _scope(scope, models):
@@ -109,7 +118,7 @@ def _topology_delta(before, after, scope):
     if before['networks'] != after['networks']:
         if not authorized or after['networks'] != _declared_networks(after['declared']):
             unexpected.append({'kind': 'unexpected_topology', 'detail': 'Actual network joins changed beyond an exact authorized input transition'})
-    for key in ('nodes', 'ports', 'unknown'):
+    for key in ('nodes', 'ports', 'unknown', 'anchor_findings'):
         if before[key] != after[key]:
             unexpected.append({'kind': 'unexpected_topology', 'detail': key + ' contract/disclosure changed',
                                'before': before[key], 'after': after[key]})
@@ -123,8 +132,10 @@ def _owner(row):
     if row.get('instance'):
         return 'node:' + row['instance']
     attrs = row['attrs']
-    if attrs.get('data-label-for'):
-        target = attrs['data-label-for']
+    label = next((a['data-label-for'] for a in [attrs] + [a['attrs'] for a in row.get('ancestors', [])]
+                  if a.get('data-label-for')), None)
+    if label:
+        target = label
         return ('extern:' + target[1:]) if target.startswith('@') else 'node:' + target
     if attrs.get('data-port'):
         return 'node:' + attrs['data-port'].split('.')[0]
@@ -139,7 +150,7 @@ def _owner(row):
 
 def _rows(model):
     return [r for r in model['browser']['elements']
-            if r['tag'] not in ('g', 'svg', 'tspan')
+            if r['tag'] not in ('g', 'svg')
             and not any(a['tag'] in ('defs', 'clipPath', 'mask', 'symbol') for a in r.get('ancestors', []))]
 
 
@@ -155,6 +166,14 @@ def _objects(model):
         objects.setdefault('node:' + node, []).append({'source_geometry': {
             k: v for k, v in geometry.items() if k != 'symbol'}})
     return objects
+
+
+def _object_location(model, owner):
+    rows = [r for r in _rows(model) if _owner(r) == owner]
+    boxes = [r['bbox'] for r in rows]
+    return {'bbox': [min(b[0] for b in boxes), min(b[1] for b in boxes),
+                     max(b[2] for b in boxes), max(b[3] for b in boxes)] if boxes else None,
+            'elements': [r['id'] or r['key'] for r in rows]}
 
 
 def _allowed(owner, scope):
@@ -186,8 +205,12 @@ def _ink_mask(model, scope, output, name):
     import numpy as np
     from PIL import Image
     from rasterize_sheet import export
+    from browser_evidence import font_environment
 
     version = model['version']
+    installed = version['manifest']['installed_font_environment']
+    if installed is None or font_environment() != installed:
+        raise ValueError('Historical installed fonts changed; local ink attribution is not comparable')
     root = ET.parse(version['files']['svg']).getroot()
     elements = list(root.iter())
     for row in _rows(model):
@@ -205,14 +228,30 @@ def _ink_mask(model, scope, output, name):
             alpha = _paint_alpha(row['style'].get(paint, 'none'))
             style += '%s:%s!important;' % (paint, 'rgba(0,0,0,%g)' % alpha if alpha else 'none')
         element.set('style', style)
+    # Retain the exact source SVG in the version; only derived mask URLs change.
+    resources = {r['ref']: (version['root'] / r['path']).as_uri() for r in version['manifest']['font_resources']}
+    for element in root.iter():
+        if element.tag.rsplit('}', 1)[-1] != 'style' or not element.text:
+            continue
+        def relocate(match):
+            ref = match[2].strip()
+            if ref.startswith(('#', 'data:')):
+                return match[0]
+            if ref not in resources:
+                raise ValueError('Unfrozen CSS resource would change mask rendering: ' + ref)
+            return 'url("' + resources[ref] + '")'
+        element.text = re.sub(r'url\(\s*(["\']?)([^\)"\']+)\1\s*\)', relocate, element.text)
     svg = output / (name + '-scope.svg')
     ET.register_namespace('', 'http://www.w3.org/2000/svg')
     svg.write_text(ET.tostring(root, encoding='unicode'), encoding='utf-8')
+    mask_fonts = font_environment(svg)
     receipt = version['verification']['png']['receipt']['renderer']
     result = export(svg, output / (name + '-scope.png'), backend=receipt['backend'])
     derived = json.loads((output / (name + '-scope.png.evidence.json')).read_text())
     if derived['renderer']['version'] != receipt['version']:
         raise ValueError('Historical rasterizer is unavailable; derived ink masks would use a different renderer version')
+    if derived['renderer'].get('font_environment') != mask_fonts:
+        raise ValueError('Frozen font resources changed during scope rasterization')
     pixels = np.asarray(Image.open(output / (name + '-scope.png')).convert('RGB'))
     return np.any(pixels < 255, axis=2), result
 
@@ -260,6 +299,8 @@ def compare_versions(before, after, scope, output, pixel_threshold=8):
     if not 0 <= pixel_threshold <= 16:
         raise ValueError('Per-channel antialias tolerance must be between 0 and 16 of 255')
     versions = [read_version(before), read_version(after)]
+    if any(v['root'] == target or v['root'] in target.parents for v in versions):
+        raise ValueError('Comparison output must be outside both input versions')
     models = [_model(v) for v in versions]
     allowed = _scope(scope, models)
     if models[0]['browser']['viewbox'] != models[1]['browser']['viewbox']:
@@ -313,7 +354,10 @@ def compare_versions(before, after, scope, output, pixel_threshold=8):
               'objects': {'changed_nodes': [k[5:] for k in changed if k.startswith('node:')],
                           'changed_edges': [k[5:] for k in changed if k.startswith('edge:')],
                           'changed_other': [k for k in changed if not k.startswith(('node:', 'edge:'))],
-                          'unexpected': unexpected_objects},
+                          'unexpected': unexpected_objects,
+                          'details': [{'object': owner, 'permitted': _allowed(owner, allowed),
+                                       'before': _object_location(models[0], owner),
+                                       'after': _object_location(models[1], owner)} for owner in changed]},
               'pixels': {'changed': int(changed_pixels.sum()), 'unexpected': int(unexpected_pixels.sum()),
                          'below_tolerance': int(((delta > 0) & ~changed_pixels).sum()),
                          'channel_tolerance': pixel_threshold, 'comparison_extent': [0, 0, *images[0].size],
@@ -324,6 +368,20 @@ def compare_versions(before, after, scope, output, pixel_threshold=8):
                          'derived_rasterizations': len(rasterizations), 'rasterizations': rasterizations},
               'comparison_tool_sha256': file_digest(__file__)}
     (target / 'change-report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
+    text = ['# 图纸变化对照', '', '结果：`%s`。%s' % (report['status'], allowed['note']), '',
+            '节点变化：%s' % (', '.join(report['objects']['changed_nodes']) or '无'),
+            '连接描画变化：%s' % (', '.join(report['objects']['changed_edges']) or '无'), '',
+            '拓扑与追溯：%s；明确授权的连接变更：%s。' %
+            ('未变' if topology['unchanged'] else '有变化', ', '.join(topology['authorized_changes']) or '无'), '',
+            '像素变化 %d，超出范围 %d；每通道抗锯齿容差 %d/255，未重采样。' %
+            (report['pixels']['changed'], report['pixels']['unexpected'], pixel_threshold), '',
+            '黄色表示声明范围内变化，红色表示范围外变化。', '', '![像素差分](diff-overlay.png)', '',
+            '[旧版 PNG](before/sheet-readback.png) · [新版 PNG](after/sheet-readback.png) · [完整 JSON](change-report.json)', '',
+            '独立完整校核：旧版 `%s`，新版 `%s`。差分不替代几何、端口及感知回读结论。' %
+            (frozen[0]['report']['validation'], frozen[1]['report']['validation']), '',
+            '本次比较 %.3f 秒，补充范围描画 %d 次；原始 PNG 未重新生成。' %
+            (report['timing']['elapsed_s'], len(rasterizations))]
+    (target / 'change-report.md').write_text('\n'.join(text) + '\n', encoding='utf-8')
     return report
 
 
@@ -343,6 +401,9 @@ def main():
     compare.add_argument('--pixel-threshold', type=int, default=8)
     args = parser.parse_args()
     output_existed = args.command == 'compare' and Path(args.output).exists()
+    output_inside_input = args.command == 'compare' and any(
+        Path(source).resolve() == Path(args.output).resolve() or Path(source).resolve() in Path(args.output).resolve().parents
+        for source in (args.before, args.after))
     started = time.monotonic()
     try:
         if args.command == 'compare':
@@ -358,10 +419,11 @@ def main():
         result = {'schema': 'sheet-change-v1', 'status': 'not_comparable', 'reason': str(error),
                   'pixels': None, 'delivery_certified': False,
                   'timing': {'elapsed_s': round(time.monotonic() - started, 6)}}
-        if args.command == 'compare' and not output_existed:
+        if args.command == 'compare' and not output_existed and not output_inside_input:
             output = Path(args.output)
             output.mkdir(parents=True, exist_ok=True)
             result['sources'] = {'before': args.before, 'after': args.after, 'scope_file': args.scope}
+            result['timing']['completed_scope_rasterizations'] = len(list(output.glob('*-scope.png.evidence.json')))
             (output / 'change-report.json').write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding='utf-8')
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 2
