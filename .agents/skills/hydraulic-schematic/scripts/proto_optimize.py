@@ -7,8 +7,8 @@
 第三阶段（--optimize）；负对照证明纯预算能量不可用（run A：把 WARN 换成
 FAIL），必须带硬缺陷项 V2/V13 + 不劣化下限。
 
-评估器与 validate_sheet 构图预算面板同口径（B2/B3/B4 折线统计、B1 桥接后
-残余交叉、B5 盒净距），并在种子处对齐官方报告数值后才参与搜索。
+B1 使用拆桥前的输入/走线非连通交点，与最终零交叉预算一致。
+其余候选几何指标保持轻量近似，最终全量 validate_sheet 校核为权威。
 几何真值来自进程内复刻出图管线（place→wire→wire_taps→find_crossings→
 split_h），与落盘 SVG 同源，不经文本往返——#22 起复刻对象为 skill 渲染器
 render_l0_sheet（与 frozen proto_render 同源，方法级兼容）。
@@ -161,29 +161,10 @@ def bpanel(L, intent, catalog):
     segs_all = [(c, pts[k], pts[k + 1])
                 for c, pts in polys for k in range(len(pts) - 1)]
 
-    # B1 桥接后残余非连通交叉(端点相接的 T 型汇入不算)。
-    b1 = 0
-    for i in range(len(segs_all)):
-        _c1, a1, b1p = segs_all[i]
-        h1 = abs(b1p[1] - a1[1]) < 0.6
-        for j in range(i + 1, len(segs_all)):
-            _c2, a2, b2 = segs_all[j]
-            h2 = abs(b2[1] - a2[1]) < 0.6
-            if h1 == h2:
-                continue
-            x, y = (a2[0], a1[1]) if h1 else (a1[0], a2[1])
-
-            def on(p, s0, e0):
-                return (min(s0[0], e0[0]) - 0.5 <= x <= max(s0[0], e0[0]) + 0.5
-                        and min(s0[1], e0[1]) - 0.5 <= y <= max(s0[1], e0[1]) + 0.5)
-            if not (on((x, y), a1, b1p) and on((x, y), a2, b2)):
-                continue
-            ends = {(round(q[0], 1), round(q[1], 1))
-                    for q in (segs_all[i][1], segs_all[i][2],
-                              segs_all[j][1], segs_all[j][2])}
-            if (round(x, 1), round(y, 1)) in ends:
-                continue
-            b1 += 1
+    # B1 counts planned nonconnected crossings before bridge gaps, exactly as
+    # the final zero-crossing budget requires. A correct bridge is no exemption.
+    # This uses input/route geometry and launches no browser for candidates.
+    b1 = len({(round(x,1),round(y,1)) for x,y,_ in cross})
 
     # V2 走线穿越符号本体:段端点落在框缘(±3)或该框端口上的是接线,豁免。
     v2 = 0
