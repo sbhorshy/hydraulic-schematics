@@ -621,7 +621,7 @@ class Sheet(object):
             fs = 10.0
             wid = max(sum(fs if ord(c) > 0x2E80 else fs * 0.55 for c in ln)
                       for ln in lines)
-            dx = -10 if e['anchor'] == 'right' else 10
+            dx = -20 if e['anchor'] == 'right' else 20
             x0 = (e['x'] + dx - wid) if e['anchor'] == 'right' else (e['x'] + dx)
             self.textboxes.append((x0 - 2, e['y'] - fs, x0 + wid + 2,
                                    e['y'] + 4 + 13 * (len(lines) - 1)))
@@ -914,15 +914,15 @@ class Sheet(object):
             else:
                 y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + w_eff + 12
             for k, ln in enumerate(lines):
-                out.append('<text class="lbl" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
-                           % (cx2, y0 + 13 * k, anch, self.esc(ln)))
+                out.append('<text class="lbl" data-label-for="%s" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
+                           % (inst, cx2, y0 + 13 * k, anch, self.esc(ln)))
         for eid, e in self.L['externs'].items():
             lines = e['label'].split('\n')
             anch = 'end' if e['anchor'] == 'right' else 'start'
-            dx = -10 if e['anchor'] == 'right' else 10
+            dx = -20 if e['anchor'] == 'right' else 20
             for k, ln in enumerate(lines):
-                out.append('<text class="ext" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
-                           % (e['x'] + dx, e['y'] + 4 + 13 * k, anch, self.esc(ln)))
+                out.append('<text class="ext" data-label-for="@%s" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
+                           % (eid, e['x'] + dx, e['y'] + 4 + 13 * k, anch, self.esc(ln)))
         return out
 
     def symbols(self):
@@ -1255,14 +1255,13 @@ def title_block(L, intent, nnet, dnames, catalog=None):
             elif st == 'draft' and typ not in draft:
                 draft.append(typ)
     row2 = ('部件 %d   |   网络 %d   |   气侧支路 %d   |   未知项 %d   |   悬空端口 %d: %s   | '
-            'provisional: %s   | draft: %s'
             % (len(intent['parts']), nnet, len(intent.get('taps') or []),
-               len(intent['unknown']), len(dnames),
-               ' '.join(dnames) if dnames else '无',
-               ' '.join(prov) if prov else '—',
-               ' '.join(draft) if draft else '—'))
-    out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 21, row1))
-    out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 40, row2))
+               len(intent['unknown']), len(dnames), ' '.join(dnames) if dnames else '无'))
+    row3 = 'provisional: %s   | draft: %s' % (' '.join(prov) if prov else '—',
+                                            ' '.join(draft) if draft else '—')
+    for index,row in enumerate((row1,row2,row3)):
+        out.append('<text class="tb-t" id="title-row-%d" x="%.1f" y="%.1f">%s</text>'
+                   % (index+1,x+10,y+h/2+4+(index-1)*14.4,row))
     return out
 
 
