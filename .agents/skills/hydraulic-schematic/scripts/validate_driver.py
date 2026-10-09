@@ -74,7 +74,7 @@ LAYOUT_NAME = '1#系统.layout.json'
 SVG_NAME = '1#系统原理图.svg'
 READBACK = 'sheet-readback.png'
 
-SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py',
+SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
            'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py']
 PY = sys.executable
