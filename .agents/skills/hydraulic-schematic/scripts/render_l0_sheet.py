@@ -1011,6 +1011,7 @@ class Sheet(object):
             if el.get('stroke','').lower() in ('white','#fff','#ffffff'):continue
             try:
                 factors=[perpendicular_scale(matrix,(b[0]-a[0],b[1]-a[1])) for a,b in segments(tag,el.attrib)]
+                if not factors:raise ValueError('Primitive body requires transform-scale compensation')
             except ValueError:
                 a,b,c,d,_,_=matrix
                 factors=[math.hypot(a,b)] if abs(a*a+b*b-c*c-d*d)<1e-7 and abs(a*c+b*d)<1e-7 else []
