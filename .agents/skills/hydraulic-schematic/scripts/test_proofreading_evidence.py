@@ -75,6 +75,32 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
                 path.write_bytes(original)
                 self.evidence_cli('verify')
 
+    def test_windows_symbol_reference_binds_the_selected_catalog_asset(self):
+        import shutil
+        layout_path=self.work/'1#系统.layout.json';layout=json.loads(layout_path.read_text())
+        name='edp-provisional-stroke.svg'
+        actual=self.work/name
+        shutil.copy2(self.work/'symbols'/name,actual)
+        layout['nodes']['EDP-001']['symbol']='symbols'+chr(92)+name
+        layout_path.write_text(json.dumps(layout))
+        self.run_cli(self.work/'render_l0_sheet.py');self.rasterize();report=self.validate()
+        selected=report['artifacts']['files']['symbol:EDP-001']
+        self.assertEqual(Path(selected['path']),actual)
+        self.assertIsNotNone(selected['sha256'])
+        self.evidence_cli('verify')
+        actual.write_text(actual.read_text()+'\n<!-- content version changed -->\n')
+        changed=self.evidence_cli('verify',expected=1)
+        self.assertIn('symbol:EDP-001',changed.stdout)
+
+    def test_missing_required_symbol_keeps_diagnostics_but_cannot_verify_current(self):
+        self.rasterize();self.validate()
+        (self.work/'symbols/edp-provisional-stroke.svg').unlink()
+        self.run_cli(self.work/'validate_sheet.py',expected=1)
+        report=json.loads((self.work/'validation-report.json').read_text())
+        self.assertEqual(report['validation'],'failed')
+        result=self.evidence_cli('verify',expected=1)
+        self.assertIn('symbol:EDP-001',result.stdout)
+
     def test_driver_does_not_deliver_automated_success_without_perceptual_review(self):
         output = Path(self.tmp.name) / 'driver'
         self.run_cli(SKILL / 'scripts/validate_driver.py',

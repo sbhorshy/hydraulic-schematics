@@ -4,6 +4,7 @@ measure_runs joins storage-only collinear cuts within each logical input edge.
 Ports, branches, real bends/reversals and bridge boundaries remain semantic ends.
 """
 from collections import defaultdict
+from svg_paint import color_rgba, computed_length
 import math
 import re
 
@@ -270,15 +271,12 @@ def display_rectangle(row, browser, require_outline=False):
     for kind in (('stroke',) if require_outline else ('stroke','fill')):
         value=row['style'].get(kind,'none')
         if value=='none': continue
-        color=re.fullmatch(r'rgba?\(([^)]+)\)',value)
-        if not color: raise ValueError('Frame paint needs additional display evidence')
-        components=[float(v.strip()) for v in color[1].split(',')]
-        if len(components) not in (3,4):
-            raise ValueError('Frame paint needs additional display evidence')
-        alpha=components[3] if len(components)==4 else 1
+        color=color_rgba(value)
+        if color is None:raise ValueError('Frame paint needs additional display evidence')
+        alpha=color[3]
         opacity=float(row['style'].get(kind+'-opacity','1'))
-        width=(float(row['style'].get('stroke-width','0').removeprefix('calc(').removesuffix(')').removesuffix('px'))
-               if kind=='stroke' else 1)
+        width=computed_length(row['style'].get('stroke-width','0')) if kind=='stroke' else 1
+        if width is None:raise ValueError('Frame stroke width needs additional display evidence')
         painted=painted or (alpha>0 and opacity>0 and width>0)
     if not painted:
         raise InvisibleFrameError('Frame has no visible outline' if require_outline else

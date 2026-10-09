@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit, unquote
 
 from proofreading_evidence import (SVG, PNG, REPORT, assess_png, digest_json, digest_bytes,
-                                   file_digest, verify_report)
+                                   file_digest, verify_report, require_bound_symbols)
 
 MANIFEST = 'version.json'
 
@@ -92,6 +92,8 @@ def read_version(path):
         if actual != source['sha256'] or actual != item['sha256']:
             raise ValueError('Frozen artifact content changed: ' + logical)
         files[logical] = local
+    if files.get('layout') is None:raise ValueError('Required layout asset is unbound')
+    require_bound_symbols(expected,json.loads(files['layout'].read_text(encoding='utf-8')))
     fingerprint = digest_json({'files': {k: v['sha256'] for k, v in manifest['files'].items()},
                                'versions': expected['versions']})
     if fingerprint != expected['fingerprint'] or fingerprint != manifest['artifact_fingerprint']:

@@ -8,7 +8,8 @@ import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
 from topology_reconciliation import write_manifest, declared_topology
 from junction_semantics import renderer_events, merge_collinear
-from lead_geometry import source_leads, perpendicular_scale
+from lead_geometry import source_leads, perpendicular_scale, segments
+from sheet_geometry import walk
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
@@ -1001,6 +1002,21 @@ class Sheet(object):
             scale = perpendicular_scale(lead['matrix'], (b[0]-a[0], b[1]-a[1]))
             if abs(scale-1) > 1e-8:
                 el.set('style', el.get('style', '') + ';--lead-scale:%.9g' % (1/scale))
+        # Internal source groups may scale body ink (for example PRV check
+        # mechanisms use 0.9). Compensate only stroke width, retaining fill/dashes.
+        for el,matrix in walk(root):
+            tag=el.tag.rsplit('}',1)[-1]
+            if tag not in ('line','path','polyline','polygon','rect','circle','ellipse') or el.get('data-interface-port'):
+                continue
+            if el.get('stroke','').lower() in ('white','#fff','#ffffff'):continue
+            try:
+                factors=[perpendicular_scale(matrix,(b[0]-a[0],b[1]-a[1])) for a,b in segments(tag,el.attrib)]
+            except ValueError:
+                a,b,c,d,_,_=matrix
+                factors=[math.hypot(a,b)] if abs(a*a+b*b-c*c-d*d)<1e-7 and abs(a*c+b*d)<1e-7 else []
+            if factors and min(factors)>0 and max(factors)-min(factors)<1e-7 and abs(factors[0]-1)>1e-8:
+                el.set('class',el.get('class','')+' sym-body-width')
+                el.set('style',el.get('style','')+';--body-scale:%.9g'%(1/factors[0]))
         return ''.join(ET.tostring(el, encoding='unicode') for el in root)
 
     def fill_name_slot(self, markup, inst):
@@ -1133,6 +1149,7 @@ def css(T):
      缺了它 SVG 默认 fill=black,凡描边符号(油箱壳体等)整只糊成黑块。 */
   .sym-outline { fill: none; stroke: currentColor;
                  stroke-width: calc(%(sy).2f * var(--kc)); }
+  .sym-body-width { stroke-width: calc(%(sy).2f * var(--kc) * var(--body-scale, 1)); }
 
   /* 符号外接引线随相接管网等级,包含气侧 sense 支路。
      按已声明连接判断,不以介质排除整类已连接端口。

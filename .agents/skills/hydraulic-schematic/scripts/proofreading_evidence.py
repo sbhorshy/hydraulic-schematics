@@ -14,6 +14,7 @@ import shutil
 import subprocess
 from pathlib import Path
 import sys
+from endpoint_usage import resolve_symbol
 
 INTENT = '1#系统.intent.yaml'
 LAYOUT = '1#系统.layout.json'
@@ -73,10 +74,7 @@ def build_snapshot(workdir, catalog_path=None, tool_dir=None):
     for inst, node in sorted(layout.get('nodes', {}).items()):
         ref = node.get('symbol')
         if ref:
-            path = workdir / ref
-            if not path.is_file():
-                path = catalog.parent / Path(ref).name
-            add('symbol:' + inst, path)
+            add('symbol:' + inst, resolve_symbol(ref, workdir, catalog.parent))
     for path in sorted(tool_dir.glob('*.py')):
         if not path.name.startswith(('test_', 'selftest')):
             add('tool:' + path.name, path)
@@ -104,6 +102,13 @@ def build_snapshot(workdir, catalog_path=None, tool_dir=None):
     return {'schema': 'sheet-artifacts-v1', 'algorithm': 'sha256',
             'fingerprint': fingerprint, 'files': files, 'versions': versions,
             'catalog_path': str(catalog), 'tool_dir': str(tool_dir)}
+
+
+def require_bound_symbols(snapshot, layout):
+    """A diagnostic report may be written, but unbound selected assets are never current."""
+    missing=['symbol:'+inst for inst in layout.get('nodes',{})
+             if not snapshot.get('files',{}).get('symbol:'+inst,{}).get('sha256')]
+    if missing:raise ValueError('Required selected symbol assets are unbound: '+', '.join(sorted(missing)))
 
 
 def write_png_receipt(svg, png, renderer):
@@ -173,9 +178,11 @@ def write_report(report, path):
 
 
 def assess_local_readback(workdir, report):
-    """Optional local-review layer; legacy reports without a manifest keep their contract."""
+    """Required coverage comes from the validated report, never file existence."""
     if not (Path(workdir)/'readback-manifest.json').exists():
-        return {'status':'not_generated','complete':False,'required':False}
+        return {'status':'not_generated','complete':False,
+                'required':any(e['id']=='READBACK_ITEMS' and e.get('required') for e in report.get('coverage',[])),
+                'detail':'Local readback manifest is missing.'}
     try:
         from readback_review import assess_manifest
         return assess_manifest(workdir,report)
@@ -186,7 +193,8 @@ def assess_local_readback(workdir, report):
 def effective_delivery(report, review, local):
     missing=[e['id'] for e in report.get('coverage',[]) if e['id'] not in ('PERCEPTUAL','READBACK_ITEMS') and e['status'] in ('fail','not_checked')]
     if review['status']!='confirmed':missing.append('PERCEPTUAL')
-    if local['status']!='not_generated' and not local['complete']:missing.append('READBACK_ITEMS')
+    local_required=any(e['id']=='READBACK_ITEMS' and e.get('required') for e in report.get('coverage',[]))
+    if (local_required or local['status']!='not_generated') and not local['complete']:missing.append('READBACK_ITEMS')
     return {'ready':not missing,'status':'ready' if not missing else 'incomplete','blocking_checks':missing}
 
 
@@ -207,6 +215,9 @@ def verify_report(workdir, report_path=None):
             raise ValueError('Validation report fingerprint is invalid.')
         recorded = report['artifacts']
         current = build_snapshot(workdir, recorded['catalog_path'], recorded['tool_dir'])
+        layout=json.loads((workdir/LAYOUT).read_text(encoding='utf-8'))
+        require_bound_symbols(recorded,layout)
+        require_bound_symbols(current,layout)
         changed = sorted(key for key in set(recorded['files']) | set(current['files'])
                          if recorded['files'].get(key, {}).get('sha256') != current['files'].get(key, {}).get('sha256'))
         if recorded['versions'] != current['versions']:
@@ -300,12 +311,13 @@ def enrich_report(report, workdir, **kwargs):
     report['visual_review'] = 'passed' if review['status'] == 'confirmed' else 'pending'
     report['delivery'] = {'ready': not missing, 'status': 'ready' if not missing else 'incomplete',
                           'blocking_checks': missing}
+    # New validator reports always require local review; frozen old coverage is
+    # assessed as recorded, without inventing a retrospective requirement.
+    coverage.append({'id':'READBACK_ITEMS','status':'not_checked','required':True,
+                     'detail':'Local image reviews are independent of whole-sheet signoff.','evidence':[]})
     local=assess_local_readback(workdir,report)
     report['phases']['local_readback']=local
-    if local['status']!='not_generated':
-        coverage.append({'id':'READBACK_ITEMS','status':'pass' if local['complete'] else 'not_checked',
-                         'required':True,'detail':'Local image reviews are independent of whole-sheet signoff.',
-                         'evidence':[local]})
+    coverage[-1].update(status='pass' if local['complete'] else 'not_checked',evidence=[local])
     report['delivery']=effective_delivery(report,review,local)
     report['validation_fingerprint'] = validation_fingerprint(report)
     return report

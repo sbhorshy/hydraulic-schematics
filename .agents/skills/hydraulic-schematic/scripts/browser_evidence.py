@@ -19,6 +19,7 @@ import tempfile
 import time
 import xml.etree.ElementTree as ET
 from urllib.parse import urlsplit, unquote
+from svg_paint import COLOR_RGBA_JS
 
 
 def digest(value):
@@ -65,6 +66,11 @@ def content_digest(record):
 SCRIPT = r'''
 (async () => {
   try {
+    __COLOR_RGBA__
+    const foreground = (style,kind) => {
+      const color=colorRGBA(style[kind]);
+      return color && color[3]>0 && !color.slice(0,3).every(v=>v===255) && Number(style[kind+'-opacity'])>0;
+    };
     const source = new TextDecoder().decode(Uint8Array.from(atob('__SVG__'), c => c.charCodeAt(0)));
     const parsed = new DOMParser().parseFromString(source, 'image/svg+xml');
     const svg = document.importNode(parsed.documentElement, true);
@@ -142,7 +148,9 @@ SCRIPT = r'''
             if(!Number.isFinite(metrics.actualBoundingBoxAscent)) throw new Error('Actual glyph metrics unavailable');
             if(metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight===0 || metrics.actualBoundingBoxAscent+metrics.actualBoundingBoxDescent===0) continue;
             const sw=Number(font.strokeWidth.replace(/^calc\(/,'').replace(/\)$/,'').replace(/px$/,''));
-            const pad=font.stroke==='none'?0:sw/2;
+            const strokeColor=colorRGBA(font.stroke);
+            if(!strokeColor) throw new Error('Text stroke paint needs additional measurement');
+            const pad=strokeColor[3]>0 && Number(font.strokeOpacity)>0?sw/2:0;
             if(!Number.isFinite(pad)) throw new Error('Text stroke width unresolved');
             const x0=-metrics.actualBoundingBoxLeft-pad,y0=-metrics.actualBoundingBoxAscent-pad;
             const x1=metrics.actualBoundingBoxRight+pad,y1=metrics.actualBoundingBoxDescent+pad;
@@ -162,8 +170,9 @@ SCRIPT = r'''
     for(const row of rows) {
       const el=all[row.key];
       if(!(el instanceof SVGGeometryElement) || !row.visible) continue;
-      const stroke=row.style.stroke!=='none' && row.style.stroke!=='rgb(255, 255, 255)' && Number(row.style['stroke-opacity'])>0;
-      const fill=row.tag!=='line' && row.style.fill!=='none' && row.style.fill!=='rgb(255, 255, 255)' && Number(row.style['fill-opacity'])>0;
+      if(!colorRGBA(row.style.stroke) || !colorRGBA(row.style.fill)) {row.outline_status='not_checked';continue;}
+      const stroke=foreground(row.style,'stroke');
+      const fill=row.tag!=='line' && foreground(row.style,'fill');
       if(!stroke && !fill) continue;
       const m=new DOMMatrix(row.matrix), factor=Math.hypot(m.a,m.b,m.c,m.d);
       const rectangular=row.tag==='rect' && Math.abs(row.length-2*(row.local_bbox[2]+row.local_bbox[3]))<.001;
@@ -208,15 +217,15 @@ SCRIPT = r'''
         }
         return probes.some(q=>{
           const local=new DOMPoint(...q).matrixTransform(inverse);
-          return (b.style.stroke !== 'none' && !['rgb(255, 255, 255)','rgba(0, 0, 0, 0)'].includes(b.style.stroke) && el.isPointInStroke(local)) ||
-            (b.style.fill !== 'none' && !['rgb(255, 255, 255)','rgba(0, 0, 0, 0)'].includes(b.style.fill) && el.isPointInFill(local));
+          return (foreground(b.style,'stroke') && el.isPointInStroke(local)) ||
+            (foreground(b.style,'fill') && el.isPointInFill(local));
         });
       }).map(b=>b.key));
     }
     document.getElementById('evidence').textContent=JSON.stringify({status:'pass',viewbox:[vb.x,vb.y,vb.width,vb.height],elements:rows});
   } catch(error) {document.getElementById('evidence').textContent=JSON.stringify({status:'not_checked',reason:String(error)});}
 })();
-'''
+'''.replace('__COLOR_RGBA__', COLOR_RGBA_JS)
 
 
 def collect(svg_path, output=None, timeout=30):
@@ -235,7 +244,7 @@ def collect(svg_path, output=None, timeout=30):
         if not executable:
             raise RuntimeError('Chrome unavailable; computed SVG display measurements were not collected')
         version = subprocess.run([executable, '--version'], capture_output=True, text=True, timeout=10).stdout.strip()
-        binding = {'svg_sha256': digest(source), 'collector_sha256': digest(Path(__file__).read_bytes()),
+        binding = {'svg_sha256': digest(source), 'collector_sha256': digest(Path(__file__).read_bytes()+COLOR_RGBA_JS.encode()),
                    'font_environment': font_environment(svg_path),
                    'renderer': {'backend': 'chrome', 'version': version}}
         record.update(binding)

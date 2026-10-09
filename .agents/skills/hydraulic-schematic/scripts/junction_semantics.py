@@ -2,6 +2,7 @@
 from collections import defaultdict
 import math
 import re
+from svg_paint import computed_length, color_rgba
 
 TOLERANCE=.1
 
@@ -78,13 +79,9 @@ def merge_collinear(points):
 
 
 def painted(row, kind='fill'):
-    value=row['style'].get(kind,'none')
-    if value=='none':return False
-    match=re.fullmatch(r'rgba?\(([-+0-9., /]+)\)',value)
-    if not match:return None
-    values=[float(v) for v in re.findall(r'[-+]?(?:\d*\.\d+|\d+\.?\d*)',match[1])]
-    if len(values) not in (3,4):return None
-    return values[:3]!=[255.,255.,255.] and (len(values)==3 or values[3]>0) and float(row['style'].get(kind+'-opacity','1'))>0
+    color=color_rgba(row['style'].get(kind,'none'))
+    if color is None:return None
+    return color[:3]!=(255.,255.,255.) and color[3]>0 and float(row['style'].get(kind+'-opacity','1'))>0
 
 
 def effects(row):
@@ -126,7 +123,8 @@ def check_junctions(topology, browser):
     for bridge in topology.get('bridges',[]):
         row=by_id.get(bridge['svg_id']);a,b=bridge['endpoints']
         stroke=painted(row,'stroke') if row else None
-        if row and (not row['visible'] or stroke is False or float(row['style'].get('stroke-width','0').replace('px',''))<=0):
+        width=computed_length(row['style'].get('stroke-width','0')) if row else None
+        if row and (not row['visible'] or stroke is False or width==0):
             fail('V14','unpainted_bridge','Bridge has no effective visible stroke',position=bridge['position'],input_anchors=[bridge['anchor']],svg_id=bridge['svg_id'])
             continue
         endpoints=[]
@@ -134,13 +132,13 @@ def check_junctions(topology, browser):
             endpoints.append({s['anchor'] for s in straight if any(math.dist(endpoint,p)<=TOLERANCE for p in (s['start'],s['end']))})
         owners=set.intersection(*endpoints)
         valid_owner=bridge['anchor'] in owners
-        unknown=bool(row and effects(row)) or stroke is None
+        unknown=bool(row and effects(row)) or stroke is None or width is None
         record={**bridge,'owners':sorted(o for o in owners if o),'continuous':bool(owners),
                 'valid_owner':valid_owner,'unchecked':unknown}
         bridges.append(record)
         if row and row['style'].get('stroke-dasharray','none')!='none' and any(float(v)>0 for v in re.findall(r'[-+]?[0-9.]+',row['style']['stroke-dasharray'])):
             fail('V14','dashed_bridge','Bridge stroke is discontinuous',position=bridge['position'],input_anchors=[bridge['anchor']],svg_id=bridge['svg_id'])
-        if unknown:unchecked.append({'check':'V14','svg_id':bridge['svg_id'],'position':bridge['position'],'detail':'Bridge clipping/masking/filtering unsupported'})
+        if unknown:unchecked.append({'check':'V14','svg_id':bridge['svg_id'],'position':bridge['position'],'detail':'Bridge stroke width/paint/clipping/masking/filtering needs additional evidence'})
         elif not valid_owner:
             fail('V14','bridge_gap','Bridge does not continuously join its claimed pipe at both ends',position=bridge['position'],
                  input_anchors=sorted({a for a in [bridge.get('anchor'),*owners] if a}),svg_id=bridge['svg_id'],endpoints=bridge['endpoints'])

@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 from browser_evidence import collect
 from lead_geometry import segments, source_leads, perpendicular_scale
 from sheet_geometry import point, walk
+from svg_paint import color_rgba, has_dash_gaps, computed_length
 
 POSITION_TOLERANCE = .1  # the existing SVG coordinate serialization allowance
 WIDTH_TOLERANCE = .02  # SVG units; no tolerance is added for a visible gap
@@ -20,9 +21,12 @@ def _class(row, prefix):
 
 
 def _visible_stroke(row):
-    return (row.get('visible') and row['style']['stroke'] not in
-            ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)') and
-            float(row['style'].get('stroke-opacity','1')) > 0)
+    if not row.get('visible') or float(row['style'].get('stroke-opacity','1')) <= 0:
+        return False
+    if computed_length(row['style'].get('stroke-width'))==0:return False
+    color=color_rgba(row['style']['stroke'])
+    if color is None:return None
+    return color[3]>0 and color[:3]!=(255.,255.,255.)
 
 
 def _overlap(a,b,c,d):
@@ -63,6 +67,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
     ev16['unchecked'].extend({'component':inst,'reason':'Normalized source ports unavailable'}
                              for inst in layout['nodes'] if inst not in geometry['nodes'])
     actual, pipes = [], []
+    external_keys = set()
     for row in rows:
         cls = _class(row,'ln-')
         if not row.get('instance') and not cls:
@@ -72,22 +77,39 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                                       'element':row['id'] or row['key'],'position':row['bbox'],
                                       'reason':'Unsupported external lead element '+row['tag']})
             continue
-        if not _visible_stroke(row):
+        paint = _visible_stroke(row)
+        if paint is None:
+            if cls or row['attrs'].get('data-interface-port') or _class(row,'pl-'):
+                ev16['unchecked'].append({'component':row.get('instance'),'port':row['attrs'].get('data-interface-port'),
+                                          'element':row.get('id') or row['key'],'reason':'Unsupported stroke paint '+row['style']['stroke'],
+                                          'position':row['bbox']})
+            continue
+        if not paint:
+            if cls or row['attrs'].get('data-interface-port') or _class(row,'pl-'):
+                failures.append(('V15','%s %s has no visible stroke @%s' %
+                                 (row.get('instance') or '',row.get('id') or row['key'],row['bbox'])))
             continue
         if row['style'].get('vector-effect') == 'non-scaling-stroke':
             failures.append(('V15','%s non-scaling-stroke keeps device width when the sheet is enlarged @%s' %
                              (row.get('id') or row['key'],row['bbox'])))
         try:
             parts = segments(row['tag'],row['attrs'])
+            width=computed_length(row['style']['stroke-width'])
+            if width is None:raise ValueError('Unresolved computed stroke width '+row['style']['stroke-width'])
             for a,b in parts:
-                effective = float(row['style']['stroke-width'].removeprefix('calc(').removesuffix(')').removesuffix('px')) * perpendicular_scale(row['matrix'],(b[0]-a[0],b[1]-a[1]))
+                effective = width * perpendicular_scale(row['matrix'],(b[0]-a[0],b[1]-a[1]))
                 if row['style'].get('vector-effect') == 'non-scaling-stroke':
-                    effective = float(row['style']['stroke-width'].removeprefix('calc(').removesuffix(')').removesuffix('px'))
+                    effective = width
                 item = {'row':row,'a':point(row['matrix'],a),'b':point(row['matrix'],b),'width':effective}
                 actual.append(item)
                 if cls in RATIOS:
                     item['class'] = cls
                     pipes.append(item)
+                    dashed=has_dash_gaps(row['style'].get('stroke-dasharray'))
+                    if dashed:
+                        failures.append(('V15','%s %s pipe uses a dashed stroke where continuous ink is required @%s' % (row.get('id') or row['key'],cls,item['a'])))
+                    elif dashed is None:
+                        ev16['unchecked'].append({'element':row.get('id') or row['key'],'position':item['a'],'reason':'Unresolved network dash lengths'})
                     expected = RATIOS[cls]*ev15['base_T']
                     measurement = {'element':row.get('id') or row['key'], 'class':cls,'position':item['a'],
                                    'effective_width':effective, 'expected_width':expected}
@@ -120,6 +142,11 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
             if not port:
                 continue
             position = port['position']
+            permitted = [(point(node['matrix'],a),point(node['matrix'],b)) for a,b in lead['segments']]
+            # Source geometry owns this role even if the attached network's paint
+            # or width is unavailable; such a lead must not become a body stroke.
+            external_keys.update(item['row']['key'] for item in actual if item['row'].get('instance')==inst
+                                 and any(_overlap(a,b,item['a'],item['b']) for a,b in permitted))
             if any(u.get('component') == inst and u.get('port') == pid for u in ev16['unchecked']):
                 continue
             touching = [p for p in pipes if any(math.dist(q,position)<=POSITION_TOLERANCE for q in (p['a'],p['b']))]
@@ -134,7 +161,6 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                            'boundary':[], 'expected_width':expected,'effective_width':None,'segments':[]}
             unchecked = False
             used_keys = set()
-            permitted = [(point(node['matrix'],a),point(node['matrix'],b)) for a,b in lead['segments']]
             for local_a,local_b in lead['segments']:
                 a,b = point(node['matrix'],local_a),point(node['matrix'],local_b)
                 matches = []
@@ -145,6 +171,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                     if span:
                         matches.append((span,item))
                         used_keys.add(item['row']['key'])
+                        external_keys.add(item['row']['key'])
                         for endpoint in (item['a'],item['b']):
                             if not any(_on_segment(endpoint,pa,pb) for pa,pb in permitted):
                                 failures.append(('V16','%s.%s lead extends beyond the defined port/body boundary @%s' %
@@ -162,6 +189,12 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                         continue
                     for item in seen:
                         row = item['row']
+                        dashed=has_dash_gaps(row['style'].get('stroke-dasharray'))
+                        if dashed:
+                            failures.append(('V16','%s.%s dashed external lead cannot provide continuous ink to the body boundary @%s' % (inst,pid,location)))
+                        elif dashed is None:
+                            ev16['unchecked'].append({'component':inst,'port':pid,'position':location,'reason':'Unresolved external lead dash lengths'})
+                            unchecked=True
                         if any(effects.get(k,'none') != 'none' for effects in
                                [row['style']] + [a.get('effects',{}) for a in row.get('ancestors',[])]
                                for k in ('clip-path','mask','filter')):
@@ -205,6 +238,47 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                     unchecked = True
             measurement['status'] = 'not_checked' if unchecked else 'measured'
             ev16['measurements'].append(measurement)
+    # Painted bodies/internal mechanisms are a separate role from external leads.
+    # Solid fills (arrows, hatching) do not create a stroke-width requirement.
+    for row in rows:
+        if (not row.get('instance') or row['tag'] not in ('line','path','polyline','polygon','rect','circle','ellipse')
+                or row['key'] in external_keys):
+            continue
+        pid=row['attrs'].get('data-interface-port')
+        if pid and any(u.get('component')==row['instance'] and u.get('port')==pid for u in ev16['unchecked']):
+            continue  # An explicitly unmeasured interface is not relabeled as body.
+        paint=_visible_stroke(row)
+        if paint is False:continue
+        width=computed_length(row['style']['stroke-width'])
+        effects=any(style.get(k,'none')!='none' for style in
+                    [row['style']]+[a.get('effects',{}) for a in row.get('ancestors',[])] for k in ('clip-path','mask','filter'))
+        reason=None
+        if paint is None or width is None or effects:
+            reason='Body stroke paint/width/display effect needs additional measurement'
+        else:
+            try:
+                parts=segments(row['tag'],row['attrs'])
+                factors=[perpendicular_scale(row['matrix'],(b[0]-a[0],b[1]-a[1])) for a,b in parts]
+            except ValueError:
+                a,b,c,d,_,_=row['matrix']
+                if abs(a*a+b*b-c*c-d*d)<1e-7 and abs(a*c+b*d)<1e-7:
+                    factors=[math.hypot(a,b)]
+                elif row['tag'] in ('circle','ellipse','rect'):
+                    trace=a*a+b*b+c*c+d*d;disc=math.sqrt(max(0.,trace*trace-4*(a*d-b*c)**2))
+                    factors=[math.sqrt(max(0.,(trace-disc)/2)),math.sqrt((trace+disc)/2)]
+                else:
+                    reason='Curved body under nonuniform transform requires additional directional width evidence'
+            if not reason:
+                widths=[width*f for f in factors]
+                expected=1.5*ev15['base_T']
+                ev15['measurements'].append({'component':row['instance'],'element':row['id'] or row['key'],
+                                             'kind':'symbol_body','position':row['bbox'],'effective_widths':widths,'expected_width':expected})
+                if any(abs(value-expected)>WIDTH_TOLERANCE for value in widths):
+                    failures.append(('V15','%s %s body/internal effective widths %s != prescribed %.3f @%s' %
+                                     (row['instance'],row['id'] or row['key'],[round(v,4) for v in widths],expected,row['bbox'])))
+        if reason:
+            ev16['unchecked'].append({'component':row['instance'],'element':row['id'] or row['key'],
+                                      'position':row['bbox'],'reason':reason})
     ev15.update(coverage_status='not_checked' if ev16['unchecked'] else 'pass',
                 coverage_detail='Computed network/lead widths in root SVG units; symbol body styling is preserved.')
     ev16.update(coverage_status='not_checked' if ev16['unchecked'] else 'pass',

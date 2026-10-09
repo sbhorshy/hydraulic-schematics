@@ -110,6 +110,21 @@ class ReadbackCLI(unittest.TestCase):
         self.assertIn('READBACK_ITEMS',report['delivery']['blocking_checks'])
         self.assertFalse(report['phases']['local_readback']['complete'])
 
+    def test_missing_manifest_cannot_remove_required_local_review_gate(self):
+        self.generate()
+        self.run_cli('proofreading_evidence.py','record-review',self.work,'--reviewer','Fixture reviewer',
+                     '--decision','confirmed','--note','Test-only whole-sheet review')
+        (self.work/'readback-manifest.json').unlink()
+        verified=json.loads(self.run_cli('proofreading_evidence.py','verify',self.work).stdout)
+        self.assertFalse(verified['delivery']['ready'])
+        self.assertIn('READBACK_ITEMS',verified['delivery']['blocking_checks'])
+        self.run_cli('readback_review.py','record-item',self.work,'port:PF-001.inlet','--decision','confirmed',
+                     '--reviewer','Fixture reviewer','--note','Missing evidence must reject signing',expected=1)
+        self.run_cli('validate_sheet.py',self.work)
+        report=json.loads((self.work/'validation-report.json').read_text())
+        self.assertEqual(next(c['status'] for c in report['coverage'] if c['id']=='READBACK_ITEMS'),'not_checked')
+        self.assertIn('READBACK_ITEMS',report['delivery']['blocking_checks'])
+
     def test_full_driver_produces_current_unviewed_readback_bundle(self):
         target=Path(self.tmp.name)/'driver'
         self.run_cli('validate_driver.py','--intent',self.work/'1#系统.intent.yaml',
