@@ -41,7 +41,8 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
         coverage = {item['id']: item for item in report['coverage']}
         self.assertEqual(coverage['V1']['status'], 'pass')
         self.assertEqual(coverage['B6.avoid_corridor']['status'], 'not_checked')
-        self.assertEqual(coverage['B7']['status'], 'not_checked')
+        self.assertEqual(coverage['B7']['status'], 'warn')
+        self.assertTrue(coverage['B7']['evidence'][0]['violations'])
         self.assertEqual(coverage['PNG']['status'], 'not_checked')
         self.assertEqual(coverage['PERCEPTUAL']['status'], 'not_checked')
         self.assertEqual(report['phases']['automated']['status'], 'incomplete')

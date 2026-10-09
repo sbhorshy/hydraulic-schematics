@@ -286,13 +286,13 @@ def check_template_gate():
 def check_l0_regressions():
     suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths',
-              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation')
+              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
-                                timeout=180)
+                                timeout=600)
     except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 180 秒，未通过') from exc
+        raise Fail('L0 专项测试超过 600 秒，未通过') from exc
     if result.returncode:
         output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
         raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'

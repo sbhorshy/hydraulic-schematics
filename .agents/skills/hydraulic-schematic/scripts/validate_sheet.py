@@ -22,6 +22,7 @@ from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
 from browser_evidence import collect
+from text_checks import check_text
 from stroke_checks import check_widths
 from proofreading_evidence import assess_png, enrich_report, resolve_catalog, write_report
 
@@ -228,29 +229,20 @@ def main(argv=None):
           for m in re.finditer(
               r'<circle class="jn" cx="([\d.]+)" cy="([\d.]+)"', raw)]
 
-    # ---------- V12 管线与文字重合 ----------
-    # 文字包围盒按字号估算:CJK 字宽约等于字号,ASCII 约 0.55 倍。
-    texts = []
-    for m in re.finditer(
-            r'<text class="([a-z\-]+)"[^>]*?x="([\-\d.]+)" y="([\-\d.]+)"'
-            r'(?:[^>]*?text-anchor="(\w+)")?[^>]*>([^<]*)</text>', raw):
-        cls, tx, ty, anch, txt = (m.group(1), float(m.group(2)), float(m.group(3)),
-                                  m.group(4) or 'start', m.group(5))
-        if not txt.strip():
-            continue
-        fs = {'lbl': 11.0, 'ext': 10.0, 'grp-lbl': 10.5,
-              'lg-t': 10.5, 'tb-t': 11.0, 'banner': 15.0}.get(cls, 11.0)
-        wid = sum(fs if ord(ch) > 0x2E80 else fs * 0.55 for ch in txt)
-        x0 = {'start': tx, 'middle': tx - wid / 2, 'end': tx - wid}[anch]
-        texts.append((cls, txt, x0, ty - fs * 0.80, x0 + wid, ty + fs * 0.22))
-    for cls, txt, x0, y0, x1, y1 in texts:
-        for pcls, pts in polys:
-            for k in range(len(pts) - 1):
-                if seg_rect_hit(pts[k], pts[k + 1], (x0, y0, x1, y1), tol=0) > 3:
-                    F.append(('V12', '管线压住文字 "%s"(%s),段 %s->%s'
-                              % (txt.strip()[:22], cls, pts[k], pts[k + 1])))
-                    break
-    ev.append({'id': 'V12', 'texts': len(texts)})
+    # ---------- V12 / B7 actual rendered text ----------
+    text_browser = browser
+    png_evidence = assess_png(HERE)
+    if (png_evidence['status']=='pass' and
+            (browser.get('font_environment') is None or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('backend')!='chrome' or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('version')!=browser.get('renderer',{}).get('version') or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('font_environment')!=browser.get('font_environment'))):
+        text_browser = {**browser, 'status':'not_checked',
+                        'reason':'Final PNG and measured glyphs lack matching renderer/font-version evidence.'}
+    text_findings, text_evidence, text_geometry = check_text(text_browser, geometry, BUDGET['B7']['budget'])
+    F.extend((c['id'], c['detail']) for c in text_findings if c['result']=='fail')
+    W.extend((c['id'], c['detail']) for c in text_findings if c['result']=='warn')
+    ev.extend(text_evidence)
 
     # ---------- V13 管线与管线共线重叠 ----------
     # 两段平行且同线、区间相交 = 图上看不出是两条管路,读图必然误判。
@@ -368,9 +360,7 @@ def main(argv=None):
         for inst, bx in ink_boxes.items():
             if not (x1 < bx[0] or x0 > bx[2] or y1 < bx[1] or y0 > bx[3]):
                 mark_hits.append('组件 %s' % inst)
-        for cls, txt, tx0, ty0, tx1, ty1 in texts:
-            if not (x1 < tx0 or x0 > tx1 or y1 < ty0 or y0 > ty1):
-                mark_hits.append('文字 %s' % txt.strip()[:16])
+
 
         # 流向箭头包围盒。斜杠不得切碎箭头。
         for ar in re.finditer(r'<path class="arw" d="([^"]+)"', raw):
@@ -393,6 +383,8 @@ def main(argv=None):
             if any(not (x1 < e[0] or x0 > e[2] or y1 < e[1] or y0 > e[3])
                    for e in edges):
                 mark_hits.append('装配分组边界')
+    mark_hits.extend('文字 %s @%s' % (f['text'][:16], f['bbox']) for f in text_findings
+                     if f.get('obstacle_kind')=='suction_marker' and f['result']=='fail')
     for hit in sorted(set(mark_hits)):
         F.append(('V17', '吸油斜杠压住%s' % hit))
     Smark = float(L.get('style', {}).get('suction_marker_S', 8.0))
@@ -454,6 +446,8 @@ def main(argv=None):
     if duplicate:
         F.append(('V17', '吸油斜杠存在 %d 个重复几何,会叠画变粗' % duplicate))
     ev.append({'id': 'V17', 'S': Smark,
+               'coverage_status': 'not_checked' if text_geometry['unchecked'] else 'pass',
+               'text_coordinate_system': 'root_svg_user_units',
                'slash_height': geom17['slash_height'],
                'slash_angle_deg': geom17['slash_angle_deg'],
                'intra_spacing': geom17['intra_spacing'],
@@ -752,6 +746,13 @@ def main(argv=None):
     else:
         add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'pass',
             '避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关')
+    b7 = text_geometry.get('budget_status', 'not_checked')
+    distances = [item['distance'] for item in text_geometry.get('clearance', [])]
+    add('B7', {'min_clearance': round(min(distances),3) if distances else None,
+               'no_obstacles_within_budget': not distances,
+               'violations': text_geometry.get('violations',0)},
+        'not_measured' if b7=='not_checked' else 'over' if b7 in ('warn','fail') else 'pass',
+        'Browser glyph ink bounds and actual SVG contours; intra-label line spacing is typography.')
     ev.append({'id': 'V19', 'crossings': len(set(b1_cross)),
                'turns_total': turn_total, 'turns_max_single': turn_max,
                'detour_max': round(max(r for r, _ in ratios), 3) if ratios else None,
@@ -760,17 +761,17 @@ def main(argv=None):
     ev.append({'id': 'composition_budget', 'source':
                'rendering-rules.md 数值构图预算（concept 档 v1）',
                'items': {it['id']: it['status'] for it in items},
-               'not_measured': ['B6.avoid_corridor', 'B7'],
-               'note': 'B7 标签净空 6px 未自动测量（需文本包围盒近似），'
-                       'V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。'})
+               'not_measured': ['B6.avoid_corridor'] + (['B7'] if b7=='not_checked' else []),
+               'note': 'B7 使用实际浏览器字形及图元轮廓；B6 避让走廊尚未自动测量。'})
 
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings:
+    for finding in endpoint_findings + topology_findings + text_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
+        'text_geometry': {**text_geometry, 'texts':[{k:v for k,v in t.items() if k not in ('row','quad_boxes')} for t in text_geometry['texts']]},
         'topology': topology,
         'sheet': os.path.basename(SHEET),
         'validation': 'failed' if F else 'passed',
@@ -782,10 +783,8 @@ def main(argv=None):
         'composition_budget': {
             'source': 'rendering-rules.md 数值构图预算（concept 档 v1）',
             'items': items,
-            'not_measured': ['B6.avoid_corridor（避让走廊 ≥12）', 'B7（标签净空 ≥6）'],
-            'note': 'B6 避让走廊与 B7 标签净空 v1 未实现自动测量'
-                    '（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠'
-                    '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
+            'not_measured': ['B6.avoid_corridor（避让走廊 ≥12）'] + (['B7（标签净空 ≥6）'] if b7=='not_checked' else []),
+            'note': 'B7 采用实际字形及图元轮廓；净空不足记 V19 WARN，压字/裁切记 V12 FAIL。',
         },
     }
     enrich_report(rep, HERE, catalog_path=CATALOG)
@@ -807,7 +806,7 @@ def main(argv=None):
                  json.dumps(it['measured'], ensure_ascii=False),
                  json.dumps({k: v for k, v in BUDGET[it['id']].items()
                              if k.startswith('budget')}, ensure_ascii=False)))
-    print('  未测: B6.avoid_corridor, B7 标签净空（v1 裁剪，见报告注明）')
+    print('  未测: '+', '.join(rep['composition_budget']['not_measured']))
     return 1 if F else 0
 
 

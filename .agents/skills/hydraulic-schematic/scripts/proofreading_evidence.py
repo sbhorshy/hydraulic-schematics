@@ -80,7 +80,8 @@ def build_snapshot(workdir, catalog_path=None, tool_dir=None):
     for path in sorted(tool_dir.glob('*.py')):
         if not path.name.startswith(('test_', 'selftest')):
             add('tool:' + path.name, path)
-    versions = {'python': platform.python_version()}
+    from browser_evidence import font_environment
+    versions = {'python': platform.python_version(), 'font_environment':font_environment(workdir / SVG)}
     for package in ('Pillow', 'numpy', 'ruamel.yaml', 'jsonschema', 'kiwisolver'):
         try:
             versions[package] = importlib.metadata.version(package)
