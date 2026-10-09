@@ -92,6 +92,12 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
     element_keys = {el:index for index,(el,_) in enumerate(elements)}
     unchecked = []
     parent = {c: e for e in root.iter() for c in e}
+    def check_effects(el, row):
+        effects = [row['style']] + [a.get('effects', {}) for a in row.get('ancestors', [])]
+        if any(style.get(k, 'none') != 'none' for style in effects
+               for k in ('clip-path', 'mask', 'filter')):
+            unchecked.append({'svg_id': el.get('id'),
+                              'detail': 'Unsupported clipping/mask/filter affects visibility'})
     def visible(el):
         if measured:
             row = browser_rows.get(element_keys[el])
@@ -99,8 +105,7 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
                 unchecked.append({'svg_id':el.get('id'),'detail':'Missing browser element measurement'})
                 return False
             style = row['style']
-            if any(style.get(k,'none') != 'none' for k in ('clip-path','mask','filter')):
-                unchecked.append({'svg_id':el.get('id'),'detail':'Unsupported clipping/mask/filter affects visibility'})
+            check_effects(el, row)
             return (row['visible'] and style.get('stroke') not in ('none','rgb(255, 255, 255)','rgba(0, 0, 0, 0)')
                     and float(style.get('stroke-opacity','1')) > 0 and float(style.get('stroke-width','1').replace('px','')) > 0)
         while el is not None:
@@ -245,6 +250,7 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
             fail('hidden_node','parts.' + inst,'Component is not visible: ' + inst,component=inst)
             continue
         if row:
+            check_effects(instance, row)
             # Chrome stores SVG matrices at float32 precision. Compare actual
             # terminal displacement in the same 0.1-unit rounding tolerance,
             # not raw coefficient equality (which misflags valid rotations).

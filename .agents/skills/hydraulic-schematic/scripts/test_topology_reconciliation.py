@@ -201,6 +201,24 @@ class TopologyCLI(unittest.TestCase):
         failures=[c for c in self.validate()['checks'] if c['id']=='V10']
         self.assertTrue(any(c.get('kind')=='hidden_node' and c.get('component')=='PF-001' for c in failures),failures)
 
+    def test_ancestor_clipping_cannot_certify_visible_connectivity(self):
+        original = self.svg.read_text()
+        for group_id in ('lines', 'symbols'):
+            with self.subTest(group=group_id):
+                self.svg.write_text(original)
+                def damage(root):
+                    ns = '{http://www.w3.org/2000/svg}'
+                    defs = ET.SubElement(root, ns + 'defs')
+                    clip = ET.SubElement(defs, ns + 'clipPath', {'id': 'hide-network'})
+                    ET.SubElement(clip, ns + 'rect', {'x': '0', 'y': '0', 'width': '1', 'height': '1'})
+                    group = next(e for e in root.iter() if e.get('id') == group_id)
+                    group.set('clip-path', 'url(#hide-network)')
+                self.edit(damage)
+                report = self.validate()
+                coverage = next(c for c in report['coverage'] if c['id'] == 'V10')
+                self.assertEqual(coverage['status'], 'not_checked')
+                self.assertTrue(report['topology']['display_evidence']['unchecked'])
+
     def test_driver_and_standalone_report_same_measured_topology(self):
         output=Path(self.tmp.name)/'driver'
         result=subprocess.run([sys.executable,str(SKILL/'scripts/validate_driver.py'),
