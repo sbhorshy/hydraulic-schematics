@@ -265,3 +265,60 @@ PNG 自动导出优先采用与测量一致的 Chrome。PNG receipt、浏览器�
 缺失、内容不符、CSS 隐藏、透明或没有可见字形描画的必需文字触发 V12；无实际范围的项保持 B7 未校核，不能以观测到零条文字作为通过。
 组件标签使用 `data-label-for="INSTANCE"`，边界标签使用 `data-label-for="@EXTERN_ID"`；槽内文字沿实际 `inst-INSTANCE` 归属。
 `text_geometry.texts[].owner` 为 `symbol:INSTANCE`、`label:INSTANCE`、`label:@EXTERN_ID`、`title`、`legend` 或独立 DOM key，供局部回读与差分归属复用。
+### 版本影响与图像差分（#73）
+
+`sheet_diff.py` 通过独立 CLI 先冻结完整证据，再比较两个版本。冻结目录保留原始
+SVG、PNG、校核报告、目录/实际符号及运行脚本内容，同时复制本地 CSS URL 字体资源；
+后续编辑规范源或工作目录不会改写历史版本。源记录必须先通过 `verify_report`
+的 current 和 PNG pass 门禁。冻结版本的 current 表示快照字节与原记录一致，
+不是重新执行旧工具。每次比较输出独立 `before/`、`after/` 快照，禁止覆盖已有结果。
+
+```bash
+python <skill>/scripts/sheet_diff.py freeze <旧工作目录> --output <旧版快照目录>
+python <skill>/scripts/sheet_diff.py verify <旧版快照目录>
+python <skill>/scripts/sheet_diff.py compare <旧版快照目录> <当前工作目录> \
+  --scope <scope.json> --output <独立差分目录>
+```
+
+范围文件示例见 `assets/examples/change-scope-local.json` 与 `change-scope-global.json`。
+`nodes` 使用实例 ID，`edges` 使用 `paths[i][k->k+1]`、`taps[i]` 或 `buses.NAME`。
+`include_adjacent_edges: true` 只展开直接连接目标节点的输入边，不扩展整个网络或其他节点；
+母线变化须单独声明。`global: true` 明确授权全图呈现变化，但不会自动授权换口。
+所有范围须有说明 `note`，不接受矩形忽略区或用户绘制的大面积 mask。
+
+默认要求声明连接、实际连通网、节点/端口契约及追溯锚点保持一致。
+即使意外换口位于目标节点或相邻边内，也会报告 `unexpected_topology`。
+确有意图改变拓扑时，须把该边显式列入 `edges`，并逐条给出
+`topology_changes: {"paths[1][0->1]": {"before": ["EDP-001.pressure_out", "PF-001.inlet"],
+"after": ["EDP-001.pressure_out", "PF-001.outlet"]}}`。两个端点组必须同时与各版
+输入定义和实际连接一致；范围许可不能掩盖与输入不符的接管。
+
+差分直接读取两版已核实的 PNG。局部许可像素来自两版允许对象的实际描画并集，
+不使用对象占位矩形或空间膨胀；对象自身的独立变化仍逐项对账，所以旁边对象的变化
+即使落在许可墨迹内也不能被吞掉。每版本最多一次批量范围栅格化，与对象数量无关；
+全局比较或无像素变化时无需补充栅格化。原始 PNG 不重新生成。
+默认每通道容差为 8/255，`--pixel-threshold` 可设为 0–16；低于容差的非零变化数仍披露。
+局部范围重绘前要求历史安装字体内容版本仍可用，本地字体从冻结副本重定位；
+字体环境不一致、未知 paint/use/滤镜等范围描画、画布/viewBox 或 PNG 尺寸不能可靠对齐时，
+明确输出 `not_comparable` 和原因，不输出“无差异”。全局 PNG 比较不需要重绘旧字体。
+
+输出 `change-report.json`、可读的 `change-report.md` 和 `diff-overlay.png`。
+报告包含变化节点/连接、前后对象坐标、输入/实际拓扑差异、授权与越域项、像素连通区域、
+容差、全图比较范围和实际耗时/栅格化次数。黄色为范围内变化，红色为范围外变化。
+比较退出码：0 范围内，1 有越域或未授权拓扑变化，2 不可比/证据失效。
+差分通过不替代两版完整校核，也不签认感知回读；报告保留各版校核/交付状态。
+
+完整驱动器可在本轮正式校核后追加差分：
+
+```bash
+python <skill>/scripts/validate_driver.py --intent <intent.yaml> --layout-seed <layout.json> \
+  --workdir <独立工作目录> --compare-against <已冻结的旧版目录> \
+  --change-scope <scope.json> --comparison-output <新的独立差分目录>
+```
+
+驱动器基准必须冻结且与本轮工作目录分离；省略 `--comparison-output` 时新建独立临时目录。
+`convergence-report.json.change_comparison` 指向结果；差分越域使交付阻断（退出 1），
+不可比则保留未齐备状态（退出 4），已有输入/几何/工具失败继续保留。差分通过仍不消除
+PERCEPTUAL 等独立交付阻断项。可复现的 CLI 正反例位于 `test_sheet_diff.py`：
+引线修复、旋转与关联走线、目标范围内错口、另一元件变化、字体替换、画布不可比、
+源锚点丢失、PNG 篡改和字体资源失效。
