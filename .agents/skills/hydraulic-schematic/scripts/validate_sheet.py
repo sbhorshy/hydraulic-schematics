@@ -589,12 +589,7 @@ def main(argv=None):
     ev.append({'id': 'V9', 'not_annotated': sorted(notready)})
 
     # ---------- V10 Independent visible connectivity and input traceability ----------
-    try:
-        from browser_evidence import collect
-        topology_browser = collect(SHEET)
-    except ImportError:
-        topology_browser = {'status':'not_checked','reason':'Browser display collector unavailable'}
-    topology = reconcile_topology(root, geometry, intent, cat, L, topology_browser)
+    topology = reconcile_topology(root, geometry, intent, cat, L, browser_evidence=browser)
     topology_findings = topology['findings']
     F.extend((c['id'], c['detail']) for c in topology_findings)
     ev.append({'id': 'V10', 'coverage_status': topology['coverage_status'],
