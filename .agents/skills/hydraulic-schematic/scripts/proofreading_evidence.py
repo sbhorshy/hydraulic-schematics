@@ -140,12 +140,12 @@ def automated_payload(report):
     """Stable validation evidence, excluding the separately recorded review."""
     return {key: value for key, value in report.items()
             if key not in ('visual_review', 'phases', 'delivery', 'perceptual_review',
-                           'validation_fingerprint', 'report_fingerprint', 'coverage', 'timings')}
+                           'validation_fingerprint', 'report_fingerprint', 'coverage', 'timings', 'local_readback')}
 
 
 def validation_fingerprint(report):
     payload = automated_payload(report)
-    payload['coverage'] = [e for e in report.get('coverage', []) if e['id'] != 'PERCEPTUAL']
+    payload['coverage'] = [e for e in report.get('coverage', []) if e['id'] not in ('PERCEPTUAL','READBACK_ITEMS')]
     return digest_json(payload)
 
 
@@ -172,6 +172,24 @@ def write_report(report, path):
     Path(str(path) + '.sha256').write_text(digest_bytes(payload), encoding='ascii')
 
 
+def assess_local_readback(workdir, report):
+    """Optional local-review layer; legacy reports without a manifest keep their contract."""
+    if not (Path(workdir)/'readback-manifest.json').exists():
+        return {'status':'not_generated','complete':False,'required':False}
+    try:
+        from readback_review import assess_manifest
+        return assess_manifest(workdir,report)
+    except (ImportError,OSError,ValueError,KeyError) as error:
+        return {'status':'invalidated','complete':False,'detail':str(error)}
+
+
+def effective_delivery(report, review, local):
+    missing=[e['id'] for e in report.get('coverage',[]) if e['id'] not in ('PERCEPTUAL','READBACK_ITEMS') and e['status'] in ('fail','not_checked')]
+    if review['status']!='confirmed':missing.append('PERCEPTUAL')
+    if local['status']!='not_generated' and not local['complete']:missing.append('READBACK_ITEMS')
+    return {'ready':not missing,'status':'ready' if not missing else 'incomplete','blocking_checks':missing}
+
+
 def verify_report(workdir, report_path=None):
     """Reusable gate for crops/diffs: never trust an old report's success field.
 
@@ -196,8 +214,11 @@ def verify_report(workdir, report_path=None):
         if recorded['fingerprint'] != current['fingerprint']:
             return {'status': 'invalidated', 'changed': changed,
                     'perceptual_review': {'status': 'invalidated'}}
+        review=assess_review(workdir,current,report)
+        local=assess_local_readback(workdir,report)
         return {'status': 'current', 'fingerprint': current['fingerprint'], 'changed': [],
-                'png': assess_png(workdir), 'perceptual_review': assess_review(workdir, current, report)}
+                'png': assess_png(workdir), 'perceptual_review':review,'local_readback':local,
+                'delivery':effective_delivery(report,review,local)}
     except (OSError, ValueError, KeyError, TypeError) as exc:
         return {'status': 'invalidated', 'detail': str(exc),
                 'perceptual_review': {'status': 'invalidated'}}
@@ -279,6 +300,13 @@ def enrich_report(report, workdir, **kwargs):
     report['visual_review'] = 'passed' if review['status'] == 'confirmed' else 'pending'
     report['delivery'] = {'ready': not missing, 'status': 'ready' if not missing else 'incomplete',
                           'blocking_checks': missing}
+    local=assess_local_readback(workdir,report)
+    report['phases']['local_readback']=local
+    if local['status']!='not_generated':
+        coverage.append({'id':'READBACK_ITEMS','status':'pass' if local['complete'] else 'not_checked',
+                         'required':True,'detail':'Local image reviews are independent of whole-sheet signoff.',
+                         'evidence':[local]})
+    report['delivery']=effective_delivery(report,review,local)
     report['validation_fingerprint'] = validation_fingerprint(report)
     return report
 

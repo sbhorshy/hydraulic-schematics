@@ -6,7 +6,7 @@
     python .agents/skills/hydraulic-schematic/scripts/selftest.py
     python .agents/skills/hydraulic-schematic/scripts/selftest.py --update-golden   # 重录金样
 
-覆盖面（v3：自包含 L0 样例与有界寻优回归）：
+覆盖面（含真实浏览器显示与局部回读证据）：
 
   A. SysML 链路端到端：按 SKILL.md 运行纪律复刻真实用法——把 skill 快照的
      render_aircraft_schematic.py 与范例 .sysml 复制进临时工作目录再运行；
@@ -26,11 +26,12 @@
      对账 E-RECON 必须拦截（exit 1）且 concept 未签认 W-SIGN-UNSIGNED 披露。
   F. L0 入口、有界寻优、驱动器、路线剪枝、光栅化适配器的专项 unittest。
      入口测试含小型 seed 的预检→渲染→几何全链回归；当前 23 部件 seed 的
-     已知几何缺陷仍须被拦截。外部 PNG 工具采用桩测试，不在主自检启动浏览器。
+     已知几何缺陷仍须被拦截。主自检包含真实 Chrome 栅格化/显示测量，
+     并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
 
 全部输入来自 skill 随附资产，不依赖仓库外层的历史 frozen 目录。
-明确不在主自检覆盖内：真实 PNG 光栅化与感知回读，以及冻结版本与新版路由的
-全 SVG 差分；这些在独立验收中执行，不得把 Python 测试通过宣称为感知通过。
+自动测试验证出图、显示及证据协议，不等于已完成实际图纸的感知回读签认；
+整图与逐项回读仍须明确记录，不能把测试通过宣称为图纸已获确认。
 
 失败出口：与渲染器同一退出码约定 0 过 / 1 断，供 CI 或钩子直接调用。
 守门基础设施，在仓库根原位运行，不复制到工作目录。
@@ -287,7 +288,7 @@ def check_l0_regressions():
     # End-to-end browser suites share this aggregate hang guard; it is not a performance assertion.
     suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths',
-              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics')
+              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_readback_review')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,

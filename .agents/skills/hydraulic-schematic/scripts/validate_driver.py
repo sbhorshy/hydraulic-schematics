@@ -63,6 +63,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from proofreading_evidence import verify_report
+from readback_review import generate as generate_readback, verify_bundle
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SKILL = os.path.dirname(HERE)
@@ -76,7 +77,7 @@ READBACK = 'sheet-readback.png'
 
 SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
-           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py']
+           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py', 'readback_review.py']
 PY = sys.executable
 # 轮内几何硬缺陷 → P3；其余 fail 全部残差。
 P3_IDS = {'V2', 'V13', 'V19'}
@@ -282,7 +283,7 @@ def load_yaml(path):
 
 # ---------- 驱动主流程 ----------
 
-GENERATED = (LAYOUT_NAME, SVG_NAME, READBACK, '1#系统原理图-topology.json', '1#系统原理图-topology.md', 'validation-report.json',
+GENERATED = ('readback.html','readback-manifest.json',LAYOUT_NAME, SVG_NAME, READBACK, '1#系统原理图-topology.json', '1#系统原理图-topology.md', 'validation-report.json',
              READBACK + '.evidence.json', 'validation-report.json.sha256',
              'convergence-report.json', 'layout-guard-report.json', 'ref.layout.json')
 MANAGED_FILES = '.driver-managed-files.json'
@@ -520,6 +521,22 @@ def main():
     wd = str(Path(args.workdir).resolve()) if args.workdir else tempfile.mkdtemp(prefix='hydraulic-driver-')
 
     def done(code):
+        if report.get('artifact_fingerprint') and not report.get('tool_failure'):
+            try:
+                with stage(report['stages'],'local_readback') as timing:
+                    bundle=generate_readback(wd)
+                    local=verify_bundle(wd)
+                    if local['status']!='current':raise RuntimeError('Local readback evidence is invalidated: '+str(local))
+                    report['local_readback']={**local,'elapsed_s':bundle['elapsed_s'],'rasterizations':0}
+                    report['delivery']=verify_report(wd)['delivery']
+                    timing['object_count']=len(bundle['objects']);timing['crop_count']=len(bundle['regions'])
+                if code in (0,4):code=0 if report['delivery']['ready'] else 4
+            except (OSError,ValueError,RuntimeError,KeyError) as error:
+                report['local_readback']={'status':'invalidated','complete':False,'detail':str(error)}
+                report['tool_failure']='Local readback generation failed: '+str(error)
+                code=3
+        else:
+            report['local_readback']={'status':'not_generated','complete':False,'detail':'No verified final PNG/report was produced.'}
         report['exit_code'] = code
         report['elapsed_s'] = round(time.monotonic() - started, 3)
         finish(report, wd)
@@ -650,6 +667,9 @@ def finish(report, wd):
     for r in report['residuals']:
         print('残差 %s [%s]: %s' % (r['id'], r['stage'],
                                     r.get('detail') or r.get('message', '')[:80]))
+    local=report.get('local_readback',{})
+    if local.get('status')=='current':
+        print('局部回读: %d 个对象 / %d 张局部图，%.3fs -> %s' % (local['object_count'],local['crop_count'],local['elapsed_s'],os.path.join(wd,'readback.html')))
     if report.get('tool_failure'):
         print('工具链故障: %s' % report['tool_failure'])
     print('结论: %s  (%.1fs, 报告 -> %s)'
