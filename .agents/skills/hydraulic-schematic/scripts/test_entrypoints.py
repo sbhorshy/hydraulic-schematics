@@ -21,7 +21,7 @@ def make_render_workspace(root, fixture):
     work = root / 'run'
     work.mkdir()
     for name in ('render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
-                 'topology_confirm.py'):
+                 'topology_confirm.py', 'sheet_geometry.py', 'endpoint_checks.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
     shutil.copytree(CATALOG.parent, work / 'symbols')
@@ -118,8 +118,8 @@ class LayoutEntrypoints(unittest.TestCase):
             report = json.loads((work / 'validation-report.json').read_text(encoding='utf-8'))
             failures = {c['id'] for c in report['checks'] if c['result'] == 'fail'}
             # 短净距出桩修复已消除原 V17；此未修正种子仍有气侧穿本体，
-            # 且新的 V13 检查会抓住同一支路原先漏检的反向折返。
-            self.assertEqual(failures, {'V2', 'V13'})
+            # 且 V3/V13 独立检查会抓住同一支路原先漏检的反向折返。
+            self.assertEqual(failures, {'V2', 'V3', 'V13'})
             self.assertTrue(any(c['id'] == 'V13' and '自身折返' in c['detail']
                                 and 'ln-sense' in c['detail'] for c in report['checks']))
             self.assertEqual(report['visual_review'], 'pending')

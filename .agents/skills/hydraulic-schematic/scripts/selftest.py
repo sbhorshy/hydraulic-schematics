@@ -285,7 +285,7 @@ def check_template_gate():
 
 def check_l0_regressions():
     suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver',
-              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_route_terminals')
+              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_route_terminals', 'test_port_geometry')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
