@@ -18,6 +18,7 @@ import re
 import sys
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
+from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
@@ -165,7 +166,6 @@ def main(argv=None):
 
     # ---------- 收集元件占位矩形 ----------
     boxes = {}
-    boxes_foot = {}   # 旋转后画布足迹占位,仅 B5 净距使用(其余检查维持声明占位口径)
     ink_boxes = {}    # 旋转后实际墨迹矩形,仅 V2"穿越本体"使用
     ports = {}
     for inst, nd in L['nodes'].items():
@@ -182,12 +182,6 @@ def main(argv=None):
         ink_boxes[inst] = ((nd['x'], nd['y'], nd['x'] + sh, nd['y'] + sw)
                            if rot in (90, 270)
                            else (nd['x'], nd['y'], nd['x'] + sw, nd['y'] + sh))
-        # 足迹占位=旋转后画布足迹,与 render 落位补偿一致:rot 90/270 宽高互换、(x,y) 锚定。
-        # B5 净距用足迹口径——非正方形旋转件的声明框(预旋转)不是图上占位
-        # (FSOV-001 归位实例:声明 201.28x114.67 rot270,图上足迹 114.67x201.28)。
-        boxes_foot[inst] = ((nd['x'], nd['y'], nd['x'] + nd['h'], nd['y'] + nd['w'])
-                            if rot in (90, 270)
-                            else (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h']))
         pabs = {}
         for pid, (px, py, anch, role, med) in ps.items():
             lx, ly = (px - vx) * k, (py - vy) * k
@@ -621,7 +615,6 @@ def main(argv=None):
     turn_total = 0
     turn_max = 0
     ratios = []
-    min_seg = 9e9
     for _c, pts in polys:
         turn_total += turns_of(pts)
         turn_max = max(turn_max, turns_of(pts))
@@ -630,8 +623,6 @@ def main(argv=None):
                      for a, b in zip(pts, pts[1:]))
         if man > 0:
             ratios.append((length / man, pts))
-        for a, b in zip(pts, pts[1:]):
-            min_seg = min(min_seg, abs(a[0] - b[0]) + abs(a[1] - b[1]))
 
     # B1 交叉：正交段几何交点，端点相接（T 型汇入/三通）不算。
     # 预算恒为 0，不承认跨线桥豁免——有桥也是超预算，须改道。
@@ -660,17 +651,9 @@ def main(argv=None):
                 continue
             b1_cross.append((x, y))
 
-    # B5 节点盒净距：矩形间最小距离（轴向或对角，欧氏）。
-    b5_gap = None
-    bl = sorted(boxes_foot.items())  # B5 用足迹口径(FSOV-001 归位暴露:非正方形旋转件声明框≠图上占位)
-    for i in range(len(bl)):
-        for j in range(i + 1, len(bl)):
-            r1, r2 = bl[i][1], bl[j][1]
-            dx = max(r1[0] - r2[2], r2[0] - r1[2], 0.0)
-            dy = max(r1[1] - r2[3], r2[1] - r1[3], 0.0)
-            g = math.hypot(dx, dy)
-            if b5_gap is None or g < b5_gap:
-                b5_gap = g
+    # B5 uses the final transformed source footprints, including nested transforms.
+    b5_nearest = nearest_components(geometry)
+    b5_gap = b5_nearest['distance'] if b5_nearest else None
 
     items = []
     def add(bid, measured, status, detail=None):
@@ -730,38 +713,72 @@ def main(argv=None):
                'over_budget': ['%.3f' % r for r, _ in b3_over]},
         b3_status, b3_detail)
 
-    # B4 最短走线段 ≥8px。
-    if min_seg < BUDGET['B4']['budget']:
-        add('B4', round(min_seg, 1), 'over')
-        W.append(('V19', '构图预算 B4：最短走线段 %.1f < 8' % min_seg))
-    else:
-        add('B4', round(min_seg, 1), 'pass')
+    # B4 measures actual turns/interfaces, not arbitrary SVG storage cuts.
+    budget_runs = measure_runs(geometry, topology)
+    nearest_run = min(budget_runs,key=lambda r:r['length']) if budget_runs else None
+    min_seg = nearest_run['length'] if nearest_run else None
+    b4_over = min_seg is not None and min_seg < BUDGET['B4']['budget']
+    b4_status = ('not_measured' if topology['coverage_status']=='not_checked' else
+                 'over' if b4_over else 'pass' if nearest_run else 'not_applicable')
+    b4_item = add('B4', round(min_seg,1) if min_seg is not None else None,b4_status)
+    if b4_status=='not_measured':
+        b4_item['detail'] = 'Visible topology is incomplete; available runs are partial measurements.'
+    b4_item['runs'] = budget_runs
+    b4_item['nearest_run'] = nearest_run
+    if b4_over:
+        W.append(('V19','构图预算 B4：%s 最短走线段 %.1f < 8，差额 %.1f，位置 %s → %s'
+                  % (nearest_run['anchor'],min_seg,8-min_seg,nearest_run['start'],nearest_run['end'])))
 
     # B5 节点盒净距 ≥40px。
     if b5_gap is not None and b5_gap < BUDGET['B5']['budget']:
         add('B5', round(b5_gap, 1), 'over')
-        W.append(('V19', '构图预算 B5：节点盒最小净距 %.1f < 40' % b5_gap))
+        W.append(('V19', '构图预算 B5：%s 最小净距 %.1f < 40，差额 %.1f，位置 %s'
+                  % (' ↔ '.join(b5_nearest['components']), b5_gap,40-b5_gap,b5_nearest['positions'])))
     else:
         add('B5', round(b5_gap, 1) if b5_gap is not None else None, 'pass')
 
-    # B6 容器走廊：分组内边距取 layout.group_padding 实测；
-    # 避让走廊需逐段算走线与元件的间隙，v1 未测。
-    gp = L.get('group_padding')
+    if geometry['issues'] or topology.get('display_evidence',{}).get('unchecked'):
+        items[-1]['status'] = 'not_measured'
+        items[-1]['detail'] = 'Some final component footprints could not be measured; see geometry/display issues.'
+    if b5_nearest:
+        items[-1]['nearest'] = dict(b5_nearest, deficit=max(0.0,BUDGET['B5']['budget']-b5_gap))
+
+    # B6 pipe-to-footprint clearance; only an actual outward terminal run
+    # may occupy its own component's approach corridor.
+    corridors = measure_corridors(geometry, topology, budget_runs, BUDGET['B6']['budget_avoid_corridor'], topology_browser)
+    corridor_gap = corridors['nearest']['distance'] if corridors['nearest'] else None
+    group_measurement = measure_groups(geometry, intent, topology_browser, BUDGET['B6']['budget_group_padding'])
+    gp = group_measurement['nearest']['distance'] if group_measurement['nearest'] else None
+    b6_over = ((gp is not None and gp < BUDGET['B6']['budget_group_padding'])
+               or (corridor_gap is not None and corridor_gap < BUDGET['B6']['budget_avoid_corridor']))
+    b6_status = ('over' if b6_over else 'not_measured' if 'not_checked' in (group_measurement['status'],corridors['coverage_status']) else 'pass')
+    b6_item = add('B6', {'group_padding':gp,'avoid_corridor':corridor_gap},b6_status)
+    b6_item['nearest_group'] = group_measurement['nearest']
+    b6_item['group_padding_status'] = group_measurement['status']
+    b6_item['groups'] = group_measurement
+    b6_item['nearest_corridor'] = corridors['nearest']
+    b6_item['corridors'] = corridors
     if gp is not None and gp < BUDGET['B6']['budget_group_padding']:
-        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'over')
-        W.append(('V19', '构图预算 B6：分组内边距 %g < 14' % gp))
-    else:
-        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'pass',
-            '避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关')
+        W.append(('V19','构图预算 B6：分组 %s 到 %s 内边距 %g < 14，差额 %g，位置 %s'
+                  % (group_measurement['nearest']['group'],group_measurement['nearest']['component'],gp,14-gp,group_measurement['nearest']['positions'])))
+    if corridors['violations']:
+        nearest = corridors['nearest']
+        W.append(('V19','构图预算 B6：%s 绕过 %s 的净距 %.1f < 12，差额 %.1f，位置 %s'
+                  % (nearest['anchor'],nearest['component'],nearest['distance'],nearest['deficit'],nearest['positions'])))
+    ev.append({'id':'B6.avoid_corridor','coverage_status':corridors['coverage_status'],
+               'coverage_detail':('Measured straight runs and visible semicircular bridges against transformed component footprints; only own outward terminal runs exempt.'
+                                  if corridors['coverage_status']!='not_checked' else
+                                  'Clearance measurement incomplete; see geometry/topology issues and unchecked objects.'),
+               'budget':BUDGET['B6']['budget_avoid_corridor'],**corridors})
     ev.append({'id': 'V19', 'crossings': len(set(b1_cross)),
                'turns_total': turn_total, 'turns_max_single': turn_max,
                'detour_max': round(max(r for r, _ in ratios), 3) if ratios else None,
-               'min_segment': round(min_seg, 1), 'box_gap_min': b5_gap})
+               'min_segment': round(min_seg, 1) if min_seg is not None else None, 'box_gap_min': b5_gap})
 
     ev.append({'id': 'composition_budget', 'source':
                'rendering-rules.md 数值构图预算（concept 档 v1）',
                'items': {it['id']: it['status'] for it in items},
-               'not_measured': ['B6.avoid_corridor', 'B7'],
+               'not_measured': (['B6.avoid_corridor'] if corridors['coverage_status']=='not_checked' else []) + ['B7'],
                'note': 'B7 标签净空 6px 未自动测量（需文本包围盒近似），'
                        'V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。'})
 
@@ -783,9 +800,8 @@ def main(argv=None):
         'composition_budget': {
             'source': 'rendering-rules.md 数值构图预算（concept 档 v1）',
             'items': items,
-            'not_measured': ['B6.avoid_corridor（避让走廊 ≥12）', 'B7（标签净空 ≥6）'],
-            'note': 'B6 避让走廊与 B7 标签净空 v1 未实现自动测量'
-                    '（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠'
+            'not_measured': (['B6.avoid_corridor（部分几何未测）'] if corridors['coverage_status']=='not_checked' else []) + ['B7（标签净空 ≥6）'],
+            'note': 'B4/B5/B6 使用本轮归一化走线与足迹；B7 标签净空未测，V12 已覆盖压字重叠'
                     '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
         },
     }
@@ -808,7 +824,7 @@ def main(argv=None):
                  json.dumps(it['measured'], ensure_ascii=False),
                  json.dumps({k: v for k, v in BUDGET[it['id']].items()
                              if k.startswith('budget')}, ensure_ascii=False)))
-    print('  未测: B6.avoid_corridor, B7 标签净空（v1 裁剪，见报告注明）')
+    print('  未测:', ', '.join(rep['composition_budget']['not_measured']))
     return 1 if F else 0
 
 

@@ -878,9 +878,9 @@ class Sheet(object):
                 continue
             gap = self.L.get('group_label_gap', 8)
             out.append(
-                '<rect class="grp" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>'
+                '<rect class="grp" data-group="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>'
                 '<text class="grp-lbl" x="%.1f" y="%.1f">%s</text>' % (
-                    box[0] - pad, box[1] - pad,
+                    self.esc(g['id']), box[0] - pad, box[1] - pad,
                     box[2] - box[0] + 2 * pad, box[3] - box[1] + 2 * pad,
                     box[0] - pad, box[1] - pad - gap, self.esc(g['label'])))
         return out
