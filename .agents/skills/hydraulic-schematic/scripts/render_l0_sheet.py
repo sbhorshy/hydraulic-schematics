@@ -7,6 +7,7 @@
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
 from lead_geometry import source_leads, perpendicular_scale
+from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
 
@@ -880,39 +881,18 @@ class Sheet(object):
 
     # ---------- 悬空端口检测 ----------
     def dangling(self):
-        """列出布局中已绘制但未被任何 path 使用的端口。
+        """列出布局中已绘制但未被 paths/taps 使用的目录端口。
 
         原理图最坏的失效模式是悄悄画一个没接线的口:读图人会以为它接好了。
         故凡未接线的端口一律标红圈并计数,不允许静默。
         """
-        used = set()
-        for p in self.i['paths']:
-            for k, tok in enumerate(p):
-                if tok.startswith('@'):
-                    continue
-                inst = tok.split('.')[0]
-                if inst not in self.i['parts']:
-                    continue
-                if '.' in tok:
-                    used.add((inst, tok.split('.', 1)[1]))
-                else:
-                    mp = self.types[self.i['parts'][inst]]['main_path']
-                    if mp:
-                        used.add((inst, mp['in']))
-                        used.add((inst, mp['out']))
-        # taps 已接的端口不悬空:sensor 端口由支路本身使用,at 端口归被测件。
-        for t in self.i.get('taps') or []:
-            sinst, spid = t['sensor'].split('.', 1)
-            used.add((sinst, spid))
-            ainst, apid = t['at'].split('.', 1)
-            if ainst in self.i['parts']:
-                used.add((ainst, apid))
-        marks, names = [], []
-        for (inst, pid), (x, y, _a) in sorted(self.abs.items()):
-            if (inst, pid) in used:
-                continue
-            marks.append('<circle class="dang" cx="%.1f" cy="%.1f" r="5"/>' % (x, y))
-            names.append('%s.%s' % (inst, pid))
+        inventory = endpoint_usage(self.i, self.types, self.L['nodes'])
+        marks, names = [], inventory['dangling']
+        for endpoint in names:
+            inst, pid = endpoint.split('.', 1)
+            x, y, _a = self.abs[(inst, pid)]
+            marks.append('<circle class="dang" data-port="%s" cx="%.1f" cy="%.1f" r="5"/>'
+                         % (endpoint, x, y))
         return marks, names
 
     def esc(self, s):
@@ -972,6 +952,13 @@ class Sheet(object):
             mk = self.portlines(mk, ports, inst)
             if nd.get('_name_slot'):
                 mk = self.fill_name_slot(mk, inst)
+            # Nonvisual source-port markers survive embedding. Metadata cannot
+            # become false body ink/lead anchors in geometric or pixel checks.
+            mk += '\n' + '\n'.join(
+                '<metadata data-node="%s" data-port="%s.%s" data-port-id="%s" '
+                'data-x="%g" data-y="%g" data-anchor-direction="%s"/>'
+                % (inst, inst, pid, pid, point[0], point[1], point[2])
+                for pid, point in sorted(ports.items()))
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
             # 覆盖——不能写成实例 g 的 stroke-width 属性,那会被后代
@@ -1312,6 +1299,11 @@ def main(argv=None):
         sys.exit(1)
     with io.open(os.path.join(workdir, '1#系统.layout.json'), encoding='utf-8') as f:
         layout = json.load(f)
+    types = {c['component_type']: c for c in catalog['components']}
+    contract_issues = symbol_contract(intent, types, layout['nodes'], workdir, cat_dir)
+    if contract_issues:
+        sys.exit(write_contract_failure(workdir, endpoint_usage(intent, types, layout['nodes']),
+                                        contract_issues, intent.get('unknown') or []))
     s = Sheet(intent, layout, catalog, cat_dir=cat_dir, workdir=workdir)
     s.place()
     s.build_textboxes()
