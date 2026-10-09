@@ -76,7 +76,7 @@ READBACK = 'sheet-readback.png'
 
 SCRIPTS = ['preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
-           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py']
+           'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py']
 PY = sys.executable
 # 轮内几何硬缺陷 → P3；其余 fail 全部残差。
 P3_IDS = {'V2', 'V13', 'V19'}

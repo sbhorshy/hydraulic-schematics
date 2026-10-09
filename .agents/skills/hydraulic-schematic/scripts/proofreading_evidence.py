@@ -243,8 +243,13 @@ def coverage_for(report):
         check_id = 'B6.group_padding' if item['id'] == 'B6' else item['id']
         status = {'over': 'warn', 'exempt': 'warn', 'not_measured': 'not_checked'}.get(item['status'], item['status'])
         detail = item.get('detail') or 'Composition budget measured by the validator.'
-        if check_id == 'B6.group_padding' and item.get('measured', {}).get('group_padding') is None:
-            status, detail = 'not_applicable', 'No group padding is declared in this layout.'
+        if check_id == 'B6.group_padding':
+            if 'group_padding_status' in item:
+                status = item['group_padding_status']
+                detail = ('No group frames apply to this input.' if status=='not_applicable' else
+                          'Measured final group frames against normalized member footprints; see group evidence for unchecked objects.')
+            elif item.get('measured', {}).get('group_padding') is None:
+                status, detail = 'not_applicable', 'No group padding is declared in this layout.'
         coverage.append(dict(id=check_id, status=status, required=True,
                              evidence=[item], detail=detail))
     return coverage

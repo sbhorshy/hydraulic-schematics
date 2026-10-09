@@ -237,6 +237,39 @@ class TextDisplay(unittest.TestCase):
                             and c.get('container')=='FSOV-001__motor-circle'
                             for c in self.text_failures(report)),self.text_failures(report))
 
+    def test_required_component_labels_hidden_by_stylesheet_fail(self):
+        self.render()
+        self.svg.write_text(self.svg.read_text().replace('</style>','#labels {display:none;}</style>'))
+        report=self.validate()
+        self.assertTrue(any(c.get('kind')=='text_hidden' for c in self.text_failures(report)),self.text_failures(report))
+        self.assertIn(next(c for c in report['coverage'] if c['id']=='B7')['status'],('fail','not_checked'))
+
+    def test_missing_declared_labels_and_title_text_cannot_look_complete(self):
+        self.render();original=self.svg.read_text()
+        for target in ('labels','USER-001__user-name','title-row-1'):
+            with self.subTest(target=target):
+                root=ET.fromstring(original)
+                element=next(e for e in root.iter() if e.get('id')==target)
+                parent=next(p for p in root.iter() if element in list(p))
+                parent.remove(element)
+                self.save(root);report=self.validate()
+                self.assertTrue(any(c.get('kind')=='missing_required_text' for c in self.text_failures(report)),self.text_failures(report))
+                self.assertIn(next(c for c in report['coverage'] if c['id']=='B7')['status'],('fail','not_checked'))
+
+    def test_unpainted_user_span_and_hidden_title_are_known_failures(self):
+        self.render();original=self.svg.read_text()
+        for target in ('user-span','title-row-1'):
+            with self.subTest(target=target):
+                root=ET.fromstring(original)
+                if target=='user-span':
+                    user=next(e for e in root.iter() if e.get('id')=='USER-001__user-name')
+                    next(user.iter(NS+'tspan')).set('style','fill:none;stroke:none')
+                else:
+                    next(e for e in root.iter() if e.get('id')==target).set('style','opacity:0')
+                self.save(root);report=self.validate()
+                self.assertTrue(any(c.get('kind')=='text_hidden' for c in self.text_failures(report)),self.text_failures(report))
+                self.assertIn(next(c for c in report['coverage'] if c['id']=='B7')['status'],('fail','not_checked'))
+
 
 if __name__=='__main__':
     unittest.main()

@@ -1,6 +1,8 @@
 """Rendered text measurement, containment and clearance in root SVG units."""
 import math
 import re
+import xml.etree.ElementTree as ET
+from layout_clearance import display_rectangle
 from lead_geometry import segments, perpendicular_scale
 from sheet_geometry import point
 
@@ -89,18 +91,110 @@ def overlap_finding(text,obstacle,kind,distance,required=6.):
                      (text['text'][:35],kind,obstacle,distance,required,text['bbox'])}
 
 
-def check_text(browser, geometry, budget=6.):
+def normalized_text(value):
+    return ''.join(str(value or '').split())
+
+
+def glyph_paint(row):
+    style=row['style']
+    if not row.get('visible'): return False
+    results=[]
+    for paint in ('fill','stroke'):
+        value=style.get(paint,'none')
+        if value=='none' or float(style.get(paint+'-opacity','1'))<=0:
+            results.append(False);continue
+        color=re.fullmatch(r'rgba?\(([^)]+)\)',value)
+        if not color: results.append(None);continue
+        rgba=[float(v.strip()) for v in color[1].split(',')]
+        alpha=rgba[3] if len(rgba)==4 else 1
+        try:
+            width=float(style.get('stroke-width','0').removeprefix('calc(').removesuffix(')').removesuffix('px')) if paint=='stroke' else 1
+        except ValueError:
+            results.append(None);continue
+        results.append(alpha>0 and width>0)
+    return True if True in results else None if None in results else False
+
+
+def required_text(rows,layout,intent,resolve_symbol,geometry):
+    """Expected text comes from declared labels and the actual selected symbol assets."""
+    required,issues,unchecked,used=set(),[],[],set()
+    text_rows=[r for r in rows if r['tag']=='text' and not any(a['tag'] in ('defs','symbol','clipPath','mask') for a in r['ancestors'])]
+    def missing(text,owner,component=None):
+        issues.append({'id':'V12','result':'fail','kind':'missing_required_text','text':text,'label_owner':owner,
+                       'component':component,'bbox':None,
+                       'component_bbox':geometry['nodes'].get(component,{}).get('footprint'),
+                       'detail':'必需文字 "%s" 缺失或内容不符，归属 %s' % (text,owner)})
+        unchecked.append({'text':text,'owner':owner,'reason':'Missing required text has no measurable glyph range'})
+    def require(text,owner,component=None,element_id=None,scope='labels'):
+        candidates=[r for r in text_rows if r['key'] not in used and normalized_text(r['text'])==normalized_text(text)]
+        if scope=='instance': candidates=[r for r in candidates if r.get('instance')==component and (not element_id or r['id']==element_id)]
+        else:
+            candidates=[r for r in candidates if 'labels' in _groups(r) and r['attrs'].get('data-label-for') in (None,owner)]
+            candidates.sort(key=lambda r:r['attrs'].get('data-label-for')!=owner)
+        if not candidates: missing(text,owner,component);return
+        row=candidates[0];required.add(row['key']);used.add(row['key'])
+    if layout is not None:
+        for inst,node in layout['nodes'].items():
+            try: source=ET.parse(resolve_symbol(node['symbol'])).getroot() if resolve_symbol else None
+            except (OSError,ET.ParseError) as error:
+                unchecked.append({'component':inst,'reason':str(error)});continue
+            intrinsic=[e for e in source.iter() if e.tag.rsplit('}',1)[-1]=='text'] if source is not None else []
+            name=layout.get('labels',{}).get(inst,inst)
+            if not any(e.get('data-name-slot') for e in intrinsic):
+                for line in name.split('\n'):
+                    if line.strip(): require(line,inst,inst)
+            for el in intrinsic:
+                label=(''.join(line for line in name.split('\n') if line) if el.get('data-name-slot') else ''.join(el.itertext()).strip()) or ''.join(el.itertext()).strip()
+                if label: require(label,inst,inst,inst+'__'+el.get('id') if el.get('id') else None,'instance')
+        for name,node in layout.get('externs',{}).items():
+            for line in node.get('label',name).split('\n'):
+                if line.strip(): require(line,'@'+name)
+        for group in ('title','legend'):
+            group_rows=[r for r in text_rows if group in _groups(r)]
+            required.update(r['key'] for r in group_rows)
+            if not group_rows: missing('图签' if group=='title' else '图例',group)
+            if group=='title' and intent:
+                combined=normalized_text(''.join(r['text'] for r in group_rows))
+                for token in ('系统 '+str(intent['system']),'L0 '+str(intent['l0_version']),str(intent['catalog']),
+                              '成熟度 '+str(intent['maturity']),'部件','网络','气侧支路','未知项','悬空端口','provisional:','draft:'):
+                    if normalized_text(token) not in combined: missing(token,'title')
+    blocked=set()
+    for row in rows:
+        parents=[r for r in text_rows if r['key'] in required and any(a['tag']=='text' and a['attrs']==r['attrs'] for a in row['ancestors'])]
+        if row['key'] not in required and not (row['tag']=='tspan' and parents): continue
+        paint=glyph_paint(row)
+        collapsed=(row.get('ink_status')=='pass' and not row.get('ink_bbox') and bool(row.get('text','').strip()))
+        if paint is False or collapsed:
+            issues.append({'id':'V12','result':'fail','kind':'text_hidden','element':row['id'] or row['key'],
+                           'text':row.get('text'),'bbox':row.get('ink_bbox') or row['bbox'],
+                           'detail':'必需文字 "%s" 被隐藏或没有可见字形描画 (%s)' % (row.get('text','')[:40],row['id'] or row['key'])})
+            unchecked.append({'element':row['id'] or row['key'],'text':row.get('text'),'reason':'Required text is not displayed'})
+            blocked.add(row['key']);blocked.update(r['key'] for r in parents)
+        elif paint is None:
+            unchecked.append({'element':row['id'] or row['key'],'reason':'Text paint cannot be established'})
+            blocked.add(row['key']);blocked.update(r['key'] for r in parents)
+    return issues,unchecked,blocked
+
+
+def check_text(browser, geometry, budget=6., layout=None, intent=None, resolve_symbol=None):
     findings,records,unchecked = [],[],[]
     if browser.get('status')!='pass':
         detail=browser.get('reason','Browser text evidence unavailable')
         return [],[{'id':i,'coverage_status':'not_checked','coverage_detail':detail} for i in ('V12','B7')],{'texts':[],'unchecked':[{'reason':detail}]}
     rows=browser['elements']
+    required_findings,required_unchecked,blocked=required_text(rows,layout,intent,resolve_symbol,geometry)
+    findings.extend(required_findings);unchecked.extend(required_unchecked)
     vx,vy,vw,vh=browser['viewbox']
     viewport=[vx,vy,vx+vw,vy+vh]
     panels={name:next((r for r in rows if r['tag']=='rect' and name in _groups(r)),None)
             for name in ('title','legend')}
     for row in rows:
-        if row['tag']!='text' or not row.get('visible') or not row.get('text','').strip():
+        if row['key'] in blocked or row['tag']!='text' or not row.get('visible') or not row.get('text','').strip():
+            continue
+        paint=glyph_paint(row)
+        if paint is False: continue
+        if paint is None:
+            unchecked.append({'element':row['id'] or row['key'],'text':row.get('text'),'reason':'Text paint cannot be established'})
             continue
         if row.get('ink_status')!='pass' or not row.get('ink_bbox'):
             unchecked.append({'element':row['id'] or row['key'],'text':row.get('text'),
@@ -116,8 +210,13 @@ def check_text(browser, geometry, budget=6.):
                               'reason':'Text clipping/masking/filter requires additional rendered evidence'})
         containers=[('viewport',viewport,None)]
         for name,panel in panels.items():
-            if panel and name in _groups(row):
-                containers.append((name,panel['bbox'],panel))
+            if name in _groups(row):
+                try:
+                    if panel is None: raise ValueError('Required text container is missing')
+                    box=display_rectangle(panel,browser)
+                    containers.append((name,box,panel))
+                except ValueError as error:
+                    unchecked.append({'element':record['element'],'container':name,'reason':str(error)})
         if row.get('instance'):
             groups=[a['id'] for a in row['ancestors'] if a['tag']=='g' and a['id']]
             candidates=[r for r in rows if r.get('instance')==row['instance'] and r.get('closed')]
@@ -130,7 +229,11 @@ def check_text(browser, geometry, budget=6.):
                 own=min(candidates,key=rank)
                 record['container']=own['id'] or own['key']
                 record['container_key']=own['key']
-                containers.append((own['id'] or own['key'],own['bbox'],own))
+                try:
+                    box=display_rectangle(own,browser) if own['tag']=='rect' else own['bbox']
+                    containers.append((own['id'] or own['key'],box,own))
+                except ValueError as error:
+                    unchecked.append({'element':record['element'],'container':record['container'],'reason':str(error)})
         for name,box,shape in containers:
             b=record['bbox']
             over={'left':max(0.,box[0]-b[0]),'top':max(0.,box[1]-b[1]),

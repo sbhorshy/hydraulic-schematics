@@ -23,7 +23,7 @@ def make_render_workspace(root, fixture):
     for name in ('render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py',
-                 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py'):
+                 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
     shutil.copytree(CATALOG.parent, work / 'symbols')
