@@ -36,7 +36,7 @@ class DisplayWidths(unittest.TestCase):
             e.tag = NS + kind
             e.set('d' if kind == 'path' else 'points',
                   'M%s %s H%s' % (coords[0], coords[1], coords[2]) if kind == 'path'
-                  else '%s,%s %s,%s' % tuple(coords))
+                  else '%s,%s %s,%s %s,%s' % tuple(coords[:2]+coords))
         ET.register_namespace('', NS[1:-1])
         tree.write(symbol, encoding='unicode')
         self.run_cli('render_l0_sheet.py')

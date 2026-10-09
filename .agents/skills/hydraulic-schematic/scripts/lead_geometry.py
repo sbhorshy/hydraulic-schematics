@@ -12,14 +12,15 @@ from sheet_geometry import NUMBER, walk, point
 def segments(tag, attrs):
     tag = tag.rsplit('}', 1)[-1]
     if tag == 'line':
-        return [((float(attrs.get('x1', 0)), float(attrs.get('y1', 0))),
-                 (float(attrs.get('x2', 0)), float(attrs.get('y2', 0))))]
+        a = (float(attrs.get('x1', 0)), float(attrs.get('y1', 0)))
+        b = (float(attrs.get('x2', 0)), float(attrs.get('y2', 0)))
+        return [(a,b)] if math.dist(a,b)>1e-8 else []
     if tag == 'polyline':
         numbers = list(map(float, re.findall(NUMBER, attrs.get('points', ''))))
         if len(numbers) < 4 or len(numbers) % 2:
             raise ValueError('invalid polyline')
         points = list(zip(numbers[::2], numbers[1::2]))
-        return list(zip(points, points[1:]))
+        return [(a,b) for a,b in zip(points,points[1:]) if math.dist(a,b)>1e-8]
     if tag != 'path':
         return []
     value = attrs.get('d', '')
@@ -66,6 +67,8 @@ def source_leads(root, ports):
                 unchecked.append({'port':el.get('data-interface-port'), 'element':el.get('id'), 'reason':str(error)})
             continue
         if not local:
+            if el.get('data-interface-port'):
+                unchecked.append({'port':el.get('data-interface-port'), 'element':el.get('id'), 'reason':'Empty or unsupported external lead geometry'})
             continue
         mapped = [(point(matrix,a),point(matrix,b)) for a,b in local]
         matching = [pid for pid,p in ports.items()

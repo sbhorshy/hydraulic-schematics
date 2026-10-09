@@ -112,7 +112,8 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
             if el.get('data-port-id'):
                 source_ports[el.get('data-port-id')] = point(matrix,(float(el.get('cx')),float(el.get('cy'))))
         leads,unsupported = source_leads(source,source_ports)
-        ev16['unchecked'].extend(dict(component=inst,**u) for u in unsupported)
+        ev16['unchecked'].extend(dict(component=inst,position=node['ports'].get(u.get('port'),{}).get('position'),**u)
+                                 for u in unsupported)
         for lead in leads:
             pid = lead['port']
             port = node['ports'].get(pid)

@@ -8,6 +8,7 @@ import base64
 import hashlib
 import html
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -15,6 +16,7 @@ import shutil
 import subprocess
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 
 
 def digest(value):
@@ -120,6 +122,10 @@ def collect(svg_path, output=None, timeout=30):
     record = {'schema': 'sheet-browser-v1', 'status': 'not_checked', 'elements': []}
     try:
         source = svg_path.read_bytes()
+        viewbox = list(map(float, ET.fromstring(source).get('viewBox', '').replace(',', ' ').split()))
+        if len(viewbox) != 4 or not all(math.isfinite(v) for v in viewbox) or min(viewbox[2:]) <= 0:
+            raise ValueError('A finite positive SVG viewBox is required for browser measurement')
+        viewport = [math.ceil(viewbox[2]), math.ceil(viewbox[3])]
         executable = next((shutil.which(n) for n in ('google-chrome','chromium','chromium-browser','chrome')
                            if shutil.which(n)), None)
         if not executable:
@@ -143,6 +149,7 @@ def collect(svg_path, output=None, timeout=30):
                             SCRIPT.replace('__SVG__', base64.b64encode(source).decode()) + '</script>', encoding='utf-8')
             command = [executable, '--headless', '--disable-gpu', '--disable-dev-shm-usage',
                        '--no-first-run', '--no-default-browser-check', '--user-data-dir='+str(Path(tmp,'profile')),
+                       '--window-size=%d,%d' % tuple(viewport),
                        '--dump-dom', '--virtual-time-budget=3000']
             if hasattr(os, 'geteuid') and os.geteuid() == 0:
                 command.append('--no-sandbox')
@@ -154,7 +161,7 @@ def collect(svg_path, output=None, timeout=30):
             record.update(json.loads(html.unescape(match.group(1))))
         if digest(svg_path.read_bytes()) != binding['svg_sha256']:
             raise RuntimeError('SVG changed during browser measurements')
-    except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as error:
+    except (OSError, RuntimeError, ValueError, ET.ParseError, subprocess.TimeoutExpired) as error:
         record.update(status='not_checked', reason=str(error), elements=[])
     record['elapsed_s'] = round(time.monotonic()-started, 6)
     record['integrity'] = content_digest(record)
