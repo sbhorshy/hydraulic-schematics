@@ -244,8 +244,16 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
         if row and not row['visible']:
             fail('hidden_node','parts.' + inst,'Component is not visible: ' + inst,component=inst)
             continue
-        if row and any(abs(a-b)>1e-5 for a,b in zip(row['matrix'],node['matrix'])):
-            unchecked.append({'component':inst,'detail':'CSS instance transform is outside normalized port geometry'})
+        if row:
+            # Chrome stores SVG matrices at float32 precision. Compare actual
+            # terminal displacement in the same 0.1-unit rounding tolerance,
+            # not raw coefficient equality (which misflags valid rotations).
+            a,b,c,d,e,f = node['matrix']
+            det=a*d-b*c
+            inverse=(d/det,-b/det,-c/det,a/det,(c*f-d*e)/det,(b*e-a*f)/det)
+            if any(math.dist(point(row['matrix'],point(inverse,port['position'])),port['position']) > .1
+                   for port in node['ports'].values()):
+                unchecked.append({'component':inst,'detail':'CSS instance transform is outside normalized port geometry'})
         for pid, port in node['ports'].items():
             labels[vertex(port['position'])].add(inst + '.' + pid)
     for ext in expected['externs']:

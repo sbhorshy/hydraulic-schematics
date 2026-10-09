@@ -157,6 +157,7 @@ class TopologyCLI(unittest.TestCase):
         self.assertFalse([c for c in report['checks'] if c['id']=='V10'])
         self.assertEqual(len(report['topology']['expected_edges']),40)
         self.assertEqual(len(report['topology']['actual_edges']),40)
+        self.assertEqual(next(c['status'] for c in report['coverage'] if c['id']=='V10'),'pass')
         self.assertTrue(report['topology']['bridges'])
 
     def test_branch_moved_to_wrong_bus_fails_at_its_input_anchor(self):
