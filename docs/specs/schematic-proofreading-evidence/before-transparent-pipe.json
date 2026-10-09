@@ -1,0 +1,22 @@
+{
+  "frozen_head": "ff212000df32c8f7ef3c281f004a0904cf29f6c9",
+  "transparent_pipe": {
+    "validation": "passed",
+    "automated": {
+      "status": "complete"
+    },
+    "coverage": {
+      "V10": "pass",
+      "V15": "pass",
+      "V16": "pass"
+    }
+  },
+  "symbol_binding": {
+    "recorded": {
+      "path": "/tmp/schematic-proofreading-0k_e9ik0/review-standards-symbol-path/run/symbols\\edp-provisional-stroke.svg",
+      "sha256": null
+    },
+    "after_mutation_status": "current",
+    "changed": []
+  }
+}

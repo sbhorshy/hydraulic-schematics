@@ -1,0 +1,37 @@
+{
+  "validation_exit": 0,
+  "validation": "passed",
+  "recorded_symbol_artifact": {
+    "path": "/tmp/schematic-proofreading-0k_e9ik0/review-standards-symbol-path/run/symbols\\edp-provisional-stroke.svg",
+    "sha256": null
+  },
+  "actual_selected_symbol": "/tmp/schematic-proofreading-0k_e9ik0/review-standards-symbol-path/run/edp-provisional-stroke.svg",
+  "actual_geometry_present": true,
+  "verification_after_selected_source_mutation": {
+    "status": "current",
+    "fingerprint": "13b1a2cbe47c4a31817ffec64d02cf3d67fa39d42f1a30ef580444aa4a57d3e4",
+    "changed": [],
+    "png": {
+      "status": "pass",
+      "detail": "PNG matches the current SVG and rasterization receipt.",
+      "receipt": {
+        "schema": "sheet-raster-v1",
+        "svg_sha256": "ac9ed31c22547f0c6dd58a76b6c0ffd17b225a02f29e29270cb82d007473e619",
+        "png_sha256": "cd902a33f5f57966b65c2d6f117e1c36c50e43f5cfaf6d3a8993def221e3fff7",
+        "renderer": {
+          "backend": "chrome",
+          "version": "Google Chrome 148.0.7778.167",
+          "exporter_sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f",
+          "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+          "width": 1680,
+          "height": 1390
+        }
+      }
+    },
+    "perceptual_review": {
+      "status": "pending",
+      "detail": "No perceptual review has been recorded."
+    }
+  },
+  "reviewed_head_at_end": "6bb01e6ddd279db8e86ae27d8e701013cef44308"
+}

@@ -1,0 +1,66 @@
+{
+  "exit": 0,
+  "coverage": {
+    "V1": "pass",
+    "V2": "pass",
+    "V3": "pass",
+    "V4": "pass",
+    "V5": "warn",
+    "V6": "pass",
+    "V7": "pass",
+    "V8": "pass",
+    "V9": "warn",
+    "V10": "pass",
+    "V11": "pass",
+    "V12": "pass",
+    "V13": "pass",
+    "V14": "pass",
+    "V15": "pass",
+    "V16": "pass",
+    "V17": "pass",
+    "V18": "pass",
+    "V19": "warn",
+    "B6.avoid_corridor": "pass",
+    "B7": "warn",
+    "B1": "pass",
+    "B2": "pass",
+    "B3": "pass",
+    "B4": "pass",
+    "B5": "pass",
+    "B6.group_padding": "not_applicable",
+    "PNG": "pass",
+    "PERCEPTUAL": "not_checked"
+  },
+  "checks": [
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "文字 \"EDP-001\" 与 graphic 85：净空 2.107，要求 6.0，位置 [589.625, 474, 631.25, 482]",
+      "kind": "text_clearance",
+      "budget_id": "B7",
+      "element": 91,
+      "text": "EDP-001",
+      "bbox": [
+        589.625,
+        474,
+        631.25,
+        482
+      ],
+      "obstacle": 85,
+      "obstacle_kind": "graphic",
+      "distance": 2.1071,
+      "required_clearance": 6.0,
+      "shortfall": 3.8929
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 5 个,须在图签栏计数并标红: EDP-001.case_drain EDP-001.drive_shaft TANK-001.body_sense_tap TANK-001.bootstrap_pressure_in TANK-001.return_in"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 3 个,不可正式出图: EDP-001(provisional) PF-001(none) TANK-001(draft)"
+    }
+  ]
+}

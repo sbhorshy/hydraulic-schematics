@@ -1,0 +1,12 @@
+[PASS] A. SysML 链路金样比对（渲染退出码/结构自检/SVG+清单逐字节）
+[PASS] B. check_library 结构闸门（自带库默认过闸 / 沙箱缺端口组拦截）
+[PASS] C. L0 预检器：负例七类违规拦截报齐 / 正例放行
+[PASS] D. 布局引擎烟测（自包含当前输入出全量布局 / 未覆盖形态拦截）
+[PASS] E. preflight 模板门禁（空背书对账拦截 / concept 未签认披露，#22）
+Ran 226 tests in 809.065s
+
+OK
+[PASS] F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器专项测试
+
+---- selftest 小结 ----
+PASS 6/6 出图能力完好。

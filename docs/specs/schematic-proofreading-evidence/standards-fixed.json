@@ -1,0 +1,51 @@
+{
+  "commit": "8dfc23bcbbae3da3796eb8866d75e4270880ee53",
+  "tree": "39484b8d4f3c065cac0c1597984f082f80c1acae",
+  "S2": {
+    "resolved": true,
+    "roi_dark_pixels": 0,
+    "V10": "fail",
+    "V15": "fail"
+  },
+  "S3": {
+    "resolved": true,
+    "selected": {
+      "path": "/tmp/schematic-proofreading-0k_e9ik0/review-standards-frozen-8dfc23b/winref/run/edp-provisional-stroke.svg",
+      "sha256": "c65046221c863ebb68bc449b0c14622451ff32698738895670651cfe639e66fb"
+    },
+    "after_mutation": {
+      "status": "invalidated",
+      "changed": [
+        "symbol:EDP-001"
+      ],
+      "perceptual_review": {
+        "status": "invalidated"
+      }
+    }
+  },
+  "S1": {
+    "resolved": true,
+    "unviewed_items": 17,
+    "after_deletion": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "READBACK_ITEMS"
+      ]
+    },
+    "after_revalidation": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "READBACK_ITEMS"
+      ]
+    }
+  },
+  "S4": {
+    "resolved": true,
+    "node_edge_tables": true,
+    "logical_edge_count_one": true,
+    "node_source_and_symbol_form": true,
+    "auxiliary_and_unknowns": true
+  }
+}
