@@ -90,6 +90,45 @@ V2 对归一化后的整条管段裁切求交；端点仅接近某个边界坐�
 三者齐备才宣告完成；修图必须重跑全链路（自检 → 几何 → 回读），且总轮数受「有界收敛」两轮上限约束——
 两轮后仍不收敛的，交付物是未收敛项清单与工程师决策请求，不是图。
 
+### V10：输入追溯与可见连接对账
+
+规范 L0 渲染器自动生成 `1#系统原理图-topology.json` 与同名 `.md`。
+JSON 的 `nodes`、`ports`、`edges`、`buses`、`externs` 和 `fragments` 给出输入锚点与 SVG ID；
+`unknown` 原样披露，不生成连接。节点为 `parts.INSTANCE`，端口为该节点经目录类型
+派生的 `parts.INSTANCE.ports.PORT`（同时保留 `catalog_anchor`），外部口为
+`extern.NAME`。逻辑边锚点为 `paths[i][k->k+1]` 或 `taps[i]`。
+母线是路径中 `@NAME` 的合并绘图抽象，锚点 `buses.NAME` 的 `input_anchors`
+列出全部来源；它不声称 intent 有额外的 buses 定义。
+
+裸实例作为一条边的起点展开 `main_path.out`，终点展开 `main_path.in`；
+路径中间实例的入、出口属于两条不同边，不穿过组件内部合并网络。
+母线主干不计额外逻辑边；桥弧和连续折线拆段保留原边锚点。
+端口复用非可视 `<metadata>`，坐标仍为局部符号坐标，配合实际实例变换读取。
+所有归一化报告坐标为 **root_svg_user_units**，已经包含 canvas shift。
+
+`topology_reconciliation.declared_topology(intent, catalog)` 返回输入清单；
+`reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence=None)`
+返回相同清单并附加 `expected_edges`、`actual_edges`、`segments`、`vertices`、
+`networks`、`bridges`、`findings` 和 `coverage_status`。
+完整结果保存在 `validation-report.json.topology`。消费者可使用：
+
+- `actual_edges`：`anchor`、实际 `endpoints`、`svg_ids`、端部 `positions`、`segments` 索引。
+- `segments`：`start/end` 根 SVG 坐标、`a/b` 顶点索引、`svg_id`、输入 `anchor`、`bridge`。
+- `vertices`：`position`、实际 `terminals`、`degree`。
+- `networks`：整个可见网络的 `terminals`、关联输入 `anchors` 与 `segments`。
+- `bridges`：实际弧的 `position`、两端 `endpoints`、`svg_id` 和 `anchor`。
+
+`data-edge` 只关联输入与绘图片段，不能证明连接成立。V10 从可见线段、桥弧及
+目录端口位置重新建立几何邻接，检查每组的连续性、真实端口/母线归属，以及
+整图是否把两个独立输入网络意外接在一起。0.1 SVG 单位容差仅补偿渲染小数舍入。
+重叠共享主干不增逻辑边；同一条边自身重复、未知额外管线、缺失/重复/无法解析
+的节点、端口和边锚点分别报告。桥弧必须有真实连续端点；交叉处的点/桥语义由 V4
+进一步校核，V10 不将图例桥弧当成系统管线。
+
+可见性使用本轮 `browser_evidence.collect` 的计算后 CSS、实际变换及透明度。
+隐藏/无描边的线不能贡献实际连接；没有浏览器测量、遇到无法处理的裁剪/遮罩/
+滤镜或端口 CSS 变换时，V10 明确 `not_checked`。追溯文件也纳入内容指纹，
+篡改后旧校核失效。PNG 与感知签认仍是独立证据，V10 通过不代替回读。
 
 ### 实际显示线宽证据（#68）
 

@@ -17,6 +17,7 @@ import os
 import re
 import sys
 from sheet_geometry import load_geometry
+from topology_reconciliation import reconcile_topology
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
@@ -587,12 +588,22 @@ def main(argv=None):
                   % (len(notready), ' '.join(sorted(notready)))))
     ev.append({'id': 'V9', 'not_annotated': sorted(notready)})
 
-    # ---------- V10 线型可推导 + 网络计数一致 ----------
-    nets = sum(len(p) - 1 for p in intent['paths'])
-    ev.append({'id': 'V10', 'l0_nets': nets, 'rendered_polylines': len(polys)})
-    if len(polys) < nets:
-        W.append(('V10', 'L0 声明 %d 条网络,图上只有 %d 条折线(母线合并所致须确认)'
-                  % (nets, len(polys))))
+    # ---------- V10 Independent visible connectivity and input traceability ----------
+    try:
+        from browser_evidence import collect
+        topology_browser = collect(SHEET)
+    except ImportError:
+        topology_browser = {'status':'not_checked','reason':'Browser display collector unavailable'}
+    topology = reconcile_topology(root, geometry, intent, cat, L, topology_browser)
+    topology_findings = topology['findings']
+    F.extend((c['id'], c['detail']) for c in topology_findings)
+    ev.append({'id': 'V10', 'coverage_status': topology['coverage_status'],
+               'coverage_detail': ('Input edges reconciled against browser-visible SVG geometry and catalog ports'
+                                   if topology['coverage_status'] == 'pass' else
+                                   'Display/geometry reconciliation incomplete: ' + str(topology.get('display_evidence'))),
+               'expected_edges': len(topology['expected_edges']),
+               'actual_edges': len(topology['actual_edges']),
+               'endpoint_tolerance': 0.1})
 
     # ---------- 构图预算面板（B1–B7，V19）----------
     # 折返数：方向变化次数，U 形回折(180°)也算一次（与
@@ -761,10 +772,11 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings:
-        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail']).update(finding)
+    for finding in endpoint_findings + topology_findings:
+        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
+        'topology': topology,
         'sheet': os.path.basename(SHEET),
         'validation': 'failed' if F else 'passed',
         'visual_review': 'pending',
