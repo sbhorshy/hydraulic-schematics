@@ -16,6 +16,7 @@ import math
 import os
 import re
 import sys
+import time
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
 from junction_semantics import check_junctions
@@ -161,7 +162,9 @@ def main(argv=None):
     if dup:
         F.append(('V1', '整图存在重复 id: %s' % ' '.join(dup)))
 
+    measurement_started = time.monotonic()
     browser = collect(SHEET)
+    timings = {'browser_evidence_s': round(time.monotonic()-measurement_started,6)}
     geometry = load_geometry(root, L, symbol_path)
     endpoint_findings, endpoint_evidence = check_endpoints(geometry, intent, cat)
     endpoint_findings.extend(check_bodies(geometry, endpoint_evidence['terminals']))
@@ -232,7 +235,9 @@ def main(argv=None):
              png_evidence.get('receipt',{}).get('renderer',{}).get('font_environment')!=browser.get('font_environment'))):
         text_browser = {**browser, 'status':'not_checked',
                         'reason':'Final PNG and measured glyphs lack matching renderer/font-version evidence.'}
+    text_started = time.monotonic()
     text_findings, text_evidence, text_geometry = check_text(text_browser, geometry, BUDGET['B7']['budget'], L, intent, symbol_path)
+    timings['text_checks_s'] = round(time.monotonic()-text_started,6)
     F.extend((c['id'], c['detail']) for c in text_findings if c['result']=='fail')
     W.extend((c['id'], c['detail']) for c in text_findings if c['result']=='warn')
     ev.extend(text_evidence)
@@ -676,6 +681,7 @@ def main(argv=None):
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
+        'timings': timings,
         'text_geometry': {**text_geometry, 'texts':[{k:v for k,v in t.items() if k not in ('row','quad_boxes')} for t in text_geometry['texts']]},
         'topology': topology,
         'sheet': os.path.basename(SHEET),

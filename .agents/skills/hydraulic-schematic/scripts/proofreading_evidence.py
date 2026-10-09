@@ -140,7 +140,7 @@ def automated_payload(report):
     """Stable validation evidence, excluding the separately recorded review."""
     return {key: value for key, value in report.items()
             if key not in ('visual_review', 'phases', 'delivery', 'perceptual_review',
-                           'validation_fingerprint', 'report_fingerprint', 'coverage')}
+                           'validation_fingerprint', 'report_fingerprint', 'coverage', 'timings')}
 
 
 def validation_fingerprint(report):
