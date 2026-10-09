@@ -62,7 +62,7 @@ class ProofreadingEvidenceCLI(unittest.TestCase):
         self.evidence_cli('verify')
         targets = ['1#系统原理图.svg', 'sheet-readback.png', '1#系统.layout.json',
                    '1#系统.intent.yaml', 'symbols/edp-provisional-stroke.svg',
-                   'component-catalog.json', 'validate_sheet.py', 'validation-report.json']
+                   'component-catalog.json', 'validate_sheet.py', 'validation-report.json', 'browser-evidence.json']
         for name in targets:
             with self.subTest(name=name):
                 path = self.work / name
