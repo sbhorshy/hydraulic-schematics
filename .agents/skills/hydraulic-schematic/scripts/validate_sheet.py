@@ -18,6 +18,7 @@ import re
 import sys
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
+from junction_semantics import check_junctions
 from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
@@ -284,38 +285,6 @@ def main(argv=None):
                       % (ov, a1, b1, a2, b2)))
     ev.append({'id': 'V13', 'segments': len(segs_all)})
 
-    # ---------- V14 非连通交叉须有跨线桥(规范 10.6.2) ----------
-    jset = {(round(x, 1), round(y, 1)) for (x, y) in jn}
-    cross = []
-    for i in range(len(segs_all)):
-        c1, a1, b1 = segs_all[i]
-        if abs(b1[1] - a1[1]) >= 0.6:
-            continue
-        y = a1[1]
-        x1lo, x1hi = sorted((a1[0], b1[0]))
-        for j in range(len(segs_all)):
-            c2, a2, b2 = segs_all[j]
-            if abs(b2[0] - a2[0]) >= 0.6:
-                continue
-            x = a2[0]
-            y2lo, y2hi = sorted((a2[1], b2[1]))
-            if x1lo + 1 < x < x1hi - 1 and y2lo + 1 < y < y2hi - 1:
-                if (round(x, 1), round(y, 1)) not in jset:
-                    cross.append((x, y))
-    # 跨线桥圆弧的圆心即交叉点,自 <path class="brg"> 的起点加半径求得。
-    brg = set()
-    for m in re.finditer(r'<path class="brg" d="M([\-\d.]+) ([\-\d.]+) '
-                         r'A([\d.]+)', raw):
-        bx0, by0, r0 = float(m.group(1)), float(m.group(2)), float(m.group(3))
-        brg.add((round(bx0 + r0, 1), round(by0, 1)))
-    nobridge = [(x, y) for (x, y) in sorted(set(cross))
-                if (round(x, 1), round(y, 1)) not in brg]
-    for (x, y) in nobridge:
-        F.append(('V14', '非连通交叉 (%.0f,%.0f) 无三通点也无跨线桥:'
-                         '读图无法判断是否连通' % (x, y)))
-    ev.append({'id': 'V14', 'crossings': len(set(cross)),
-               'bridged': len(brg), 'unbridged': len(nobridge)})
-
     baseT = float(L.get('style', {}).get('base_line_width_T', 1.0))
     width_failures, width_evidence = check_widths(SHEET, L, geometry, symbol_path, browser=browser)
     F.extend(width_failures)
@@ -471,13 +440,6 @@ def main(argv=None):
                 F.append(('V11', '斜线段 (%.0f,%.0f)->(%.0f,%.0f),管线须正交'
                           % (x0, y0, x1, y1)))
 
-    # ---------- V4 三通实心点必须在母线内部 ----------
-    bus_x = {b['x'] for b in L['buses'].values()}
-    for (x, y) in jn:
-        if round(x, 1) not in {round(v, 1) for v in bus_x}:
-            W.append(('V4', '三通点 (%g,%g) 不在任何母线 x 上' % (x, y)))
-    ev.append({'id': 'V4', 'junctions': len(jn), 'bus_x': sorted(bus_x)})
-
     # ---------- V5 悬空端口(不阻止出图,但必须披露) ----------
     dang = inventory['dangling']
     if dang:
@@ -517,6 +479,10 @@ def main(argv=None):
                'actual_edges': len(topology['actual_edges']),
                'endpoint_tolerance': 0.1})
 
+    junction_findings,junction_evidence = check_junctions(topology,browser)
+    F.extend((c['id'],c['detail']) for c in junction_findings)
+    ev.extend(junction_evidence)
+
     bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser)
     F.extend((c['id'],c['detail']) for c in bounds_findings)
     ev.append(bounds_evidence)
@@ -554,32 +520,14 @@ def main(argv=None):
         if man > 0:
             ratios.append((length / man, pts))
 
-    # B1 交叉：正交段几何交点，端点相接（T 型汇入/三通）不算。
-    # 预算恒为 0，不承认跨线桥豁免——有桥也是超预算，须改道。
-    b1_cross = []
-    for i in range(len(segs_all)):
-        _c1, a1, b1 = segs_all[i]
-        h1 = abs(b1[1] - a1[1]) < 0.6
-        for j in range(i + 1, len(segs_all)):
-            _c2, a2, b2 = segs_all[j]
-            h2 = abs(b2[1] - a2[1]) < 0.6
-            if h1 == h2:
-                continue
-            if h1:
-                x, y = a2[0], a1[1]
-            else:
-                x, y = a1[0], a2[1]
-            def on(p, s, e):
-                return (min(s[0], e[0]) - 0.5 <= x <= max(s[0], e[0]) + 0.5
-                        and min(s[1], e[1]) - 0.5 <= y <= max(s[1], e[1]) + 0.5)
-            if not (on((x, y), a1, b1) and on((x, y), a2, b2)):
-                continue
-            ends = {(round(q[0], 1), round(q[1], 1))
-                    for q in (segs_all[i][1], segs_all[i][2],
-                              segs_all[j][1], segs_all[j][2])}
-            if (round(x, 1), round(y, 1)) in ends:
-                continue
-            b1_cross.append((x, y))
+    # B1 retains the zero-crossing policy, including real bridged crossings.
+    # Facing loose ends diagnose a missing bridge but do not invent a route.
+    crossing_evidence = next(e for e in junction_evidence if e['id']=='V14')
+    crossing_events = [e for e in crossing_evidence.get('events',[]) if e['kind']=='crossing']
+    b1_cross = [tuple(e['position']) for e in crossing_events
+                if e.get('measurement_status')=='measured' and (e.get('visible_horizontal') or e.get('bridge_ids'))]
+    b1_unchecked = (crossing_evidence['coverage_status']=='not_checked' or
+                    any(not e.get('visible_horizontal') and not e.get('bridge_ids') for e in crossing_events))
 
     # B5 uses the final transformed source footprints, including nested transforms.
     b5_nearest = nearest_components(geometry)
@@ -601,7 +549,8 @@ def main(argv=None):
         F.append(('V19', '构图预算 B1：交叉 %d 处 > 0，须改道消除'
                   % len(set(b1_cross))))
     else:
-        add('B1', 0, 'pass')
+        add('B1', 0, 'not_measured' if b1_unchecked else 'pass',
+            'Crossing route/display evidence incomplete.' if b1_unchecked else None)
 
     # B2 折返：单条 ≤3 且全图 ≤40。超限走 WARN；落在边界端子上的
     # 存量走线按表注¹披露为 exempt。
@@ -723,7 +672,7 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings + bounds_findings + frame_findings + text_findings:
+    for finding in endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
