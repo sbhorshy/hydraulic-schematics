@@ -21,7 +21,8 @@
       [--guard-report OUT.json] [--param KEY=VAL ...]
 
 REF_LAYOUT 仅取 labels/label_pos/label_drop 等展示文案（标签文字不是坐标决策），
-坐标一概不从参照布局读取。--param 供改参传播实验（如 ROW_PITCH=420）。
+坐标一概不从参照布局读取。R17 装配分支另外继承实际 symbol/rot，尺寸仍从 SVG 实读。
+--param 供改参传播实验（如 ROW_PITCH=420 / ASSEMBLY_GAP_CAP=80）。
 """
 import copy
 import io
@@ -36,6 +37,9 @@ from ruamel.yaml import YAML
 
 # ---------- 规则参数表 P：布局语言的全部自由度 ----------
 P = dict(
+    ASSEMBLY_START_X=320, ASSEMBLY_RUN_Y=300,
+    ASSEMBLY_STUB_IN=170, ASSEMBLY_STUB_OUT=110,
+    ASSEMBLY_GAP_CAP=80, ASSEMBLY_TEXT_CLEAR=6,
     TANK_X=60,                 # R1 油箱置左
     COL_GAP=90,                # R2 列间距(吸油阀列与泵列)
     BUS_GAP=262,               # R3 压力汇流母线离泵列右缘——取值使 @PRESS≈880:
@@ -182,8 +186,11 @@ def classify_bus(role_set):
 
 
 # ---------- Stage 1: 规则引擎 ----------
-def rules(intent, cat, params, ref=None):
+def rules(intent, cat, params, ref=None, *, source_dir=None, catalog_dir=None):
     """intent -> (layout, structure)。structure 供守门层生成 REQUIRED。"""
+    if intent.get('assemblies'):
+        from assembly_layout import rules as assembly_rules
+        return assembly_rules(intent, cat, params, ref, source_dir, catalog_dir)
     P = params
     roles, _types = port_roles(cat, intent['parts'])
     chains, single, buses = analyze(intent, roles)
@@ -589,6 +596,9 @@ def guard(layout, structure, params):
     又能在规则点回答"哪条、违了多少"。规则解已一致时漂移为零(零漂移性质);
     有违例时求解器在强锚点拉力下做最小位移微调,报告列出挪了谁。
     """
+    if structure.get('assembly_row'):
+        from assembly_layout import guard as assembly_guard
+        return assembly_guard(layout, structure, params)
     P = params
     nodes = layout['nodes']
     bx = {b: float(v['x']) for b, v in layout['buses'].items()}
@@ -792,8 +802,17 @@ def main(argv):
     intent = load_yaml(intent_p)
     with io.open(cat_p, encoding='utf-8') as f:
         cat = json.load(f)
-    layout, structure = rules(intent, cat, params, ref)
+    if intent.get('assemblies'):
+        # A rejected assembly request cannot leave an older layout looking current.
+        for path in (out_p, guard_p):
+            if path and os.path.isfile(path):
+                os.unlink(path)
+    layout, structure = rules(intent, cat, params, ref,
+                              source_dir=os.path.dirname(os.path.abspath(ref_p if ref_p != '-' else intent_p)),
+                              catalog_dir=os.path.dirname(os.path.abspath(cat_p)))
     layout, report = guard(layout, structure, params)
+    if opt_kicks is not None and structure.get('assembly_row'):
+        raise SystemExit('装配单行 R17 使用确定性规则，不支持系统级 --optimize；请使用参数或显式布局。')
     if opt_kicks is not None:
         # ---- 阶段 3:寻优叠加层(#19 正式并入)----
         # 规则+守门之后,以 B1–B5+硬缺陷(V2/V13)为能量做邻域微调
