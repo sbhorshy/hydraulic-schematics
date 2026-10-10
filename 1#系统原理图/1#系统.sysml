@@ -324,8 +324,8 @@ package 'HYD-SYS-1' {
 
         // ---- 气侧链(用户 2026-09-07 口径:蓄压器气端 -> 压力表 -> 充气活门,串接,
         //      挂在自增压支路 PRV-002 下游的蓄压器气端上;与 intent 行 107-108 的
-        //      taps 写法不一致,intent/原理图侧待同步;ACV 左右端口侧别也待同步:
-        //      用户口径 左=地面充气侧/右=气侧,现目录与 SVG 记法相反)----
+        //      #46 已用链式 taps 同步 intent/图;PG 两条边共用单一 pressure_sense 口:
+        //      ACV 左=地面充气侧/右=气侧,当前目录与 SVG 已同步;充气源仍未建模)----
         connect 'ACC-001'.'gas_port' to 'PG-001'.'pressure_sense';
         connect 'PG-001'.'pressure_sense' to 'ACV-001'.'accumulator_gas';
     }

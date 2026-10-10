@@ -1,0 +1,46 @@
+==== 校核驱动器 ====
+工作区: /tmp/ready46-final/before
+preflight: cleared_for_layout
+  轮1 布局=seed             回读=regenerated -> fail 13, warn 9
+       FAIL V3 管线折返形成越界线头: ln-sense (1404.0, 89.5) -> (1422.0, 89.5) -> (1240.0, 89.5)
+       FAIL V2 管线穿越 ACV-001 本体 133.80 单位,段 (1422.0, 89.5)->(1240.0, 89.5)
+       FAIL V13 管线自身折返形成越界线头: ln-sense (1374.0, 89.5) -> (1392.0, 89.5) -> (1210.0, 89.5)
+       FAIL V10 Actual endpoints disagree with input paths[2][0->1]: ['@CASE', '@PRESS', 'EDP-00
+       FAIL V10 Actual endpoints disagree with input paths[3][0->1]: ['@CASE', '@PRESS', 'EMP-00
+       FAIL V10 Actual endpoints disagree with input taps[0]: ['ACC-001.gas_port', 'ACV-001.accu
+       FAIL V10 Repeated visible segment within taps[0]
+       FAIL V10 Visible geometry joins separate input networks: @CASE, @PRESS, CDF-001.inlet, ED
+       FAIL V10 Visible geometry joins separate input networks: ACC-001.gas_port, ACV-001.accumu
+       FAIL V14 Distinct input networks touch at a terminal/T; a marker cannot legalize this con
+       FAIL V14 Distinct input networks touch at a terminal/T; a marker cannot legalize this con
+       FAIL V14 Distinct input networks touch at a terminal/T; a marker cannot legalize this con
+       FAIL V19 构图预算 B1：交叉 1 处 > 0，须改道消除
+残差 V3 [round1]: 管线折返形成越界线头: ln-sense (1404.0, 89.5) -> (1422.0, 89.5) -> (1240.0, 89.5)
+残差 V2 [round1]: 管线穿越 ACV-001 本体 133.80 单位,段 (1422.0, 89.5)->(1240.0, 89.5)
+残差 V13 [round1]: 管线自身折返形成越界线头: ln-sense (1374.0, 89.5) -> (1392.0, 89.5) -> (1210.0, 89.5)
+残差 V10 [round1]: Actual endpoints disagree with input paths[2][0->1]: ['@CASE', '@PRESS', 'EDP-001.pressure_out'] (unattached [])
+残差 V10 [round1]: Actual endpoints disagree with input paths[3][0->1]: ['@CASE', '@PRESS', 'EMP-001.pressure_out'] (unattached [])
+残差 V10 [round1]: Actual endpoints disagree with input taps[0]: ['ACC-001.gas_port', 'ACV-001.accumulator_gas', 'ACV-001.charge_port'] (unattached [(1422.0, 89.5)])
+残差 V10 [round1]: Repeated visible segment within taps[0]
+残差 V10 [round1]: Visible geometry joins separate input networks: @CASE, @PRESS, CDF-001.inlet, EDP-001.case_drain, EDP-001.pressure_out, EMP-001.case_drain, EMP-001.pressure_out, PF-001.inlet, PRV-002.inlet
+残差 V10 [round1]: Visible geometry joins separate input networks: ACC-001.gas_port, ACV-001.accumulator_gas, ACV-001.charge_port, PG-001.pressure_sense
+残差 V14 [round1]: Distinct input networks touch at a terminal/T; a marker cannot legalize this connection
+残差 V14 [round1]: Distinct input networks touch at a terminal/T; a marker cannot legalize this connection
+残差 V14 [round1]: Distinct input networks touch at a terminal/T; a marker cannot legalize this connection
+残差 V19 [round1]: 构图预算 B1：交叉 1 处 > 0，须改道消除
+局部回读: 134 个对象 / 62 张局部图，2.326s -> /tmp/ready46-final/before/readback.html
+结论: 残差上报，需人工/AI 介入  (10.0s, 报告 -> /tmp/ready46-final/before/convergence-report.json)
+[driver] setup started
+[driver] setup completed 0.921s
+[driver] preflight started
+[driver] preflight completed 0.216s
+[driver] layout started
+[driver] layout completed 0.000s
+[driver] render started
+[driver] render completed 0.416s
+[driver] readback started
+[driver] readback completed 1.119s
+[driver] validate started
+[driver] validate completed 3.694s
+[driver] local_readback started
+[driver] local_readback completed 3.078s

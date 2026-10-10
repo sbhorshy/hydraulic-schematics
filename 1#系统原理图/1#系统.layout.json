@@ -24,7 +24,8 @@
     "2.0 fsov-cell60:用户澄清「是方框60*60,不是整个」——符号 v1.8 方框两格各 60×60（总框 120×60），画布=墨迹 362.304x204.003；FSOV-001 落 @(290,394) rot0（TANK/EDP 之间，吸油向自然位）；选1 授权执行:CASE 母线 x 620→660（让开 362 宽占位，收集 EDP/EMP/CDF 集液口径不变）",
     "2.1 fsov-cell60-placement:v1.8 方框两格各 60×60 落位——rot270 占位 204.003x362.304 @(294,333)（TANK/EDP 夹缝,吸油向 TANK→FSOV→EDP 自然贯通,零新增 V2 预期);CASE 母线回 620（rot270 宽 204 不再需要让位);EDP/EMP 保持 x=500",
     "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）",
-    "2026-10-10 #49: TANK canonical viewBox 0 0 218 564; keep placement and footprint; pressure port local x 172 -> 155; add body_sense_tap (50,564); routes regenerated from SVG ports."
+    "2026-10-10 #49: TANK canonical viewBox 0 0 218 564; keep placement and footprint; pressure port local x 172 -> 155; add body_sense_tap (50,564); routes regenerated from SVG ports.",
+    "2026-10-10 #46: ACC liquid at PRV-002.outlet; ACC-PG-ACV taps share the single PG port. Explicit seed places the branch southeast of PRV-002; return corridor 890 -> 1010 clears the branch; only ACC/PG/ACV nodes and their label slots move."
   ],
   "canvas": {
     "width": 1680,
@@ -106,25 +107,28 @@
       "rot": 180
     },
     "ACC-001": {
-      "x": 1180,
-      "y": 190,
+      "x": 700,
+      "y": 840,
       "symbol": "symbols/accumulator.svg",
       "w": 60,
-      "h": 100
+      "h": 100,
+      "rot": 0
     },
     "ACV-001": {
-      "x": 1240,
-      "y": 60,
+      "x": 800,
+      "y": 937,
       "symbol": "symbols/air-charging-valve.svg",
       "w": 134,
-      "h": 57
+      "h": 57,
+      "rot": 180
     },
     "PG-001": {
-      "x": 1414,
-      "y": 50,
+      "x": 830,
+      "y": 832,
       "symbol": "symbols/pressure-gauge.svg",
       "w": 63,
-      "h": 67
+      "h": 67,
+      "rot": 90
     },
     "QDP-001": {
       "x": 1186,
@@ -267,7 +271,7 @@
     "RF-001": "below",
     "PRV-001": "above",
     "PRV-002": "below",
-    "ACC-001": "right",
+    "ACC-001": "above",
     "ACV-001": "above",
     "PG-001": "above",
     "QDP-001": "below",
@@ -277,9 +281,9 @@
     "TANK-001": 100,
     "EDP-001": 40
   },
-  "lanes_note": "水平走廊 890:供 @RET->油箱 支路在油箱(底 840,bootstrap 桩至 858)与 QDR 支路(933.8)之间东行并入 @RET(x=940),接入高度即 890;原走廊 100 因 CDF 出油并入 @RET 后母线上延,且 100 正穿 CDF 出油口端口点(505.5,100),弃用。",
+  "lanes_note": "#46 水平走廊 1010: @RET->油箱 支路从油箱西侧下绕，越过 PRV-002 下游 ACC/PG/ACV 支路底缘(994)，从图例顶缘(1020)上方接入 @RET；原890会穿新气侧件/支路。仅更改候选走廊，不改任何连接与其他节点坐标。",
   "lanes": [
-    890
+    1010
   ],
   "vlanes_note": "竖廊 290:油箱(278)与 FSOV(330) 之间供 TANK->FSOV 吸油上行;20:油箱西侧供 CDF 出油与回油接入 return_in。",
   "vlanes": [
@@ -299,5 +303,8 @@
     "y": 1330,
     "w": 1600,
     "h": 56
+  },
+  "label_lift": {
+    "ACC-001": 19
   }
 }

@@ -288,7 +288,7 @@ def check_l0_regressions():
     # Aggregate process hang guard, not optimizer/performance budget. Measured old
     # 226-test run: 809s; #39 (~94s), #62 (~60s), #49 (~14s) already exceed
     # the former 900s, before #42/#46/#23 browser suites. Root runs full suite once.
-    suites = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
+    suites = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_accumulator_branch', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
               'test_rotation_routes', 'test_editor_rotation', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
     try:

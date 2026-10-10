@@ -1,0 +1,33 @@
+F
+======================================================================
+FAIL: test_signed_connections_and_their_visible_geometry (__main__.AccumulatorBranch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/test_accumulator_branch.py", line 55, in test_signed_connections_and_their_visible_geometry
+    self.assertEqual([c for c in report['checks'] if c.get('text') in names
+AssertionError: Lists differ: [{'id': 'V19', 'result': 'warn', 'detail':[305 chars]0.6}] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+{'id': 'V19', 'result': 'warn', 'detail': '文字 "系统蓄压器" 与 pipe wire-44-0：净空 5.400，要求 6.0，位置 [732.5, 804, 787.484375, 816]', 'kind': 'text_clearance', 'budget_id': 'B7', 'element': 470, 'text': '系统蓄压器', 'bbox': [732.5, 804, 787.484375, 816], 'obstacle': 'wire-44-0', 'obstacle_kind': 'pipe', 'distance': 5.4, 'required_clearance': 6.0, 'shortfall': 0.6}
+
++ []
+- [{'bbox': [732.5, 804, 787.484375, 816],
+-   'budget_id': 'B7',
+-   'detail': '文字 "系统蓄压器" 与 pipe wire-44-0：净空 5.400，要求 6.0，位置 [732.5, 804, '
+-             '787.484375, 816]',
+-   'distance': 5.4,
+-   'element': 470,
+-   'id': 'V19',
+-   'kind': 'text_clearance',
+-   'obstacle': 'wire-44-0',
+-   'obstacle_kind': 'pipe',
+-   'required_clearance': 6.0,
+-   'result': 'warn',
+-   'shortfall': 0.6,
+-   'text': '系统蓄压器'}] : [{'id': 'V10', 'result': 'fail', 'detail': "Actual endpoints disagree with input paths[2][0->1]: ['@CASE', '@PRESS', 'EDP-001.pressure_out'] (unattached [])", 'kind': 'additional_or_wrong_connection', 'anchor': 'paths[2][0->1]', 'expected_endpoints': ['EDP-001.pressure_out', '@PRESS'], 'actual_endpoints': ['@CASE', '@PRESS', 'EDP-001.pressure_out'], 'positions': [[650.0, 330.0], [910.0, 330.0]], 'svg_ids': ['wire-3-0']}, {'id': 'V10', 'result': 'fail', 'detail': "Actual endpoints disagree with input paths[3][0->1]: ['@CASE', '@PRESS', 'EMP-001.pressure_out'] (unattached [])", 'kind': 'additional_or_wrong_connection', 'anchor': 'paths[3][0->1]', 'expected_endpoints': ['EMP-001.pressure_out', '@PRESS'], 'actual_endpoints': ['@CASE', '@PRESS', 'EMP-001.pressure_out'], 'positions': [[650.0, 650.0], [910.0, 650.0]], 'svg_ids': ['wire-4-0']}, {'id': 'V10', 'result': 'fail', 'detail': 'Visible geometry joins separate input networks: @CASE, @PRESS, CDF-001.inlet, EDP-001.case_drain, EDP-001.pressure_out, EMP-001.case_drain, EMP-001.pressure_out, PF-001.inlet, PRV-002.inlet', 'kind': 'wrong_network_join', 'anchor': 'paths[15][0->1]', 'endpoints': ['@CASE', '@PRESS', 'CDF-001.inlet', 'EDP-001.case_drain', 'EDP-001.pressure_out', 'EMP-001.case_drain', 'EMP-001.pressure_out', 'PF-001.inlet', 'PRV-002.inlet'], 'input_anchors': ['buses.CASE', 'buses.PRESS', 'paths[15][0->1]', 'paths[29][0->1]', 'paths[2][0->1]', 'paths[30][0->1]', 'paths[31][0->1]', 'paths[3][0->1]', 'paths[4][0->1]']}, {'id': 'V14', 'result': 'fail', 'detail': 'Distinct input networks touch at a terminal/T; a marker cannot legalize this connection', 'kind': 'false_connection', 'position': [650.0, 330.0], 'input_anchors': ['buses.CASE', 'paths[2][0->1]'], 'networks': ['@CASE', '@PRESS']}, {'id': 'V14', 'result': 'fail', 'detail': 'Distinct input networks touch at a terminal/T; a marker cannot legalize this connection', 'kind': 'false_connection', 'position': [650.0, 650.0], 'input_anchors': ['buses.CASE', 'paths[3][0->1]'], 'networks': ['@CASE', '@PRESS']}, {'id': 'V19', 'result': 'fail', 'detail': '构图预算 B1：交叉 1 处 > 0，须改道消除'}, {'id': 'V19', 'result': 'warn', 'detail': '文字 "系统蓄压器" 与 pipe wire-44-0：净空 5.400，要求 6.0，位置 [732.5, 804, 787.484375, 816]', 'kind': 'text_clearance', 'budget_id': 'B7', 'element': 470, 'text': '系统蓄压器', 'bbox': [732.5, 804, 787.484375, 816], 'obstacle': 'wire-44-0', 'obstacle_kind': 'pipe', 'distance': 5.4, 'required_clearance': 6.0, 'shortfall': 0.6}, {'id': 'V19', 'result': 'warn', 'detail': '文字 "CV-002" 与 graphic 444：净空 2.101，要求 6.0，位置 [1452.3984375, 1208, 1487.4921875, 1216]', 'kind': 'text_clearance', 'budget_id': 'B7', 'element': 479, 'text': 'CV-002', 'bbox': [1452.3984375, 1208, 1487.4921875, 1216], 'obstacle': 444, 'obstacle_kind': 'graphic', 'distance': 2.1006, 'required_clearance': 6.0, 'shortfall': 3.8994}, {'id': 'V19', 'result': 'warn', 'detail': '文字 "电动泵" 与 graphic 446：净空 1.101，要求 6.0，位置 [594.5, 592, 626.484375, 603]', 'kind': 'text_clearance', 'budget_id': 'B7', 'element': 458, 'text': '电动泵', 'bbox': [594.5, 592, 626.484375, 603], 'obstacle': 446, 'obstacle_kind': 'graphic', 'distance': 1.1007, 'required_clearance': 6.0, 'shortfall': 4.8993}, {'id': 'V13', 'result': 'warn', 'detail': '共线重叠 12 单位但汇于同一端口,按连通处理: (278.0, 686.0)->(520.0, 686.0)'}, {'id': 'V13', 'result': 'warn', 'detail': '共线重叠 20 单位但汇于同一端口,按连通处理: (440.0, 780.6)->(420.0, 780.6)'}, {'id': 'V13', 'result': 'warn', 'detail': '共线重叠 18 单位但汇于同一端口,按连通处理: (830.0, 864.0)->(812.0, 864.0)'}, {'id': 'V5', 'result': 'warn', 'detail': '悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap'}, {'id': 'V9', 'result': 'warn', 'detail': '非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)'}, {'id': 'V19', 'result': 'warn', 'detail': '构图预算 B5：FSOV-001 ↔ TANK-001 最小净距 24.0 < 40，差额 16.0，位置 [[331.99999999999994, 283.6997246079999], [308.0, 283.6997246079999]]'}, {'id': 'V19', 'result': 'warn', 'detail': '构图预算 B6：buses.CASE 绕过 EDP-001 的净距 0.0 < 12，差额 12.0，位置 [[650.0, 330.0], [650.0, 330.0]]'}]
+
+----------------------------------------------------------------------
+Ran 1 test in 12.501s
+
+FAILED (failures=1)
