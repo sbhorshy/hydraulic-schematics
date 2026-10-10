@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {
+      "id": "CDF-001-BODY",
+      "anchor": "parts.CDF-001-BODY",
+      "type": "filter_line_shutoff_dp_case_drain",
+      "svg_ids": [
+        "inst-CDF-001-BODY"
+      ]
+    },
+    {
+      "id": "CDF-001-CV",
+      "anchor": "parts.CDF-001-CV",
+      "type": "check_valve",
+      "svg_ids": [
+        "inst-CDF-001-CV"
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "id": "CDF-001-BODY.inlet",
+      "component": "CDF-001-BODY",
+      "anchor": "parts.CDF-001-BODY.ports.inlet",
+      "catalog_anchor": "filter_line_shutoff_dp_case_drain.ports.inlet",
+      "svg_ids": [
+        "port-CDF-001-BODY-inlet"
+      ]
+    },
+    {
+      "id": "CDF-001-BODY.outlet",
+      "component": "CDF-001-BODY",
+      "anchor": "parts.CDF-001-BODY.ports.outlet",
+      "catalog_anchor": "filter_line_shutoff_dp_case_drain.ports.outlet",
+      "svg_ids": [
+        "port-CDF-001-BODY-outlet"
+      ]
+    },
+    {
+      "id": "CDF-001-CV.inlet",
+      "component": "CDF-001-CV",
+      "anchor": "parts.CDF-001-CV.ports.inlet",
+      "catalog_anchor": "check_valve.ports.inlet",
+      "svg_ids": [
+        "port-CDF-001-CV-inlet"
+      ]
+    },
+    {
+      "id": "CDF-001-CV.outlet",
+      "component": "CDF-001-CV",
+      "anchor": "parts.CDF-001-CV.ports.outlet",
+      "catalog_anchor": "check_valve.ports.outlet",
+      "svg_ids": [
+        "port-CDF-001-CV-outlet"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "anchor": "paths[0][0->1]",
+      "endpoints": [
+        "CASE-IN",
+        "CDF-001-BODY.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-0-0"
+      ]
+    },
+    {
+      "anchor": "paths[0][1->2]",
+      "endpoints": [
+        "CDF-001-BODY.outlet",
+        "CDF-001-CV.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-1-0"
+      ]
+    },
+    {
+      "anchor": "paths[0][2->3]",
+      "endpoints": [
+        "CDF-001-CV.outlet",
+        "CASE-OUT"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-2-0"
+      ]
+    }
+  ],
+  "buses": [],
+  "externs": [
+    {
+      "id": "CASE-IN",
+      "anchor": "extern.CASE-IN",
+      "svg_ids": [
+        "extern-CASE-IN"
+      ]
+    },
+    {
+      "id": "CASE-OUT",
+      "anchor": "extern.CASE-OUT",
+      "svg_ids": [
+        "extern-CASE-OUT"
+      ]
+    }
+  ],
+  "assemblies": [
+    {
+      "id": "CDF-001",
+      "anchor": "assemblies.CDF-001",
+      "label": "CDF-001 壳体回油滤装配",
+      "members": [
+        "CDF-001-BODY",
+        "CDF-001-CV"
+      ],
+      "svg_ids": [
+        "assembly-CDF-001",
+        "assembly-label-CDF-001"
+      ]
+    }
+  ],
+  "unknown": [
+    "CDF-001-CV.flow-direction-tbd",
+    "CDF-001-CV.port-role-catalog-default",
+    "CDF-001-BODY.dp-indicator-or-sensor",
+    "CDF-001.filtration-rating"
+  ],
+  "fragments": [
+    {
+      "id": "wire-0-0",
+      "anchor": "paths[0][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-1-0",
+      "anchor": "paths[0][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-2-0",
+      "anchor": "paths[0][2->3]",
+      "kind": "run"
+    }
+  ]
+}

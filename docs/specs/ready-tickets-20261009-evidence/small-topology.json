@@ -1,0 +1,190 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {
+      "id": "EDP-001",
+      "anchor": "parts.EDP-001",
+      "type": "engine_driven_pump",
+      "svg_ids": [
+        "inst-EDP-001"
+      ]
+    },
+    {
+      "id": "PF-001",
+      "anchor": "parts.PF-001",
+      "type": "pressure_filter",
+      "svg_ids": [
+        "inst-PF-001"
+      ]
+    },
+    {
+      "id": "TANK-001",
+      "anchor": "parts.TANK-001",
+      "type": "bootstrap_reservoir",
+      "svg_ids": [
+        "inst-TANK-001"
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "id": "EDP-001.suction",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.suction",
+      "catalog_anchor": "engine_driven_pump.ports.suction",
+      "svg_ids": [
+        "port-EDP-001-suction"
+      ]
+    },
+    {
+      "id": "EDP-001.pressure_out",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.pressure_out",
+      "catalog_anchor": "engine_driven_pump.ports.pressure_out",
+      "svg_ids": [
+        "port-EDP-001-pressure_out"
+      ]
+    },
+    {
+      "id": "EDP-001.case_drain",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.case_drain",
+      "catalog_anchor": "engine_driven_pump.ports.case_drain",
+      "svg_ids": [
+        "port-EDP-001-case_drain"
+      ]
+    },
+    {
+      "id": "EDP-001.drive_shaft",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.drive_shaft",
+      "catalog_anchor": "engine_driven_pump.ports.drive_shaft",
+      "svg_ids": [
+        "port-EDP-001-drive_shaft"
+      ]
+    },
+    {
+      "id": "PF-001.inlet",
+      "component": "PF-001",
+      "anchor": "parts.PF-001.ports.inlet",
+      "catalog_anchor": "pressure_filter.ports.inlet",
+      "svg_ids": [
+        "port-PF-001-inlet"
+      ]
+    },
+    {
+      "id": "PF-001.outlet",
+      "component": "PF-001",
+      "anchor": "parts.PF-001.ports.outlet",
+      "catalog_anchor": "pressure_filter.ports.outlet",
+      "svg_ids": [
+        "port-PF-001-outlet"
+      ]
+    },
+    {
+      "id": "TANK-001.bootstrap_pressure_in",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.bootstrap_pressure_in",
+      "catalog_anchor": "bootstrap_reservoir.ports.bootstrap_pressure_in",
+      "svg_ids": [
+        "port-TANK-001-bootstrap_pressure_in"
+      ]
+    },
+    {
+      "id": "TANK-001.suction_out",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.suction_out",
+      "catalog_anchor": "bootstrap_reservoir.ports.suction_out",
+      "svg_ids": [
+        "port-TANK-001-suction_out"
+      ]
+    },
+    {
+      "id": "TANK-001.return_in",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.return_in",
+      "catalog_anchor": "bootstrap_reservoir.ports.return_in",
+      "svg_ids": [
+        "port-TANK-001-return_in"
+      ]
+    },
+    {
+      "id": "TANK-001.body_sense_tap",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.body_sense_tap",
+      "catalog_anchor": "bootstrap_reservoir.ports.body_sense_tap",
+      "svg_ids": [
+        "port-TANK-001-body_sense_tap"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "anchor": "paths[0][0->1]",
+      "endpoints": [
+        "TANK-001.suction_out",
+        "EDP-001.suction"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-0-0"
+      ]
+    },
+    {
+      "anchor": "paths[1][0->1]",
+      "endpoints": [
+        "EDP-001.pressure_out",
+        "PF-001.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-1-0"
+      ]
+    },
+    {
+      "anchor": "paths[1][1->2]",
+      "endpoints": [
+        "PF-001.outlet",
+        "USR-001"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-2-0"
+      ]
+    }
+  ],
+  "buses": [],
+  "externs": [
+    {
+      "id": "USR-001",
+      "anchor": "extern.USR-001",
+      "svg_ids": [
+        "extern-USR-001"
+      ]
+    }
+  ],
+  "assemblies": [],
+  "unknown": [
+    "supply-only-regression-return-circuit-not-modeled",
+    "TANK-001.bootstrap_pressure_in-not-modeled",
+    "EDP-001.case_drain-not-modeled",
+    "EDP-001.drive_shaft-not-modeled"
+  ],
+  "fragments": [
+    {
+      "id": "wire-0-0",
+      "anchor": "paths[0][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-1-0",
+      "anchor": "paths[1][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-2-0",
+      "anchor": "paths[1][1->2]",
+      "kind": "run"
+    }
+  ]
+}

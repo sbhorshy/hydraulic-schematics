@@ -1,0 +1,4314 @@
+[
+  {
+    "case": "small",
+    "commit": "f426711e304da07b4243f8a84fc2e3ed2eeb7489",
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/assets/fixtures/l0-small-seed/1#系统.intent.yaml",
+      "--workdir",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/small",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/assets/fixtures/l0-small-seed/1#系统.layout.json"
+    ],
+    "started_at": "2026-10-10T04:51:23.375803+00:00",
+    "elapsed_seconds": 21.051,
+    "exit_code": 4,
+    "fail_count": 0,
+    "warn_count": 3,
+    "expected_fail_count": 0,
+    "delivery": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "PERCEPTUAL",
+        "READBACK_ITEMS"
+      ]
+    },
+    "verification": {
+      "status": "current",
+      "fingerprint": "9b86780a2aa11cb664cfb522a89796c0507fe2b67cfe26b7605c7048d97d7936",
+      "changed": [],
+      "png": {
+        "status": "pass",
+        "detail": "PNG matches the current SVG and rasterization receipt.",
+        "receipt": {
+          "schema": "sheet-raster-v1",
+          "svg_sha256": "c7dd5f456072905daee6a2dfa5bb54e965f7574c31d677eae6b71abf801013e4",
+          "png_sha256": "cd902a33f5f57966b65c2d6f117e1c36c50e43f5cfaf6d3a8993def221e3fff7",
+          "renderer": {
+            "backend": "chrome",
+            "version": "Google Chrome 148.0.7778.167",
+            "exporter_sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f",
+            "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+            "width": 1680,
+            "height": 1390
+          }
+        }
+      },
+      "perceptual_review": {
+        "status": "pending",
+        "detail": "No perceptual review has been recorded."
+      },
+      "local_readback": {
+        "status": "current",
+        "complete": false,
+        "review_status": "pending",
+        "review_binding": "69ef66bd8e82714be67e2f303ec8d9c88f845f65004827faa7a9522da42d42ac",
+        "review_counts": {
+          "confirmed": 0,
+          "questioned": 0,
+          "unviewed": 17
+        },
+        "object_count": 17,
+        "crop_count": 8,
+        "unavailable": [],
+        "manifest": "readback-manifest.json",
+        "html": "readback.html"
+      },
+      "delivery": {
+        "ready": false,
+        "status": "incomplete",
+        "blocking_checks": [
+          "PERCEPTUAL",
+          "READBACK_ITEMS"
+        ]
+      }
+    },
+    "budgets": [
+      {
+        "id": "B1",
+        "metric": "线线交叉",
+        "measured": 0,
+        "status": "pass"
+      },
+      {
+        "id": "B2",
+        "metric": "折返次数",
+        "measured": {
+          "total": 0,
+          "max_single": 0
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B3",
+        "metric": "绕行比（路线长÷直角曼哈顿距）",
+        "measured": {
+          "max": 1.0,
+          "over_budget": []
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B4",
+        "metric": "最短走线段(px)",
+        "measured": 200.0,
+        "status": "pass"
+      },
+      {
+        "id": "B5",
+        "metric": "节点盒最小净距(px)",
+        "measured": 200.0,
+        "status": "pass"
+      },
+      {
+        "id": "B6",
+        "metric": "容器走廊(px)",
+        "measured": {
+          "group_padding": null,
+          "avoid_corridor": 280.0
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B7",
+        "metric": "标签净空(px)",
+        "measured": {
+          "min_clearance": 2.107,
+          "no_obstacles_within_budget": false,
+          "violations": 1
+        },
+        "status": "over"
+      }
+    ],
+    "v6": [
+      {
+        "id": "V6",
+        "status": "pass",
+        "required": true,
+        "evidence": [
+          {
+            "id": "V6",
+            "canvas": [
+              1680,
+              1390
+            ],
+            "canvas_bounds": [
+              0,
+              0,
+              1680,
+              1390
+            ],
+            "drawable_bounds": [
+              0.0,
+              0.0,
+              1650.0,
+              1390.0
+            ],
+            "coordinate_system": "root_svg_user_units",
+            "coverage_status": "pass",
+            "coverage_detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox).",
+            "content_x": [
+              89.1,
+              1150.0
+            ],
+            "content_y": [
+              120.0,
+              684.9
+            ],
+            "objects": [
+              {
+                "component": "TANK-001",
+                "box": [
+                  90.0,
+                  120.0,
+                  308.0,
+                  684.0
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "box": [
+                  570.0,
+                  490.0,
+                  650.0,
+                  570.0
+                ]
+              },
+              {
+                "component": "PF-001",
+                "box": [
+                  850.0,
+                  490.0,
+                  930.0,
+                  570.0
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-shell",
+                "paint": true,
+                "box": [
+                  97.1,
+                  192.6,
+                  297.9,
+                  447.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-upper",
+                "paint": true,
+                "box": [
+                  97.1,
+                  350.1,
+                  297.9,
+                  351.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-lower-left",
+                "paint": true,
+                "box": [
+                  97.1,
+                  372.1,
+                  188.9,
+                  373.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-lower-right",
+                "paint": true,
+                "box": [
+                  207.1,
+                  372.1,
+                  297.9,
+                  373.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-bottom-left",
+                "paint": true,
+                "box": [
+                  97.1,
+                  446.1,
+                  188.9,
+                  447.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-bottom-right",
+                "paint": true,
+                "box": [
+                  208.1,
+                  446.1,
+                  297.9,
+                  447.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__return-interface",
+                "paint": true,
+                "box": [
+                  89.1,
+                  446.1,
+                  115.9,
+                  530.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__suction-interface",
+                "paint": true,
+                "box": [
+                  279.4,
+                  446.4,
+                  308.6,
+                  530.6
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__pressure-interface",
+                "paint": true,
+                "box": [
+                  229.1,
+                  499.1,
+                  245.9,
+                  684.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__body-sense-interface",
+                "paint": true,
+                "box": [
+                  139.1,
+                  446.1,
+                  140.9,
+                  684.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "44",
+                "paint": true,
+                "box": [
+                  165.1,
+                  372.1,
+                  188.9,
+                  564.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "45",
+                "paint": true,
+                "box": [
+                  207.1,
+                  372.1,
+                  230.9,
+                  564.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "46",
+                "paint": true,
+                "box": [
+                  165.1,
+                  563.1,
+                  230.9,
+                  655.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "47",
+                "paint": true,
+                "box": [
+                  165.1,
+                  587.1,
+                  230.9,
+                  588.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "49",
+                "paint": true,
+                "box": [
+                  173.1,
+                  144.1,
+                  222.9,
+                  193.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "50",
+                "paint": true,
+                "box": [
+                  174.1,
+                  158.1,
+                  221.9,
+                  159.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "51",
+                "paint": true,
+                "box": [
+                  174.1,
+                  177.1,
+                  221.9,
+                  178.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "52",
+                "paint": true,
+                "box": [
+                  173.1,
+                  135.6,
+                  222.9,
+                  144.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "53",
+                "paint": true,
+                "box": [
+                  223.2047326829699,
+                  122.54368188609294,
+                  243.36073695061773,
+                  157.14621085200446
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "60",
+                "paint": true,
+                "box": [
+                  587.1,
+                  507.1,
+                  632.9,
+                  552.9
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "61",
+                "paint": true,
+                "box": [
+                  618,
+                  522,
+                  632,
+                  538
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "62",
+                "paint": true,
+                "box": [
+                  569.4,
+                  529.4,
+                  588.6,
+                  530.6
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "63",
+                "paint": true,
+                "box": [
+                  630.2,
+                  528.2,
+                  651.8,
+                  531.8
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "64",
+                "paint": true,
+                "box": [
+                  609.1,
+                  551.1,
+                  610.9,
+                  570.9
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "65",
+                "paint": true,
+                "box": [
+                  609.1,
+                  489.1,
+                  610.9,
+                  508.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "72",
+                "paint": true,
+                "box": [
+                  848.2,
+                  528.2,
+                  869.8,
+                  531.8
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "73",
+                "paint": true,
+                "box": [
+                  910.2,
+                  528.2,
+                  931.8,
+                  531.8
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "74",
+                "paint": true,
+                "box": [
+                  867.1,
+                  505.1,
+                  912.9,
+                  554.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "75",
+                "paint": true,
+                "box": [
+                  873.1,
+                  513.1,
+                  906.9,
+                  546.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "76",
+                "paint": true,
+                "box": [
+                  873.6,
+                  524.6,
+                  884.4,
+                  535.4
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "77",
+                "paint": true,
+                "box": [
+                  891.6,
+                  524.6,
+                  902.4,
+                  535.4
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "78",
+                "paint": true,
+                "box": [
+                  881.1,
+                  521.1,
+                  898.9,
+                  538.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "79",
+                "paint": true,
+                "box": [
+                  881.1,
+                  521.1,
+                  898.9,
+                  538.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "80",
+                "paint": true,
+                "box": [
+                  889.1,
+                  507.1,
+                  890.9,
+                  554.9
+                ]
+              },
+              {
+                "svg_id": "wire-0-0",
+                "anchor": "paths[0][0->1]",
+                "box": [
+                  308.0,
+                  529.4,
+                  570.0,
+                  530.6
+                ]
+              },
+              {
+                "svg_id": "wire-1-0",
+                "anchor": "paths[1][0->1]",
+                "box": [
+                  650.0,
+                  528.2,
+                  850.0,
+                  531.8
+                ]
+              },
+              {
+                "svg_id": "wire-2-0",
+                "anchor": "paths[1][1->2]",
+                "box": [
+                  930.0,
+                  528.2,
+                  1150.0,
+                  531.8
+                ]
+              }
+            ],
+            "unchecked": []
+          }
+        ],
+        "detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox)."
+      }
+    ],
+    "sha256": {
+      "1#系统原理图.svg": "c7dd5f456072905daee6a2dfa5bb54e965f7574c31d677eae6b71abf801013e4",
+      "sheet-readback.png": "cd902a33f5f57966b65c2d6f117e1c36c50e43f5cfaf6d3a8993def221e3fff7",
+      "validation-report.json": "5a13055215b957b9bb21e030c63d1864dbb804666cdee603e45a5a46c7d64060"
+    }
+  },
+  {
+    "case": "assembly",
+    "commit": "f426711e304da07b4243f8a84fc2e3ed2eeb7489",
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/assets/fixtures/l0-assembly-seed/1#系统.intent.yaml",
+      "--workdir",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/assembly",
+      "--ref",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/assets/fixtures/l0-assembly-seed/1#系统.layout.json"
+    ],
+    "started_at": "2026-10-10T04:51:44.443656+00:00",
+    "elapsed_seconds": 25.021,
+    "exit_code": 4,
+    "fail_count": 0,
+    "warn_count": 1,
+    "expected_fail_count": 0,
+    "delivery": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "PERCEPTUAL",
+        "READBACK_ITEMS"
+      ]
+    },
+    "verification": {
+      "status": "current",
+      "fingerprint": "5c03bcbf4971fa140c0a083d5732b4a178e61423cee468896410c75bbd433499",
+      "changed": [],
+      "png": {
+        "status": "pass",
+        "detail": "PNG matches the current SVG and rasterization receipt.",
+        "receipt": {
+          "schema": "sheet-raster-v1",
+          "svg_sha256": "09f0f5b9df2ecec8ed454abc5736c6f3b6c03517f876955ca0b2d4f95fa3f6ad",
+          "png_sha256": "78f2885ce17ca3eb6b38d4726aabb29137dc5b93a736ba39aa1aed2bf5d5f46c",
+          "renderer": {
+            "backend": "chrome",
+            "version": "Google Chrome 148.0.7778.167",
+            "exporter_sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f",
+            "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+            "width": 1680,
+            "height": 1390
+          }
+        }
+      },
+      "perceptual_review": {
+        "status": "pending",
+        "detail": "No perceptual review has been recorded."
+      },
+      "local_readback": {
+        "status": "current",
+        "complete": false,
+        "review_status": "pending",
+        "review_binding": "410888a39cac7575810ff8084ab1b3a3d8d3dadff36d9a2ddbc7d22ca3f03f9e",
+        "review_counts": {
+          "confirmed": 0,
+          "questioned": 0,
+          "unviewed": 12
+        },
+        "object_count": 12,
+        "crop_count": 7,
+        "unavailable": [],
+        "manifest": "readback-manifest.json",
+        "html": "readback.html"
+      },
+      "delivery": {
+        "ready": false,
+        "status": "incomplete",
+        "blocking_checks": [
+          "PERCEPTUAL",
+          "READBACK_ITEMS"
+        ]
+      }
+    },
+    "budgets": [
+      {
+        "id": "B1",
+        "metric": "线线交叉",
+        "measured": 0,
+        "status": "pass"
+      },
+      {
+        "id": "B2",
+        "metric": "折返次数",
+        "measured": {
+          "total": 0,
+          "max_single": 0
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B3",
+        "metric": "绕行比（路线长÷直角曼哈顿距）",
+        "measured": {
+          "max": 1.0,
+          "over_budget": []
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B4",
+        "metric": "最短走线段(px)",
+        "measured": 40.0,
+        "status": "pass"
+      },
+      {
+        "id": "B5",
+        "metric": "节点盒最小净距(px)",
+        "measured": 40.0,
+        "status": "pass"
+      },
+      {
+        "id": "B6",
+        "metric": "容器走廊(px)",
+        "measured": {
+          "group_padding": null,
+          "avoid_corridor": 120.0
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B7",
+        "metric": "标签净空(px)",
+        "measured": {
+          "min_clearance": 6.0,
+          "no_obstacles_within_budget": false,
+          "violations": 0
+        },
+        "status": "pass"
+      }
+    ],
+    "v6": [
+      {
+        "id": "V6",
+        "status": "pass",
+        "required": true,
+        "evidence": [
+          {
+            "id": "V6",
+            "canvas": [
+              1680,
+              1390
+            ],
+            "canvas_bounds": [
+              0,
+              0,
+              1680,
+              1390
+            ],
+            "drawable_bounds": [
+              0.0,
+              0.0,
+              1650.0,
+              1390.0
+            ],
+            "coordinate_system": "root_svg_user_units",
+            "coverage_status": "pass",
+            "coverage_detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox).",
+            "content_x": [
+              150.0,
+              650.0
+            ],
+            "content_y": [
+              186.0,
+              344.0
+            ],
+            "objects": [
+              {
+                "component": "CDF-001-BODY",
+                "box": [
+                  320.0,
+                  186.0,
+                  420.0,
+                  344.0
+                ]
+              },
+              {
+                "component": "CDF-001-CV",
+                "box": [
+                  460.0,
+                  260.0,
+                  540.0,
+                  340.0
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__dp-indicator-ball",
+                "paint": true,
+                "box": [
+                  348.1,
+                  189.1,
+                  391.9,
+                  232.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__dp-indicator-x-1",
+                "paint": true,
+                "box": [
+                  355.1,
+                  196.1,
+                  384.9,
+                  225.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__dp-indicator-x-2",
+                "paint": true,
+                "box": [
+                  355.1,
+                  196.1,
+                  384.9,
+                  225.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__dp-indicator-tube-l",
+                "paint": true,
+                "box": [
+                  352.6,
+                  223.5000015258789,
+                  354.4,
+                  277.4
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__dp-indicator-tube-r",
+                "paint": true,
+                "box": [
+                  385.6,
+                  223.5000015258789,
+                  387.4,
+                  277.4
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__filter-housing",
+                "paint": true,
+                "box": [
+                  329.1,
+                  259.1,
+                  410.9,
+                  340.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-ring",
+                "paint": true,
+                "box": [
+                  341.1,
+                  271.1,
+                  398.9,
+                  328.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-ball-l",
+                "paint": true,
+                "box": [
+                  341.6,
+                  291.1,
+                  359.4,
+                  308.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-ball-r",
+                "paint": true,
+                "box": [
+                  373.1,
+                  291.1,
+                  390.9,
+                  308.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-x-1",
+                "paint": true,
+                "box": [
+                  355.1,
+                  285.1,
+                  384.9,
+                  314.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-x-2",
+                "paint": true,
+                "box": [
+                  355.1,
+                  285.1,
+                  384.9,
+                  314.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__shutoff-centerline",
+                "paint": true,
+                "box": [
+                  369.1,
+                  261.1,
+                  370.9,
+                  338.9
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__port-lead-l",
+                "paint": true,
+                "box": [
+                  319.4,
+                  299.4,
+                  330.6,
+                  300.6
+                ]
+              },
+              {
+                "component": "CDF-001-BODY",
+                "svg_id": "CDF-001-BODY__port-lead-r",
+                "paint": true,
+                "box": [
+                  409.4,
+                  299.4,
+                  420.6,
+                  300.6
+                ]
+              },
+              {
+                "component": "CDF-001-CV",
+                "svg_id": "41",
+                "paint": true,
+                "box": [
+                  521.4,
+                  299.4,
+                  540.6,
+                  300.6
+                ]
+              },
+              {
+                "component": "CDF-001-CV",
+                "svg_id": "42",
+                "paint": true,
+                "box": [
+                  459.4,
+                  299.4,
+                  483.6,
+                  300.6
+                ]
+              },
+              {
+                "component": "CDF-001-CV",
+                "svg_id": "43",
+                "paint": true,
+                "box": [
+                  488.1,
+                  283.1,
+                  521.9,
+                  316.9
+                ]
+              },
+              {
+                "component": "CDF-001-CV",
+                "svg_id": "44",
+                "paint": true,
+                "box": [
+                  482.1,
+                  270.1,
+                  508.9,
+                  329.9
+                ]
+              },
+              {
+                "svg_id": "wire-0-0",
+                "anchor": "paths[0][0->1]",
+                "box": [
+                  150.0,
+                  299.4,
+                  320.0,
+                  300.6
+                ]
+              },
+              {
+                "svg_id": "wire-1-0",
+                "anchor": "paths[0][1->2]",
+                "box": [
+                  420.0,
+                  299.4,
+                  460.0,
+                  300.6
+                ]
+              },
+              {
+                "svg_id": "wire-2-0",
+                "anchor": "paths[0][2->3]",
+                "box": [
+                  540.0,
+                  299.4,
+                  650.0,
+                  300.6
+                ]
+              }
+            ],
+            "unchecked": []
+          }
+        ],
+        "detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox)."
+      }
+    ],
+    "sha256": {
+      "1#系统原理图.svg": "09f0f5b9df2ecec8ed454abc5736c6f3b6c03517f876955ca0b2d4f95fa3f6ad",
+      "sheet-readback.png": "78f2885ce17ca3eb6b38d4726aabb29137dc5b93a736ba39aa1aed2bf5d5f46c",
+      "validation-report.json": "32ceae70a4f53475073fd9b7bd1d1720926f67706f02ef69ff8249d957dd6203"
+    }
+  },
+  {
+    "case": "project",
+    "commit": "f426711e304da07b4243f8a84fc2e3ed2eeb7489",
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/1#系统原理图/1#系统.intent.yaml",
+      "--workdir",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/project",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/1#系统原理图/1#系统.layout.json",
+      "--catalog",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/1#系统原理图/component-catalog.json"
+    ],
+    "started_at": "2026-10-10T04:52:09.488264+00:00",
+    "elapsed_seconds": 40.849,
+    "exit_code": 1,
+    "fail_count": 6,
+    "warn_count": 9,
+    "expected_fail_count": 6,
+    "delivery": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "V4",
+        "V10",
+        "V14",
+        "V19",
+        "B1",
+        "PERCEPTUAL",
+        "READBACK_ITEMS"
+      ]
+    },
+    "verification": {
+      "status": "current",
+      "fingerprint": "664b8c57f39829a3ae9a82790ae9e4d7c52804e3ae69e7919e4f1351462ebb8c",
+      "changed": [],
+      "png": {
+        "status": "pass",
+        "detail": "PNG matches the current SVG and rasterization receipt.",
+        "receipt": {
+          "schema": "sheet-raster-v1",
+          "svg_sha256": "24fc3b80965e15e63f292746d4269b4441c760e1e5f1116d1bed901f50dad766",
+          "png_sha256": "cef54e36ab128ec34165322c08ce26cab7f6aa19eb59528dc5928bac0be241bb",
+          "renderer": {
+            "backend": "chrome",
+            "version": "Google Chrome 148.0.7778.167",
+            "exporter_sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f",
+            "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+            "width": 1710,
+            "height": 1390
+          }
+        }
+      },
+      "perceptual_review": {
+        "status": "pending",
+        "detail": "No perceptual review has been recorded."
+      },
+      "local_readback": {
+        "status": "current",
+        "complete": false,
+        "review_status": "pending",
+        "review_binding": "d5c0934222c8197f721019b85e18a3b3f6de10e132dfff91210ae35be6038f59",
+        "review_counts": {
+          "confirmed": 0,
+          "questioned": 0,
+          "unviewed": 128
+        },
+        "object_count": 128,
+        "crop_count": 62,
+        "unavailable": [],
+        "manifest": "readback-manifest.json",
+        "html": "readback.html"
+      },
+      "delivery": {
+        "ready": false,
+        "status": "incomplete",
+        "blocking_checks": [
+          "V4",
+          "V10",
+          "V14",
+          "V19",
+          "B1",
+          "PERCEPTUAL",
+          "READBACK_ITEMS"
+        ]
+      }
+    },
+    "budgets": [
+      {
+        "id": "B1",
+        "metric": "线线交叉",
+        "measured": 1,
+        "status": "fail"
+      },
+      {
+        "id": "B2",
+        "metric": "折返次数",
+        "measured": {
+          "total": 24,
+          "max_single": 3
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B3",
+        "metric": "绕行比（路线长÷直角曼哈顿距）",
+        "measured": {
+          "max": 1.29,
+          "over_budget": []
+        },
+        "status": "pass"
+      },
+      {
+        "id": "B4",
+        "metric": "最短走线段(px)",
+        "measured": 10.0,
+        "status": "pass"
+      },
+      {
+        "id": "B5",
+        "metric": "节点盒最小净距(px)",
+        "measured": 24.0,
+        "status": "over"
+      },
+      {
+        "id": "B6",
+        "metric": "容器走廊(px)",
+        "measured": {
+          "group_padding": null,
+          "avoid_corridor": 0.0
+        },
+        "status": "over"
+      },
+      {
+        "id": "B7",
+        "metric": "标签净空(px)",
+        "measured": {
+          "min_clearance": 1.101,
+          "no_obstacles_within_budget": false,
+          "violations": 2
+        },
+        "status": "over"
+      }
+    ],
+    "v6": [
+      {
+        "id": "V6",
+        "status": "pass",
+        "required": true,
+        "evidence": [
+          {
+            "id": "V6",
+            "canvas": [
+              1710,
+              1390
+            ],
+            "canvas_bounds": [
+              0,
+              0,
+              1710,
+              1390
+            ],
+            "drawable_bounds": [
+              0.0,
+              0.0,
+              1680.0,
+              1390.0
+            ],
+            "coordinate_system": "root_svg_user_units",
+            "coverage_status": "pass",
+            "coverage_detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox).",
+            "content_x": [
+              71.4,
+              1676.6
+            ],
+            "content_y": [
+              81.4,
+              1206.0
+            ],
+            "objects": [
+              {
+                "component": "TANK-001",
+                "box": [
+                  90.0,
+                  276.0,
+                  308.0,
+                  840.0
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "box": [
+                  331.99999999999994,
+                  283.6997246079999,
+                  536.0029919932,
+                  646.0029999999999
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "box": [
+                  570.0,
+                  290.0,
+                  650.0,
+                  370.0
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "box": [
+                  570.0,
+                  610.0,
+                  650.0,
+                  690.0
+                ]
+              },
+              {
+                "component": "PF-001",
+                "box": [
+                  1030.0,
+                  254.0,
+                  1130.0,
+                  412.0
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "box": [
+                  450.0,
+                  99.99999999999997,
+                  608.0,
+                  200.0
+                ]
+              },
+              {
+                "component": "RF-001",
+                "box": [
+                  1230.0,
+                  1012.0,
+                  1330.0,
+                  1206.0
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "box": [
+                  1330.0,
+                  290.0,
+                  1470.0,
+                  367.7778
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "box": [
+                  470.0,
+                  730.0,
+                  610.0,
+                  807.7778
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "box": [
+                  730.0,
+                  840.0,
+                  790.0,
+                  940.0
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "box": [
+                  830.0,
+                  937.0,
+                  964.0,
+                  994.0
+                ]
+              },
+              {
+                "component": "PG-001",
+                "box": [
+                  860.0,
+                  832.0,
+                  927.0,
+                  895.0
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "box": [
+                  1216.0,
+                  560.0,
+                  1376.0,
+                  627.6056
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "box": [
+                  1230.0,
+                  900.0,
+                  1390.0,
+                  967.6056
+                ]
+              },
+              {
+                "component": "CV-002",
+                "box": [
+                  1430.0,
+                  1120.0,
+                  1510.0,
+                  1200.0
+                ]
+              },
+              {
+                "component": "USER-001",
+                "box": [
+                  1528.0,
+                  160.0,
+                  1648.0,
+                  220.0
+                ]
+              },
+              {
+                "component": "USER-002",
+                "box": [
+                  1528.0,
+                  265.0,
+                  1648.0,
+                  325.0
+                ]
+              },
+              {
+                "component": "USER-003",
+                "box": [
+                  1528.0,
+                  370.0,
+                  1648.0,
+                  430.0
+                ]
+              },
+              {
+                "component": "USER-004",
+                "box": [
+                  1528.0,
+                  475.0,
+                  1648.0,
+                  535.0
+                ]
+              },
+              {
+                "component": "USER-005",
+                "box": [
+                  1528.0,
+                  580.0,
+                  1648.0,
+                  640.0
+                ]
+              },
+              {
+                "component": "USER-006",
+                "box": [
+                  1528.0,
+                  685.0,
+                  1648.0,
+                  745.0
+                ]
+              },
+              {
+                "component": "USER-007",
+                "box": [
+                  1528.0,
+                  790.0,
+                  1648.0,
+                  850.0
+                ]
+              },
+              {
+                "component": "USER-008",
+                "box": [
+                  1528.0,
+                  895.0,
+                  1648.0,
+                  955.0
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-shell",
+                "paint": true,
+                "box": [
+                  97.1,
+                  348.6,
+                  297.9,
+                  603.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-upper",
+                "paint": true,
+                "box": [
+                  97.1,
+                  506.1,
+                  297.9,
+                  507.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-lower-left",
+                "paint": true,
+                "box": [
+                  97.1,
+                  528.1,
+                  188.9,
+                  529.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__separator-lower-right",
+                "paint": true,
+                "box": [
+                  207.1,
+                  528.1,
+                  297.9,
+                  529.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-bottom-left",
+                "paint": true,
+                "box": [
+                  97.1,
+                  602.1,
+                  188.9,
+                  603.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__tank-bottom-right",
+                "paint": true,
+                "box": [
+                  208.1,
+                  602.1,
+                  297.9,
+                  603.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__return-interface",
+                "paint": true,
+                "box": [
+                  89.4,
+                  602.4,
+                  115.6,
+                  686.6
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__suction-interface",
+                "paint": true,
+                "box": [
+                  279.4,
+                  602.4,
+                  308.6,
+                  686.6
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__pressure-interface",
+                "paint": true,
+                "box": [
+                  228.2,
+                  654.2,
+                  246.8,
+                  841.8
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "TANK-001__body-sense-interface",
+                "paint": true,
+                "box": [
+                  139.1,
+                  602.1,
+                  140.9,
+                  840.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "118",
+                "paint": true,
+                "box": [
+                  165.1,
+                  528.1,
+                  188.9,
+                  720.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "119",
+                "paint": true,
+                "box": [
+                  207.1,
+                  528.1,
+                  230.9,
+                  720.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "120",
+                "paint": true,
+                "box": [
+                  165.1,
+                  719.1,
+                  230.9,
+                  811.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "121",
+                "paint": true,
+                "box": [
+                  165.1,
+                  743.1,
+                  230.9,
+                  744.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "123",
+                "paint": true,
+                "box": [
+                  173.1,
+                  300.1,
+                  222.9,
+                  349.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "124",
+                "paint": true,
+                "box": [
+                  174.1,
+                  314.1,
+                  221.9,
+                  315.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "125",
+                "paint": true,
+                "box": [
+                  174.1,
+                  333.1,
+                  221.9,
+                  334.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "126",
+                "paint": true,
+                "box": [
+                  173.1,
+                  291.6,
+                  222.9,
+                  300.9
+                ]
+              },
+              {
+                "component": "TANK-001",
+                "svg_id": "127",
+                "paint": true,
+                "box": [
+                  223.2047326829699,
+                  278.54368188609294,
+                  243.36073695061773,
+                  313.14621085200446
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__envelope-box",
+                "paint": true,
+                "box": [
+                  402.90275853284146,
+                  358.01092298938164,
+                  464.7038387334549,
+                  479.81238513553836
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__shaft-lower",
+                "paint": true,
+                "box": [
+                  435.90318756606956,
+                  478.2406903226285,
+                  437.7031839182653,
+                  522.4851044427585
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__shaft-upper",
+                "paint": true,
+                "box": [
+                  423.9031127028367,
+                  478.2406903226285,
+                  425.7031090550325,
+                  522.5992018067479
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__pump-triangle-upper",
+                "paint": true,
+                "box": [
+                  401.86505464216043,
+                  491.57306686819356,
+                  417.9090284757085,
+                  503.4288472850785
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__pump-triangle-lower",
+                "paint": true,
+                "box": [
+                  445.5932680261767,
+                  491.57306686819356,
+                  461.6378445806713,
+                  503.4288472850785
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__pump-arc",
+                "paint": true,
+                "box": [
+                  400.85696342340106,
+                  490.42676181820497,
+                  462.6694342869658,
+                  504.77488947911553
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__port-upper",
+                "paint": true,
+                "box": [
+                  361.10024048029294,
+                  448.0179579917687,
+                  404.8289543515762,
+                  449.81795434396446
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__port-lower",
+                "paint": true,
+                "box": [
+                  462.903827122501,
+                  448.1380596770861,
+                  507.070345282328,
+                  449.9380560292819
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__position1-passage",
+                "paint": true,
+                "box": [
+                  402.90275853284146,
+                  448.03605487892236,
+                  464.79983158091164,
+                  449.8360512311181
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__position2-passage-upper",
+                "paint": true,
+                "box": [
+                  402.90275853284146,
+                  388.04708648446757,
+                  419.79932005507163,
+                  389.84708283666333
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__position2-tick-upper",
+                "paint": true,
+                "box": [
+                  417.99932370287587,
+                  382.01719147786133,
+                  419.79932005507163,
+                  395.81725506391086
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__position2-tick-lower",
+                "paint": true,
+                "box": [
+                  447.9998656270847,
+                  382.01719147786133,
+                  449.7998619792805,
+                  395.81725506391086
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__position2-passage-lower",
+                "paint": true,
+                "box": [
+                  447.9998656270847,
+                  388.04708648446757,
+                  464.7038234746968,
+                  389.84708283666333
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__box-mid",
+                "paint": true,
+                "box": [
+                  403.1189522475435,
+                  418.02950863338555,
+                  464.9200248187779,
+                  419.8295049855813
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__valve-flow-arrow",
+                "paint": true,
+                "box": [
+                  448.77966293593727,
+                  446.655952084966,
+                  463.89983340481376,
+                  451.6961487798744
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__seat-left",
+                "paint": true,
+                "box": [
+                  440.06118390037426,
+                  317.77470692314745,
+                  458.829644094906,
+                  336.54256439673264
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__seat-right",
+                "paint": true,
+                "box": [
+                  440.06118390037426,
+                  300.8002540182417,
+                  458.829644094906,
+                  319.5747032753432
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__ball",
+                "paint": true,
+                "box": [
+                  432.273495214835,
+                  307.81442857006135,
+                  454.05325034744016,
+                  329.5941837026665
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__port-bottom",
+                "paint": true,
+                "box": [
+                  457.0115432261775,
+                  317.7681151396311,
+                  488.8120815025821,
+                  319.56811149182687
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__port-top",
+                "paint": true,
+                "box": [
+                  401.79895522777514,
+                  317.7023193745328,
+                  433.59949350417975,
+                  319.50231572672857
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__spring-1",
+                "paint": true,
+                "box": [
+                  408.4586478472176,
+                  305.9539300974349,
+                  417.0211274430638,
+                  330.2487844268588
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__spring-2",
+                "paint": true,
+                "box": [
+                  415.221131090868,
+                  305.9539300974349,
+                  423.7835115047863,
+                  330.1763053256953
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__spring-3",
+                "paint": true,
+                "box": [
+                  421.98351515259054,
+                  305.9539300974349,
+                  430.54530047494137,
+                  330.1763053256953
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__spring-4",
+                "paint": true,
+                "box": [
+                  428.7453041227456,
+                  305.9539300974349,
+                  437.21768838115605,
+                  330.2487844268588
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__motor-text",
+                "paint": true,
+                "box": [
+                  422.6417169437038,
+                  544.0507452479271,
+                  438.44168492408863,
+                  558.8507152548698
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__motor-circle",
+                "paint": true,
+                "box": [
+                  400.02246194074195,
+                  520.2533043086576,
+                  461.82353832666587,
+                  582.0543806945814
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__main-run",
+                "paint": true,
+                "box": [
+                  487.0180818423352,
+                  317.7681151396311,
+                  507.0582450871232,
+                  449.9380560292819
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__main-run-upper",
+                "paint": true,
+                "box": [
+                  361.10024048029294,
+                  317.7023193745328,
+                  403.59895348731567,
+                  449.81795434396446
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__main-run-upper-ext",
+                "paint": true,
+                "box": [
+                  331.40000121593476,
+                  448.31795738380134,
+                  362.60023744045606,
+                  449.5179549519318
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__main-run-lower-ext",
+                "paint": true,
+                "box": [
+                  505.5703483221649,
+                  448.43805906911876,
+                  536.6029880693143,
+                  449.63805663724924
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__junction-upper",
+                "paint": true,
+                "box": [
+                  359.3004436363599,
+                  446.21816019416326,
+                  364.70003272274937,
+                  451.61774928055274
+                ]
+              },
+              {
+                "component": "FSOV-001",
+                "svg_id": "FSOV-001__junction-lower",
+                "paint": true,
+                "box": [
+                  503.4584537983392,
+                  446.3382618794807,
+                  508.85804288472866,
+                  451.73785096587017
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "177",
+                "paint": true,
+                "box": [
+                  587.1,
+                  307.1,
+                  632.9,
+                  352.9
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "178",
+                "paint": true,
+                "box": [
+                  618,
+                  322,
+                  632,
+                  338
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "179",
+                "paint": true,
+                "box": [
+                  569.4,
+                  329.4,
+                  588.6,
+                  330.6
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "180",
+                "paint": true,
+                "box": [
+                  630.2,
+                  328.2,
+                  651.8,
+                  331.8
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "181",
+                "paint": true,
+                "box": [
+                  609.4,
+                  351.4,
+                  610.6,
+                  370.6
+                ]
+              },
+              {
+                "component": "EDP-001",
+                "svg_id": "182",
+                "paint": true,
+                "box": [
+                  609.1,
+                  289.1,
+                  610.9,
+                  308.9
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "189",
+                "paint": true,
+                "box": [
+                  587.1,
+                  627.1,
+                  632.9,
+                  672.9
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "190",
+                "paint": true,
+                "box": [
+                  618,
+                  642,
+                  632,
+                  658
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "191",
+                "paint": true,
+                "box": [
+                  591.1,
+                  631.1,
+                  628.9,
+                  668.9
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "192",
+                "paint": true,
+                "box": [
+                  620,
+                  632,
+                  628,
+                  640
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "193",
+                "paint": true,
+                "box": [
+                  569.4,
+                  649.4,
+                  588.6,
+                  650.6
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "194",
+                "paint": true,
+                "box": [
+                  630.2,
+                  648.2,
+                  651.8,
+                  651.8
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "195",
+                "paint": true,
+                "box": [
+                  609.4,
+                  671.4,
+                  610.6,
+                  690.6
+                ]
+              },
+              {
+                "component": "EMP-001",
+                "svg_id": "196",
+                "paint": true,
+                "box": [
+                  609.1,
+                  609.1,
+                  610.9,
+                  628.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__dp-indicator-ball",
+                "paint": true,
+                "box": [
+                  1058.1,
+                  257.1,
+                  1101.9,
+                  300.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__dp-indicator-x-1",
+                "paint": true,
+                "box": [
+                  1065.1,
+                  264.1,
+                  1094.9,
+                  293.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__dp-indicator-x-2",
+                "paint": true,
+                "box": [
+                  1065.1,
+                  264.1,
+                  1094.9,
+                  293.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__dp-indicator-tube-l",
+                "paint": true,
+                "box": [
+                  1062.6,
+                  291.50000152587893,
+                  1064.4,
+                  345.4
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__dp-indicator-tube-r",
+                "paint": true,
+                "box": [
+                  1095.6,
+                  291.50000152587893,
+                  1097.4,
+                  345.4
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__filter-housing",
+                "paint": true,
+                "box": [
+                  1039.1,
+                  327.1,
+                  1120.9,
+                  408.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-ring",
+                "paint": true,
+                "box": [
+                  1051.1,
+                  339.1,
+                  1108.9,
+                  396.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-ball-l",
+                "paint": true,
+                "box": [
+                  1051.6,
+                  359.1,
+                  1069.4,
+                  376.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-ball-r",
+                "paint": true,
+                "box": [
+                  1083.1,
+                  359.1,
+                  1100.9,
+                  376.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-x-1",
+                "paint": true,
+                "box": [
+                  1065.1,
+                  353.1,
+                  1094.9,
+                  382.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-x-2",
+                "paint": true,
+                "box": [
+                  1065.1,
+                  353.1,
+                  1094.9,
+                  382.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__shutoff-centerline",
+                "paint": true,
+                "box": [
+                  1079.1,
+                  329.1,
+                  1080.9,
+                  406.9
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__port-lead-l",
+                "paint": true,
+                "box": [
+                  1028.2,
+                  366.2,
+                  1041.8,
+                  369.8
+                ]
+              },
+              {
+                "component": "PF-001",
+                "svg_id": "PF-001__port-lead-r",
+                "paint": true,
+                "box": [
+                  1118.2,
+                  366.2,
+                  1131.8,
+                  369.8
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__dp-indicator-ball",
+                "paint": true,
+                "box": [
+                  453.1,
+                  128.1,
+                  496.9,
+                  171.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__dp-indicator-x-1",
+                "paint": true,
+                "box": [
+                  460.1,
+                  135.1,
+                  489.9,
+                  164.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__dp-indicator-x-2",
+                "paint": true,
+                "box": [
+                  460.1,
+                  135.1,
+                  489.9,
+                  164.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__dp-indicator-tube-l",
+                "paint": true,
+                "box": [
+                  487.50000152587893,
+                  165.6,
+                  541.4,
+                  167.4
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__dp-indicator-tube-r",
+                "paint": true,
+                "box": [
+                  487.50000152587893,
+                  132.6,
+                  541.4,
+                  134.4
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__filter-housing",
+                "paint": true,
+                "box": [
+                  523.1,
+                  109.1,
+                  604.9,
+                  190.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-ring",
+                "paint": true,
+                "box": [
+                  535.1,
+                  121.1,
+                  592.9,
+                  178.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-ball-l",
+                "paint": true,
+                "box": [
+                  555.1,
+                  160.6,
+                  572.9,
+                  178.4
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-ball-r",
+                "paint": true,
+                "box": [
+                  555.1,
+                  129.1,
+                  572.9,
+                  146.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-x-1",
+                "paint": true,
+                "box": [
+                  549.1,
+                  135.1,
+                  578.9,
+                  164.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-x-2",
+                "paint": true,
+                "box": [
+                  549.1,
+                  135.1,
+                  578.9,
+                  164.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__shutoff-centerline",
+                "paint": true,
+                "box": [
+                  525.1,
+                  149.1,
+                  602.9,
+                  150.9
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__port-lead-l",
+                "paint": true,
+                "box": [
+                  563.4,
+                  189.4,
+                  564.6,
+                  200.6
+                ]
+              },
+              {
+                "component": "CDF-001",
+                "svg_id": "CDF-001__port-lead-r",
+                "paint": true,
+                "box": [
+                  563.4,
+                  99.4,
+                  564.6,
+                  110.6
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__dp-indicator-ball",
+                "paint": true,
+                "box": [
+                  1258.1,
+                  1159.1,
+                  1301.9,
+                  1202.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__dp-indicator-x-1",
+                "paint": true,
+                "box": [
+                  1265.1,
+                  1166.1,
+                  1294.9,
+                  1195.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__dp-indicator-x-2",
+                "paint": true,
+                "box": [
+                  1265.1,
+                  1166.1,
+                  1294.9,
+                  1195.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__dp-indicator-tube-l",
+                "paint": true,
+                "box": [
+                  1295.6,
+                  1114.6,
+                  1297.4,
+                  1168.4999984741212
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__dp-indicator-tube-r",
+                "paint": true,
+                "box": [
+                  1262.6,
+                  1114.6,
+                  1264.4,
+                  1168.4999984741212
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__filter-housing",
+                "paint": true,
+                "box": [
+                  1239.1,
+                  1051.1,
+                  1320.9,
+                  1132.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-ring",
+                "paint": true,
+                "box": [
+                  1251.1,
+                  1063.1,
+                  1308.9,
+                  1120.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-ball-l",
+                "paint": true,
+                "box": [
+                  1290.6,
+                  1083.1,
+                  1308.4,
+                  1100.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-ball-r",
+                "paint": true,
+                "box": [
+                  1259.1,
+                  1083.1,
+                  1276.9,
+                  1100.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-x-1",
+                "paint": true,
+                "box": [
+                  1265.1,
+                  1077.1,
+                  1294.9,
+                  1106.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-x-2",
+                "paint": true,
+                "box": [
+                  1265.1,
+                  1077.1,
+                  1294.9,
+                  1106.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__shutoff-centerline",
+                "paint": true,
+                "box": [
+                  1279.1,
+                  1053.1,
+                  1280.9,
+                  1130.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__port-lead-l",
+                "paint": true,
+                "box": [
+                  1319.4,
+                  1091.4,
+                  1330.6,
+                  1092.6
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__port-lead-r",
+                "paint": true,
+                "box": [
+                  1229.4,
+                  1091.4,
+                  1240.6,
+                  1092.6
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-branch-l",
+                "paint": true,
+                "box": [
+                  1290.4,
+                  1029.4,
+                  1330.6,
+                  1092.6
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-branch-r",
+                "paint": true,
+                "box": [
+                  1229.4,
+                  1029.4,
+                  1230.6,
+                  1092.6
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-lead-out",
+                "paint": true,
+                "box": [
+                  1229.1,
+                  1029.1,
+                  1271.9,
+                  1030.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-valve-seat",
+                "paint": true,
+                "box": [
+                  1276.1,
+                  1015.1,
+                  1291.9,
+                  1044.9
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-valve-ball",
+                "paint": true,
+                "box": [
+                  1269.4500022888183,
+                  1020.7500053405762,
+                  1287.950003051758,
+                  1039.2500061035157
+                ]
+              },
+              {
+                "component": "RF-001",
+                "svg_id": "RF-001__bypass-valve-spring",
+                "paint": true,
+                "box": [
+                  1249.6374528847723,
+                  1016.9550973536847,
+                  1273.8625471152277,
+                  1041.9117640644263
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__housing",
+                "paint": true,
+                "box": [
+                  1361.939500427246,
+                  302.9271999359131,
+                  1433.7395004272462,
+                  360.46789970397947
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__main-pipeline-left",
+                "paint": true,
+                "box": [
+                  1361.939500427246,
+                  316.3222003936768,
+                  1397.8753036499024,
+                  318.12220039367674
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__port-lead-inlet",
+                "paint": true,
+                "box": [
+                  1328.2,
+                  315.42220039367675,
+                  1364.639500427246,
+                  319.02220039367677
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__main-pipeline-right",
+                "paint": true,
+                "box": [
+                  1427.1864028930663,
+                  316.3222003936768,
+                  1433.7395004272462,
+                  318.12220039367674
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__port-lead-outlet",
+                "paint": true,
+                "box": [
+                  1431.0395004272461,
+                  315.42220039367675,
+                  1471.8,
+                  319.02220039367677
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__junction-left",
+                "paint": true,
+                "box": [
+                  1366.2604995727538,
+                  315.02589950561526,
+                  1370.653099679947,
+                  319.4184996128082
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-vertical-stem",
+                "paint": true,
+                "box": [
+                  1380.0877014160155,
+                  310.70490036010744,
+                  1381.8877014160157,
+                  327.19629898071287
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-stem-arrow",
+                "paint": true,
+                "box": [
+                  1377.4950996398925,
+                  308.54440078735354,
+                  1384.4802001953126,
+                  316.8258995056152
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-spring-like",
+                "paint": true,
+                "box": [
+                  1391.361193507614,
+                  308.94593321367023,
+                  1405.1532102886272,
+                  325.00362030238813
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-check-line-left",
+                "paint": true,
+                "box": [
+                  1396.0753036141396,
+                  316.3223013025761,
+                  1404.8753240386652,
+                  318.12230137410165
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-check-line-right",
+                "paint": true,
+                "box": [
+                  1418.2419449673748,
+                  316.3223013025761,
+                  1428.986416372105,
+                  318.12230137410165
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-check-ball",
+                "paint": true,
+                "box": [
+                  1403.4642138198578,
+                  310.1000610841656,
+                  1417.7086943282043,
+                  324.34454159251214
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__upper-check-seat",
+                "paint": true,
+                "box": [
+                  1408.5197840509604,
+                  305.04449042390945,
+                  1420.0419450389004,
+                  329.40002213054186
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__junction-right",
+                "paint": true,
+                "box": [
+                  1425.8901000976562,
+                  315.02589950561526,
+                  1430.2827002048493,
+                  319.4184996128082
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-left-passage",
+                "paint": true,
+                "box": [
+                  1367.5567985534667,
+                  316.3222003936768,
+                  1383.6159996032716,
+                  343.1840003967285
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-right-passage",
+                "paint": true,
+                "box": [
+                  1412.9272018432616,
+                  316.3222003936768,
+                  1428.9864028930665,
+                  343.1840003967285
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-check-line-left",
+                "paint": true,
+                "box": [
+                  1405.9271794023348,
+                  341.384004175663,
+                  1414.7271998268604,
+                  343.18400424718857
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-check-line-right",
+                "paint": true,
+                "box": [
+                  1381.816087068895,
+                  341.384004175663,
+                  1392.5605584736252,
+                  343.18400424718857
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-check-ball",
+                "paint": true,
+                "box": [
+                  1393.0938091127955,
+                  335.1617639572525,
+                  1407.3382896211422,
+                  349.40624446559906
+                ]
+              },
+              {
+                "component": "PRV-001",
+                "svg_id": "PRV-001__lower-check-seat",
+                "paint": true,
+                "box": [
+                  1390.7605584020996,
+                  330.1062834192228,
+                  1402.2827193900393,
+                  354.4618151258552
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__housing",
+                "paint": true,
+                "box": [
+                  506.26049957275393,
+                  737.3099323272705,
+                  578.0604995727539,
+                  794.8506320953369
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__main-pipeline-left",
+                "paint": true,
+                "box": [
+                  542.1246963500977,
+                  779.6556316375733,
+                  578.0604995727539,
+                  781.4556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__port-lead-inlet",
+                "paint": true,
+                "box": [
+                  575.360499572754,
+                  778.7556316375733,
+                  611.8,
+                  782.3556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__main-pipeline-right",
+                "paint": true,
+                "box": [
+                  506.26049957275393,
+                  779.6556316375733,
+                  512.8135971069336,
+                  781.4556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__port-lead-outlet",
+                "paint": true,
+                "box": [
+                  468.2,
+                  778.7556316375733,
+                  508.9604995727539,
+                  782.3556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__junction-left",
+                "paint": true,
+                "box": [
+                  569.3469003200531,
+                  778.3593324184418,
+                  573.7395004272461,
+                  782.7519325256347
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-vertical-stem",
+                "paint": true,
+                "box": [
+                  558.1122985839844,
+                  770.5815330505371,
+                  559.9122985839844,
+                  787.0729316711426
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-stem-arrow",
+                "paint": true,
+                "box": [
+                  555.5197998046875,
+                  780.9519325256348,
+                  562.5049003601074,
+                  789.2334312438965
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-spring-like",
+                "paint": true,
+                "box": [
+                  534.8467897113728,
+                  772.7742117288619,
+                  548.6388064923859,
+                  788.8318988175797
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-check-line-left",
+                "paint": true,
+                "box": [
+                  535.1246759613347,
+                  779.6555306571483,
+                  543.9246963858604,
+                  781.4555307286739
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-check-line-right",
+                "paint": true,
+                "box": [
+                  511.01358362789506,
+                  779.6555306571483,
+                  521.7580550326252,
+                  781.4555307286739
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-check-ball",
+                "paint": true,
+                "box": [
+                  522.2913056717956,
+                  773.4332904387379,
+                  536.5357861801422,
+                  787.6777709470844
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__upper-check-seat",
+                "paint": true,
+                "box": [
+                  519.9580549610996,
+                  768.3778099007081,
+                  531.4802159490395,
+                  792.7333416073405
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__junction-right",
+                "paint": true,
+                "box": [
+                  509.7172997951508,
+                  778.3593324184418,
+                  514.1098999023437,
+                  782.7519325256347
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-left-passage",
+                "paint": true,
+                "box": [
+                  556.3840003967285,
+                  754.5938316345215,
+                  572.4432014465332,
+                  781.4556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-right-passage",
+                "paint": true,
+                "box": [
+                  511.0135971069336,
+                  754.5938316345215,
+                  527.0727981567383,
+                  781.4556316375732
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-check-line-left",
+                "paint": true,
+                "box": [
+                  525.2728001731396,
+                  754.5938277840614,
+                  534.0728205976653,
+                  756.393827855587
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-check-line-right",
+                "paint": true,
+                "box": [
+                  547.4394415263748,
+                  754.5938277840614,
+                  558.1839129311049,
+                  756.393827855587
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-check-ball",
+                "paint": true,
+                "box": [
+                  532.6617103788578,
+                  748.371587565651,
+                  546.9061908872044,
+                  762.6160680739974
+                ]
+              },
+              {
+                "component": "PRV-002",
+                "svg_id": "PRV-002__lower-check-seat",
+                "paint": true,
+                "box": [
+                  537.7172806099605,
+                  743.3160169053948,
+                  549.2394415979004,
+                  767.6715486120272
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "svg_id": "315",
+                "paint": true,
+                "box": [
+                  741.1,
+                  851.1,
+                  778.9,
+                  928.9
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "svg_id": "316",
+                "paint": true,
+                "box": [
+                  754.1,
+                  881.1,
+                  765.9,
+                  890.9
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "svg_id": "317",
+                "paint": true,
+                "box": [
+                  741.1,
+                  889.1,
+                  778.9,
+                  890.9
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "svg_id": "318",
+                "paint": true,
+                "box": [
+                  758.2,
+                  926.2,
+                  761.8,
+                  941.8
+                ]
+              },
+              {
+                "component": "ACC-001",
+                "svg_id": "319",
+                "paint": true,
+                "box": [
+                  759.4,
+                  839.4,
+                  760.6,
+                  852.6
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__left-end-feature",
+                "paint": true,
+                "box": [
+                  950.6,
+                  953.6,
+                  952.4,
+                  975.4
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__left-interface-line",
+                "paint": true,
+                "box": [
+                  925.6,
+                  963.6,
+                  964.9,
+                  965.4
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__central-left-triangle",
+                "paint": true,
+                "box": [
+                  903.6,
+                  949.6,
+                  927.4,
+                  980.4
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__central-right-triangle",
+                "paint": true,
+                "box": [
+                  882.6,
+                  950.1,
+                  905.4,
+                  979.9
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__middle-interface-line",
+                "paint": true,
+                "box": [
+                  866.1,
+                  963.6,
+                  884.4,
+                  965.4
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__right-small-triangle",
+                "paint": true,
+                "box": [
+                  853.1,
+                  955.6,
+                  867.9,
+                  972.9
+                ]
+              },
+              {
+                "component": "ACV-001",
+                "svg_id": "ACV-001__right-interface-line",
+                "paint": true,
+                "box": [
+                  829.4,
+                  963.9,
+                  854.6,
+                  965.1
+                ]
+              },
+              {
+                "component": "PG-001",
+                "svg_id": "PG-001__dial",
+                "paint": true,
+                "box": [
+                  874.1,
+                  841.1,
+                  919.9,
+                  886.9
+                ]
+              },
+              {
+                "component": "PG-001",
+                "svg_id": "PG-001__needle",
+                "paint": true,
+                "box": [
+                  881.35,
+                  855.35,
+                  911.4,
+                  873.4
+                ]
+              },
+              {
+                "component": "PG-001",
+                "svg_id": "PG-001__needle-arrow",
+                "paint": true,
+                "box": [
+                  900.5,
+                  855.5,
+                  911.75,
+                  864.75
+                ]
+              },
+              {
+                "component": "PG-001",
+                "svg_id": "PG-001__pressure-sense-line",
+                "paint": true,
+                "box": [
+                  859.4,
+                  863.4,
+                  875.6,
+                  864.6
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__housing",
+                "paint": true,
+                "box": [
+                  1264.6774993896483,
+                  562.8557883262635,
+                  1326.571398162842,
+                  624.749690914154
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__mating-half-tick",
+                "paint": true,
+                "box": [
+                  1374.3487999796866,
+                  580.1327916145325,
+                  1376.1487999796868,
+                  607.4726914405823
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__line-left",
+                "paint": true,
+                "box": [
+                  1312.7525993347167,
+                  592.90268907547,
+                  1376.9,
+                  594.70268907547
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__poppet-ball",
+                "paint": true,
+                "box": [
+                  1271.4379974365233,
+                  575.6256886482239,
+                  1307.7919982910157,
+                  611.979689502716
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__poppet-jaws",
+                "paint": true,
+                "box": [
+                  1287.963800048828,
+                  566.6116906166077,
+                  1314.552599334717,
+                  620.9937905311584
+                ]
+              },
+              {
+                "component": "QDP-001",
+                "svg_id": "QDP-001__line-right",
+                "paint": true,
+                "box": [
+                  1214.2,
+                  592.00268907547,
+                  1274.1379974365234,
+                  595.6026890754699
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__housing",
+                "paint": true,
+                "box": [
+                  1278.6774993896483,
+                  902.8557883262635,
+                  1340.571398162842,
+                  964.749690914154
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__mating-half-tick",
+                "paint": true,
+                "box": [
+                  1388.3487999796866,
+                  920.1327916145325,
+                  1390.1487999796868,
+                  947.4726914405823
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__line-left",
+                "paint": true,
+                "box": [
+                  1326.7525993347167,
+                  932.90268907547,
+                  1390.9,
+                  934.70268907547
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__poppet-ball",
+                "paint": true,
+                "box": [
+                  1285.4379974365233,
+                  915.6256886482239,
+                  1321.7919982910157,
+                  951.979689502716
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__poppet-jaws",
+                "paint": true,
+                "box": [
+                  1301.963800048828,
+                  906.6116906166077,
+                  1328.552599334717,
+                  960.9937905311584
+                ]
+              },
+              {
+                "component": "QDR-001",
+                "svg_id": "QDR-001__line-right",
+                "paint": true,
+                "box": [
+                  1229.4,
+                  933.20268907547,
+                  1286.9379974365233,
+                  934.40268907547
+                ]
+              },
+              {
+                "component": "CV-002",
+                "svg_id": "362",
+                "paint": true,
+                "box": [
+                  1469.4,
+                  1119.4,
+                  1470.6,
+                  1138.6
+                ]
+              },
+              {
+                "component": "CV-002",
+                "svg_id": "363",
+                "paint": true,
+                "box": [
+                  1469.1,
+                  1176.1,
+                  1470.9,
+                  1200.9
+                ]
+              },
+              {
+                "component": "CV-002",
+                "svg_id": "364",
+                "paint": true,
+                "box": [
+                  1453.1,
+                  1138.1,
+                  1486.9,
+                  1171.9
+                ]
+              },
+              {
+                "component": "CV-002",
+                "svg_id": "365",
+                "paint": true,
+                "box": [
+                  1440.1,
+                  1151.1,
+                  1499.9,
+                  1177.9
+                ]
+              },
+              {
+                "component": "USER-001",
+                "svg_id": "USER-001__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  167.1,
+                  1628.9,
+                  212.9
+                ]
+              },
+              {
+                "component": "USER-001",
+                "svg_id": "USER-001__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  188.2,
+                  1549.8,
+                  191.8
+                ]
+              },
+              {
+                "component": "USER-001",
+                "svg_id": "USER-001__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  189.4,
+                  1648.6,
+                  190.6
+                ]
+              },
+              {
+                "component": "USER-001",
+                "svg_id": "USER-001__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  178.5,
+                  1614.375,
+                  202.5
+                ]
+              },
+              {
+                "component": "USER-002",
+                "svg_id": "USER-002__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  272.1,
+                  1628.9,
+                  317.9
+                ]
+              },
+              {
+                "component": "USER-002",
+                "svg_id": "USER-002__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  293.2,
+                  1549.8,
+                  296.8
+                ]
+              },
+              {
+                "component": "USER-002",
+                "svg_id": "USER-002__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  294.4,
+                  1648.6,
+                  295.6
+                ]
+              },
+              {
+                "component": "USER-002",
+                "svg_id": "USER-002__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  283.5,
+                  1615.375,
+                  306.5
+                ]
+              },
+              {
+                "component": "USER-003",
+                "svg_id": "USER-003__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  377.1,
+                  1628.9,
+                  422.9
+                ]
+              },
+              {
+                "component": "USER-003",
+                "svg_id": "USER-003__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  398.2,
+                  1549.8,
+                  401.8
+                ]
+              },
+              {
+                "component": "USER-003",
+                "svg_id": "USER-003__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  399.4,
+                  1648.6,
+                  400.6
+                ]
+              },
+              {
+                "component": "USER-003",
+                "svg_id": "USER-003__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  388.5,
+                  1614.375,
+                  411.5
+                ]
+              },
+              {
+                "component": "USER-004",
+                "svg_id": "USER-004__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  482.1,
+                  1628.9,
+                  527.9
+                ]
+              },
+              {
+                "component": "USER-004",
+                "svg_id": "USER-004__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  503.2,
+                  1549.8,
+                  506.8
+                ]
+              },
+              {
+                "component": "USER-004",
+                "svg_id": "USER-004__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  504.4,
+                  1648.6,
+                  505.6
+                ]
+              },
+              {
+                "component": "USER-004",
+                "svg_id": "USER-004__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  493.5,
+                  1615.375,
+                  516.5
+                ]
+              },
+              {
+                "component": "USER-005",
+                "svg_id": "USER-005__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  587.1,
+                  1628.9,
+                  632.9
+                ]
+              },
+              {
+                "component": "USER-005",
+                "svg_id": "USER-005__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  608.2,
+                  1549.8,
+                  611.8
+                ]
+              },
+              {
+                "component": "USER-005",
+                "svg_id": "USER-005__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  609.4,
+                  1648.6,
+                  610.6
+                ]
+              },
+              {
+                "component": "USER-005",
+                "svg_id": "USER-005__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  598.5,
+                  1615.375,
+                  621.5
+                ]
+              },
+              {
+                "component": "USER-006",
+                "svg_id": "USER-006__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  692.1,
+                  1628.9,
+                  737.9
+                ]
+              },
+              {
+                "component": "USER-006",
+                "svg_id": "USER-006__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  713.2,
+                  1549.8,
+                  716.8
+                ]
+              },
+              {
+                "component": "USER-006",
+                "svg_id": "USER-006__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  714.4,
+                  1648.6,
+                  715.6
+                ]
+              },
+              {
+                "component": "USER-006",
+                "svg_id": "USER-006__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  703.5,
+                  1615.375,
+                  727.5
+                ]
+              },
+              {
+                "component": "USER-007",
+                "svg_id": "USER-007__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  797.1,
+                  1628.9,
+                  842.9
+                ]
+              },
+              {
+                "component": "USER-007",
+                "svg_id": "USER-007__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  818.2,
+                  1549.8,
+                  821.8
+                ]
+              },
+              {
+                "component": "USER-007",
+                "svg_id": "USER-007__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  819.4,
+                  1648.6,
+                  820.6
+                ]
+              },
+              {
+                "component": "USER-007",
+                "svg_id": "USER-007__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  808.5,
+                  1615.375,
+                  832.5
+                ]
+              },
+              {
+                "component": "USER-008",
+                "svg_id": "USER-008__user-box",
+                "paint": true,
+                "box": [
+                  1547.1,
+                  902.1,
+                  1628.9,
+                  947.9
+                ]
+              },
+              {
+                "component": "USER-008",
+                "svg_id": "USER-008__port-stub-left",
+                "paint": true,
+                "box": [
+                  1526.2,
+                  923.2,
+                  1549.8,
+                  926.8
+                ]
+              },
+              {
+                "component": "USER-008",
+                "svg_id": "USER-008__port-stub-right",
+                "paint": true,
+                "box": [
+                  1627.4,
+                  924.4,
+                  1648.6,
+                  925.6
+                ]
+              },
+              {
+                "component": "USER-008",
+                "svg_id": "USER-008__user-name",
+                "paint": true,
+                "box": [
+                  1561.953125,
+                  913.5,
+                  1615.375,
+                  937.5
+                ]
+              },
+              {
+                "svg_id": "wire-0-0",
+                "anchor": "paths[0][0->1]",
+                "box": [
+                  308.0,
+                  649.4,
+                  570.0,
+                  686.6
+                ]
+              },
+              {
+                "svg_id": "wire-1-0",
+                "anchor": "paths[1][0->1]",
+                "box": [
+                  308.0,
+                  448.29999999999995,
+                  332.0,
+                  686.6
+                ]
+              },
+              {
+                "svg_id": "wire-2-0",
+                "anchor": "paths[1][1->2]",
+                "box": [
+                  536.0,
+                  329.4,
+                  570.0,
+                  449.6
+                ]
+              },
+              {
+                "svg_id": "wire-3-0",
+                "anchor": "paths[2][0->1]",
+                "box": [
+                  650.0,
+                  328.2,
+                  910.0,
+                  331.8
+                ]
+              },
+              {
+                "svg_id": "wire-4-0",
+                "anchor": "paths[3][0->1]",
+                "box": [
+                  650.0,
+                  648.2,
+                  910.0,
+                  651.8
+                ]
+              },
+              {
+                "svg_id": "wire-5-0",
+                "anchor": "paths[4][0->1]",
+                "box": [
+                  975.0,
+                  366.2,
+                  1030.0,
+                  369.8
+                ]
+              },
+              {
+                "svg_id": "wire-5-1",
+                "anchor": "paths[4][0->1]",
+                "box": [
+                  910.0,
+                  366.2,
+                  965.0,
+                  369.8
+                ]
+              },
+              {
+                "svg_id": "wire-6-0",
+                "anchor": "paths[4][1->2]",
+                "box": [
+                  1130.0,
+                  366.2,
+                  1190.0,
+                  369.8
+                ]
+              },
+              {
+                "svg_id": "wire-7-0",
+                "anchor": "paths[5][0->1]",
+                "box": [
+                  1190.0,
+                  315.4,
+                  1330.0,
+                  319.0
+                ]
+              },
+              {
+                "svg_id": "wire-8-0",
+                "anchor": "paths[5][1->2]",
+                "box": [
+                  1470.0,
+                  315.4,
+                  1500.0,
+                  319.0
+                ]
+              },
+              {
+                "svg_id": "wire-9-0",
+                "anchor": "paths[6][0->1]",
+                "box": [
+                  1500.0,
+                  188.2,
+                  1528.0,
+                  191.8
+                ]
+              },
+              {
+                "svg_id": "wire-10-0",
+                "anchor": "paths[7][0->1]",
+                "box": [
+                  1500.0,
+                  293.2,
+                  1528.0,
+                  296.8
+                ]
+              },
+              {
+                "svg_id": "wire-11-0",
+                "anchor": "paths[8][0->1]",
+                "box": [
+                  1500.0,
+                  398.2,
+                  1528.0,
+                  401.8
+                ]
+              },
+              {
+                "svg_id": "wire-12-0",
+                "anchor": "paths[9][0->1]",
+                "box": [
+                  1500.0,
+                  503.2,
+                  1528.0,
+                  506.8
+                ]
+              },
+              {
+                "svg_id": "wire-13-0",
+                "anchor": "paths[10][0->1]",
+                "box": [
+                  1500.0,
+                  608.2,
+                  1528.0,
+                  611.8
+                ]
+              },
+              {
+                "svg_id": "wire-14-0",
+                "anchor": "paths[11][0->1]",
+                "box": [
+                  1500.0,
+                  713.2,
+                  1528.0,
+                  716.8
+                ]
+              },
+              {
+                "svg_id": "wire-15-0",
+                "anchor": "paths[12][0->1]",
+                "box": [
+                  1500.0,
+                  818.2,
+                  1528.0,
+                  821.8
+                ]
+              },
+              {
+                "svg_id": "wire-16-0",
+                "anchor": "paths[13][0->1]",
+                "box": [
+                  1500.0,
+                  923.2,
+                  1528.0,
+                  926.8
+                ]
+              },
+              {
+                "svg_id": "wire-17-0",
+                "anchor": "paths[14][0->1]",
+                "box": [
+                  448.2,
+                  778.8000000000001,
+                  761.8,
+                  961.8
+                ]
+              },
+              {
+                "svg_id": "wire-18-0",
+                "anchor": "paths[15][0->1]",
+                "box": [
+                  610.0,
+                  778.8000000000001,
+                  910.0,
+                  782.4
+                ]
+              },
+              {
+                "svg_id": "wire-19-0",
+                "anchor": "paths[15][1->2]",
+                "box": [
+                  243.2,
+                  778.8000000000001,
+                  470.0,
+                  861.8
+                ]
+              },
+              {
+                "svg_id": "wire-20-0",
+                "anchor": "paths[16][0->1]",
+                "box": [
+                  1190.0,
+                  592.0,
+                  1216.0,
+                  595.5999999999999
+                ]
+              },
+              {
+                "svg_id": "wire-21-0",
+                "anchor": "paths[17][0->1]",
+                "box": [
+                  1648.0,
+                  189.4,
+                  1676.0,
+                  190.6
+                ]
+              },
+              {
+                "svg_id": "wire-22-0",
+                "anchor": "paths[18][0->1]",
+                "box": [
+                  1648.0,
+                  294.4,
+                  1676.0,
+                  295.6
+                ]
+              },
+              {
+                "svg_id": "wire-23-0",
+                "anchor": "paths[19][0->1]",
+                "box": [
+                  1648.0,
+                  399.4,
+                  1676.0,
+                  400.6
+                ]
+              },
+              {
+                "svg_id": "wire-24-0",
+                "anchor": "paths[20][0->1]",
+                "box": [
+                  1648.0,
+                  504.4,
+                  1676.0,
+                  505.6
+                ]
+              },
+              {
+                "svg_id": "wire-25-0",
+                "anchor": "paths[21][0->1]",
+                "box": [
+                  1648.0,
+                  609.4,
+                  1676.0,
+                  610.6
+                ]
+              },
+              {
+                "svg_id": "wire-26-0",
+                "anchor": "paths[22][0->1]",
+                "box": [
+                  1648.0,
+                  714.4,
+                  1676.0,
+                  715.6
+                ]
+              },
+              {
+                "svg_id": "wire-27-0",
+                "anchor": "paths[23][0->1]",
+                "box": [
+                  1648.0,
+                  819.4,
+                  1676.0,
+                  820.6
+                ]
+              },
+              {
+                "svg_id": "wire-28-0",
+                "anchor": "paths[24][0->1]",
+                "box": [
+                  1648.0,
+                  924.4,
+                  1676.0,
+                  925.6
+                ]
+              },
+              {
+                "svg_id": "wire-29-0",
+                "anchor": "paths[25][0->1]",
+                "box": [
+                  1330.0,
+                  1091.4,
+                  1676.0,
+                  1092.6
+                ]
+              },
+              {
+                "svg_id": "wire-30-0",
+                "anchor": "paths[25][1->2]",
+                "box": [
+                  970.0,
+                  1091.4,
+                  1230.0,
+                  1092.6
+                ]
+              },
+              {
+                "svg_id": "wire-31-0",
+                "anchor": "paths[26][0->1]",
+                "box": [
+                  1469.4,
+                  1101.4,
+                  1676.0,
+                  1120.0
+                ]
+              },
+              {
+                "svg_id": "wire-32-0",
+                "anchor": "paths[27][0->1]",
+                "box": [
+                  71.4,
+                  685.4,
+                  970.0,
+                  1010.6
+                ]
+              },
+              {
+                "svg_id": "wire-33-0",
+                "anchor": "paths[28][0->1]",
+                "box": [
+                  970.0,
+                  933.1999999999999,
+                  1230.0,
+                  934.4
+                ]
+              },
+              {
+                "svg_id": "wire-34-0",
+                "anchor": "paths[29][0->1]",
+                "box": [
+                  609.4,
+                  370.0,
+                  650.0,
+                  388.6
+                ]
+              },
+              {
+                "svg_id": "wire-35-0",
+                "anchor": "paths[30][0->1]",
+                "box": [
+                  609.4,
+                  690.0,
+                  650.0,
+                  708.6
+                ]
+              },
+              {
+                "svg_id": "wire-36-0",
+                "anchor": "paths[31][0->1]",
+                "box": [
+                  563.4,
+                  200.0,
+                  650.0,
+                  218.6
+                ]
+              },
+              {
+                "svg_id": "wire-37-0",
+                "anchor": "paths[31][1->2]",
+                "box": [
+                  563.4,
+                  81.4,
+                  970.0,
+                  100.0
+                ]
+              },
+              {
+                "svg_id": "wire-38-0",
+                "anchor": "buses.PRESS",
+                "box": [
+                  908.2,
+                  330.0,
+                  911.8,
+                  780.6
+                ]
+              },
+              {
+                "svg_id": "wire-39-0",
+                "anchor": "buses.MANIFOLD",
+                "box": [
+                  1188.2,
+                  317.2,
+                  1191.8,
+                  593.8
+                ]
+              },
+              {
+                "svg_id": "wire-40-0",
+                "anchor": "buses.USR",
+                "box": [
+                  1498.2,
+                  190.0,
+                  1501.8,
+                  925.0
+                ]
+              },
+              {
+                "svg_id": "wire-41-0",
+                "anchor": "buses.USERR",
+                "box": [
+                  1675.4,
+                  190.0,
+                  1676.6,
+                  1102.0
+                ]
+              },
+              {
+                "svg_id": "wire-42-0",
+                "anchor": "buses.RET",
+                "box": [
+                  969.4,
+                  82.0,
+                  970.6,
+                  1092.0
+                ]
+              },
+              {
+                "svg_id": "wire-43-0",
+                "anchor": "buses.CASE",
+                "box": [
+                  649.4,
+                  218.0,
+                  650.6,
+                  708.0
+                ]
+              },
+              {
+                "svg_id": "wire-44-0",
+                "anchor": "taps[0]",
+                "box": [
+                  759.4,
+                  821.4,
+                  860.0,
+                  864.6
+                ]
+              },
+              {
+                "svg_id": "wire-45-0",
+                "anchor": "taps[1]",
+                "box": [
+                  811.4,
+                  863.4,
+                  860.0,
+                  965.1
+                ]
+              },
+              {
+                "svg_id": "bridge-0",
+                "anchor": "paths[4][0->1]",
+                "box": [
+                  963.2,
+                  361.2,
+                  976.8,
+                  369.8
+                ]
+              }
+            ],
+            "unchecked": []
+          }
+        ],
+        "detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox)."
+      }
+    ],
+    "sha256": {
+      "1#系统原理图.svg": "24fc3b80965e15e63f292746d4269b4441c760e1e5f1116d1bed901f50dad766",
+      "sheet-readback.png": "cef54e36ab128ec34165322c08ce26cab7f6aa19eb59528dc5928bac0be241bb",
+      "validation-report.json": "3b08bb7156408564a073bcb97fbdf2967f91af3e6c59105661e67495af35532e"
+    }
+  }
+]

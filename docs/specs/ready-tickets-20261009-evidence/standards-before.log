@@ -1,0 +1,3 @@
+Missing coordinate_system accepted: (0.0, 0.0, 1650.0, 1390.0)
+missing_label {"tool": "l0-preflight", "ok": true, "status": "cleared_for_layout", "products_withheld": [], "findings": [{"id": "W-SHAPE-DEP", "level": "WARN", "rule": "l0-input-contract", "yamlline": null, "object": "jsonschema", "message": "jsonschema 未安装，形状层跳过（依赖提示见 SKILL.md）", "remedy": "pip install jsonschema"}]}
+one_member {"tool": "l0-preflight", "ok": true, "status": "cleared_for_layout", "products_withheld": [], "findings": [{"id": "W-SHAPE-DEP", "level": "WARN", "rule": "l0-input-contract", "yamlline": null, "object": "jsonschema", "message": "jsonschema 未安装，形状层跳过（依赖提示见 SKILL.md）", "remedy": "pip install jsonschema"}]}

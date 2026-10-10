@@ -1,0 +1,36 @@
+{
+  "commit": "c215799dd606ca2c4c55663c1c6c79eb5d22e95a",
+  "results": [
+    {
+      "commit": "c215799dd606ca2c4c55663c1c6c79eb5d22e95a",
+      "scope": "selftest",
+      "command": [
+        "/usr/bin/python",
+        "-u",
+        ".agents/skills/hydraulic-schematic/scripts/selftest.py"
+      ],
+      "started_at": "2026-10-10T04:01:41.433587+00:00",
+      "finished_at": "2026-10-10T04:24:39.721146+00:00",
+      "elapsed_seconds": 1378.288,
+      "exit_code": 1
+    },
+    {
+      "commit": "c215799dd606ca2c4c55663c1c6c79eb5d22e95a",
+      "scope": "repository-tests",
+      "command": [
+        "/usr/bin/python",
+        "-u",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/repository",
+        "-v"
+      ],
+      "started_at": "2026-10-10T04:24:39.731511+00:00",
+      "finished_at": "2026-10-10T04:25:26.251310+00:00",
+      "elapsed_seconds": 46.52,
+      "exit_code": 0
+    }
+  ]
+}

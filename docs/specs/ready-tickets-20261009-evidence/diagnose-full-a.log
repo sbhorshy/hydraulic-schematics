@@ -1,0 +1,134 @@
+test_six_pixel_tail_is_rejected_by_sheet_validator (test_route_terminals.BacktrackValidation) ... ok
+test_facing_collinear_ports_remain_direct (test_route_terminals.CloseFacingPorts) ... ok
+test_reported_valve_to_pump_route_has_no_tail (test_route_terminals.CloseFacingPorts) ... ok
+test_short_clearances_in_all_four_orientations (test_route_terminals.CloseFacingPorts) ... ok
+test_ancestor_clipping_that_removes_circles_is_not_checked (test_dangling_ports.DanglingPorts) ... ok
+test_ancestor_css_hiding_and_zero_opacity_remove_visible_markers (test_dangling_ports.DanglingPorts) ... ok
+test_bare_last_instance_uses_only_main_path_in_and_inline_uses_both (test_dangling_ports.DanglingPorts) ... ok
+test_body_tap_consumes_measurement_anchor_without_exempting_other_open_ports (test_dangling_ports.DanglingPorts) ... ok
+test_broken_local_port_group_blocks_render_and_validation_with_same_contract (test_dangling_ports.DanglingPorts) ... ok
+test_circle_without_red_paint_fails_despite_visible_geometry (test_dangling_ports.DanglingPorts) ... ok
+test_connected_gas_taps_agree_with_open_ports_circles_and_title (test_dangling_ports.DanglingPorts) ... ok
+test_full_driver_preserves_local_contract_failure_for_standalone_validation (test_dangling_ports.DanglingPorts) ... ok
+test_hidden_red_circle_group_cannot_satisfy_disclosure (test_dangling_ports.DanglingPorts) ... ok
+test_local_symbol_missing_open_port_is_contract_error (test_dangling_ports.DanglingPorts) ... ok
+test_missing_connected_port_marker_is_drawing_error (test_dangling_ports.DanglingPorts) ... ok
+test_missing_red_circle_is_drawing_omission_not_input_change (test_dangling_ports.DanglingPorts) ... ok
+test_red_circle_positions_use_actual_svg_transforms (test_dangling_ports.DanglingPorts) ... ok
+test_removing_tap_exposes_both_endpoints_and_keeps_unknowns (test_dangling_ports.DanglingPorts) ... ok
+test_stale_title_count_is_rejected (test_dangling_ports.DanglingPorts) ... ok
+test_standalone_cli_resolves_workdir_and_catalog_assets_from_elsewhere (test_dangling_ports.DanglingPorts) ... ok
+test_stylesheet_hidden_circles_fail_with_actual_png_evidence (test_dangling_ports.DanglingPorts) ... ok
+test_unavailable_browser_is_unchecked_but_known_omissions_still_fail (test_dangling_ports.DanglingPorts) ... ok
+test_visible_rotated_and_shifted_circles_pass_actual_display_check (test_dangling_ports.DanglingPorts) ... ok
+test_actual_nested_svg_transform_is_used_for_ports_and_pipes (test_port_geometry.PortGeometryCLI) ... FAIL
+test_boundary_coordinate_does_not_exempt_a_body_crossing (test_port_geometry.PortGeometryCLI) ... FAIL
+test_completed_port_check_explains_its_actual_coverage (test_port_geometry.PortGeometryCLI) ... ok
+test_connection_cannot_cross_an_unrelated_reservoir_body (test_port_geometry.PortGeometryCLI) ... FAIL
+test_current_firewall_valve_short_clearance_is_a_positive_endpoint_case (test_port_geometry.PortGeometryCLI) ... ok
+test_mutating_only_the_visible_instance_cannot_reuse_layout_ports (test_port_geometry.PortGeometryCLI) ... ok
+test_reverse_incidence_fails_even_when_endpoint_is_exact (test_port_geometry.PortGeometryCLI) ... ok
+test_scaled_nonzero_origin_symbol_in_all_four_rotations (test_port_geometry.PortGeometryCLI) ... ok
+test_six_pixel_foldback_has_v3_connection_location (test_port_geometry.PortGeometryCLI) ... FAIL
+test_unsupported_visible_geometry_is_explicitly_rejected (test_port_geometry.PortGeometryCLI) ... ok
+test_visible_endpoint_gap_fails_with_port_and_input_location (test_port_geometry.PortGeometryCLI) ... FAIL
+test_added_connection_cannot_borrow_an_existing_edge_claim (test_topology_reconciliation.TopologyCLI) ... ok
+test_ancestor_clipping_cannot_certify_visible_connectivity (test_topology_reconciliation.TopologyCLI) ... ok
+test_branch_moved_to_wrong_bus_fails_at_its_input_anchor (test_topology_reconciliation.TopologyCLI) ... ok
+test_contiguous_split_and_bridge_fragments_remain_one_connection (test_topology_reconciliation.TopologyCLI) ... FAIL
+test_css_hidden_line_is_missing_even_though_geometry_and_claim_remain (test_topology_reconciliation.TopologyCLI) ... ok
+test_current_seed_discloses_actual_pressure_case_and_gas_short_circuits (test_topology_reconciliation.TopologyCLI) ... ok
+test_deleted_connection_fails_at_its_input_anchor (test_topology_reconciliation.TopologyCLI) ... ok
+test_driver_and_standalone_report_same_measured_topology (test_topology_reconciliation.TopologyCLI) ... ok
+test_hidden_component_cannot_supply_a_visible_terminal (test_topology_reconciliation.TopologyCLI) ... ok
+test_markdown_manifest_separates_logical_edges_nodes_and_svg_fragments (test_topology_reconciliation.TopologyCLI) ... ok
+test_missing_browser_measurement_never_claims_visible_graph_pass (test_topology_reconciliation.TopologyCLI) ... ok
+test_missing_port_anchor_is_a_topology_traceability_failure (test_topology_reconciliation.TopologyCLI) ... ok
+test_renderer_emits_input_anchors_and_manifest_without_extra_script (test_topology_reconciliation.TopologyCLI) ... ok
+test_series_connections_are_measured_and_coverage_is_complete (test_topology_reconciliation.TopologyCLI) ... ok
+test_shared_overlaid_suction_trunk_has_one_physical_incidence (test_topology_reconciliation.TopologyCLI) ... ok
+test_target_ports_swapped_with_same_edge_count_and_claims_fail (test_topology_reconciliation.TopologyCLI) ... ok
+test_two_pumps_shared_suction_buses_branches_and_gas_taps (test_topology_reconciliation.TopologyCLI) ... ok
+test_unclassified_extra_visible_wire_cannot_escape_topology (test_topology_reconciliation.TopologyCLI) ... ok
+test_unknowns_are_disclosed_and_never_generate_edges (test_topology_reconciliation.TopologyCLI) ... ok
+test_missing_pressure_style_is_rejected (test_priority_valve_leads.PriorityValveLeads) ... ok
+test_port_path_cannot_evade_width_check (test_priority_valve_leads.PriorityValveLeads) ... ok
+test_pressure_leads_match_connected_network_for_both_rotations (test_priority_valve_leads.PriorityValveLeads) ... ok
+test_valid_external_leads_pass_v16 (test_priority_valve_leads.PriorityValveLeads) ... ok
+test_equal_score_routes_keep_first_candidate (test_route_pruning.RendererDefaultsTest) ... ok
+test_missing_or_null_labels_match_explicit_empty_maps (test_route_pruning.RendererDefaultsTest) ... ok
+
+======================================================================
+FAIL: test_actual_nested_svg_transform_is_used_for_ports_and_pipes (test_port_geometry.PortGeometryCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_port_geometry.py", line 147, in test_actual_nested_svg_transform_is_used_for_ports_and_pipes
+    self.assertEqual(report['geometry']['nodes']['EDP-001']['ports']['pressure_out']['position'],
+AssertionError: Lists differ: [685.0, 523.0] != [655.0, 523.0]
+
+First differing element 0:
+685.0
+655.0
+
+- [685.0, 523.0]
+?   ^
+
++ [655.0, 523.0]
+?   ^
+
+
+======================================================================
+FAIL: test_boundary_coordinate_does_not_exempt_a_body_crossing (test_port_geometry.PortGeometryCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_port_geometry.py", line 84, in test_boundary_coordinate_does_not_exempt_a_body_crossing
+    self.assertEqual(finding['anchor'], 'paths[1][0->1]')
+AssertionError: None != 'paths[1][0->1]'
+
+======================================================================
+FAIL: test_connection_cannot_cross_an_unrelated_reservoir_body (test_port_geometry.PortGeometryCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_port_geometry.py", line 107, in test_connection_cannot_cross_an_unrelated_reservoir_body
+    self.assertEqual(finding['anchor'], 'paths[1][0->1]')
+AssertionError: None != 'paths[1][0->1]'
+
+======================================================================
+FAIL: test_six_pixel_foldback_has_v3_connection_location (test_port_geometry.PortGeometryCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_port_geometry.py", line 97, in test_six_pixel_foldback_has_v3_connection_location
+    self.assertEqual(finding['position'], [670.0, 530.0])
+AssertionError: Lists differ: [634.0, 530.0] != [670.0, 530.0]
+
+First differing element 0:
+634.0
+670.0
+
+- [634.0, 530.0]
+?   ^^
+
++ [670.0, 530.0]
+?   ^^
+
+
+======================================================================
+FAIL: test_visible_endpoint_gap_fails_with_port_and_input_location (test_port_geometry.PortGeometryCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_port_geometry.py", line 62, in test_visible_endpoint_gap_fails_with_port_and_input_location
+    self.assertAlmostEqual(finding['distance'], 2.0)
+AssertionError: 28.0 != 2.0 within 7 places (26.0 difference)
+
+======================================================================
+FAIL: test_contiguous_split_and_bridge_fragments_remain_one_connection (test_topology_reconciliation.TopologyCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_topology_reconciliation.py", line 150, in test_contiguous_split_and_bridge_fragments_remain_one_connection
+    self.assertFalse([c for c in report['checks'] if c['id']=='V10'])
+AssertionError: [{'id': 'V10', 'result': 'fail', 'detail': "Actual endpoints disagree with input paths[1][0->1]: ['EDP-001.pressure_out'] (unattached [(620.0, 530.0), (820.0, 530.0)])", 'kind': 'additional_or_wrong_connection', 'anchor': 'paths[1][0->1]', 'expected_endpoints': ['EDP-001.pressure_out', 'PF-001.inlet'], 'actual_endpoints': ['EDP-001.pressure_out'], 'positions': [[620.0, 530.0], [820.0, 530.0]], 'svg_ids': ['test-bridge', 'wire-1-0', 'wire-split']}] is not false
+
+----------------------------------------------------------------------
+Ran 59 tests in 272.964s
+
+FAILED (failures=6)

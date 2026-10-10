@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1390" width="1680" height="1390">
+<style>
+  text { font-family: "Noto Sans CJK SC","Microsoft YaHei",sans-serif; }
+  .lbl  { font-size: 11px; fill: #000; }
+  .ext  { font-size: 10px; fill: #333; }
+  .grp  { fill: none; stroke: #000; stroke-width: 1.20;
+          stroke-dasharray: 8 5; }
+  .enc { fill: none; stroke: #000; stroke-width: 1.80; stroke-dasharray: 8 5; }
+  .enc-lbl { font-size: 10.5px; fill: #000; }
+  .grp-lbl { font-size: 10.5px; fill: #000; }
+  .ext-mark { stroke: #000; stroke-width: 1.20; }
+  polyline { fill: none; stroke: #000;
+             stroke-linecap: butt; stroke-linejoin: miter; }
+  .ln-pressure   { stroke-width: 3.60; }
+  .ln-return     { stroke-width: 1.20; }
+  .ln-suction    { stroke-width: 1.20; }
+  .ln-case_drain { stroke-width: 1.20; }
+  .ln-sense      { stroke-width: 1.20; }
+  .suc-mark { stroke: #000; stroke-width: 1.20;
+              stroke-linecap: butt; }
+  .jn { fill: #000; }
+  .dang { fill: none; stroke: #d00000; stroke-width: 1.80; }
+  .brg-hi { fill: none; stroke: #000; stroke-width: 3.60;
+            stroke-linecap: butt; }
+  .brg-lo { fill: none; stroke: #000; stroke-width: 1.20;
+            stroke-linecap: butt; }
+  .banner { font-size: 15px; font-weight: bold; fill: #b00000; }
+  .tb  { fill: none; stroke: #000; stroke-width: 1.20; }
+  .tb-t{ font-size: 11px; fill: #000; }
+  .lg  { fill: #fff; stroke: #000; stroke-width: 1.20; }
+  .lg-t{ font-size: 10.5px; fill: #000; }
+
+  /* 组件本体线宽:企业标准 1.5 T,一处定义。
+     曾用 vector-effect: non-scaling-stroke 来抵消符号的落位缩放,
+     那是错的:该属性把线宽钉在**设备像素**上,于是整图放大出图时
+     管线随之变粗、而符号内的线纹丝不动(实测 1x/2x/3x 下管线
+     4/8/10px,引线恒为 4px)。改为在实例上按 1/k 补偿,
+     线宽随图缩放,同时不受符号自身缩放影响。 */
+  :root { --kc: 1; }
+  /* fill:none 必须图纸级补回:read_symbol 只嵌形状不嵌符号内样式表,
+     缺了它 SVG 默认 fill=black,凡描边符号(油箱壳体等)整只糊成黑块。 */
+  .sym-outline { fill: none; stroke: currentColor;
+                 stroke-width: calc(1.80 * var(--kc)); }
+  .sym-body-width { stroke-width: calc(1.80 * var(--kc) * var(--body-scale, 1)); }
+
+  /* 符号外接引线随相接管网等级,包含气侧 sense 支路。
+     按已声明连接判断,不以介质排除整类已连接端口。
+     端口类直接作用于各类引线图元,覆盖继承的 sym-outline 线宽。
+     注:style 内容未包 CDATA,注释里不可出现尖括号,会破坏 XML。 */
+  .pl-pressure   { stroke-width: calc(3.60 * var(--kc) * var(--lead-scale, 1)); }
+  .pl-return     { stroke-width: calc(1.20 * var(--kc) * var(--lead-scale, 1)); }
+  .pl-suction    { stroke-width: calc(1.20 * var(--kc) * var(--lead-scale, 1)); }
+  .pl-sense      { stroke-width: calc(1.20 * var(--kc) * var(--lead-scale, 1)); }
+  .pl-case_drain { stroke-width: calc(1.20 * var(--kc) * var(--lead-scale, 1)); }
+</style>
+<rect x="0" y="0" width="1680" height="1390" fill="#ffffff"/>
+<text class="banner" x="40" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>
+<text class="lbl" x="40" y="44">1# 液压系统原理图  (由 1#系统.intent.yaml 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>
+<g id="assemblies"><rect id="assembly-CDF-001" class="enc" data-assembly="CDF-001" data-input-anchor="assemblies.CDF-001" x="305.100000" y="171.100000" width="257.784375" height="218.800000"/><text id="assembly-label-CDF-001" class="enc-lbl" data-assembly="CDF-001" data-input-anchor="assemblies.CDF-001" x="305.100000" y="161.100000">CDF-001 壳体回油滤装配</text></g>
+<g id="sheet"><g id="groups"></g>
+<g id="lines"><polyline class="ln-case_drain" points="150.0,300.0 320.0,300.0" id="wire-0-0" data-edge="paths[0][0->1]" data-input-anchor="paths[0][0->1]"/>
+<polyline class="ln-case_drain" points="420.0,300.0 460.0,300.0" id="wire-1-0" data-edge="paths[0][1->2]" data-input-anchor="paths[0][1->2]"/>
+<polyline class="ln-return" points="540.0,300.0 650.0,300.0" id="wire-2-0" data-edge="paths[0][2->3]" data-input-anchor="paths[0][2->3]"/></g>
+<g id="suction-markers"></g>
+<g id="bridges"></g>
+<g id="junctions"></g>
+<g id="externs"><path id="extern-CASE-IN" data-extern="CASE-IN" data-input-anchor="extern.CASE-IN" class="ext-mark" d="M138.0 292.0 L150.0 300.0 L138.0 308.0 Z" fill="#e8e8e8"/>
+<path id="extern-CASE-OUT" data-extern="CASE-OUT" data-input-anchor="extern.CASE-OUT" class="ext-mark" d="M662.0 292.0 L650.0 300.0 L662.0 308.0 Z" fill="#e8e8e8"/></g>
+<g id="symbols"><g id="inst-CDF-001-BODY" data-node="CDF-001-BODY" data-input-anchor="parts.CDF-001-BODY" transform="translate(320,186) translate(0,0) rotate(0) scale(1) translate(-0,-0)">
+<g id="CDF-001-BODY__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+
+    
+    <circle id="CDF-001-BODY__dp-indicator-ball" cx="50" cy="25" r="21" />
+    <line id="CDF-001-BODY__dp-indicator-x-1" x1="36" y1="11" x2="64" y2="39" />
+    <line id="CDF-001-BODY__dp-indicator-x-2" x1="64" y1="11" x2="36" y2="39" />
+    
+    <line id="CDF-001-BODY__dp-indicator-tube-l" x1="33.5" y1="38.4" x2="33.5" y2="90.5" />
+    <line id="CDF-001-BODY__dp-indicator-tube-r" x1="66.5" y1="38.4" x2="66.5" y2="90.5" />
+
+    
+    <path id="CDF-001-BODY__filter-housing" d="M10 114 L50 74 L90 114 L50 154 Z" />
+
+    
+    <circle id="CDF-001-BODY__shutoff-ring" cx="50" cy="114" r="28" />
+    <circle id="CDF-001-BODY__shutoff-ball-l" cx="30.5" cy="114" r="8" />
+    <circle id="CDF-001-BODY__shutoff-ball-r" cx="62" cy="114" r="8" />
+    <line id="CDF-001-BODY__shutoff-x-1" x1="36" y1="100" x2="64" y2="128" />
+    <line id="CDF-001-BODY__shutoff-x-2" x1="36" y1="128" x2="64" y2="100" />
+    <line id="CDF-001-BODY__shutoff-centerline" x1="50" y1="76" x2="50" y2="152" stroke-dasharray="5" />
+
+    
+    <line id="CDF-001-BODY__port-lead-l" x1="0" y1="114" x2="10" y2="114" class="pl-case_drain" data-interface-port="inlet" />
+    <line id="CDF-001-BODY__port-lead-r" x1="90" y1="114" x2="100" y2="114" class="pl-case_drain" data-interface-port="outlet" />
+  </g>
+
+  
+<metadata data-node="CDF-001-BODY" data-port="CDF-001-BODY.inlet" data-port-id="inlet" id="port-CDF-001-BODY-inlet" data-input-anchor="parts.CDF-001-BODY.ports.inlet" data-x="0" data-y="114" data-anchor-direction="left"/>
+<metadata data-node="CDF-001-BODY" data-port="CDF-001-BODY.outlet" data-port-id="outlet" id="port-CDF-001-BODY-outlet" data-input-anchor="parts.CDF-001-BODY.ports.outlet" data-x="100" data-y="114" data-anchor-direction="right"/>
+</g>
+<g id="inst-CDF-001-CV" data-node="CDF-001-CV" data-input-anchor="parts.CDF-001-CV" transform="translate(460,260) translate(80,80) rotate(180) scale(1) translate(-0,-0)">
+<g id="CDF-001-CV__symbol" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" class="sym-outline">
+    
+    <line x1="0" y1="40" x2="18" y2="40" class="pl-return" data-interface-port="outlet" />
+    <line x1="57" y1="40" x2="80" y2="40" class="pl-case_drain" data-interface-port="inlet" />
+    
+    <circle cx="35" cy="40" r="16" />
+    
+    <path d="M32 11 L57 40 L32 69" />
+  </g>
+
+  
+<metadata data-node="CDF-001-CV" data-port="CDF-001-CV.inlet" data-port-id="inlet" id="port-CDF-001-CV-inlet" data-input-anchor="parts.CDF-001-CV.ports.inlet" data-x="80" data-y="40" data-anchor-direction="right"/>
+<metadata data-node="CDF-001-CV" data-port="CDF-001-CV.outlet" data-port-id="outlet" id="port-CDF-001-CV-outlet" data-input-anchor="parts.CDF-001-CV.ports.outlet" data-x="0" data-y="40" data-anchor-direction="left"/>
+</g></g>
+<g id="dangling"></g>
+<g id="labels"><text class="lbl" data-label-for="CDF-001-BODY" x="370.0" y="360.0" text-anchor="middle">CDF-001-BODY</text>
+<text class="lbl" data-label-for="CDF-001-BODY" x="370.0" y="373.0" text-anchor="middle">油滤本体</text>
+<text class="lbl" data-label-for="CDF-001-CV" x="500.0" y="356.0" text-anchor="middle">CDF-001-CV</text>
+<text class="lbl" data-label-for="CDF-001-CV" x="500.0" y="369.0" text-anchor="middle">单向阀（流向待确认）</text>
+<text class="ext" data-label-for="@CASE-IN" x="130.0" y="304.0" text-anchor="end">自 @CASE 母线</text>
+<text class="ext" data-label-for="@CASE-IN" x="130.0" y="317.0" text-anchor="end">EDP-001 / EMP-001</text>
+<text class="ext" data-label-for="@CASE-IN" x="130.0" y="330.0" text-anchor="end">壳体回油合流</text>
+<text class="ext" data-label-for="@CASE-OUT" x="670.0" y="304.0" text-anchor="start">至 TANK-001.return_in</text>
+<text class="ext" data-label-for="@CASE-OUT" x="670.0" y="317.0" text-anchor="start">油箱回油口</text></g></g>
+<g id="legend"><rect class="lg" x="380.0" y="475.0" width="540.0" height="310.0"/>
+<text class="lg-t" x="390.0" y="493.0" font-weight="bold">图例  (T = 1.20)</text>
+<line x1="392.0" y1="515.0" x2="436.0" y2="515.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="519.0">High Pressure Lines  高压 (高于回油压力的全部压力级)  3.0 T</text>
+<line x1="392.0" y1="537.0" x2="436.0" y2="537.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="541.0">Low Pressure Lines   低压 (回油、壳体回油)             1.0 T</text>
+<line class="suc-sample-base" x1="392.0" y1="559.0" x2="436.0" y2="559.0" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="392.0" y1="566.1" x2="400.3" y2="551.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="400.9" y1="566.1" x2="409.2" y2="551.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="409.9" y1="566.1" x2="418.1" y2="551.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="418.8" y1="566.1" x2="427.1" y2="551.9" stroke="#000" stroke-width="1.20"/>
+<line class="suc-sample-mark" x1="427.7" y1="566.1" x2="436.0" y2="551.9" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="563.0">Suction Lines  吸油:连续基线 + 周期性五斜杠组  1.0 T (S=8)</text>
+<line x1="392.0" y1="581.0" x2="436.0" y2="581.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="585.0">Gas-side Branch 气侧支路 (充气活门/压力表)          1.0 T</text>
+<line x1="392.0" y1="603.0" x2="436.0" y2="603.0" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="607.0">组件本体 (符号轮廓、内部机构)                          1.5 T</text>
+<text class="lg-t" x="452.0" y="629.0">  端口引线 (viewBox 边界到符号轮廓) 随管线等级      3.0 / 1.0 T</text>
+<text class="lg-t" x="452.0" y="651.0">  ∴ 管线与组件交接处有台阶,位于符号边界,不表示压力等级变化</text>
+<path d="M392.0 662.0 L406.0 669.0 L392.0 676.0 Z" fill="#e8e8e8" stroke="#000" stroke-width="1.80"/>
+<text class="lg-t" x="444.0" y="673.0">系统边界接口(用户未建模)</text>
+<path class="brg-lo" d="M404.0 691.0 A5 5 0 0 1 414.0 691.0"/>
+<line x1="409.0" y1="679.0" x2="409.0" y2="699.0" stroke="#000" stroke-width="1.20"/>
+<text class="lg-t" x="444.0" y="695.0">跨线桥:横线跨过竖线,二者不连通</text>
+<circle class="jn" cx="409.0" cy="713.0" r="3"/>
+<line x1="392.0" y1="713.0" x2="426.0" y2="713.0" stroke="#000" stroke-width="3.60"/>
+<text class="lg-t" x="444.0" y="717.0">三通:实心点表示连通</text>
+<circle class="dang" cx="409.0" cy="735.0" r="5"/>
+<text class="lg-t" x="444.0" y="739.0">悬空端口:未接线,不得视为已连接</text></g>
+<g id="title"><rect class="tb" x="40.0" y="1330.0" width="1600.0" height="56.0"/>
+<text class="tb-t" id="title-row-1" x="50.0" y="1347.6">系统 HYD-SYS-1/CDF-001   |   L0 1.1   |   目录 comac-hydraulic-components@0.7-draft   |   成熟度 concept</text>
+<text class="tb-t" id="title-row-2" x="50.0" y="1362.0">部件 2   |   网络 3   |   气侧支路 0   |   未知项 4   |   悬空端口 0: 无   | </text>
+<text class="tb-t" id="title-row-3" x="50.0" y="1376.4">provisional: —   | draft: —</text></g>
+</svg>

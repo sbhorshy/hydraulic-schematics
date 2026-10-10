@@ -1,0 +1,11 @@
+test_signed_connections_and_their_visible_geometry (test_accumulator_branch.AccumulatorBranch) ... ok
+test_project_wrappers_honor_an_explicit_workspace_and_current_gates (test_coordinate_entrypoints.CoordinateEntrypoints) ... ok
+test_retired_cdf_generators_fail_before_touching_the_working_inputs (test_coordinate_entrypoints.CoordinateEntrypoints) ... ok
+test_rotation_persists_and_runs_canonical_chain_without_legacy_scripts (test_editor_rotation.EditorRotation) ... ok
+test_project_renders_current_reservoir_ports (test_reservoir_retirement.ReservoirRetirement) ... ok
+test_copied_skill_discovers_its_tests_and_runs_preflight (test_skill_package.StandaloneSkill) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 46.994s
+
+OK
