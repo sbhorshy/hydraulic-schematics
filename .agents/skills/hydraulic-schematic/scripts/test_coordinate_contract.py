@@ -104,5 +104,38 @@ class CoordinateContract(unittest.TestCase):
             self.assertTrue(hits,report['checks'])
             self.assertGreaterEqual(max(c['overflow']['right'] for c in hits),4.9)
 
+    def test_closed_acute_miter_stroke_cannot_escape_the_drawable_gate(self):
+        with tempfile.TemporaryDirectory(prefix='miter-paint-margin-') as directory:
+            work=make_render_workspace(Path(directory),SKILL/'assets/fixtures/l0-small-seed')
+            path=work/'1#系统.layout.json';layout=json.loads(path.read_text());layout['drawable']['width']=945
+            path.write_text(json.dumps(layout))
+            run=subprocess.run([sys.executable,str(SKILL/'scripts/render_l0_sheet.py'),str(work)],capture_output=True,text=True)
+            self.assertEqual(run.returncode,0,run.stdout+run.stderr)
+            svg=work/'1#系统原理图.svg';original=svg.read_text()
+            for tag,attrs in (('polygon',{'points':'80,20 50,10 50,30'}),
+                              ('path',{'d':'M80 20 L50 10 L50 30 Z'})):
+                with self.subTest(primitive=tag):
+                    root=ET.fromstring(original);instance=next(e for e in root.iter() if e.get('id')=='inst-PF-001')
+                    ET.SubElement(instance,'{http://www.w3.org/2000/svg}'+tag,{
+                        'id':'miter-edge-probe',**attrs,
+                        'style':'stroke:black;stroke-width:20!important;fill:none;stroke-linejoin:miter;stroke-miterlimit:4'})
+                    ET.register_namespace('','http://www.w3.org/2000/svg');svg.write_text(ET.tostring(root,encoding='unicode'))
+                    subprocess.run([sys.executable,str(SKILL/'scripts/validate_sheet.py'),str(work)],capture_output=True,text=True)
+                    report=json.loads((work/'validation-report.json').read_text())
+                    hits=[c for c in report['checks'] if c['id']=='V6' and c.get('svg_id')=='miter-edge-probe']
+                    self.assertTrue(hits,report['checks'])
+                    # Worked triangle: r/sin(arctan(1/3)) = 10*sqrt(10).
+                    self.assertAlmostEqual(hits[0]['box'][2],930+10*(10**.5),places=5)
+                    self.assertGreater(hits[0]['overflow']['right'],16)
+                    # The same corner with miterlimit 3 becomes a bevel; do not
+                    # invent an oversized miter or reject its actual paint.
+                    probe=next(e for e in root.iter() if e.get('id')=='miter-edge-probe')
+                    probe.set('style',probe.get('style').replace('miterlimit:4','miterlimit:3'))
+                    svg.write_text(ET.tostring(root,encoding='unicode'))
+                    subprocess.run([sys.executable,str(SKILL/'scripts/validate_sheet.py'),str(work)],capture_output=True,text=True)
+                    clipped=json.loads((work/'validation-report.json').read_text())
+                    self.assertFalse([c for c in clipped['checks'] if c['id']=='V6' and c.get('svg_id')=='miter-edge-probe'])
+
+
 
 if __name__ == '__main__': unittest.main()

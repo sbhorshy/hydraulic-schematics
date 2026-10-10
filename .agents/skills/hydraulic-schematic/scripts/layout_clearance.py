@@ -248,7 +248,7 @@ def pipe_paint_bounds(pipe, row):
 
 def component_paint_bounds(row):
     """Visible symbol primitives, including stroke outside the source viewBox."""
-    from lead_geometry import segments
+    from lead_geometry import segments, NUMBER
     from sheet_geometry import point
     from text_checks import display_effects
     if not row.get('visible') or row['tag'] not in ('line','polyline','polygon','rect','circle','ellipse','path','text'):
@@ -269,36 +269,71 @@ def component_paint_bounds(row):
     width=computed_length(row['style'].get('stroke-width','0'))
     if width is None:raise ValueError('Component stroke width unavailable')
     if width == 0:return box if painted['fill'] else None
-    matrix=row['matrix'];scale=1 if row['style'].get('vector-effect')=='non-scaling-stroke' else max(math.hypot(*matrix[:2]),math.hypot(*matrix[2:4]))
-    radius=width*scale/2
-    try:
+    matrix=row['matrix'];radius=width/2
+    unscaled=row['style'].get('vector-effect')=='non-scaling-stroke'
+    rx=radius if unscaled else radius*math.hypot(matrix[0],matrix[2])
+    ry=radius if unscaled else radius*math.hypot(matrix[1],matrix[3])
+    join=row['style'].get('stroke-linejoin','miter')
+    cap=row['style'].get('stroke-linecap','butt')
+    closed=bool(row.get('closed'))
+    if row['tag'] in ('circle','ellipse') or (row['tag']=='rect' and not row.get('linear_outline')) or (join=='round' and (closed or cap=='round')):
+        # Smooth closed shapes and round tubes are the geometry's Minkowski sum
+        # with the transformed stroke disk. This is not valid for sharp miters.
+        return [box[0]-rx,box[1]-ry,box[2]+rx,box[3]+ry]
+    if row['tag']=='polygon':
+        values=list(map(float,re.findall(NUMBER,row['attrs'].get('points',''))))
+        if len(values)<6 or len(values)%2:raise ValueError('Invalid polygon paint geometry')
+        vertices=list(zip(values[::2],values[1::2]));vertices.append(vertices[0])
+        parts=list(zip(vertices,vertices[1:]));closed=True
+    elif row['tag']=='rect':
+        x,y,w,h=row['local_bbox'];vertices=[(x,y),(x+w,y),(x+w,y+h),(x,y+h),(x,y)]
+        parts=list(zip(vertices,vertices[1:]));closed=True
+    elif row['tag']=='path' and closed:
+        d=row['attrs'].get('d','')
+        if len(re.findall('[mM]',d))!=1 or len(re.findall('[zZ]',d))!=1 or not d.rstrip().endswith(('z','Z')):
+            raise ValueError('Multiple closed subpaths require additional miter bounds evidence')
+        parts=segments('path',{**row['attrs'],'d':re.sub('[zZ]','',d)})
+        if parts:parts.append((parts[-1][1],parts[0][0]))
+    else:
         parts=segments(row['tag'],row['attrs'])
-    except ValueError:
-        parts=[]
-    if not parts:
-        # Browser geometry bounds contain the complete closed curves/rectangles;
-        # add the displayed stroke radius, never the layout-declared dimensions.
-        return [box[0]-radius,box[1]-radius,box[2]+radius,box[3]+radius]
+    if not parts:raise ValueError('Component stroke path bounds not measured')
     points=[];directions=[]
     for a,b in parts:
-        a,b=point(matrix,a),point(matrix,b);length=math.dist(a,b)
+        if unscaled:a,b=point(matrix,a),point(matrix,b)
+        length=math.dist(a,b)
         if not length:continue
         u=((b[0]-a[0])/length,(b[1]-a[1])/length);n=(-u[1],u[0])
         points.extend((p[0]+sign*radius*n[0],p[1]+sign*radius*n[1]) for p in (a,b) for sign in (-1,1))
         directions.append((a,b,u,n))
     if not directions:return box
-    for a,b,u,n in directions:
-        if row['style'].get('stroke-linecap')=='round':
-            points.extend((p[0]+dx*radius,p[1]+dy*radius) for p in (a,b) for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)))
-        elif row['style'].get('stroke-linecap')=='square':
-            points.extend((p[0]+end*radius*u[0]+side*radius*n[0],p[1]+end*radius*u[1]+side*radius*n[1]) for p,end in ((a,-1),(b,1)) for side in (-1,1))
-    for first,second in zip(directions,directions[1:]):
+    if not closed:
+        for index,(a,b,u,n) in enumerate(directions):
+            ends=[]
+            if index==0 or math.dist(directions[index-1][1],a)>1e-6:ends.append((a,-1))
+            if index==len(directions)-1 or math.dist(b,directions[index+1][0])>1e-6:ends.append((b,1))
+            for p,end in ends:
+                if cap=='round':points.extend((p[0]+dx*radius,p[1]+dy*radius) for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)))
+                elif cap=='square':points.extend((p[0]+end*radius*u[0]+side*radius*n[0],p[1]+end*radius*u[1]+side*radius*n[1]) for side in (-1,1))
+    following=directions[1:]+(directions[:1] if closed else [])
+    for first,second in zip(directions,following):
         if math.dist(first[1],second[0])>1e-6:continue
-        p=first[1];n,m=first[3],second[3];den=1+n[0]*m[0]+n[1]*m[1]
-        if den>1e-9 and row['style'].get('stroke-linejoin','miter')=='miter':
+        p=first[1];u,v=first[2],second[2];n,m=first[3],second[3]
+        cross=u[0]*v[1]-u[1]*v[0];den=1+n[0]*m[0]+n[1]*m[1]
+        if abs(cross)<1e-9:continue
+        side=-1 if cross>0 else 1
+        if join=='miter' and den>1e-9:
             offset=(radius*(n[0]+m[0])/den,radius*(n[1]+m[1])/den)
             if math.hypot(*offset)<=radius*float(row['style'].get('stroke-miterlimit',4)):
-                points.extend((p[0]+sign*offset[0],p[1]+sign*offset[1]) for sign in (-1,1))
+                points.append((p[0]+side*offset[0],p[1]+side*offset[1]))
+        elif join=='round':
+            start=math.atan2(side*n[1],side*n[0]);finish=math.atan2(side*m[1],side*m[0]);direction=1 if cross>0 else -1
+            sweep=(direction*(finish-start))%(2*math.pi)
+            for angle in (0,math.pi/2,math.pi,3*math.pi/2):
+                if (direction*(angle-start))%(2*math.pi)<=sweep+1e-9:
+                    points.append((p[0]+radius*math.cos(angle),p[1]+radius*math.sin(angle)))
+        elif join not in ('bevel','miter'):
+            raise ValueError('Unsupported stroke join '+join)
+    if not unscaled:points=[point(matrix,p) for p in points]
     if painted['fill']:points.extend(((box[0],box[1]),(box[2],box[3])))
     return [min(p[0] for p in points),min(p[1] for p in points),max(p[0] for p in points),max(p[1] for p in points)]
 
