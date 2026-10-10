@@ -582,9 +582,9 @@
         }
       ],
       "symbol": {
-        "asset": "symbols/reservoir-bootstrap-annotated.svg",
-        "symbol_status": "annotated",
-        "note": "draft 级描边(数据源 USER_ANNOTATED);门禁 C8 报 data-symbol-form=traced_outline,属符号重绘运动待办早期符号。本图按 CONCEPT 档使用并在图签披露。"
+        "asset": "symbols/bootstrap-type-reservoir.svg",
+        "symbol_status": "draft",
+        "note": "开放描边重画(draft);#21 转正标准端口组(方言 port-anchors 冒充 connection-points 即 TANK-001.suction_out 崩溃根源),活塞/弹簧/液位计仍 unknown。0.6-draft 增本体感测口 body_sense_tap(签认 B 类),后续油箱图统一用本符号。"
       }
     },
     {

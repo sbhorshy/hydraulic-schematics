@@ -5,6 +5,10 @@
 import json
 import io
 
+# This legacy generator writes a hard-coded Windows worktree. Keep it
+# fail-closed until #48 supplies the supported catalog generation entry.
+raise SystemExit("旧项目目录生成器已停用（#49 防回退）；请使用现有目录和规范源 validate_driver.py。生成器重构见 #48。")
+
 BASE = r'D:/File/COMAC/组件库/.agents/skills/hydraulic-schematic/assets/component-library/component-catalog.json'
 WORK = r'D:/File/COMAC/组件库/1#系统原理图/component-catalog.json'
 SYMDIR = 'symbols/'
@@ -25,9 +29,8 @@ updates = {
                                '两口 main_upper/main_lower 双向,ports/main_path 继承规范源。'),
     'hydro_pneumatic_accumulator': ('accumulator.svg', 'annotated',
                                     '重描绘边件,端口标注齐全;旧"两处 port-pressure-in 重 id"缺陷已随重绘消除。'),
-    'bootstrap_reservoir': ('reservoir-bootstrap-annotated.svg', 'annotated',
-                            'draft 级描边(数据源 USER_ANNOTATED);门禁 C8 报 data-symbol-form=traced_outline,'
-                            '属符号重绘运动待办早期符号。本图按 CONCEPT 档使用并在图签披露。'),
+    'bootstrap_reservoir': ('bootstrap-type-reservoir.svg', 'draft',
+                            '规范源描边油箱受管副本;见 symbols/README.md;不得回写退役资产。'),
     # skill 更新后快照收录 hydraulic_user(0.1-draft);资产路径改指本目录副本。
     'hydraulic_user': ('hydraulic-user.svg', 'provisional',
                        '通用用户名框(data-name-slot),实例名由渲染器写入名槽;'
