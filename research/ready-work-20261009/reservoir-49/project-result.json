@@ -1,5 +1,4 @@
 {
-  "run_head_before_changes": "fd6c1082d8cda36a662154f06518beb1f37712e5",
   "driver_exit": 1,
   "fail_count": 13,
   "warn_count": 9,
@@ -280,19 +279,19 @@
     {
       "stage": "setup",
       "status": "completed",
-      "elapsed_s": 2.469041
+      "elapsed_s": 2.46041
     },
     {
       "stage": "preflight",
       "status": "completed",
-      "elapsed_s": 0.219585
+      "elapsed_s": 0.215806
     },
     {
       "stage": "local_readback",
       "status": "completed",
       "object_count": 134,
       "crop_count": 62,
-      "elapsed_s": 5.102051
+      "elapsed_s": 3.557824
     }
   ],
   "round_stages": [
@@ -300,22 +299,22 @@
       {
         "stage": "layout",
         "status": "completed",
-        "elapsed_s": 0.000411
+        "elapsed_s": 0.000323
       },
       {
         "stage": "render",
         "status": "completed",
-        "elapsed_s": 0.317051
+        "elapsed_s": 0.366218
       },
       {
         "stage": "readback",
         "status": "completed",
-        "elapsed_s": 1.069308
+        "elapsed_s": 1.018458
       },
       {
         "stage": "validate",
         "status": "completed",
-        "elapsed_s": 3.438721
+        "elapsed_s": 3.690574
       }
     ]
   ],
@@ -346,10 +345,11 @@
     }
   ],
   "artifact_sha256": {
-    "1#系统原理图.svg": "4366048555a8038953b6cfe72425a05253f813e684e06ce0675f40225001de5e",
+    "1#系统原理图.svg": "d3dfe4c3c5c0b7a606d4705dd46c6a1a2a7ad829e0a269eb76f5b9561e2382c3",
     "sheet-readback.png": "86c4652f34c1e1e235c8f0255930de0cf5ab46ea58fbc25cb583b3af35b00bb5",
-    "validation-report.json": "b8e5c7f05d6ebd4695f38aa242c9ccbdeb19cd9f9ecc2a802357997f615965a7",
-    "convergence-report.json": "575976d2a830034ce31f595bd9d1edcdf7a49a8bedf8099391905710c9415128"
+    "validation-report.json": "1dfade953a8f2145ac447610d487df16769d590c1728d29c0b9dba150d294976",
+    "convergence-report.json": "3a25be6c2f1ed451c06115382e173ab6bc9062badd687c1f9d8c1da2efa273e2"
   },
-  "full_artifacts": ".scratch/ready-work/issue-49-evidence/project-run"
+  "full_artifacts": ".scratch/ready-work/issue-49-evidence/project-final",
+  "tested_code_head": "d5143010a22e81a646d67c2eb66b7fa833760f52"
 }
