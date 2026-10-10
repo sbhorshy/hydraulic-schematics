@@ -1,0 +1,110 @@
+{
+  "project": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/1#系统.intent.yaml",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/1#系统.layout.json",
+      "--workdir",
+      "/tmp/ready-44-audit/project",
+      "--catalog",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/component-catalog.json"
+    ],
+    "exit": 3,
+    "elapsed_seconds": 2.171
+  },
+  "canonical-current": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/fixtures/l0-current/1#系统.intent.yaml",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/fixtures/l0-current/1#系统.layout.json",
+      "--workdir",
+      "/tmp/ready-44-audit/canonical-current"
+    ],
+    "exit": 1,
+    "elapsed_seconds": 11.038
+  },
+  "historical-e2e": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/skill-chain-e2e/1#系统.intent.yaml",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/skill-chain-e2e/1#系统.layout.json",
+      "--workdir",
+      "/tmp/ready-44-audit/historical-e2e"
+    ],
+    "exit": 2,
+    "elapsed_seconds": 1.59
+  },
+  "check-library": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/check_library.py"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.414
+  },
+  "project-engine-probe": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/layout_engine.py",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/1#系统.intent.yaml",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/component-catalog.json",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/1#系统.layout.json",
+      "-o",
+      "/tmp/ready-44-audit/project-engine-probe.layout.json"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.213
+  },
+  "symbol-gate": {
+    "command": [
+      "/usr/bin/python",
+      "/tmp/ready-44-audit/symbol-gate/check_symbol.py",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/accumulator.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/air-charging-valve.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/bootstrap-type-reservoir.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/check-valve-spring.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/check-valve.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/edp-provisional-stroke.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/emp-provisional-stroke.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-dp-return-bypass.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-dp.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-stroke.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/firewall-shutoff-valve.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/fsov-provisional-stroke.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/hydraulic-user.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/pressure-gauge.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/pressure-switch.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/pressure-transducer.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/priority-valve.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/quick-disconnect-coupling-disconnected.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/quick-disconnect-coupling.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/relief-valve.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/temperature-switch.svg",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/temperature-transducer.svg"
+    ],
+    "exit": 1,
+    "scope": 22
+  },
+  "historical-engine-probe": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/scripts/layout_engine.py",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/skill-chain-e2e/1#系统.intent.yaml",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library/component-catalog.json",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/skill-chain-e2e/1#系统.layout.json",
+      "-o",
+      "/tmp/ready-44-audit/historical-engine-probe.layout.json"
+    ],
+    "exit": 0,
+    "scope": "Diagnostic only; not a continuation of blocked driver"
+  }
+}
