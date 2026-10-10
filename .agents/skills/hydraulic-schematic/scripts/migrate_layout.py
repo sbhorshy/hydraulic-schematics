@@ -14,8 +14,14 @@ from layout_contract import EDGE_MARGIN, drawable_bounds, make_contract, number,
 LEGACY_BOUNDARY_TERMINALS = [[1480.0,300.0],[1480.0,700.0],[60.0,514.4]]
 
 
-def migrate(layout, margin=EDGE_MARGIN):
+def migrate(layout, margin=EDGE_MARGIN, declare_root=False):
     result = copy.deepcopy(layout)
+    if declare_root:
+        if ('canvas_shift_x' in result or 'drawable' not in result
+                or result.get('coordinate_system') not in (None, 'root_svg_user_units')):
+            raise ValueError('--declare-root requires an undeclared drawable layout with verified root coordinates; '
+                             'it cannot override an unknown coordinate_system or a legacy canvas_shift_x')
+        result['coordinate_system'] = 'root_svg_user_units'
     if 'canvas_shift_x' not in result and 'drawable' in result:
         drawable_bounds(result)
         return result
@@ -54,9 +60,11 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input');parser.add_argument('-o','--output',required=True)
     parser.add_argument('--edge-margin',type=float,default=EDGE_MARGIN)
+    parser.add_argument('--declare-root',action='store_true',
+                        help='explicitly confirm an undeclared drawable layout already uses root SVG units; preserve geometry')
     args=parser.parse_args()
     try:
-        output=migrate(json.loads(Path(args.input).read_text(encoding='utf-8')),args.edge_margin)
+        output=migrate(json.loads(Path(args.input).read_text(encoding='utf-8')),args.edge_margin,declare_root=args.declare_root)
         Path(args.output).write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     except (OSError,ValueError,KeyError,TypeError) as error:
         parser.exit(1,str(error)+'\n')

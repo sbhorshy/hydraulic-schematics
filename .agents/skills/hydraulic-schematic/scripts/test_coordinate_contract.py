@@ -52,6 +52,35 @@ class CoordinateContract(unittest.TestCase):
             self.assertIn('migrate_layout.py',run.stdout+run.stderr)
             self.assertFalse((work/'1#系统原理图.svg').exists())
 
+    def test_renderer_requires_an_explicit_coordinate_system(self):
+        with tempfile.TemporaryDirectory(prefix='missing-coordinate-system-') as directory:
+            work=make_render_workspace(Path(directory),SKILL/'assets/fixtures/l0-small-seed')
+            path=work/'1#系统.layout.json';layout=json.loads(path.read_text())
+            layout.pop('coordinate_system');path.write_text(json.dumps(layout))
+            run=subprocess.run([sys.executable,str(SKILL/'scripts/render_l0_sheet.py'),str(work)],capture_output=True,text=True)
+            self.assertNotEqual(run.returncode,0,run.stdout+run.stderr)
+            self.assertIn('coordinate_system',run.stdout+run.stderr)
+            self.assertIn('migrate_layout.py',run.stdout+run.stderr)
+            self.assertFalse((work/'1#系统原理图.svg').exists())
+            original=path.read_bytes();target=Path(directory)/'declared.layout.json'
+            migration=[sys.executable,str(SKILL/'scripts/migrate_layout.py'),str(path),'-o',str(target)]
+            rejected=subprocess.run(migration,capture_output=True,text=True)
+            self.assertNotEqual(rejected.returncode,0)
+            self.assertFalse(target.exists())
+            declared=subprocess.run(migration+['--declare-root'],capture_output=True,text=True)
+            self.assertEqual(declared.returncode,0,declared.stdout+declared.stderr)
+            corrected=json.loads(target.read_text())
+            self.assertEqual(corrected.pop('coordinate_system'),'root_svg_user_units')
+            self.assertEqual(corrected,layout)  # declared existing coordinates, no geometry/margin changes
+            self.assertEqual(path.read_bytes(),original)
+            path.write_bytes(target.read_bytes())
+            run=subprocess.run([sys.executable,str(SKILL/'scripts/render_l0_sheet.py'),str(work)],capture_output=True,text=True)
+            self.assertEqual(run.returncode,0,run.stdout+run.stderr)
+            unsupported=dict(layout,coordinate_system='unknown_space');path.write_text(json.dumps(unsupported))
+            blocked=subprocess.run(migration+['--declare-root'],capture_output=True,text=True)
+            self.assertNotEqual(blocked.returncode,0)
+            self.assertIn('coordinate_system',blocked.stdout+blocked.stderr)
+
     def test_validator_checks_bus_paint_not_only_centerline_against_drawable(self):
         with tempfile.TemporaryDirectory(prefix='paint-margin-') as directory:
             work = make_render_workspace(Path(directory), SKILL/'assets/fixtures/l0-current')

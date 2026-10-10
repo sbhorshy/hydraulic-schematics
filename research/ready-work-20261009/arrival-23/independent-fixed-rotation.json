@@ -1,0 +1,152 @@
+{
+  "sources": {
+    "EDP-001": {
+      "asset": "1#系统原理图/symbols/edp-provisional-stroke.svg",
+      "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b",
+      "ports": {
+        "suction": [
+          0.0,
+          40.0
+        ],
+        "pressure_out": [
+          80.0,
+          40.0
+        ],
+        "case_drain": [
+          40.0,
+          80.0
+        ]
+      },
+      "order": [
+        "P",
+        "C",
+        "S"
+      ]
+    },
+    "EMP-001": {
+      "asset": "1#系统原理图/symbols/emp-provisional-stroke.svg",
+      "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34",
+      "ports": {
+        "suction": [
+          0.0,
+          40.0
+        ],
+        "pressure_out": [
+          80.0,
+          40.0
+        ],
+        "case_drain": [
+          40.0,
+          80.0
+        ]
+      },
+      "order": [
+        "P",
+        "C",
+        "S"
+      ]
+    }
+  },
+  "selected_intent_paths": [
+    [
+      0,
+      [
+        "TANK-001.suction_out",
+        "EMP-001.suction"
+      ]
+    ],
+    [
+      1,
+      [
+        "TANK-001.suction_out",
+        "FSOV-001",
+        "EDP-001.suction"
+      ]
+    ],
+    [
+      2,
+      [
+        "EDP-001.pressure_out",
+        "@PRESS"
+      ]
+    ],
+    [
+      3,
+      [
+        "EMP-001.pressure_out",
+        "@PRESS"
+      ]
+    ],
+    [
+      29,
+      [
+        "EDP-001.case_drain",
+        "@CASE"
+      ]
+    ],
+    [
+      30,
+      [
+        "EMP-001.case_drain",
+        "@CASE"
+      ]
+    ]
+  ],
+  "fsov_main_path": {
+    "in": "main_upper",
+    "out": "main_lower"
+  },
+  "same_order": {
+    "faces": [
+      [
+        "EDP",
+        "S",
+        "EMP",
+        "C",
+        "EDP",
+        "P",
+        "EMP",
+        "S",
+        "EDP",
+        "C",
+        "EMP",
+        "P"
+      ]
+    ],
+    "V": 5,
+    "E": 6,
+    "chi": 0,
+    "fixed_embedding_planar": false,
+    "abstract_graph_planar": true,
+    "error": "Bad embedding. The graph does not match Euler's formula"
+  },
+  "reversed_control": {
+    "faces": [
+      [
+        "EDP",
+        "S",
+        "EMP",
+        "P"
+      ],
+      [
+        "EDP",
+        "C",
+        "EMP",
+        "S"
+      ],
+      [
+        "EDP",
+        "P",
+        "EMP",
+        "C"
+      ]
+    ],
+    "V": 5,
+    "E": 6,
+    "chi": 2,
+    "fixed_embedding_planar": true,
+    "abstract_graph_planar": true,
+    "error": null
+  },
+  "networkx_version": "3.3"
+}

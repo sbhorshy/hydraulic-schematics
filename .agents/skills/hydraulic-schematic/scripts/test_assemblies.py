@@ -1,6 +1,7 @@
 """Assembly contracts at the public preflight, renderer and validator CLIs."""
 import copy
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -31,6 +32,35 @@ class AssemblyCLI(unittest.TestCase):
         self.assertEqual(result.returncode,1,result.stdout+result.stderr)
         report=json.loads(result.stdout)
         self.assertTrue(any(f['level']=='ERROR' and f['id'].startswith('E-ASSEMBLY') for f in report['findings']))
+
+    def test_assembly_invariants_hold_without_optional_jsonschema(self):
+        dependency_dir=Path(self.tmp.name)/'optional-dependency'
+        dependency_dir.mkdir()
+        (dependency_dir/'jsonschema.py').write_text('raise ImportError("optional jsonschema unavailable")\n')
+        env=dict(os.environ,PYTHONPATH=str(dependency_dir))
+        original=copy.deepcopy(self.intent)
+        cases=[('valid',lambda a:None,0),
+               ('missing_label',lambda a:a['SUPPLY'].pop('label'),1),
+               ('blank_label',lambda a:a['SUPPLY'].update(label='  '),1),
+               ('one_member',lambda a:a['SUPPLY'].update(members=['PF-001']),1),
+               ('missing_members',lambda a:a['SUPPLY'].pop('members'),1),
+               ('members_not_list',lambda a:a['SUPPLY'].update(members='PF-001'),1),
+               ('invalid_member',lambda a:a['SUPPLY'].update(members=['PF-001',None]),1),
+               ('invalid_declaration',lambda a:a.update(SUPPLY=None),1)]
+        for name,mutate,expected in cases:
+            with self.subTest(case=name):
+                self.intent=copy.deepcopy(original)
+                mutate(self.intent['assemblies']);self.write_intent()
+                result=subprocess.run([sys.executable,str(SKILL/'scripts/preflight.py'),str(self.intent_path),'--json'],
+                                      env=env,capture_output=True,text=True)
+                report=json.loads(result.stdout)
+                self.assertTrue(any(f['id']=='W-SHAPE-DEP' for f in report['findings']),report)
+                self.assertEqual(result.returncode,expected,report)
+                if expected:
+                    self.assertTrue(any(f['id'].startswith('E-ASSEMBLY') and f['level']=='ERROR' for f in report['findings']),report)
+                    self.assertFalse(report['ok'])
+                else:
+                    self.assertTrue(report['ok'])
 
     def test_renderer_encloses_actual_long_member_labels_and_keeps_groups_distinct(self):
         from browser_evidence import collect

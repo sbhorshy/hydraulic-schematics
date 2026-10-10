@@ -142,21 +142,41 @@ def semantic_findings(intent, catalog, source_text):
                 "改用目录内类型，或先把类型登记进 component-catalog.json 再引用")
 
     # Assembly is a grouping declaration, never a synthetic part or port.
-    assemblies = intent.get('assemblies') or {}
+    assemblies = intent.get('assemblies', {})
+    if not isinstance(assemblies, dict):
+        add('E-ASSEMBLY-SHAPE', 'ERROR', None, 'assemblies',
+            'assemblies 必须是装配声明映射', '按装配 id 声明 label 与 members')
+        assemblies = {}
     owners = {}
     if isinstance(assemblies, dict):
         for aid, assembly in assemblies.items():
-            if not isinstance(assembly, dict):
-                continue  # shape errors are reported by schema
             anchor = 'assemblies.' + str(aid)
+            if not isinstance(aid, str) or not re.fullmatch(r'[A-Z][A-Za-z0-9_-]*', aid):
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 必须以大写字母开头，仅含字母、数字、下划线或连字符', '修正装配 id')
+            if not isinstance(assembly, dict):
+                add('E-ASSEMBLY-SHAPE', 'ERROR', None, anchor,
+                    '装配声明必须包含 label 与 members', '改为装配声明映射')
+                continue
+            label = assembly.get('label')
+            if not isinstance(label, str) or not label.strip():
+                add('E-ASSEMBLY-LABEL', 'ERROR', None, anchor,
+                    '装配 label 必须是非空文本', '提供可读的装配名称')
             if aid in parts or aid in externs:
                 add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
                     '装配 id 与 part/extern 重名', '使用独立装配 id')
-            members = assembly.get('members') or []
+            members = assembly.get('members')
             if not isinstance(members, list):
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配 members 必须是至少两个成员的列表', '列出已声明的组件实例')
                 continue
+            if len(members) < 2:
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配至少包含两个成员', '列出至少两个不同的已声明组件实例')
             for member in members:
-                if not isinstance(member, str):
+                if not isinstance(member, str) or not member:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '装配成员必须是非空组件实例名称', '使用 parts 中的组件实例名称')
                     continue
                 if member not in parts or member in assemblies:
                     add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,

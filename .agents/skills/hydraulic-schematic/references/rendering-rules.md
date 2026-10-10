@@ -31,7 +31,7 @@ unknown:     # 数量/接法存疑, 显式列出, 不代为编造
 
 `drawable` 是内容可绘制矩形；`edge_margin` 是它右界到画布右边的显式留白，最小 30，生成器参数名为 `EDGE_MARGIN`。消费者读取矩形，不能再减一次 margin。renderer/validator/guard/optimizer/R17 采用相同契约；V6 同时检查源符号足迹、可见组件描边和管线实际 stroke/cap 边界，不只检查母线中心线。面板仍位于独立的根坐标区，按既有面板闸门检查。
 
-旧布局须显式调用 `python scripts/migrate_layout.py OLD.layout.json -o NEW.layout.json`。迁移将旧内容 x 平移计入各坐标字段，保留图例/图签位置；不足 30 右缘空间时只向右扩画布，不挪节点、不减预算。当前系统 seed 从 1680 扩到 1710（旧 USERR 实际中心 x1676，仅剩4px），新增区为白边；small/assembly/rotation 正例不扩画布。源文件不改，重复迁移当前格式不再累加平移。正常入口拒绝旧字段并给迁移命令，不静默猜测坐标系。归档 `proto/`、`proto/frozen/` 与 `skill-chain-e2e/` 是旧版本整体，未经显式迁移不得混入当前运行。
+旧布局须显式调用 `python scripts/migrate_layout.py OLD.layout.json -o NEW.layout.json`。迁移将旧内容 x 平移计入各坐标字段，保留图例/图签位置；不足 30 右缘空间时只向右扩画布，不挪节点、不减预算。当前系统 seed 从 1680 扩到 1710（旧 USERR 实际中心 x1676，仅剩4px），新增区为白边；small/assembly/rotation 正例不扩画布。源文件不改，重复迁移当前格式不再累加平移。正常入口拒绝旧字段并给迁移命令，不静默猜测坐标系。 已有 drawable/margin 但缺少 coordinate_system 的布局也会被拒绝；只有人工确认数值已是根坐标时，才显式运行 `migrate_layout.py --declare-root INPUT -o OUTPUT` 补声明（原坐标、drawable、margin 不动）。该选项不能覆盖未知坐标系或混入旧 SHIFT；未确认时须回到已知来源布局再迁移。归档 `proto/`、`proto/frozen/` 与 `skill-chain-e2e/` 是旧版本整体，未经显式迁移不得混入当前运行。
 
 ## 视觉常量（两链路共用）
 
