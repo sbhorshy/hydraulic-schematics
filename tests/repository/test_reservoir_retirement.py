@@ -7,8 +7,8 @@ import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 
-SCRIPTS = Path(__file__).resolve().parent
-PROJECT = SCRIPTS.parents[3] / '1#系统原理图'
+from repository_context import REPO, SCRIPTS
+PROJECT = REPO / '1#系统原理图'
 
 
 class ReservoirRetirement(unittest.TestCase):

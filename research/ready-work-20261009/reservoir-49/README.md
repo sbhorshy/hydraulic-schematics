@@ -4,7 +4,7 @@
 
 迁移不是只换文件名：保留 TANK 的位置与 218×564 足迹，依据新 SVG 重新渲染端口与连线。旧 viewBox `20 10 218 564` 变为新 `0 0 218 564`；回油/吸油口归一化几何不变，增压口从局部 x=172 变 x=155（全局 x=232 → 215），新增 body_sense_tap=(50,564)。新 SVG 元数据及现行 validator 共同验证这些真实几何，未编造端口或更改拓扑。
 
-TDD 使用此前已授权的 driver / SVG / PNG / report 公开接口：`test_reservoir_retirement.py` 红态重现 render V5 缺 body_sense_tap；迁移后测试通过，验证 render 完成、两个新版端口坐标、PNG 已刷新与 TANK 无 V5/V8 错误。该回归已登记 selftest。`check_library` 当前通过（既有 QD whitelist 如实披露）。本票未重跑全量 selftest，批次整合后由根代理统一执行，不把历史全量证明冒充新跑。
+TDD 使用此前已授权的 driver / SVG / PNG / report 公开接口：`test_reservoir_retirement.py` 红态重现 render V5 缺 body_sense_tap；迁移后测试通过，验证 render 完成、两个新版端口坐标、PNG 已刷新与 TANK 无 V5/V8 错误。该回归现由仓库集成命令显式执行。`check_library` 当前通过（既有 QD whitelist 如实披露）。本票未重跑全量 selftest，批次整合后由根代理统一执行，不把历史全量证明冒充新跑。
 
 新项目 driver 从 preflight 到渲染、PNG、validate、134 对象/62 局部回读全部执行，exit 1、13 FAIL / 9 WARN；旧 TANK 契约故障已消除，但气侧折返/穿体、压力与壳体网络误接、B1 交叉等既有残差仍在，详见 [project-result.json](project-result.json) 与 [project.log](project.log)。未签认感知、未升档 maturity，`delivery.ready=false`。完整 SVG/PNG/报告在 `.scratch/ready-work/issue-49-evidence/project-final/`，公开摘要记录 SHA-256 和原始失败条目。
 
@@ -15,7 +15,7 @@ TDD 使用此前已授权的 driver / SVG / PNG / report 公开接口：`test_re
 复现（仓库根目录，新的独立工作目录）：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/test_reservoir_retirement.py
+python tests/repository/test_reservoir_retirement.py
 python .agents/skills/hydraulic-schematic/scripts/check_library.py
 python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
   --intent '1#系统原理图/1#系统.intent.yaml' \
@@ -25,3 +25,5 @@ python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
 ```
 
 最终证据在合入装配规则后重新运行：代码 HEAD `d514301`，公开项目回归 1 test / 14.070 秒通过；本目录后继提交仅刷新审计文本/日志，不改变受测运行代码。
+
+复现入口补记：本批最终自检可移植性修复把仓库专属集成用例移至 `tests/repository/`，不再计入独立 skill 自检；上面的原始运行证据仍按其受测版本解释。

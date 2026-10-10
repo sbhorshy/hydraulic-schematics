@@ -6,9 +6,10 @@ import tempfile
 import threading
 import unittest
 import urllib.request
-from test_entrypoints import make_render_workspace, SKILL
+from repository_context import REPO, SKILL
+from test_entrypoints import make_render_workspace
 
-spec = importlib.util.spec_from_file_location('editor_server', SKILL.parents[2] / 'editor-proto/server.py')
+spec = importlib.util.spec_from_file_location('editor_server', REPO / 'editor-proto/server.py')
 server = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(server)
 

@@ -62,8 +62,12 @@
 ```bash
 pip install ruamel.yaml jsonschema
 
-# 1) 出图能力回归（金样逐字节 + 闸门沙箱 + 负正例），应 PASS 3/3
+# 1) skill 自包含回归（A–F），不依赖外层项目/编辑器目录
 python .agents/skills/hydraulic-schematic/scripts/selftest.py
+
+# 1b) 本仓库集成回归（编辑器 HTTP、活动项目油箱/蓄压器、独立 skill 包）
+# 此项不包含在上面的 skill 自检中；在仓库内另行执行并单独记录结果。
+python -m unittest discover -s tests/repository -v
 
 # 2) 符号库结构校验（L1 合法 XML / L2 端口组唯一 / L3 catalog↔symbol 交叉）
 python .agents/skills/hydraulic-schematic/scripts/check_library.py
