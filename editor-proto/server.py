@@ -6,7 +6,7 @@
   原型范围内唯一写 layout 的路径）；revision_log 顶条 + layout_version 递增披露手调批次，
   来源标识 editor-proto。
 - #59 编辑器无导出能力：本服务不提供任何成品下载端点；画布每帧=标准链产物
-  （render.py → validate_sheet.py 原样调起，零校验实现）；违规手调允许落盘，
+  （规范源 render_l0_sheet.py → 新 PNG → validate_sheet.py，零校验实现）；违规手调允许落盘，
   由 validate 结果如实呈现（红=扣留无成品）。
 
 用法：
@@ -29,6 +29,10 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+SCRIPTS = os.path.abspath(os.path.join(HERE, '..', '.agents', 'skills', 'hydraulic-schematic', 'scripts'))
+sys.path.insert(0, SCRIPTS)
+from proofreading_evidence import verify_report
+
 LOCK = threading.Lock()
 STATE = {'latency': None}  # 最近一次闭环耗时，供 /api/sheet 回显
 
@@ -60,7 +64,12 @@ def _bump_version(ver):
 
 def _run(workdir, script, timeout=300):
     t0 = time.perf_counter()
-    p = subprocess.run([sys.executable, script], cwd=workdir,
+    args = [sys.executable, os.path.join(SCRIPTS, script)]
+    if script == 'rasterize_sheet.py':
+        args += [os.path.join(workdir, '1#系统原理图.svg'), '-o', os.path.join(workdir, 'sheet-readback.png')]
+    else:
+        args += [workdir]
+    p = subprocess.run(args, cwd=workdir,
                        capture_output=True, timeout=timeout)
     ms = int((time.perf_counter() - t0) * 1000)
     out = p.stdout.decode('utf-8', 'replace')
@@ -130,14 +139,16 @@ def apply_delta(workdir, node, dx, dy, rot=None):
         log.append('%s editor-proto:手调 %s' % (ver, move))
     write_layout_atomic(workdir, layout)
 
-    rc_r, _out_r, err_r, ms_r = _run(workdir, 'render.py')
+    rc_r, _out_r, err_r, ms_r = _run(workdir, 'render_l0_sheet.py')
     if rc_r != 0:
         STATE['latency'] = {'render_ms': ms_r, 'validate_ms': None, 'total_ms': ms_r}
         return {'ok': False, 'stage': 'render', 'render_stderr': err_r[-1500:],
                 'latency': STATE['latency'],
                 'hint': '渲染失败（layout 已按手调即真源落盘，git 可回退）'}
 
+    rc_png, _, err_png, ms_png = _run(workdir, 'rasterize_sheet.py')
     rc_v, out_v, err_v, ms_v = _run(workdir, 'validate_sheet.py')
+    ms_v += ms_png
     total = ms_r + ms_v
     STATE['latency'] = {'render_ms': ms_r, 'validate_ms': ms_v, 'total_ms': total}
     try:
@@ -152,12 +163,14 @@ def apply_delta(workdir, node, dx, dy, rot=None):
     with open(svg_path, encoding='utf-8') as f:
         svg = f.read()
 
-    passed = str(report.get('validation', '')).lower() in ('passed', 'pass', 'ok')
-    return {'ok': True, 'passed': passed, 'svg': svg,
+    evidence = verify_report(workdir)
+    passed = rc_png == 0 and rc_v == 0 and evidence.get('status') == 'current' and evidence.get('delivery', {}).get('ready', False)
+    return {'ok': True, 'passed': passed, 'svg': svg, 'evidence': evidence,
             'issues': _flatten_issues(report)[:40],
             'latency': STATE['latency'],
             'layout_meta': {'version': ver,
                             'revision_log_tail': log[-5:],
+                            'raster_exit': rc_png, 'raster_stderr': err_png[-500:],
                             'validate_exit': rc_v, 'validate_stderr': err_v[-500:]}}
 
 
@@ -229,9 +242,9 @@ class Handler(BaseHTTPRequestHandler):
                            encoding='utf-8').read()
                 report = _load(self.workdir, 'validation-report.json')
                 layout = _load(self.workdir, '1#系统.layout.json')
-                self._json({'ok': True,
-                            'passed': str(report.get('validation', '')).lower()
-                            in ('passed', 'pass', 'ok'),
+                evidence = verify_report(self.workdir)
+                self._json({'ok': True, 'evidence': evidence,
+                            'passed': evidence.get('status') == 'current' and evidence.get('delivery', {}).get('ready', False),
                             'svg': svg, 'issues': _flatten_issues(report)[:40],
                             'latency': STATE['latency'],
                             'layout_meta': {
@@ -283,7 +296,7 @@ def main():
     ap.add_argument('--port', type=int, default=8763)
     a = ap.parse_args()
     workdir = os.path.abspath(a.workdir)
-    for need in ('render.py', 'validate_sheet.py', '1#系统.layout.json'):
+    for need in ('1#系统.intent.yaml', '1#系统.layout.json'):
         if not os.path.exists(os.path.join(workdir, need)):
             sys.exit('workdir 缺 %s：%s' % (need, workdir))
     Handler.workdir = workdir

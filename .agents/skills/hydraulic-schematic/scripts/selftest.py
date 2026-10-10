@@ -290,7 +290,7 @@ def check_l0_regressions():
     # the former 900s, before #42/#46/#23 browser suites. Root runs full suite once.
     suites = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
-              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
+              'test_rotation_routes', 'test_editor_rotation', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
