@@ -141,6 +141,38 @@ def semantic_findings(intent, catalog, source_text):
                 "类型 %s 不在目录 %s 内，其端口集合无从谈起" % (typ, intent.get('catalog')),
                 "改用目录内类型，或先把类型登记进 component-catalog.json 再引用")
 
+    # Assembly is a grouping declaration, never a synthetic part or port.
+    assemblies = intent.get('assemblies') or {}
+    owners = {}
+    if isinstance(assemblies, dict):
+        for aid, assembly in assemblies.items():
+            if not isinstance(assembly, dict):
+                continue  # shape errors are reported by schema
+            anchor = 'assemblies.' + str(aid)
+            if aid in parts or aid in externs:
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 与 part/extern 重名', '使用独立装配 id')
+            members = assembly.get('members') or []
+            if not isinstance(members, list):
+                continue
+            for member in members:
+                if not isinstance(member, str):
+                    continue
+                if member not in parts or member in assemblies:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '成员 %s 必须是已声明 part，禁止装配嵌套' % member,
+                        '仅引用 parts 中的组件实例')
+                if member in owners:
+                    add('E-ASSEMBLY-OWNER', 'ERROR', None, anchor,
+                        '成员 %s 重复归属 %s / %s' % (member, owners[member], aid),
+                        '每个成员仅属于一个装配且只列一次')
+                owners[member] = aid
+        for pi, path in enumerate(intent.get('paths') or []):
+            for token in path:
+                if str(token).split('.')[0] in assemblies:
+                    add('E-ASSEMBLY-ENDPOINT', 'ERROR', None, 'paths[%d]' % pi,
+                        '装配不是管线端点: %s' % token, '连接实际成员端口或 extern')
+
     # 逐 path 核对：引用 / 裸实例 / 端口存在性 / medium / role / terminal 端点合法性
     for pi, path in enumerate(intent.get('paths') or []):
         line = lm['paths'][pi] if pi < len(lm['paths']) else None

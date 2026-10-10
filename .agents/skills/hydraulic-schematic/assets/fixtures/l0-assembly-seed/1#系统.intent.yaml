@@ -1,0 +1,58 @@
+# L0 系统意图:HYD-SYS-1 壳体回油滤组件 CDF-001 装配展开图
+#
+# 唯一输入定义: 1#系统原理图/1#系统.sysml
+#   part def 'case_drain_filter' (行 118-129) + 实例 CDF-001 (行 173)。
+# 本图把该装配件展开为两只受控组件:
+#   CDF-001-BODY = 本体,SysML 引用基型 filter_line_shutoff_dp (行 123);
+#     其内部结构(滤芯+压差传感器,行 75-88,内部连接 4 条)由符号
+#     filter-line-shutoff-dp.svg 内联表达,不再拆节点——与 sysml 行 14-19
+#     "油滤装配件与 filter-line-shutoff-dp.svg 一一对应;目录三类型各自
+#     内联本体结构"一致。role 取目录 case_drain 变体
+#     filter_line_shutoff_dp_case_drain,与 1#系统.intent.yaml 对 CDF-001
+#     的口径一致(壳体回油滤本体 role=case_drain)。
+#   CDF-001-CV   = 单向阀 check_valve (sysml 行 124)。
+
+l0_version: '1.1'
+system: HYD-SYS-1/CDF-001
+catalog: comac-hydraulic-components@0.7-draft
+maturity: concept
+
+# 装配边界(绘图抽象,非部件):
+#   入口 = @CASE 母线,双泵壳体回油合流(sysml 行 235-236);
+#   出口 = TANK-001.return_in,直回油箱(sysml 行 239)。
+# 契约 extern 枚举(inlet/outlet/return)无 case_drain,两侧均按 return
+# 建模;线型按端口 role 逐边推导,口径差异见 unknown 披露。
+extern:
+  CASE-IN: return
+  CASE-OUT: return
+
+parts:
+  CDF-001-BODY: filter_line_shutoff_dp_case_drain
+  CDF-001-CV: check_valve
+
+# 装配声明(#35 决议:label 必填、members≥2),驱动装配围框渲染(#37 定档:
+# 1.5T 长虚线,框外上方标签)。成员即本图 parts,框几何由渲染器按成员
+# 包围盒+内距推导,layout 无新键。
+assemblies:
+  CDF-001:
+    label: CDF-001 壳体回油滤装配
+    members: [CDF-001-BODY, CDF-001-CV]
+
+# 串联主路,对应 sysml 行 126-128 三条 connect:
+#   connect 'inlet' to 'body'.'inlet';
+#   connect 'body'.'outlet' to 'cv'.'inlet';
+#   connect 'cv'.'outlet' to 'outlet'。
+paths:
+- [CASE-IN, CDF-001-BODY, CDF-001-CV, CASE-OUT]
+
+unknown:
+  # 单向阀"允许流向油箱、防倒灌"为判断,待工程确认(sysml 行 72 注)
+- CDF-001-CV.flow-direction-tbd
+  # check_valve 目录端口 role 缺省 pressure;装配语境实为壳体回油介质。
+  # 线宽两级制(高压 3.0T/低压 1.0T)下与 case_drain 边同为 1.0T 实线,
+  # 视觉无差异;出口段线型类名记为 return,已在拓扑清单披露。
+- CDF-001-CV.port-role-catalog-default
+  # 压差指示器就地目视,指示器/传感器待定,无电输出端口(sysml 行 67)
+- CDF-001-BODY.dp-indicator-or-sensor
+  # 滤芯过滤精度未声明(沿用 1# 系统 intent unknown 挂账)
+- CDF-001.filtration-rating

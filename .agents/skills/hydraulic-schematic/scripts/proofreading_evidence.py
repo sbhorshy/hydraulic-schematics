@@ -251,7 +251,7 @@ def coverage_for(report):
     """Expose each check, preserving failures and explicit incomplete evidence."""
     records = report.get('evidence', [])
     coverage = []
-    for check_id in [*(f'V{i}' for i in range(1, 20)), 'B6.avoid_corridor', 'B7']:
+    for check_id in [*(f'V{i}' for i in range(1, 20)), *(['V20'] if any(e.get('id')=='V20' for e in records) else []), 'B6.avoid_corridor', 'B7']:
         evidence = [e for e in records if e.get('id') == check_id]
         findings = [e for e in report.get('checks', []) if e.get('id') == check_id]
         explicit = [e for e in evidence if 'coverage_status' in e]

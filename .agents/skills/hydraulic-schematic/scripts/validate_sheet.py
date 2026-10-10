@@ -313,7 +313,7 @@ def main(argv=None):
         if len(q) != 5:
             F.append(('V17', '吸油斜杠组 %d 含 %d 根,标准要求完整 5 根' % (gi, len(q))))
         smarks.extend(q)
-    if not smgroups:
+    if not smgroups and any(p['class']=='ln-suction' for p in geometry['pipes']):
         F.append(('V17', '吸油线存在但未生成任何五斜杠组'))
 
     # 标记不得进入组件或文字。用斜杠包围盒与障碍矩形相交判定。
@@ -674,10 +674,15 @@ def main(argv=None):
                'not_measured': (['B6.avoid_corridor'] if corridors['coverage_status']=='not_checked' else []) + (['B7'] if b7=='not_checked' else []),
                'note': 'B4/B5/B6 使用实际走线与足迹，B7 使用实际浏览器字形及图元轮廓。'})
 
+    from assembly_checks import check_assemblies
+    assembly_findings, assembly_evidence = check_assemblies(intent, L, geometry, text_browser, topology, budget_runs)
+    F.extend((c['id'], c['detail']) for c in assembly_findings)
+    ev.extend(assembly_evidence)
+
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings:
+    for finding in endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings + assembly_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,
