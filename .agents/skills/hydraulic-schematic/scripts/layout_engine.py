@@ -34,6 +34,7 @@ from kiwisolver import Solver, Variable, UnsatisfiableConstraint
 from kiwisolver import strength as _st
 strong = _st.strong
 from ruamel.yaml import YAML
+from layout_contract import make_contract, drawable_bounds, pipe_half_width
 
 # ---------- 规则参数表 P：布局语言的全部自由度 ----------
 P = dict(
@@ -80,7 +81,7 @@ P = dict(
     EDGE_PAD=12,               # R11 竖廊离列缘
     BUS_NO_RIDE=20,            # 守门: 盒缘离母线最小距离(禁骑母线)
     BOX_GAP=40,                # 守门: B5 盒距
-    CANVAS_W=1680, CANVAS_H=1390, SHIFT=30,
+    CANVAS_W=1680, CANVAS_H=1390, EDGE_MARGIN=30,
     LEGEND=dict(x=380, y=1020, w=540, h=290),   # 让位回油收集走廊
     TITLE=dict(x=40, y=1330, w=1600, h=56),
 )
@@ -558,10 +559,11 @@ def rules(intent, cat, params, ref=None, *, source_dir=None, catalog_dir=None):
         note='方案乙:R1–R16 规则定行位 + kiwi 守门微调(#18);全部坐标由'
              '参数表+intent 拓扑推导,零手工坐标。',
         canvas=dict(width=P['CANVAS_W'], height=P['CANVAS_H']),
-        canvas_shift_x=P['SHIFT'],
+        **make_contract(P['CANVAS_W'], P['CANVAS_H'], P['EDGE_MARGIN']),
         style=dict(base_line_width_T=1.2, symbol_stroke_width=2, suction_marker_S=8),
         externs=externs, nodes=nodes, buses=buses_out,
         labels=labels,
+        boundary_terminals=[[e['x'],e['y']] for e in externs.values()],
         lanes=[P['LANE_TOP']], vlanes=vlanes,
         group_padding=20, group_label_gap=10,
         legend=P['LEGEND'], title_block=P['TITLE'],
@@ -600,6 +602,8 @@ def guard(layout, structure, params):
         from assembly_layout import guard as assembly_guard
         return assembly_guard(layout, structure, params)
     P = params
+    left, top, right, bottom = drawable_bounds(layout)
+    paint_pad = pipe_half_width(layout)
     nodes = layout['nodes']
     bx = {b: float(v['x']) for b, v in layout['buses'].items()}
     s = Solver()
@@ -645,17 +649,19 @@ def guard(layout, structure, params):
     EPS = 1e-6
 
     # -- REQUIRED 1: 画布与图例回避(净空只对 x-压住图例的盒声明)--
-    LG0, LG1 = P['LEGEND']['x'], P['LEGEND']['x'] + P['LEGEND']['w']
+    LG0, LG1 = layout['legend']['x'], layout['legend']['x'] + layout['legend']['w']
     for inst in nodes:
         vx, vy = V[inst]
-        req('canvas.left[%s]' % inst, vx >= 60, x0(inst) >= 60 - EPS)
-        req('canvas.right[%s]' % inst, vx + w(inst) <= P['CANVAS_W'] - 30,
-            x1(inst) <= P['CANVAS_W'] - 30 + EPS)
-        req('canvas.top[%s]' % inst, vy >= 60, y0(inst) >= 60 - EPS)
+        req('canvas.left[%s]' % inst, vx >= max(left + paint_pad, 60), x0(inst) >= max(left + paint_pad, 60) - EPS)
+        req('canvas.right[%s]' % inst, vx + w(inst) <= right - paint_pad,
+            x1(inst) <= right - paint_pad + EPS)
+        req('canvas.top[%s]' % inst, vy >= max(top + paint_pad, 60), y0(inst) >= max(top + paint_pad, 60) - EPS)
+        req('canvas.bottom[%s]' % inst, vy + h(inst) <= bottom - paint_pad,
+            y1(inst) <= bottom - paint_pad + EPS)
         if x0(inst) < LG1 and LG0 < x1(inst):
             req('legend.clear[%s]' % inst,
-                vy + h(inst) <= P['LEGEND']['y'] - 10,
-                y1(inst) <= P['LEGEND']['y'] - 10 + EPS)
+                vy + h(inst) <= layout['legend']['y'] - 10,
+                y1(inst) <= layout['legend']['y'] - 10 + EPS)
 
     # -- REQUIRED 2: 元件禁骑母线(侧别取规则解观察侧;近邻 300 内才声明)--
     for inst in nodes:
@@ -723,13 +729,12 @@ def guard(layout, structure, params):
         req('bus-order[%s<%s]' % (a, b), B[a] + P['BUS_NO_RIDE'] <= B[b],
             bx[a] + P['BUS_NO_RIDE'] <= bx[b] + EPS)
 
-    # -- REQUIRED 6: 母线画布界。viewBox 固定 canvas 宽而内容整体 +SHIFT,
-    # 母线可用右缘 = CANVAS_W - SHIFT;越界即被裁出图面(目视验收缺陷)。
+    # -- REQUIRED 6: explicit drawable bounds include the painted line radius.
     for b in B:
         req('canvas.right[bus:%s]' % b,
-            B[b] <= P['CANVAS_W'] - P['SHIFT'],
-            bx[b] <= P['CANVAS_W'] - P['SHIFT'] + EPS)
-        req('canvas.left[bus:%s]' % b, B[b] >= 60, bx[b] >= 60 - EPS)
+            B[b] <= right - paint_pad,
+            bx[b] <= right - paint_pad + EPS)
+        req('canvas.left[bus:%s]' % b, B[b] >= max(left + paint_pad, 60), bx[b] >= max(left + paint_pad, 60) - EPS)
 
     # ---- 规则点违例评估 → 求解 → 漂移报告 ----
     violations_at_rule = [tag for tag, ok in checks if not ok]

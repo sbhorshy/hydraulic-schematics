@@ -7,7 +7,6 @@
     "width": 1500,
     "height": 950
   },
-  "canvas_shift_x": 30,
   "style": {
     "base_line_width_T": 1.2,
     "symbol_stroke_width": 2,
@@ -15,13 +14,13 @@
   },
   "externs": {
     "CASE-IN": {
-      "x": 130,
+      "x": 160.0,
       "y": 300,
       "anchor": "right",
       "label": "自 @CASE 母线\nEDP-001 / EMP-001\n壳体回油合流"
     },
     "CASE-OUT": {
-      "x": 780,
+      "x": 810.0,
       "y": 300,
       "anchor": "left",
       "label": "至 TANK-001.return_in\n油箱回油口"
@@ -30,14 +29,14 @@
   "buses": {},
   "nodes": {
     "CDF-001-BODY": {
-      "x": 320,
+      "x": 350.0,
       "y": 186,
       "symbol": "filter-line-shutoff-dp.svg",
       "w": 100,
       "h": 158
     },
     "CDF-001-CV": {
-      "x": 510,
+      "x": 540.0,
       "y": 260,
       "symbol": "check-valve.svg",
       "w": 80.0,
@@ -66,5 +65,31 @@
     "y": 860,
     "w": 1420,
     "h": 56
-  }
+  },
+  "vlanes": [],
+  "boundary_terminals": [
+    [
+      1510.0,
+      300.0
+    ],
+    [
+      1510.0,
+      700.0
+    ],
+    [
+      90.0,
+      514.4
+    ]
+  ],
+  "coordinate_system": "root_svg_user_units",
+  "drawable": {
+    "x": 0,
+    "y": 0,
+    "width": 1470.0,
+    "height": 950
+  },
+  "edge_margin": 30.0,
+  "revision_log": [
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1500→1500; edge_margin=30"
+  ]
 }

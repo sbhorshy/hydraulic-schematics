@@ -51,26 +51,20 @@ def _cached_read_symbol(path):
 
 R.read_symbol = _cached_read_symbol
 
-# 边界端子（B3 走廊豁免判点）：缺省值为 1# 系统实测知识（#19 冻结）。
-# 通用口径（#22 沉淀）：布局 json 提供 "boundary_terminals" 键即覆写。
-BOUNDARY_TERMINALS_DEFAULT = [(1480.0, 300.0), (1480.0, 700.0), (60.0, 514.4)]
+# B3 走廊豁免只读取布局声明的根坐标 boundary_terminals；缺省无豁免。
 B3_BUDGET, B3_BOUNDARY = 1.5, 4.0
 B4_BUDGET, B5_BUDGET = 8.0, 40.0
 B2_SINGLE, B2_TOTAL = 3, 40
-# 画布缺省值（1# 实测）；运行时一律从布局 canvas / canvas_shift_x 推导。
-CANVAS_W, CANVAS_H, SHIFT = 1680, 1390, 30
+from layout_contract import drawable_bounds, pipe_half_width
 
 
 def canvas_geom(L):
-    """画布几何 (宽, 高, shift)：布局显式契约优先，缺省值兜底。"""
-    cv = L.get('canvas') or {}
-    return (float(cv.get('width', CANVAS_W)), float(cv.get('height', CANVAS_H)),
-            float(L.get('canvas_shift_x', SHIFT)))
+    return drawable_bounds(L)
 
 
 def boundary_terminals(L):
     return [tuple(t) for t in (L.get('boundary_terminals')
-                               or BOUNDARY_TERMINALS_DEFAULT)]
+                               or [])]
 
 
 # ---------- 评估器：与 validate_sheet 构图预算面板同口径 ----------
@@ -282,7 +276,7 @@ NO_REGRESSION = {}
 
 
 def neighbors(L):
-    cw, _ch, sh = canvas_geom(L)
+    left, top, right, bottom = canvas_geom(L)
     ms = []
     lanes = L.get('lanes') or []
     vlanes = L.get('vlanes') or []
@@ -294,10 +288,10 @@ def neighbors(L):
         for dx in (-40, -20, -10, 10, 20, 40):
             ms.append(('vlane_move', i, dx))
         ms.append(('vlane_del', i))
-    for y in range(140, int(_ch) - 89, LANE_GRID):
+    for y in range(max(140, int(top)), int(bottom) - 89, LANE_GRID):
         if all(abs(y - ly) >= 15 for ly in lanes):
             ms.append(('lane_add', y))
-    for x in range(60, int(cw - sh) - 60, VLANE_GRID):
+    for x in range(max(60, int(left)), int(right) - 60, VLANE_GRID):
         if all(abs(x - cx) >= 15 for cx in vlanes) and x not in (20,):
             ms.append(('vlane_add', x))
     for b, bd in L['buses'].items():
@@ -316,7 +310,7 @@ def _fast_copy(L):
     apply_move 与管线管线写入的全部路径，候选对象新鲜度契约不变，
     省掉 deepcopy 的备忘录机制（实测约占爬坡墙钟一半）。"""
     c = dict(L)
-    for k in ('canvas', 'style', 'legend', 'title_block'):
+    for k in ('canvas', 'drawable', 'style', 'legend', 'title_block'):
         if isinstance(L.get(k), dict):
             c[k] = dict(L[k])
     for k in ('externs', 'nodes', 'buses'):
@@ -328,7 +322,8 @@ def _fast_copy(L):
 
 def apply_move(L, m):
     L = _fast_copy(L)
-    cw, ch, sh = canvas_geom(L)
+    left, top, right, bottom = canvas_geom(L)
+    radius = pipe_half_width(L)
     op = m[0]
     if op == 'lane_move':
         L['lanes'][m[1]] += m[2]
@@ -349,15 +344,15 @@ def apply_move(L, m):
         nd['x'] += m[2]
         nd['y'] += m[3]
     # 解空间钳位：走廊在图幅内且互不贴脸，母线/元件守住画布可用区。
-    L['lanes'] = [ly for ly in L.get('lanes', []) if 60 <= ly <= ch - 60]
-    L['vlanes'] = [cx for cx in L.get('vlanes', []) if 20 <= cx <= cw - sh]
+    L['lanes'] = [ly for ly in L.get('lanes', []) if max(top, 60) <= ly <= bottom - 60]
+    L['vlanes'] = [cx for cx in L.get('vlanes', []) if max(left + radius, 20) <= cx <= right - radius]
     for bd in L['buses'].values():
-        if not (60 <= bd['x'] <= cw - sh):
+        if not (max(left + radius, 60) <= bd['x'] <= right - radius):
             return None
     for nd in L['nodes'].values():
-        if not (60 <= nd['x'] and nd['x'] + nd['w'] <= cw - sh):
+        if not (max(left + radius, 60) <= nd['x'] and nd['x'] + nd['w'] <= right - radius):
             return None
-        if not (60 <= nd['y'] and nd['y'] + nd['h'] <= ch - 60):
+        if not (max(top + radius, 60) <= nd['y'] and nd['y'] + nd['h'] <= bottom - 60):
             return None
     if len(set(L.get('lanes', []))) != len(L.get('lanes', [])):
         return None

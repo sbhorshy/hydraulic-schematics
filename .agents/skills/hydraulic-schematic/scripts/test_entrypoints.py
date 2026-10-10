@@ -20,7 +20,7 @@ def make_render_workspace(root, fixture):
     """Copy templates before running, using only packaged catalog/symbol assets."""
     work = root / 'run'
     work.mkdir()
-    for name in ('assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
+    for name in ('layout_contract.py', 'assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
                  'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
@@ -31,6 +31,11 @@ def make_render_workspace(root, fixture):
     shutil.copy2(CATALOG, work / CATALOG.name)
     for name in ('1#系统.intent.yaml', '1#系统.layout.json'):
         shutil.copy2(fixture / name, work / name)
+    # Catalog-relative bare asset names are supported by assembly seeds too.
+    for node in json.loads((work / '1#系统.layout.json').read_text())['nodes'].values():
+        ref = node.get('symbol', '')
+        if ref and Path(ref).name == ref and (CATALOG.parent / ref).is_file():
+            shutil.copy2(CATALOG.parent / ref, work / ref)
     return work
 
 

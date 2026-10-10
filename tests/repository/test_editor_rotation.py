@@ -36,7 +36,7 @@ class EditorRotation(unittest.TestCase):
                 result = json.load(urllib.request.urlopen(req, timeout=90))
                 self.assertFalse(result['passed'])
                 self.assertTrue(any(i['sev']=='red' for i in result['issues']), result)
-                self.assertEqual(json.loads((work / '1#系统.layout.json').read_text())['nodes']['PF-001']['x'], 540)
+                self.assertEqual(json.loads((work / '1#系统.layout.json').read_text())['nodes']['PF-001']['x'], 570)
             finally:
                 http.shutdown(); http.server_close(); worker.join()
 

@@ -11,6 +11,7 @@ import xml.etree.ElementTree as ET
 from browser_evidence import collect
 from endpoint_usage import resolve_symbol
 from sheet_geometry import load_geometry
+from layout_contract import make_contract, drawable_bounds, pipe_half_width
 from text_checks import glyph_paint, display_effects
 
 
@@ -104,7 +105,8 @@ def rules(intent,catalog,params,ref=None,source_dir=None,catalog_dir=None):
         node['y']=P['ASSEMBLY_RUN_Y']-geometry['ports'][main['in']]['position'][1]
         nodes[inst]=node;geometries[inst]=geometry;mains[inst]=main
     layout=dict(layout_version='layout-engine-assembly-1',source_l0='',note='R17 单行装配；实际 SVG 足迹/端口与浏览器字形；禁止拓扑猜测。',
-                canvas={'width':P['CANVAS_W'],'height':P['CANVAS_H']},canvas_shift_x=P['SHIFT'],
+                canvas={'width':P['CANVAS_W'],'height':P['CANVAS_H']},
+                **make_contract(P['CANVAS_W'], P['CANVAS_H'], P['EDGE_MARGIN']),
                 style={'base_line_width_T':1.2,'symbol_stroke_width':2,'suction_marker_S':8},nodes=nodes,buses={},externs={},
                 labels={inst:ref.get('labels',{}).get(inst,inst) for inst in chain},label_pos={},
                 group_padding=14,group_label_gap=10,legend=copy.deepcopy(P['LEGEND']),title_block=copy.deepcopy(P['TITLE']))
@@ -154,14 +156,15 @@ def rules(intent,catalog,params,ref=None,source_dir=None,catalog_dir=None):
 
 def guard(layout,structure,params):
     # Never drift a node away from its measured port-aligned row.
-    boxes=[b for _,b in structure['boxes']];shift=layout.get('canvas_shift_x',0)
+    boxes=[b for _,b in structure['boxes']]
+    x0,y0,x1,y1=drawable_bounds(layout)
     padding=layout['group_padding']+.75*layout['style']['base_line_width_T']
-    if any(b[0]+shift<padding or b[1]<85 or b[2]+shift>layout['canvas']['width']-padding for b in boxes):
+    if any(b[0]<x0+padding or b[1]<max(y0+padding,85) or b[2]>x1-padding or b[3]>y1-padding for b in boxes):
         reject('成员/实际字形越出可绘制区域；调整画幅/起点/主路高度')
     ends=list(layout['externs'].values())
     left=min(b[0] for b in boxes)-padding;right=max(b[2] for b in boxes)+padding
     if (ends[0]['x']>=left or ends[-1]['x']<=right or
-            any(e['x']+shift<20 or e['x']+shift>layout['canvas']['width']-20 for e in ends)):
+            any(e['x']<x0+20 or e['x']>x1-20 for e in ends)):
         reject('extern 引出长度必须越过带内距围框并留在画幅内')
     legend=layout['legend'];title=layout['title_block']
     if (legend['y']+legend['h']>title['y']-14 or title['y']+title['h']>layout['canvas']['height'] or

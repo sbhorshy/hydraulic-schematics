@@ -105,7 +105,7 @@ SCRIPT = r'''
         attrs:Object.fromEntries([...el.attributes].map(a=>[a.name,a.value])), ancestors,
         matrix:matrix(m), bbox:bounds(m,bb), local_bbox:[bb.x,bb.y,bb.width,bb.height],
         client_bbox:bounds(rootInverse,cb), visible:visible && opacity>0, opacity,
-        style:Object.fromEntries(['stroke','stroke-width','stroke-opacity','stroke-dasharray','stroke-linecap',
+        style:Object.fromEntries(['stroke','stroke-width','stroke-opacity','stroke-dasharray','stroke-linecap','stroke-linejoin','stroke-miterlimit',
           'fill','fill-opacity','vector-effect','display','visibility','font-family','font-size','font-weight',
           'text-anchor','clip-path','mask','filter'].map(k=>[k,cs.getPropertyValue(k)]))};
       if(el instanceof SVGGeometryElement) {
