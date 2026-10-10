@@ -62,7 +62,7 @@
 ## 标注新符号的步骤
 
 1. 复制库内 `_template.svg` 起稿（技术规范 §6.3.1 模板），命名 `<name>-stroke.svg`（中文类型可用中文名）；统一黑描边、无填充，`stroke-width=2` 为基准。
-2. 确认 `viewBox` 收紧到图形实际包围盒——原点允许非 `(0,0)`（如油箱 `"20 10 218 564"`）。
+2. 确认 `viewBox` 收紧到图形实际包围盒——原点允许非 `(0,0)`（如历史夹具中退役油箱 `"20 10 218 564"`；当前描边油箱为 `"0 0 218 564"`）。
 3. 按 API 添加 `connection-points`：cx/cy 用 viewBox 用户坐标写在引线上。
 4. 更新 `component-catalog.json`：该组件的 `symbol.asset` 指向新文件，`symbol_status: annotated`，`ports[]` 逐条补齐（`id` / `svg_element_id` / `medium` / `role` / `flow_capability` / `anchor_direction`）。
 5. 端口契约变化属于目录修订——递增 `catalog_revision` 并在 status 里记录冻结与否。
@@ -98,3 +98,7 @@ vb = [float(v) for v in root.get('viewBox').replace(',', ' ').split()]
 ```
 
 不在渲染器里硬编码任何端口坐标——符号改版后硬编码即静默失真。
+
+### 油箱退役记录（2026-10-10，#49）
+
+活动工程统一选用本库 `bootstrap-type-reservoir.svg`（draft）；项目 symbols 下仅保留其逐字节受管副本。旧描摹油箱退出活动目录，历史 frozen 及已归档图纸属于版本化实证，不作为当前符号入口。符号重绘 campaign 早期符号待办由 4 减为 3；其余三件不在本票范围。本次更换不提高 draft 成熟度，也不代签内部机构未知项。

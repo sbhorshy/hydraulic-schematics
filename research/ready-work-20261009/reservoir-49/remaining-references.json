@@ -1,0 +1,126 @@
+[
+  {
+    "path": "1#系统原理图/1#系统_topology.md",
+    "classification": "historical rendered output or frozen documentation"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统A.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统A原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统B.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统B原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统_topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统丁.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统丁原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统丙.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统丙原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-optA.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-optA原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-optB.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-optB原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-perturbed.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙-perturbed原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙扰动-optB.layout.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/1#系统乙扰动-optB原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/build_catalog.py",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/component-catalog.json",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/driver-runs/arrival/1#系统原理图-topology.md",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/frozen/layout_engine.py",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/proto/proto_b_rules.py",
+    "classification": "immutable historical prototype/frozen input or output"
+  },
+  {
+    "path": "1#系统原理图/skill-chain-e2e/README.md",
+    "classification": "historical rendered output or frozen documentation"
+  },
+  {
+    "path": "docs/specs/ready-tickets-20261009.md",
+    "classification": "versioned audit/spec source record"
+  },
+  {
+    "path": "research/ready-work-20261009/baseline-44/project/convergence-report.json",
+    "classification": "versioned audit/spec source record"
+  },
+  {
+    "path": "research/ready-work-20261009/baseline-44/project/validation-report.json",
+    "classification": "versioned audit/spec source record"
+  },
+  {
+    "path": "research/ready-work-20261009/source-snapshot.json",
+    "classification": "versioned audit/spec source record"
+  }
+]

@@ -1,0 +1,30 @@
+F
+======================================================================
+FAIL: test_project_renders_current_reservoir_ports (__main__.ReservoirRetirement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-49/.agents/skills/hydraulic-schematic/scripts/test_reservoir_retirement.py", line 27, in test_project_renders_current_reservoir_ports
+    self.assertTrue(render and render[-1]['status'] == 'completed', run.stdout + run.stderr)
+AssertionError: False is not true : ==== 校核驱动器 ====
+工作区: /tmp/reservoir-retirement-u3gn_mzz
+preflight: cleared_for_layout
+  轮1 布局=seed             回读= -> fail 0, warn 0
+工具链故障: render_l0_sheet 失败 rc=1
+FAIL V5 TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号
+
+
+结论: 工具链故障  (2.4s, 报告 -> /tmp/reservoir-retirement-u3gn_mzz/convergence-report.json)
+[driver] setup started
+[driver] setup completed 1.714s
+[driver] preflight started
+[driver] preflight completed 0.216s
+[driver] layout started
+[driver] layout completed 0.000s
+[driver] render started
+[driver] render failed 0.517s
+
+
+----------------------------------------------------------------------
+Ran 1 test in 3.901s
+
+FAILED (failures=1)

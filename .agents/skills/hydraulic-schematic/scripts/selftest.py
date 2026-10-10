@@ -286,7 +286,7 @@ def check_template_gate():
 
 def check_l0_regressions():
     # End-to-end browser suites share this aggregate hang guard; it is not a performance assertion.
-    suites = ('test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
+    suites = ('test_entrypoints', 'test_reservoir_retirement', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
               'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
     try:
