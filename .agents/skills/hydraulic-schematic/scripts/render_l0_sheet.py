@@ -338,7 +338,10 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             if inst in exclude:
                 continue
-            out.append((nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h']))
+            w, h = nd.get('_W', nd['w']), nd.get('_H', nd['h'])
+            if int(nd.get('rot', 0)) % 180:
+                w, h = h, w
+            out.append((nd['x'], nd['y'], nd['x'] + w, nd['y'] + h))
         return out
 
     @staticmethod
@@ -687,12 +690,21 @@ class Sheet(object):
                         cands.append([m, (cx2, m[1]), (cx2, ly),
                                       (bx, ly), (bx, m[1])])
                 obs = self.obstacles()
+                # A bus has no terminal body: its final horizontal segment must
+                # also clear the source. Extend the attachment height around
+                # the actual rotated footprint, without changing any port.
+                own = self.obstacles(exclude=set(self.L['nodes']) - {oinst})
+                direct = self.dedup([(ox, oy), m, (bx, m[1])])
+                if self.hits(direct[1:], own) or self.backtracks(direct):
+                    for x0, y0, x1, y1 in own:
+                        for ly in (y0 - S, y1 + S):
+                            cands.append([m, (m[0], ly), (bx, ly)])
                 best, bad = None, None
                 for c in cands:
                     cp = self.dedup([(ox, oy)] + c)
-                    if len(cp) < 2:
+                    if len(cp) < 2 or self.backtracks(cp):
                         continue
-                    h = self.hits(cp, obs, skip_ends=True)
+                    h = self.hits(cp[1:], obs)
                     # 本支路自己要接的这条母线不算(末段必然贴在它上面),
                     # 但其他母线要算。
                     # 全部母线都算,包括自己要接的这条:支路只应**横向**
@@ -714,6 +726,8 @@ class Sheet(object):
                           + cr * 120 + ln + len(cp) * 5)
                     if bad is None or sc < bad:
                         bad, best = sc, cp
+                if best is None:
+                    raise ValueError('未找到无反向折返的母线接入路线: %s -> @%s' % (other, bus))
                 pts = best
                 for q in range(len(pts) - 1):
                     self.drawn.append((pts[q], pts[q + 1]))
