@@ -1116,6 +1116,8 @@ def css(T):
   .ext  { font-size: 10px; fill: #333; }
   .grp  { fill: none; stroke: #000; stroke-width: %(gb).2f;
           stroke-dasharray: 8 5; }
+  .enc { fill: none; stroke: #000; stroke-width: %(sy).2f; stroke-dasharray: 8 5; }
+  .enc-lbl { font-size: 10.5px; fill: #000; }
   .grp-lbl { font-size: 10.5px; fill: #000; }
   .ext-mark { stroke: #000; stroke-width: %(lo).2f; }
   polyline { fill: none; stroke: #000;
@@ -1161,7 +1163,7 @@ def css(T):
   .pl-suction    { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
   .pl-sense      { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
   .pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
-""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': 1.5 * T}
+""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': T}
 
 
 def legend(L, T):
@@ -1438,6 +1440,9 @@ def main(argv=None):
     outp = os.path.join(workdir, '1#系统原理图.svg')
     with io.open(outp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(P))
+    from assembly_checks import render_enclosures
+    from endpoint_usage import resolve_symbol
+    render_enclosures(outp, intent, layout, lambda ref: resolve_symbol(ref, workdir, cat_dir))
     write_manifest(workdir, intent, catalog, fragments)
     print('wrote', outp)
     print('nets=%d  segments=%d  junctions=%d  buses=%s'

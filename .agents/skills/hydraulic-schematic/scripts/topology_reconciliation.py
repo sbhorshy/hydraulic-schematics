@@ -35,7 +35,10 @@ def declared_topology(intent, catalog):
              for bus in sorted({v for e in edges for v in e['endpoints'] if v.startswith('@')})]
     externs = [{'id': name, 'anchor': 'extern.' + name} for name in intent.get('extern', {})]
     return {'schema_version': 1, 'nodes': nodes, 'ports': ports, 'edges': edges,
-            'buses': buses, 'externs': externs, 'unknown': intent.get('unknown') or []}
+            'buses': buses, 'externs': externs,
+            'assemblies': [{'id':aid,'anchor':'assemblies.'+aid,'label':assembly['label'],
+                            'members':assembly['members'],'svg_ids':['assembly-'+aid,'assembly-label-'+aid]}
+                           for aid,assembly in (intent.get('assemblies') or {}).items()], 'unknown': intent.get('unknown') or []}
 
 
 def write_manifest(workdir, intent, catalog, fragments):
@@ -70,7 +73,7 @@ def write_manifest(workdir, intent, catalog, fragments):
                      (item['anchor'],item['id'],item['type'],', '.join(item['svg_ids']),symbol))
     lines += ['', '## 端口 / 母线 / 边界辅助映射', '',
               '| 输入锚点 | 对象 | SVG 图元 |', '| --- | --- | --- |']
-    for item in manifest['ports'] + manifest['buses'] + manifest['externs']:
+    for item in manifest['ports'] + manifest['buses'] + manifest['externs'] + manifest['assemblies']:
         lines.append('| `%s` | `%s` | %s |' % (item['anchor'],item['id'],', '.join(item.get('svg_ids',[]))))
     lines += ['', '## 简化说明 / 未知项', '', '以下未知项只披露，不生成连接；逻辑实例数不按 SVG 片段数累加。', '']
     lines += ['- ' + str(value) for value in manifest['unknown']] or ['- 无声明的未知项。']
