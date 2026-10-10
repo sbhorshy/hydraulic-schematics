@@ -63,6 +63,17 @@ def inventory(report):
     edges=report.get('topology',{}).get('expected_edges',[])
     def add(oid,kind,label,targets,**fields):
         objects.append({'id':oid,'kind':kind,'label':label,'targets':targets,**fields})
+    for evidence in report.get('evidence',[]):
+        if evidence['id']!='V20': continue
+        for assembly in evidence.get('assemblies',[]):
+            aid=assembly['assembly']
+            add('assembly:'+aid,'assembly',aid+' 装配围框',
+                [expand(assembly['frame'])] if assembly.get('frame') else [],
+                input_anchors=[assembly['anchor']],members=assembly['members'])
+            for index,crossing in enumerate(assembly.get('crossings',[])):
+                add('assembly-crossing:'+aid+':'+str(index),'assembly_crossing',aid+' 越框端口',
+                    [point_box(crossing['position'])],position=crossing['position'],
+                    input_anchors=[assembly['anchor'],crossing['input_anchor']],member_port=crossing['member_port'])
     lead_bounds={}
     for evidence in report.get('evidence',[]):
         if evidence['id']=='V16':

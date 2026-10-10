@@ -20,7 +20,7 @@ def make_render_workspace(root, fixture):
     """Copy templates before running, using only packaged catalog/symbol assets."""
     work = root / 'run'
     work.mkdir()
-    for name in ('render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
+    for name in ('assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
                  'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
