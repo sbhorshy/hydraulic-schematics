@@ -1,0 +1,1 @@
+layout-engine: 23 nodes, 6 buses; guard 微调: ['ACC-001', 'ACV-001', 'CV-002', 'FSOV-001', 'PF-001', 'PG-001', 'PRV-001', 'QDP-001', 'QDR-001', 'RF-001', 'USER-001', 'USER-002', 'USER-003', 'USER-004', 'USER-005', 'USER-006', 'USER-007', 'USER-008', 'bus:MANIFOLD', 'bus:PRESS', 'bus:RET', 'bus:USERR', 'bus:USR']

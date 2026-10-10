@@ -1,0 +1,4 @@
+== check_library ==
+库: /mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/.agents/skills/hydraulic-schematic/assets/component-library（SVG 23，端口组 22，白名单 1）
+ INFO L2 豁免 quick-disconnect-coupling.svg —— 连接位变体：无端口组，待重绘补齐；断开位侧别语义已工程确认（2026-09-07，右=机侧座端 aircraft_side / 左=地面接口 ground_side，unknown: quick-disconnect-port-redraw-pending）（#22）
+结论: 通过（INFO 1 / FAIL 0）

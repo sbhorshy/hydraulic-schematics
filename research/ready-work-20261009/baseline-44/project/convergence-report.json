@@ -1,0 +1,190 @@
+{
+  "driver": "validate-driver-1.2-bounded",
+  "converged": false,
+  "validation_scope": "automated_structure_geometry_and_pixel_checks",
+  "perceptual_review": "pending",
+  "stages": [
+    {
+      "stage": "setup",
+      "status": "completed",
+      "elapsed_s": 0.737426
+    },
+    {
+      "stage": "preflight",
+      "status": "completed",
+      "elapsed_s": 0.215494
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "stages": [
+        {
+          "stage": "layout",
+          "status": "completed",
+          "elapsed_s": 2.6e-05
+        },
+        {
+          "stage": "render",
+          "status": "failed",
+          "elapsed_s": 0.516186
+        }
+      ],
+      "layout_source": "seed"
+    }
+  ],
+  "prescriptions": [],
+  "residuals": [],
+  "optimization_budgets": {
+    "max_evals": 200,
+    "max_steps": 50,
+    "max_seconds": 30.0,
+    "polish_steps": 0
+  },
+  "local_symbol_sources": [
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/reservoir-bootstrap-annotated.svg",
+      "destination": "symbols/seed-90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0/reservoir-bootstrap-annotated.svg",
+      "sha256": "90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/firewall-shutoff-valve.svg",
+      "destination": "symbols/seed-4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f/firewall-shutoff-valve.svg",
+      "sha256": "4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/edp-provisional-stroke.svg",
+      "destination": "symbols/seed-134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b/edp-provisional-stroke.svg",
+      "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/emp-provisional-stroke.svg",
+      "destination": "symbols/seed-e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34/emp-provisional-stroke.svg",
+      "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/filter-line-shutoff-dp.svg",
+      "destination": "symbols/seed-ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea/filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/filter-line-shutoff-dp.svg",
+      "destination": "symbols/seed-ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea/filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/filter-line-shutoff-dp-return-bypass.svg",
+      "destination": "symbols/seed-45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491/filter-line-shutoff-dp-return-bypass.svg",
+      "sha256": "45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/priority-valve.svg",
+      "destination": "symbols/seed-57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7/priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/priority-valve.svg",
+      "destination": "symbols/seed-57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7/priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/accumulator.svg",
+      "destination": "symbols/seed-79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6/accumulator.svg",
+      "sha256": "79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/air-charging-valve.svg",
+      "destination": "symbols/seed-6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b/air-charging-valve.svg",
+      "sha256": "6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/pressure-gauge.svg",
+      "destination": "symbols/seed-8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d/pressure-gauge.svg",
+      "sha256": "8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/quick-disconnect-coupling-disconnected.svg",
+      "destination": "symbols/seed-f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1/quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/quick-disconnect-coupling-disconnected.svg",
+      "destination": "symbols/seed-f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1/quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/check-valve.svg",
+      "destination": "symbols/seed-25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b/check-valve.svg",
+      "sha256": "25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-44/1#系统原理图/symbols/hydraulic-user.svg",
+      "destination": "symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    }
+  ],
+  "inject": null,
+  "exit_code": 3,
+  "automated_validation": {
+    "status": "not_checked"
+  },
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "VALIDATION",
+      "PERCEPTUAL"
+    ]
+  },
+  "workspace": {
+    "kept": false,
+    "copied_files": 70,
+    "reused_files": 0
+  },
+  "preflight": {
+    "status": "cleared_for_layout",
+    "findings": 0
+  },
+  "tool_failure": "render_l0_sheet 失败 rc=1\nFAIL V5 TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号\n\n",
+  "local_readback": {
+    "status": "not_generated",
+    "complete": false,
+    "detail": "No verified final PNG/report was produced."
+  },
+  "elapsed_s": 1.47
+}
