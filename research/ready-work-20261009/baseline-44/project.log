@@ -1,0 +1,17 @@
+[driver] setup started
+[driver] setup completed 0.737s
+[driver] preflight started
+[driver] preflight completed 0.215s
+[driver] layout started
+[driver] layout completed 0.000s
+[driver] render started
+[driver] render failed 0.516s
+==== 校核驱动器 ====
+工作区: /tmp/ready-44-audit/project
+preflight: cleared_for_layout
+  轮1 布局=seed             回读= -> fail 0, warn 0
+工具链故障: render_l0_sheet 失败 rc=1
+FAIL V5 TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号
+
+
+结论: 工具链故障  (1.5s, 报告 -> /tmp/ready-44-audit/project/convergence-report.json)

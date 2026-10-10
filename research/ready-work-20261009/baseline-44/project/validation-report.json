@@ -1,0 +1,1021 @@
+{
+  "sheet": "1#系统原理图.svg",
+  "validation": "failed",
+  "visual_review": "pending",
+  "fail_count": 1,
+  "warn_count": 0,
+  "checks": [
+    {
+      "id": "V5",
+      "result": "fail",
+      "detail": "TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "V5",
+      "used": [
+        "ACC-001.gas_port",
+        "ACC-001.hydraulic_port",
+        "ACV-001.accumulator_gas",
+        "ACV-001.charge_port",
+        "CDF-001.inlet",
+        "CDF-001.outlet",
+        "CV-002.outlet",
+        "EDP-001.case_drain",
+        "EDP-001.pressure_out",
+        "EDP-001.suction",
+        "EMP-001.case_drain",
+        "EMP-001.pressure_out",
+        "EMP-001.suction",
+        "FSOV-001.main_lower",
+        "FSOV-001.main_upper",
+        "PF-001.inlet",
+        "PF-001.outlet",
+        "PG-001.pressure_sense",
+        "PRV-001.inlet",
+        "PRV-001.outlet",
+        "PRV-002.inlet",
+        "PRV-002.outlet",
+        "QDP-001.aircraft_side",
+        "QDR-001.aircraft_side",
+        "RF-001.inlet",
+        "RF-001.outlet",
+        "TANK-001.bootstrap_pressure_in",
+        "TANK-001.return_in",
+        "TANK-001.suction_out",
+        "USER-001.pressure_in",
+        "USER-001.return_out",
+        "USER-002.pressure_in",
+        "USER-002.return_out",
+        "USER-003.pressure_in",
+        "USER-003.return_out",
+        "USER-004.pressure_in",
+        "USER-004.return_out",
+        "USER-005.pressure_in",
+        "USER-005.return_out",
+        "USER-006.pressure_in",
+        "USER-006.return_out",
+        "USER-007.pressure_in",
+        "USER-007.return_out",
+        "USER-008.pressure_in",
+        "USER-008.return_out"
+      ],
+      "declared": [
+        "ACC-001.gas_port",
+        "ACC-001.hydraulic_port",
+        "ACV-001.accumulator_gas",
+        "ACV-001.charge_port",
+        "CDF-001.inlet",
+        "CDF-001.outlet",
+        "CV-002.inlet",
+        "CV-002.outlet",
+        "EDP-001.case_drain",
+        "EDP-001.drive_shaft",
+        "EDP-001.pressure_out",
+        "EDP-001.suction",
+        "EMP-001.case_drain",
+        "EMP-001.elec_power",
+        "EMP-001.pressure_out",
+        "EMP-001.suction",
+        "FSOV-001.main_lower",
+        "FSOV-001.main_upper",
+        "PF-001.inlet",
+        "PF-001.outlet",
+        "PG-001.pressure_sense",
+        "PRV-001.inlet",
+        "PRV-001.outlet",
+        "PRV-002.inlet",
+        "PRV-002.outlet",
+        "QDP-001.aircraft_side",
+        "QDP-001.ground_side",
+        "QDR-001.aircraft_side",
+        "QDR-001.ground_side",
+        "RF-001.inlet",
+        "RF-001.outlet",
+        "TANK-001.body_sense_tap",
+        "TANK-001.bootstrap_pressure_in",
+        "TANK-001.return_in",
+        "TANK-001.suction_out",
+        "USER-001.pressure_in",
+        "USER-001.return_out",
+        "USER-002.pressure_in",
+        "USER-002.return_out",
+        "USER-003.pressure_in",
+        "USER-003.return_out",
+        "USER-004.pressure_in",
+        "USER-004.return_out",
+        "USER-005.pressure_in",
+        "USER-005.return_out",
+        "USER-006.pressure_in",
+        "USER-006.return_out",
+        "USER-007.pressure_in",
+        "USER-007.return_out",
+        "USER-008.pressure_in",
+        "USER-008.return_out"
+      ],
+      "dangling": [
+        "CV-002.inlet",
+        "EDP-001.drive_shaft",
+        "EMP-001.elec_power",
+        "QDP-001.ground_side",
+        "QDR-001.ground_side",
+        "TANK-001.body_sense_tap"
+      ],
+      "contract_issues": [
+        {
+          "kind": "missing_symbol_port",
+          "component": "TANK-001",
+          "endpoint": "TANK-001.body_sense_tap",
+          "symbol": "/tmp/ready-44-audit/project/symbols/seed-90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0/reservoir-bootstrap-annotated.svg",
+          "detail": "TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号"
+        }
+      ],
+      "drawing_issues": [],
+      "drawing_status": "not_checked",
+      "reason": "符号端口契约失败，未继续几何/披露校核",
+      "unknown": [
+        "ETP-selector-valve-not-in-catalog",
+        "ETP-unit-not-in-catalog",
+        "ground-refuel-assembly-not-in-catalog",
+        "priority-valve-internal-check-flow-pending",
+        "quick-disconnect-port-semantics-pending",
+        "filter-line-shutoff-dp-standard-page-pending",
+        "return-filter-bypass-assembly-constructed",
+        "return-filter-bypass-cracking-flow-pending",
+        "return-filter-bypass-branch-position-assumed",
+        "air-charging-valve-port-sides-user-confirmed",
+        "pressure-gauge-medium-pneumatic-assumed",
+        "hydraulic-user-symbol-provisional",
+        "FSOV-001-suction-side-placement-assumed",
+        "TANK-001-return-port-count-unconfirmed",
+        "system-relief-valve-not-declared",
+        "pump-isolation-check-valves-not-declared",
+        "EDP-001-drive-shaft-destination",
+        "EMP-001-elec-power-destination",
+        "FSOV-001-command-destination",
+        "QD-open-ends-are-disconnected-position",
+        "accumulator-charge-source-not-declared",
+        "system-pressure-class",
+        "EDP-001-rated-flow",
+        "EMP-001-rated-flow",
+        "ACC-001-precharge-pressure",
+        "ACC-001-volume",
+        "PF-001-filtration-rating",
+        "RF-001-filtration-rating",
+        "CDF-001-filtration-rating",
+        "operating-modes"
+      ]
+    },
+    {
+      "id": "V1",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V2",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V3",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V4",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V6",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V7",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V8",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V9",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V10",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V11",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V12",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V13",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V14",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V15",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V16",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V17",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V18",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V19",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "B6.avoid_corridor",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "B7",
+      "coverage_status": "not_checked",
+      "coverage_detail": "Symbol port contract failure prevented this check."
+    }
+  ],
+  "report_schema": "proofreading-evidence-v1",
+  "artifacts": {
+    "schema": "sheet-artifacts-v1",
+    "algorithm": "sha256",
+    "fingerprint": "f9ac7f8fca8c1bab0f91a87fc14f8b98d87c3b2b9a4fa69c96068c96895bd7d9",
+    "files": {
+      "input": {
+        "path": "/tmp/ready-44-audit/project/1#系统.intent.yaml",
+        "sha256": "8e160fd7251429f55dcb3a9cef9978cffb0d6c04306dced56459bd819a8117ae"
+      },
+      "layout": {
+        "path": "/tmp/ready-44-audit/project/1#系统.layout.json",
+        "sha256": "d3d0fe642b21a6c5168aa262beb879b38a484917ba406877bb5e8c60c7c040e0"
+      },
+      "svg": {
+        "path": "/tmp/ready-44-audit/project/1#系统原理图.svg",
+        "sha256": null
+      },
+      "png": {
+        "path": "/tmp/ready-44-audit/project/sheet-readback.png",
+        "sha256": null
+      },
+      "topology_manifest": {
+        "path": "/tmp/ready-44-audit/project/1#系统原理图-topology.json",
+        "sha256": null
+      },
+      "topology_manifest_markdown": {
+        "path": "/tmp/ready-44-audit/project/1#系统原理图-topology.md",
+        "sha256": null
+      },
+      "png_provenance": {
+        "path": "/tmp/ready-44-audit/project/sheet-readback.png.evidence.json",
+        "sha256": null
+      },
+      "browser_evidence": {
+        "path": "/tmp/ready-44-audit/project/browser-evidence.json",
+        "sha256": null
+      },
+      "catalog": {
+        "path": "/tmp/ready-44-audit/project/component-catalog.json",
+        "sha256": "c0ff111dd944608cefc1b140f3d0da2833a6ab58a286c23f0dd5fc9aef24a884"
+      },
+      "symbol:ACC-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6/accumulator.svg",
+        "sha256": "79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6"
+      },
+      "symbol:ACV-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b/air-charging-valve.svg",
+        "sha256": "6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b"
+      },
+      "symbol:CDF-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea/filter-line-shutoff-dp.svg",
+        "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+      },
+      "symbol:CV-002": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b/check-valve.svg",
+        "sha256": "25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b"
+      },
+      "symbol:EDP-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b/edp-provisional-stroke.svg",
+        "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b"
+      },
+      "symbol:EMP-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34/emp-provisional-stroke.svg",
+        "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34"
+      },
+      "symbol:FSOV-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f/firewall-shutoff-valve.svg",
+        "sha256": "4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f"
+      },
+      "symbol:PF-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea/filter-line-shutoff-dp.svg",
+        "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+      },
+      "symbol:PG-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d/pressure-gauge.svg",
+        "sha256": "8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d"
+      },
+      "symbol:PRV-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7/priority-valve.svg",
+        "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+      },
+      "symbol:PRV-002": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7/priority-valve.svg",
+        "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+      },
+      "symbol:QDP-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1/quick-disconnect-coupling-disconnected.svg",
+        "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+      },
+      "symbol:QDR-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1/quick-disconnect-coupling-disconnected.svg",
+        "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+      },
+      "symbol:RF-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491/filter-line-shutoff-dp-return-bypass.svg",
+        "sha256": "45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491"
+      },
+      "symbol:TANK-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0/reservoir-bootstrap-annotated.svg",
+        "sha256": "90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0"
+      },
+      "symbol:USER-001": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-002": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-003": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-004": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-005": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-006": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-007": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "symbol:USER-008": {
+        "path": "/tmp/ready-44-audit/project/symbols/seed-ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481/hydraulic-user.svg",
+        "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+      },
+      "tool:browser_evidence.py": {
+        "path": "/tmp/ready-44-audit/project/browser_evidence.py",
+        "sha256": "2ce7420c086d4321aac60b370c67fba3f91c2ab9afebbbcab0fcdacd4d526177"
+      },
+      "tool:endpoint_checks.py": {
+        "path": "/tmp/ready-44-audit/project/endpoint_checks.py",
+        "sha256": "026626582f56f3666aaaa3bd18ad9e6a6db87ade133bc53d6590fb9a83f86bae"
+      },
+      "tool:endpoint_usage.py": {
+        "path": "/tmp/ready-44-audit/project/endpoint_usage.py",
+        "sha256": "5465594a19fe8caddbf96e56e85c8b40da9e24e56264dbb57ac9af33cfd874e2"
+      },
+      "tool:junction_semantics.py": {
+        "path": "/tmp/ready-44-audit/project/junction_semantics.py",
+        "sha256": "4ac584dc6ce94fea7a3c798df6da8cea96dd619c912555c896a9c2b11d0fb82a"
+      },
+      "tool:layout_clearance.py": {
+        "path": "/tmp/ready-44-audit/project/layout_clearance.py",
+        "sha256": "138b56e238149709bec3f569228fb3cf0098da745738b0ce4dba24e486a7c333"
+      },
+      "tool:layout_engine.py": {
+        "path": "/tmp/ready-44-audit/project/layout_engine.py",
+        "sha256": "e2692a11d48bbbacd6a2187f9bc3a2fcf21a6c553fae791cdb1a3b07a676d9c6"
+      },
+      "tool:lead_geometry.py": {
+        "path": "/tmp/ready-44-audit/project/lead_geometry.py",
+        "sha256": "9c21ddd18d2f0d10fdaf86c24f8e245580d002a377b12374b53a3f1b5b623b95"
+      },
+      "tool:preflight.py": {
+        "path": "/tmp/ready-44-audit/project/preflight.py",
+        "sha256": "40d245f7d3568c7a6a83f19aaa9db3ff1cf024430fc8a5909f67e1bf70bfdd69"
+      },
+      "tool:proofreading_evidence.py": {
+        "path": "/tmp/ready-44-audit/project/proofreading_evidence.py",
+        "sha256": "3c5a3cbb2ae1a9d98926530bc57eea1caebd3bba433c7f2c161ad2bf653db21c"
+      },
+      "tool:proto_optimize.py": {
+        "path": "/tmp/ready-44-audit/project/proto_optimize.py",
+        "sha256": "cea44eb19af3edcec0cdd7e6f520dcf2984c725e392e9e514142963e1f4c026d"
+      },
+      "tool:rasterize_sheet.py": {
+        "path": "/tmp/ready-44-audit/project/rasterize_sheet.py",
+        "sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f"
+      },
+      "tool:readback_review.py": {
+        "path": "/tmp/ready-44-audit/project/readback_review.py",
+        "sha256": "527b675a8cffe638dcebbecc99ff007ae0d0e80c9404275318c75bb34066e410"
+      },
+      "tool:render_l0_sheet.py": {
+        "path": "/tmp/ready-44-audit/project/render_l0_sheet.py",
+        "sha256": "8f119f1cd19478b72b6b2b57f54cccf92ce6504ea77d65c00b3f9078d74535f5"
+      },
+      "tool:sheet_diff.py": {
+        "path": "/tmp/ready-44-audit/project/sheet_diff.py",
+        "sha256": "5b0ef008ca4b31908a0de0d6948fd2240afb646286b71c20780a2ec411eaf507"
+      },
+      "tool:sheet_geometry.py": {
+        "path": "/tmp/ready-44-audit/project/sheet_geometry.py",
+        "sha256": "c63326f6ff69b08c1c73f21da1d6e64e401de482eee92ff5d0f49581de894cd8"
+      },
+      "tool:sheet_version.py": {
+        "path": "/tmp/ready-44-audit/project/sheet_version.py",
+        "sha256": "1375b746bfafc4d6be569b69714bd8d084102e0cf569e186235d28dfccc9282b"
+      },
+      "tool:stroke_checks.py": {
+        "path": "/tmp/ready-44-audit/project/stroke_checks.py",
+        "sha256": "dedf5fe3c7499afc7ee643121321626b85d696bf9f7a803b17f37b22669f673b"
+      },
+      "tool:svg_paint.py": {
+        "path": "/tmp/ready-44-audit/project/svg_paint.py",
+        "sha256": "0754f8dd08c103c4d0dde44582c6530aa2363859c2cd42e8f075379f529c27bb"
+      },
+      "tool:text_checks.py": {
+        "path": "/tmp/ready-44-audit/project/text_checks.py",
+        "sha256": "df753b918739c2c2281c1028d844a2cfda27dfe7ff920b08c94b8a15ab59c174"
+      },
+      "tool:topology_confirm.py": {
+        "path": "/tmp/ready-44-audit/project/topology_confirm.py",
+        "sha256": "9877ed821510f258c49bd322018bfbb5f428883eb538f95cf3d0dfd04b087c1a"
+      },
+      "tool:topology_reconciliation.py": {
+        "path": "/tmp/ready-44-audit/project/topology_reconciliation.py",
+        "sha256": "f6a6f649c406980231067d8a771a43e35d5b1b5a41bbae2f213054bccc592962"
+      },
+      "tool:validate_sheet.py": {
+        "path": "/tmp/ready-44-audit/project/validate_sheet.py",
+        "sha256": "764d0356aefc0e786dc6a5aa5497e0d838f2140615d229692727fa4eafa76ecf"
+      }
+    },
+    "versions": {
+      "python": "3.10.12",
+      "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+      "Pillow": "10.1.0",
+      "numpy": "1.24.3",
+      "ruamel.yaml": "0.19.1",
+      "jsonschema": "4.26.0",
+      "kiwisolver": "1.3.2"
+    },
+    "catalog_path": "/tmp/ready-44-audit/project/component-catalog.json",
+    "tool_dir": "/tmp/ready-44-audit/project"
+  },
+  "coverage": [
+    {
+      "id": "V1",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V1",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V2",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V2",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V3",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V3",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V4",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V4",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V5",
+      "status": "fail",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V5",
+          "used": [
+            "ACC-001.gas_port",
+            "ACC-001.hydraulic_port",
+            "ACV-001.accumulator_gas",
+            "ACV-001.charge_port",
+            "CDF-001.inlet",
+            "CDF-001.outlet",
+            "CV-002.outlet",
+            "EDP-001.case_drain",
+            "EDP-001.pressure_out",
+            "EDP-001.suction",
+            "EMP-001.case_drain",
+            "EMP-001.pressure_out",
+            "EMP-001.suction",
+            "FSOV-001.main_lower",
+            "FSOV-001.main_upper",
+            "PF-001.inlet",
+            "PF-001.outlet",
+            "PG-001.pressure_sense",
+            "PRV-001.inlet",
+            "PRV-001.outlet",
+            "PRV-002.inlet",
+            "PRV-002.outlet",
+            "QDP-001.aircraft_side",
+            "QDR-001.aircraft_side",
+            "RF-001.inlet",
+            "RF-001.outlet",
+            "TANK-001.bootstrap_pressure_in",
+            "TANK-001.return_in",
+            "TANK-001.suction_out",
+            "USER-001.pressure_in",
+            "USER-001.return_out",
+            "USER-002.pressure_in",
+            "USER-002.return_out",
+            "USER-003.pressure_in",
+            "USER-003.return_out",
+            "USER-004.pressure_in",
+            "USER-004.return_out",
+            "USER-005.pressure_in",
+            "USER-005.return_out",
+            "USER-006.pressure_in",
+            "USER-006.return_out",
+            "USER-007.pressure_in",
+            "USER-007.return_out",
+            "USER-008.pressure_in",
+            "USER-008.return_out"
+          ],
+          "declared": [
+            "ACC-001.gas_port",
+            "ACC-001.hydraulic_port",
+            "ACV-001.accumulator_gas",
+            "ACV-001.charge_port",
+            "CDF-001.inlet",
+            "CDF-001.outlet",
+            "CV-002.inlet",
+            "CV-002.outlet",
+            "EDP-001.case_drain",
+            "EDP-001.drive_shaft",
+            "EDP-001.pressure_out",
+            "EDP-001.suction",
+            "EMP-001.case_drain",
+            "EMP-001.elec_power",
+            "EMP-001.pressure_out",
+            "EMP-001.suction",
+            "FSOV-001.main_lower",
+            "FSOV-001.main_upper",
+            "PF-001.inlet",
+            "PF-001.outlet",
+            "PG-001.pressure_sense",
+            "PRV-001.inlet",
+            "PRV-001.outlet",
+            "PRV-002.inlet",
+            "PRV-002.outlet",
+            "QDP-001.aircraft_side",
+            "QDP-001.ground_side",
+            "QDR-001.aircraft_side",
+            "QDR-001.ground_side",
+            "RF-001.inlet",
+            "RF-001.outlet",
+            "TANK-001.body_sense_tap",
+            "TANK-001.bootstrap_pressure_in",
+            "TANK-001.return_in",
+            "TANK-001.suction_out",
+            "USER-001.pressure_in",
+            "USER-001.return_out",
+            "USER-002.pressure_in",
+            "USER-002.return_out",
+            "USER-003.pressure_in",
+            "USER-003.return_out",
+            "USER-004.pressure_in",
+            "USER-004.return_out",
+            "USER-005.pressure_in",
+            "USER-005.return_out",
+            "USER-006.pressure_in",
+            "USER-006.return_out",
+            "USER-007.pressure_in",
+            "USER-007.return_out",
+            "USER-008.pressure_in",
+            "USER-008.return_out"
+          ],
+          "dangling": [
+            "CV-002.inlet",
+            "EDP-001.drive_shaft",
+            "EMP-001.elec_power",
+            "QDP-001.ground_side",
+            "QDR-001.ground_side",
+            "TANK-001.body_sense_tap"
+          ],
+          "contract_issues": [
+            {
+              "kind": "missing_symbol_port",
+              "component": "TANK-001",
+              "endpoint": "TANK-001.body_sense_tap",
+              "symbol": "/tmp/ready-44-audit/project/symbols/seed-90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0/reservoir-bootstrap-annotated.svg",
+              "detail": "TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号"
+            }
+          ],
+          "drawing_issues": [],
+          "drawing_status": "not_checked",
+          "reason": "符号端口契约失败，未继续几何/披露校核",
+          "unknown": [
+            "ETP-selector-valve-not-in-catalog",
+            "ETP-unit-not-in-catalog",
+            "ground-refuel-assembly-not-in-catalog",
+            "priority-valve-internal-check-flow-pending",
+            "quick-disconnect-port-semantics-pending",
+            "filter-line-shutoff-dp-standard-page-pending",
+            "return-filter-bypass-assembly-constructed",
+            "return-filter-bypass-cracking-flow-pending",
+            "return-filter-bypass-branch-position-assumed",
+            "air-charging-valve-port-sides-user-confirmed",
+            "pressure-gauge-medium-pneumatic-assumed",
+            "hydraulic-user-symbol-provisional",
+            "FSOV-001-suction-side-placement-assumed",
+            "TANK-001-return-port-count-unconfirmed",
+            "system-relief-valve-not-declared",
+            "pump-isolation-check-valves-not-declared",
+            "EDP-001-drive-shaft-destination",
+            "EMP-001-elec-power-destination",
+            "FSOV-001-command-destination",
+            "QD-open-ends-are-disconnected-position",
+            "accumulator-charge-source-not-declared",
+            "system-pressure-class",
+            "EDP-001-rated-flow",
+            "EMP-001-rated-flow",
+            "ACC-001-precharge-pressure",
+            "ACC-001-volume",
+            "PF-001-filtration-rating",
+            "RF-001-filtration-rating",
+            "CDF-001-filtration-rating",
+            "operating-modes"
+          ]
+        },
+        {
+          "id": "V5",
+          "result": "fail",
+          "detail": "TANK-001 符号端口契约: 目录声明的 body_sense_tap 缺于实际符号"
+        }
+      ],
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V6",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V6",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V7",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V7",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V8",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V8",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V9",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V9",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V10",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V10",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V11",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V11",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V12",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V12",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V13",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V13",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V14",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V14",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V15",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V15",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V16",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V16",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V17",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V17",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V18",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V18",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "V19",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "V19",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "B6.avoid_corridor",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "B6.avoid_corridor",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "B7",
+      "status": "not_checked",
+      "required": true,
+      "evidence": [
+        {
+          "id": "B7",
+          "coverage_status": "not_checked",
+          "coverage_detail": "Symbol port contract failure prevented this check."
+        }
+      ],
+      "detail": "Symbol port contract failure prevented this check."
+    },
+    {
+      "id": "PNG",
+      "status": "not_checked",
+      "required": true,
+      "detail": "PNG or rasterization provenance is missing.",
+      "evidence": [
+        {
+          "status": "not_checked",
+          "detail": "PNG or rasterization provenance is missing."
+        }
+      ]
+    },
+    {
+      "id": "PERCEPTUAL",
+      "status": "not_checked",
+      "required": true,
+      "detail": "No perceptual review has been recorded.",
+      "evidence": [
+        {
+          "status": "pending",
+          "detail": "No perceptual review has been recorded."
+        }
+      ]
+    },
+    {
+      "id": "READBACK_ITEMS",
+      "status": "not_checked",
+      "required": true,
+      "detail": "Local image reviews are independent of whole-sheet signoff.",
+      "evidence": [
+        {
+          "status": "not_generated",
+          "complete": false,
+          "required": true,
+          "detail": "Local readback manifest is missing."
+        }
+      ]
+    }
+  ],
+  "phases": {
+    "automated": {
+      "status": "failed"
+    },
+    "perceptual": {
+      "status": "pending",
+      "detail": "No perceptual review has been recorded."
+    },
+    "local_readback": {
+      "status": "not_generated",
+      "complete": false,
+      "required": true,
+      "detail": "Local readback manifest is missing."
+    }
+  },
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "B6.avoid_corridor",
+      "B7",
+      "PNG",
+      "PERCEPTUAL",
+      "READBACK_ITEMS"
+    ]
+  },
+  "validation_fingerprint": "ffa03162adee3788a10c809ae57a7a961d26ad3599681ade6904960c438b9d1b",
+  "report_fingerprint": "e0124e5168c86e8b36f75442a3b5c4f074a822cf7c3ff8ff71b684d0de609f1e"
+}
