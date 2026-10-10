@@ -5,6 +5,7 @@
 
     python .agents/skills/hydraulic-schematic/scripts/selftest.py
     python .agents/skills/hydraulic-schematic/scripts/selftest.py --update-golden   # 重录金样
+    python .agents/skills/hydraulic-schematic/scripts/selftest.py --list-suites     # 仅列 F 组注册清单，不执行测试
 
 覆盖面（含真实浏览器显示与局部回读证据）：
 
@@ -30,6 +31,7 @@
      并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
 
 全部输入来自 skill 随附资产，不依赖仓库外层的历史 frozen 目录。
+仓库编辑器/活动项目集成测试另在 tests/repository/ 显式运行，不计入本自检。
 自动测试验证出图、显示及证据协议，不等于已完成实际图纸的感知回读签认；
 整图与逐项回读仍须明确记录，不能把测试通过宣称为图纸已获确认。
 
@@ -284,15 +286,16 @@ def check_template_gate():
 
 # ---------- F. 性能、入口与证据专项回归（证据用例启动本机 Chrome） ----------
 
+L0_SUITES = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
+          'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
+          'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
+
+
 def check_l0_regressions():
-    # Aggregate process hang guard, not optimizer/performance budget. Measured old
-    # 226-test run: 809s; #39 (~94s), #62 (~60s), #49 (~14s) already exceed
-    # the former 900s, before #42/#46/#23 browser suites. Root runs full suite once.
-    suites = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_accumulator_branch', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
-              'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
-              'test_rotation_routes', 'test_editor_rotation', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
+    # Aggregate hang guard for bundled browser regressions, not the optimizer
+    # performance budget. Repository integration runs under its own command.
     try:
-        result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
+        result = subprocess.run([sys.executable, '-m', 'unittest', *L0_SUITES],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
                                 timeout=1800)
     except subprocess.TimeoutExpired as exc:
@@ -321,6 +324,11 @@ def main():
     sys.dont_write_bytecode = True
     sys.path.insert(0, HERE)
 
+    if '--list-suites' in sys.argv[1:]:
+        print(json.dumps({'scope': 'standalone-skill', 'suites': L0_SUITES,
+                          'repository_integration': 'not_run; execute tests/repository separately'}))
+        return 0
+
     update = '--update-golden' in sys.argv[1:]
     if update:
         print('== 重录金样（从当前快照渲染器重新生成） ==')
@@ -328,6 +336,7 @@ def main():
         print('selftest: 金样重录完成，随后再跑一次确认 0 过。')
         return 0
 
+    print('范围: skill 随附资产与工具；仓库 editor/project 集成测试未在此命令执行。')
     failed = []
     for name, fn in CHECKS:
         try:

@@ -25,7 +25,7 @@ ACC/PG/ACV 移到 PRV-002 右下方，PG 转 90°、ACV 转 180°，端口位置
 - SVG 几何变化仅五条输入边：新增液端边、两条气側边，以及同一 PRV 下游到油箱的配套路由和油箱回油绕行。其他边的点串相同，差异逐条保存在比较 JSON。
 - 新 driver 完成 preflight、seed、渲染、1:1 PNG、校核与 128 对象 / 62 局部回读；exit 1，感知与工程签认保持 pending。
 
-TDD 在已授权的公开 CLI/SVG/PNG/report 接缝进行：先复现三条签认边缺失，再以实际文字净空 5.4 px 红例把检查收紧。最终 `test_accumulator_branch.py` 通过（含全图失败集合差分、B1 不劣化、三件标签净空、PG 单物理口）；已加入 selftest。`check_library` 通过，既有 QD whitelist 不掩盖另票全库符号门禁的红项。本票未重跑全量 selftest；根代理整合后统一运行。
+TDD 在已授权的公开 CLI/SVG/PNG/report 接缝进行：先复现三条签认边缺失，再以实际文字净空 5.4 px 红例把检查收紧。最终 `test_accumulator_branch.py` 通过（含全图失败集合差分、B1 不劣化、三件标签净空、PG 单物理口）；现由 `tests/repository/` 入口显式执行。`check_library` 通过，既有 QD whitelist 不掩盖另票全库符号门禁的红项。本票未重跑全量 selftest；根代理整合后统一运行。
 
 ## 差异与范围
 
@@ -36,10 +36,12 @@ SysML 仅更新“intent 尚待同步”的过时注释，connect 拓扑未改�
 复现（仓库根目录）：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/test_accumulator_branch.py
+python tests/repository/test_accumulator_branch.py
 python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
   --intent '1#系统原理图/1#系统.intent.yaml' \
   --catalog '1#系统原理图/component-catalog.json' \
   --layout-seed '1#系统原理图/1#系统.layout.json' \
   --workdir /tmp/accumulator-46-fresh
 ```
+
+复现入口补记：本批最终自检可移植性修复把仓库专属集成用例移至 `tests/repository/`，不再计入独立 skill 自检；上面的原始运行证据仍按其受测版本解释。
