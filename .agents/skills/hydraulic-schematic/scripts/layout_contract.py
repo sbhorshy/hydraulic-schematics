@@ -34,8 +34,11 @@ def drawable_bounds(layout):
         raise ValueError('edge_margin must be at least %g SVG units' % EDGE_MARGIN)
     if (min(cw,ch,w,h)<=0 or min(x,y)<0 or x+w+margin>cw+1e-6 or y+h>ch+1e-6):
         raise ValueError('drawable must fit canvas with its declared right edge_margin')
-    if layout.get('coordinate_system','root_svg_user_units') != 'root_svg_user_units':
-        raise ValueError('Current layout coordinates must be root_svg_user_units')
+    if layout.get('coordinate_system') != 'root_svg_user_units':
+        raise ValueError(
+            "Layout requires explicit coordinate_system='root_svg_user_units'; "
+            'for an undeclared layout with verified root coordinates run migrate_layout.py --declare-root INPUT -o OUTPUT; '
+            'for legacy canvas_shift_x use migrate_layout.py INPUT -o OUTPUT')
     return x, y, x+w, y+h
 
 
