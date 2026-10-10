@@ -34,7 +34,7 @@
 | selftest D 的当前规范源证明为 PASS；项目 23 件 engine probe 也通过 | 旧“check_valve_refuel 未登记导致 D 红”不再适用于这个版本；不能因此推断 29 件 SysML 已支持 | [FOOTPRINT 新类型登记与引擎补齐](https://github.com/sbhorshy/hydraulic-schematics/issues/45)核对剩余真实类型/端口；冻结金样仍归上述重钉票 |
 | canonical-current 气侧 V3/V2/V13 + V10/V14 连通错误 | 旧气侧布局回折、穿 ACV 本体，ACC 液端与气侧串接口径尚未同步 | [蓄压器移挂与气侧链串接落 intent](https://github.com/sbhorshy/hydraulic-schematics/issues/46)；新正确输入之后余下冻结布局由重钉票承接 |
 | canonical-current V10/V14：@CASE 与 @PRESS 等不同网络几何误接，V19/B1 交叉 1 > 0 | 当前真实几何残差；不是 validator 误报，不放宽预算。13 条逐项原文见 validation-report | [selftest D 红修复与 skill-chain-e2e 冻结态重钉](https://github.com/sbhorshy/hydraulic-schematics/issues/47)，保留[逐边追溯](https://github.com/sbhorshy/hydraulic-schematics/issues/65)及[真实连通关系校核](https://github.com/sbhorshy/hydraulic-schematics/issues/66)已落实的门禁 |
-| v4.2 符号/脚本与既有全量证明逐字节相同；新 canonical 流水线已经重新渲染校核 | “v4.2 未重跑”不能单独解释所有当前红项；项目由于 TANK 故障尚未走到该层，明确未校核 | 油箱退役后再跑项目链；残差逐项归入气侧同步/冻结重钉，不据旧 PNG 宣布通过 |
+| 票面所指压差油滤相关资产（当前 v4.3 / 100×158）与 f93 已测规范源相同；新 canonical 流水线已经重新渲染校核 | “v4.2 未重跑”不能单独解释所有当前红项；项目由于 TANK 故障尚未走到该层，明确未校核 | 油箱退役后再跑项目链；残差逐项归入气侧同步/冻结重钉，不据旧 PNG 宣布通过 |
 | 全库 C1–C13 的旧 FSOV 目录不符、连接位 QD 无端口组 | check_library 的白名单通过不足以解除入库门禁红；全库 22 件两 ERROR 不能改称 active 18 通过 | [check_symbol.py 入库门禁规范源归位进 skill](https://github.com/sbhorshy/hydraulic-schematics/issues/31)，QD 资产事实不足另归类型登记票 |
 | build_catalog.py 含 D:/File/COMAC 硬编码写路径、旧油箱回写 | 静态检查，未原位执行；避免改写原工作输入 | [build_catalog 重构与双册对齐](https://github.com/sbhorshy/hydraulic-schematics/issues/48) |
 
