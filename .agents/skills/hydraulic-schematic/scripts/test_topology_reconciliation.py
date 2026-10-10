@@ -108,7 +108,7 @@ class TopologyCLI(unittest.TestCase):
         def damage(root):
             group = next(e for e in root.iter() if e.get('id') == 'lines')
             ET.SubElement(group, '{http://www.w3.org/2000/svg}polyline', {
-                'class':'ln-pressure', 'points':'620,530 700,530 700,650 540,650',
+                'class':'ln-pressure', 'points':'650,530 730,530 730,650 570,650',
                 'id':'added-wire', 'data-edge':'paths[1][0->1]',
                 'data-input-anchor':'paths[1][0->1]'})
         self.edit(damage)
@@ -120,8 +120,8 @@ class TopologyCLI(unittest.TestCase):
             a = next(e for e in root.iter() if e.get('data-edge') == 'paths[1][0->1]')
             b = next(e for e in root.iter() if e.get('data-edge') == 'paths[1][1->2]')
             # EDP now bypasses PF and feeds the external user; PF loops onto itself.
-            a.set('points', '620,530 620,450 1120,450 1120,530')
-            b.set('points', '900,530 920,530 920,600 800,600 800,530 820,530')
+            a.set('points', '650,530 650,450 1150,450 1150,530')
+            b.set('points', '930,530 950,530 950,600 830,600 830,530 850,530')
         self.edit(damage)
         findings = [c for c in self.validate()['checks'] if c['id'] == 'V10']
         self.assertEqual({c['anchor'] for c in findings if c.get('kind') == 'additional_or_wrong_connection'},
@@ -139,11 +139,11 @@ class TopologyCLI(unittest.TestCase):
         def split(root):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             line=next(e for e in group if e.get('data-edge')=='paths[1][0->1]')
-            line.set('points','620,530 735,530')
-            ET.SubElement(group,line.tag,{**line.attrib,'id':'wire-split','points':'745,530 820,530'})
+            line.set('points','650,530 765,530')
+            ET.SubElement(group,line.tag,{**line.attrib,'id':'wire-split','points':'775,530 850,530'})
             bridges=next(e for e in root.iter() if e.get('id')=='bridges')
             ET.SubElement(bridges,'{http://www.w3.org/2000/svg}path',{
-                'id':'test-bridge','class':'brg-hi','d':'M735 530 A5 5 0 0 1 745 530',
+                'id':'test-bridge','class':'brg-hi','d':'M765 530 A5 5 0 0 1 775 530',
                 'data-edge':'paths[1][0->1]','data-input-anchor':'paths[1][0->1]'})
         self.edit(split)
         report=self.validate()
@@ -164,7 +164,7 @@ class TopologyCLI(unittest.TestCase):
         layout=json.loads(path.read_text())
         # A local positive drawing: move case trunk off pressure terminals and
         # orient the charging valve to prevent the retained gas-side foldback.
-        layout['buses']['CASE']['x']=700
+        layout['buses']['CASE']['x']=730
         layout['nodes']['ACV-001']['rot']=180
         path.write_text(json.dumps(layout))
         self.render()
@@ -186,7 +186,7 @@ class TopologyCLI(unittest.TestCase):
                     if el.get('data-edge')=='paths[2][0->1]': group.remove(el)
             group=next(e for e in root.iter() if e.get('id')=='lines')
             ET.SubElement(group,'{http://www.w3.org/2000/svg}polyline',{
-                'class':'ln-pressure','points':'620,330 700,330','id':'wrong-bus-branch',
+                'class':'ln-pressure','points':'650,330 730,330','id':'wrong-bus-branch',
                 'data-edge':'paths[2][0->1]','data-input-anchor':'paths[2][0->1]'})
         self.edit(damage)
         failures=[c for c in self.validate()['checks'] if c['id']=='V10']

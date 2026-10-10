@@ -174,19 +174,20 @@ class DisplayWidths(unittest.TestCase):
         self.run_cli('render_l0_sheet.py')
         self.validate()
         original = self.svg.read_text()
+        _, _, canvas_width, canvas_height = map(float, ET.fromstring(original).get('viewBox').split())
         executable = shutil.which('google-chrome') or shutil.which('chromium')
         self.assertTrue(executable, 'Actual browser PNG evidence requires Chrome')
         energies = []
         for scale in (1,2):
             root = ET.fromstring(original)
-            root.set('width',str(1680*scale))
-            root.set('height',str(1390*scale))
+            root.set('width',str(round(canvas_width*scale)))
+            root.set('height',str(round(canvas_height*scale)))
             source = self.work / ('scale-%d.svg' % scale)
             source.write_text(ET.tostring(root,encoding='unicode'))
             png = self.work / ('scale-%d.png' % scale)
             command = [executable,'--headless','--disable-gpu','--hide-scrollbars',
                        '--force-device-scale-factor=1','--user-data-dir='+str(self.work/('profile-%d'%scale)),
-                       '--window-size=%d,%d'%(1680*scale,1390*scale),'--screenshot='+str(png)]
+                       '--window-size=%d,%d'%(round(canvas_width*scale),round(canvas_height*scale)),'--screenshot='+str(png)]
             if hasattr(os,'geteuid') and os.geteuid()==0:
                 command.append('--no-sandbox')
             result = subprocess.run(command+[source.as_uri()],capture_output=True,text=True,timeout=30)

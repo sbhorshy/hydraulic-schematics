@@ -44,7 +44,7 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         root=ET.parse(self.svg).getroot()
         dots=[e for g in root.iter() if g.get('id')=='junctions' for e in g
-              if e.get('class')=='jn' and abs(float(e.get('cx'))-290)<.1 and abs(float(e.get('cy'))-686)<.1]
+              if e.get('class')=='jn' and abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1]
         self.assertEqual(len(dots),1,'The actual suction fork at root(320,686) needs one junction dot')
         self.assertIn('paths[0][0->1]',dots[0].get('data-edges',''))
         self.assertIn('paths[1][0->1]',dots[0].get('data-edges',''))
@@ -53,24 +53,25 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         def erase(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            group.remove(next(e for e in group if abs(float(e.get('cx'))-290)<.1 and abs(float(e.get('cy'))-686)<.1))
+            group.remove(next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1))
         self.edit(erase)
         findings=[c for c in self.validate()['checks'] if c['id']=='V4' and c['result']=='fail']
         finding=next(c for c in findings if c.get('kind')=='missing_junction' and c.get('position')==[320.0,686.0])
         self.assertEqual(finding['input_anchors'],['paths[0][0->1]','paths[1][0->1]'])
 
+    # Injections retain their original final/root positions after removal of the sheet x transform.
     def crossing(self, bridge=True):
         def edit(root):
             suction=next(e for e in root.iter() if e.get('data-edge')=='paths[0][0->1]')
-            suction.set('points','278,530 298,530 298,450 740,450 740,610 520,610 520,530 540,530')
+            suction.set('points','308,530 328,530 328,450 770,450 770,610 550,610 550,530 570,530')
             if bridge:
                 group=next(e for e in root.iter() if e.get('id')=='lines')
                 pressure=next(e for e in group if e.get('data-edge')=='paths[1][0->1]')
-                pressure.set('points','620,530 735,530')
-                ET.SubElement(group,pressure.tag,{**pressure.attrib,'id':'pressure-tail','points':'745,530 820,530'})
+                pressure.set('points','650,530 765,530')
+                ET.SubElement(group,pressure.tag,{**pressure.attrib,'id':'pressure-tail','points':'775,530 850,530'})
                 arcs=next(e for e in root.iter() if e.get('id')=='bridges')
                 ET.SubElement(arcs,'{http://www.w3.org/2000/svg}path',{
-                    'class':'brg-hi','id':'cross-bridge','d':'M735 530 A5 5 0 0 1 745 530',
+                    'class':'brg-hi','id':'cross-bridge','d':'M765 530 A5 5 0 0 1 775 530',
                     'data-edge':'paths[1][0->1]','data-input-anchor':'paths[1][0->1]'})
         self.edit(edit)
 
@@ -88,7 +89,7 @@ class JunctionCLI(unittest.TestCase):
         self.crossing(False)
         def dot(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            ET.SubElement(group,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':'740','cy':'530','r':'3','data-edges':'paths[1][0->1]','data-network':'pressure'})
+            ET.SubElement(group,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':'770','cy':'530','r':'3','data-edges':'paths[1][0->1]','data-network':'pressure'})
         self.edit(dot)
         findings=[c for c in self.validate()['checks'] if c['id'] in ('V4','V14')]
         self.assertTrue(any(c.get('kind')=='false_junction' and c.get('position')==[770,530] for c in findings),findings)
@@ -114,7 +115,7 @@ class JunctionCLI(unittest.TestCase):
 
     def test_offset_bridge_fails_actual_center_and_continuity(self):
         self.crossing()
-        self.edit(lambda root:next(e for e in root.iter() if e.get('id')=='cross-bridge').set('d','M737 530 A5 5 0 0 1 747 530'))
+        self.edit(lambda root:next(e for e in root.iter() if e.get('id')=='cross-bridge').set('d','M767 530 A5 5 0 0 1 777 530'))
         findings=[c for c in self.validate()['checks'] if c['id']=='V14']
         self.assertTrue(any(c.get('kind')=='bridge_gap' for c in findings),findings)
         self.assertTrue(any(c.get('kind')=='missing_bridge' and c.get('position')==[770,530] for c in findings),findings)
@@ -123,15 +124,15 @@ class JunctionCLI(unittest.TestCase):
         self.crossing()
         def dot(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            ET.SubElement(group,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':'298','cy':'450','r':'3'})
+            ET.SubElement(group,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':'328','cy':'450','r':'3'})
         self.edit(dot)
         findings=[c for c in self.validate()['checks'] if c['id']=='V4']
         self.assertTrue(any(c.get('kind')=='unexpected_junction' and c.get('position')==[328,450] for c in findings),findings)
         self.current()
         def offset(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            dot=next(e for e in group if abs(float(e.get('cx'))-290)<.1 and abs(float(e.get('cy'))-686)<.1)
-            dot.set('cx','293')
+            dot=next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1)
+            dot.set('cx','323')
         self.edit(offset)
         findings=[c for c in self.validate()['checks'] if c['id']=='V4']
         self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[320,686] for c in findings),findings)
@@ -143,7 +144,7 @@ class JunctionCLI(unittest.TestCase):
                 self.current()
                 def hide(root):
                     group=next(e for e in root.iter() if e.get('id')=='junctions')
-                    dot=next(e for e in group if abs(float(e.get('cx'))-290)<.1 and abs(float(e.get('cy'))-686)<.1)
+                    dot=next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1)
                     style_node=next(e for e in root.iter() if e.tag.endswith('style'))
                     style_node.text += '\n#'+dot.get('id')+' {'+style+';}'
                 self.edit(hide)
@@ -153,7 +154,7 @@ class JunctionCLI(unittest.TestCase):
     def test_correct_branches_buses_and_bridges_have_complete_coverage(self):
         self.current()
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
-        layout['buses']['CASE']['x']=700;layout['nodes']['ACV-001']['rot']=180
+        layout['buses']['CASE']['x']=730;layout['nodes']['ACV-001']['rot']=180
         path.write_text(json.dumps(layout));self.render()
         report=self.validate()
         self.assertFalse([c for c in report['checks'] if c['id'] in ('V4','V10','V14')])
@@ -164,7 +165,7 @@ class JunctionCLI(unittest.TestCase):
         def unsplit(root):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             group.remove(next(e for e in group if e.get('id')=='pressure-tail'))
-            next(e for e in group if e.get('data-edge')=='paths[1][0->1]').set('points','620,530 820,530')
+            next(e for e in group if e.get('data-edge')=='paths[1][0->1]').set('points','650,530 850,530')
         self.edit(unsplit)
         findings=[c for c in self.validate()['checks'] if c['id']=='V14']
         self.assertTrue(any(c.get('kind')=='bridge_not_split' for c in findings),findings)
@@ -175,11 +176,11 @@ class JunctionCLI(unittest.TestCase):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             trunk=next(e for e in group if e.get('data-edge')=='paths[0][0->1]')
             tail=trunk.get('points').split()[1:]
-            trunk.set('points','278,686 285,686')
-            ET.SubElement(group,trunk.tag,{**trunk.attrib,'id':'fork-tail','points':'295,686 '+' '.join(tail)})
+            trunk.set('points','308,686 315,686')
+            ET.SubElement(group,trunk.tag,{**trunk.attrib,'id':'fork-tail','points':'325,686 '+' '.join(tail)})
             arcs=next(e for e in root.iter() if e.get('id')=='bridges')
             ET.SubElement(arcs,'{http://www.w3.org/2000/svg}path',{
-                'class':'brg-lo','id':'fork-bridge','d':'M285 686 A5 5 0 0 1 295 686',
+                'class':'brg-lo','id':'fork-bridge','d':'M315 686 A5 5 0 0 1 325 686',
                 'data-edge':'paths[0][0->1]','data-input-anchor':'paths[0][0->1]'})
         self.edit(bridge)
         findings=[c for c in self.validate()['checks'] if c['id']=='V14']
@@ -220,15 +221,15 @@ class JunctionCLI(unittest.TestCase):
         with path.open('w') as f:yaml.dump(intent,f)
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
         layout['externs']={name:{'x':x,'y':y,'anchor':anchor,'label':name} for name,x,y,anchor in
-                           [('S',500,800,'right'),('A',1100,800,'left'),('B',900,900,'left')]}
+                           [('S',530,800,'right'),('A',1130,800,'left'),('B',930,900,'left')]}
         path.write_text(json.dumps(layout));self.render()
         def cross(root):
             lines=next(e for e in root.iter() if e.get('id')=='lines')
-            next(e for e in lines if e.get('data-edge')=='paths[0][0->1]').set('points','500,800 1100,800')
-            next(e for e in lines if e.get('data-edge')=='paths[1][0->1]').set('points','500,800 520,800 520,700 800,700 800,900 900,900')
+            next(e for e in lines if e.get('data-edge')=='paths[0][0->1]').set('points','530,800 1130,800')
+            next(e for e in lines if e.get('data-edge')=='paths[1][0->1]').set('points','530,800 550,800 550,700 830,700 830,900 930,900')
             dots=next(e for e in root.iter() if e.get('id')=='junctions')
             dots.clear();dots.set('id','junctions')
-            for x,y in [(520,800),(800,800)]:
+            for x,y in [(550,800),(830,800)]:
                 ET.SubElement(dots,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':str(x),'cy':str(y),'r':'3'})
         self.edit(cross)
         report=self.validate()
