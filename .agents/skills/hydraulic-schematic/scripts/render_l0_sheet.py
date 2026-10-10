@@ -206,6 +206,7 @@ class Sheet(object):
         self.warn = []
         self.drawn = []      # 已画线段,供避重叠用
         self.textboxes = []  # 文字包围盒,供避压字用
+        self.label_offsets = {}  # derived horizontal placement within the declared slot
         self.poly_anchors = []
         self.polys = []      # (line_type, 点串),供求交叉与打断用
         # (点串,start_terminal,end_terminal)。同一 intent path 内的 FSOV 等
@@ -594,6 +595,7 @@ class Sheet(object):
         """预算文字包围盒。必须在 wire() 之前调用,否则走线器不知道
         哪里有字,画完才发现压住标签(校核项 V12)。"""
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
+        used = endpoint_usage(self.i, self.types, self.L['nodes'])['used']
         for inst, nd in self.L['nodes'].items():
             if nd.get('_name_slot'):
                 continue    # 名字已画在框内名槽,不占框外避让包围盒
@@ -618,6 +620,21 @@ class Sheet(object):
             else:
                 y0 = nd['y'] + 16 - fs
             x0 = (nd['x'] + w_eff + 12) if pos == 'right' else (cx - wid / 2.0)
+            if pos == 'below' and rot in (90, 270):
+                # Keep the user's below slot, but leave a vertical port channel
+                # through it. Only a derived anchor moves, never input geometry.
+                ports = [self.abs[tuple(token.split('.', 1))] for token in used
+                         if token.startswith(inst + '.')]
+                columns = [px for px, py, direction in ports
+                           if direction == 'down' and py <= y0+fs+13*(len(lines)-1)+4]
+                if any(x0-10 <= px <= x0+wid+10 for px in columns):
+                    choices = [px-wid-10 for px in columns] + [px+10 for px in columns]
+                    choices = [x for x in choices if abs(x-x0) <= w_eff and x < nd['x']+w_eff and x+wid > nd['x']
+                               and all(px <= x-10+1e-6 or px >= x+wid+10-1e-6 for px in columns)]
+                    if choices:
+                        shifted = min(choices, key=lambda x: abs(x-x0))
+                        self.label_offsets[inst] = shifted-x0
+                        x0 = shifted
             self.textboxes.append((x0 - 2, y0 - 2, x0 + wid + 2,
                                    y0 + fs + 13 * (len(lines) - 1) + 4))
         for eid, e in self.L.get('externs', {}).items():
@@ -636,6 +653,22 @@ class Sheet(object):
                 self.textboxes.append((r['x'] - sh, r['y'],
                                        r['x'] + r['w'] - sh, r['y'] + r['h']))
 
+    def bus_stub(self, x, y, anchor):
+        # A rotated terminal can face a label in the inter-component gap.
+        # Stay within that free gap before turning; never draw the lead through
+        # text and hope that a later detour repairs it. Retain B4's 8 px
+        # minimum; any remaining label conflict stays visible to validation.
+        length = 18.0
+        horizontal = anchor in ('left', 'right')
+        sign = 1 if anchor in ('right', 'down') else -1
+        origin, cross = (x, y) if horizontal else (y, x)
+        for x0, y0, x1, y1 in self.textboxes:
+            lo, hi, c0, c1 = (x0, x1, y0, y1) if horizontal else (y0, y1, x0, x1)
+            distance = (lo-origin) if sign > 0 else (origin-hi)
+            if c0 <= cross <= c1 and 0 < distance < 2*length:
+                length = max(8.0, min(length, distance / 2))
+        return (x+sign*length, y) if horizontal else (x, y+sign*length)
+
     # ---------- paths 编译 ----------
     def wire(self):
         """展开 paths;@总线名转为竖直母线。返回 (线段 markup 列表, 节点列表)."""
@@ -647,6 +680,26 @@ class Sheet(object):
             for k in range(nseg):
                 a, b = p[k], p[k + 1]
                 nets.append((a, b, pi, k, nseg, path_lt))
+
+        # Reserve unambiguous straight bus branches before routing their peers.
+        # Otherwise an early detour may cut a later branch (or the completed bus).
+        reserved = []
+        bus_levels = {}
+        for a, b, pi, pk, _, _ in nets:
+            ab, bb = a.startswith('@'), b.startswith('@')
+            if ab == bb:
+                continue
+            bus = (a if ab else b)[1:]
+            other = b if ab else a
+            x, y, anchor = self.port(other, 'in' if ab else 'out')
+            m = self.bus_stub(x, y, anchor)
+            pts = self.dedup([(x, y), m, (self.L['buses'][bus]['x'], m[1])])
+            bus_levels.setdefault(bus, []).append(m[1])
+            if not self.backtracks(pts) and not self.hits(pts[1:], self.obstacles()):
+                reserved.append(((pi, pk), list(zip(pts, pts[1:]))))
+        future_buses = [((self.L['buses'][bus]['x'], min(ys)),
+                         (self.L['buses'][bus]['x'], max(ys)))
+                        for bus, ys in bus_levels.items()]
 
         for a, b, pi, path_k, path_nseg, path_lt in nets:
             ab, bb = a.startswith('@'), b.startswith('@')
@@ -669,8 +722,7 @@ class Sheet(object):
                 self.mark_port_lt(other, want, lt)
                 # 从元件端口正交接到母线
                 S = 18.0
-                stub = {'left': (-S, 0), 'right': (S, 0), 'up': (0, -S), 'down': (0, S)}[oa]
-                m = (ox + stub[0], oy + stub[1])
+                m = self.bus_stub(ox, oy, oa)
                 # 元件到母线也要避障:早先直接横拉,穿过了中间的滤本体。
                 cands = [[m, (bx, m[1])]]
                 for ly in self.L.get('lanes', []):
@@ -693,37 +745,52 @@ class Sheet(object):
                 # A bus has no terminal body: its final horizontal segment must
                 # also clear the source. Extend the attachment height around
                 # the actual rotated footprint, without changing any port.
-                own = self.obstacles(exclude=set(self.L['nodes']) - {oinst})
                 direct = self.dedup([(ox, oy), m, (bx, m[1])])
-                if self.hits(direct[1:], own) or self.backtracks(direct):
-                    for x0, y0, x1, y1 in own:
-                        for ly in (y0 - S, y1 + S):
+                recovery = bool(self.hits(direct[1:], obs) or self.backtracks(direct))
+                anticipated = [segment for key, segments in reserved
+                               if key != (pi, path_k) for segment in segments] + future_buses
+                existing_count = len(cands)
+                if recovery:
+                    # Finite obstacle-edge heights, including neighboring bodies
+                    # and label clearance, not just the source's two edges.
+                    heights = [y for box in obs for y in (box[1]-S, box[3]+S)]
+                    heights += [y for box in self.textboxes for y in (box[1]-8, box[3]+8)]
+                    for ly in dict.fromkeys(heights):
+                        if 0 < ly < self.L['canvas']['height']:
                             cands.append([m, (m[0], ly), (bx, ly)])
                 best, bad = None, None
-                for c in cands:
+                for candidate_index, c in enumerate(cands):
+                    if (recovery and candidate_index == existing_count and bad is not None
+                            and bad[:4] == (0, 0, 0, 0)):
+                        break  # a valid existing route keeps its original geometry
                     cp = self.dedup([(ox, oy)] + c)
                     if len(cp) < 2 or self.backtracks(cp):
                         continue
-                    h = self.hits(cp[1:], obs)
+                    h = self.hits(cp[1:], obs, tol=0.0 if recovery else 4.0)
                     # 本支路自己要接的这条母线不算(末段必然贴在它上面),
                     # 但其他母线要算。
                     # 全部母线都算,包括自己要接的这条:支路只应**横向**
                     # 抵达母线,不应沿母线纵走。沿母线走 480 单位在图上
                     # 与母线本体完全重合(校核项 V13)。
-                    if bad is not None and h * 10000 >= bad:
+                    if not recovery and bad is not None and h * 10000 >= bad:
                         continue
                     ov = (self.overlap(cp, self.drawn)
                           + self.overlap(cp, self.buslines))
-                    if bad is not None and h * 10000 + ov * 3000 >= bad:
+                    if not recovery and bad is not None and h * 10000 + ov * 3000 >= bad:
                         continue
-                    tx = self.hits(cp, self.textboxes, tol=0.0)
-                    if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                    tx = self.hits(cp, self.textboxes, tol=-8.0 if recovery else 0.0)
+                    if not recovery and bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
                         continue
-                    cr = self.crossings(cp, self.drawn)
+                    cr = self.crossings(cp, self.drawn + (anticipated if recovery else []))
                     ln = sum(abs(cp[i + 1][0] - cp[i][0]) + abs(cp[i + 1][1] - cp[i][1])
                              for i in range(len(cp) - 1))
                     sc = (h * 10000 + ov * 3000 + tx * 900
                           + cr * 120 + ln + len(cp) * 5)
+                    if recovery:
+                        # In a repair, never exchange hard geometry/topology for
+                        # shorter routes or fewer bends. Preserve ordinary cost
+                        # ordering for all unaffected direct connections.
+                        sc = (h, ov, cr, tx, ln + len(cp)*5)
                     if bad is None or sc < bad:
                         bad, best = sc, cp
                 if best is None:
@@ -931,6 +998,7 @@ class Sheet(object):
                 y0, anch, cx2 = nd['y'] - 8 - 13 * (len(lines) - 1) - lift, 'middle', cx
             else:
                 y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + w_eff + 12
+            cx2 += self.label_offsets.get(inst, 0)
             for k, ln in enumerate(lines):
                 out.append('<text class="lbl" data-label-for="%s" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
                            % (inst, cx2, y0 + 13 * k, anch, self.esc(ln)))
