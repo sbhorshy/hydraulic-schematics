@@ -23,7 +23,8 @@
     "1.9 fsov-60:用户令「把firewall-shutoff-valve.svg改成60*60吧」——符号 v1.7 画布/占位 60x60(墨迹 60x33.78 居中,摘 envelope-class 框随内容同 PRV);FSOV-001 回原锚 @(330,270.7) rot270;选1 的 EDP/EMP 左移撤销回 x=500。1.7/1.8 的 ×2.4 安放阻塞就此了结",
     "2.0 fsov-cell60:用户澄清「是方框60*60,不是整个」——符号 v1.8 方框两格各 60×60（总框 120×60），画布=墨迹 362.304x204.003；FSOV-001 落 @(290,394) rot0（TANK/EDP 之间，吸油向自然位）；选1 授权执行:CASE 母线 x 620→660（让开 362 宽占位，收集 EDP/EMP/CDF 集液口径不变）",
     "2.1 fsov-cell60-placement:v1.8 方框两格各 60×60 落位——rot270 占位 204.003x362.304 @(294,333)（TANK/EDP 夹缝,吸油向 TANK→FSOV→EDP 自然贯通,零新增 V2 预期);CASE 母线回 620（rot270 宽 204 不再需要让位);EDP/EMP 保持 x=500",
-    "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）"
+    "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）",
+    "2026-10-10 #49: TANK canonical viewBox 0 0 218 564; keep placement and footprint; pressure port local x 172 -> 155; add body_sense_tap (50,564); routes regenerated from SVG ports."
   ],
   "canvas": {
     "width": 1680,
@@ -40,7 +41,7 @@
     "TANK-001": {
       "x": 60,
       "y": 276,
-      "symbol": "symbols/reservoir-bootstrap-annotated.svg",
+      "symbol": "symbols/bootstrap-type-reservoir.svg",
       "w": 218,
       "h": 564
     },
