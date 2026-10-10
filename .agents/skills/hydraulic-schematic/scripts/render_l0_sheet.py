@@ -10,6 +10,7 @@ from topology_reconciliation import write_manifest, declared_topology
 from junction_semantics import renderer_events, merge_collinear
 from lead_geometry import source_leads, perpendicular_scale, segments
 from sheet_geometry import walk
+from layout_contract import drawable_bounds
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
 
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
@@ -649,9 +650,8 @@ class Sheet(object):
         for key in ('legend', 'title_block'):
             r = self.L.get(key)
             if r:
-                sh = self.L.get('canvas_shift_x', 0)
-                self.textboxes.append((r['x'] - sh, r['y'],
-                                       r['x'] + r['w'] - sh, r['y'] + r['h']))
+                self.textboxes.append((r['x'], r['y'],
+                                       r['x'] + r['w'], r['y'] + r['h']))
 
     def bus_stub(self, x, y, anchor):
         # A rotated terminal can face a label in the inter-component gap.
@@ -1392,6 +1392,10 @@ def main(argv=None):
         sys.exit(1)
     with io.open(os.path.join(workdir, '1#系统.layout.json'), encoding='utf-8') as f:
         layout = json.load(f)
+    try:
+        drawable_bounds(layout)
+    except ValueError as error:
+        sys.exit(str(error))
     types = {c['component_type']: c for c in catalog['components']}
     contract_issues = symbol_contract(intent, types, layout['nodes'], workdir, cat_dir)
     if contract_issues:
@@ -1441,8 +1445,8 @@ def main(argv=None):
     for key in ('legend', 'title_block'):
         q = layout.get(key)
         if q:
-            blocked.append((q['x'] - layout.get('canvas_shift_x', 0), q['y'],
-                            q['x'] + q['w'] - layout.get('canvas_shift_x', 0),
+            blocked.append((q['x'], q['y'],
+                            q['x'] + q['w'],
                             q['y'] + q['h']))
     blocked += [(x - 9, y - 9, x + 9, y + 9) for x, y in junc]
     blocked += [(x - 11, y - 11, x + 11, y + 11) for x, y, _lt in cross]
@@ -1493,9 +1497,7 @@ def main(argv=None):
     T = layout.get('style', {}).get('base_line_width_T', 1.2)
     P.append('<style>%s</style>' % css(T))
     P.append('<rect x="0" y="0" width="%d" height="%d" fill="#ffffff"/>' % (W, H))
-    # 左侧边界标记的说明文字向左伸出约 110px(anchor=end),
-    # 若 extern.x=60 则文字被裁在画布外。整体右移让位。
-    SHIFT = layout.get('canvas_shift_x', 0)
+    # All drawing and panel coordinates already use root SVG units.
     P.append('<text class="banner" x="%d" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>' % 40)
     P.append('<text class="lbl" x="%d" y="44">1# 液压系统原理图  '
              '(由 %s 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>'
@@ -1513,7 +1515,7 @@ def main(argv=None):
     body.append('<g id="symbols">%s</g>' % '\n'.join(s.symbols()))
     body.append('<g id="dangling">%s</g>' % '\n'.join(dmarks))
     body.append('<g id="labels">%s</g>' % '\n'.join(s.texts()))
-    P.append('<g id="sheet" transform="translate(%d,0)">%s</g>' % (SHIFT, '\n'.join(body)))
+    P.append('<g id="sheet">%s</g>' % '\n'.join(body))
     P.append('<g id="legend">%s</g>' % '\n'.join(legend(layout, T)))
     nnet = sum(len(p) - 1 for p in intent['paths'])
     P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames, catalog)))

@@ -1,6 +1,6 @@
 # 1# 系统活动输入与历史证据
 
-活动输入为本目录 `1#系统.intent.yaml`、`1#系统.layout.json`、`component-catalog.json`。使用规范源驱动器，并指定新的独立 `--workdir`；本目录老 `render.py`/`validate_sheet.py` 与旧 SVG/PNG/topology/report 不构成当前交付入口或通过证明。
+活动输入为本目录 `1#系统.intent.yaml`、`1#系统.layout.json`、`component-catalog.json`。使用规范源驱动器，并指定新的独立 `--workdir`；本目录 `render.py`/`validate_sheet.py` 现为规范源薄入口，支持显式工作目录；没有第二份渲染/校核实现。旧 SVG/PNG/topology/report 不构成当前通过证明。
 
 ```bash
 python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
@@ -17,3 +17,5 @@ python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
 活动 `build_catalog.py` 暂时在任何文件 I/O 前 fail-closed，防止硬编码 Windows 写路径/旧覆盖策略把活动目录回退。[build_catalog 重构与双册对齐](https://github.com/sbhorshy/hydraulic-schematics/issues/48)负责后续正式生成入口，本次未执行旧生成器、未重构生成策略。
 
 2026-10-10，[蓄压器同步](https://github.com/sbhorshy/hydraulic-schematics/issues/46)已把活动 intent 的液端改接 PRV-002 下游，气侧按 ACC→PG→ACV 两条 taps 表达。项目显式 seed 是本支路当前受支持的布局入口；不带 seed 的 R1–R16 引擎仍报告 ACC/PG/ACV 未布。三层对账、新 PNG 与实际残差见 `research/ready-work-20261009/accumulator-46/`；历史图像不因这段说明升级为新交付。
+
+#23 将活动 seed 转为根 SVG 坐标，内容物理位置不变，画布右扩 30px 留足显式 EDGE_MARGIN。旧 build_render.py 已 fail-closed，不能再生成过期脚本覆盖薄入口。CDF 活动输入与旧产物边界见子目录 README。

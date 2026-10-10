@@ -44,10 +44,10 @@ class LayoutClearanceCLI(unittest.TestCase):
         def split(root):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             pipe=next(e for e in group if e.get('data-edge')=='paths[1][0->1]')
-            pipe.set('points','621,530 638,530 820,530')
+            pipe.set('points','651,530 668,530 850,530')
             ET.SubElement(group,'{http://www.w3.org/2000/svg}line',{
                 'class':'ln-pressure','stroke':'black','id':'storage-cut','data-edge':'paths[1][0->1]',
-                'data-input-anchor':'paths[1][0->1]','x1':'620','y1':'530','x2':'621','y2':'530'})
+                'data-input-anchor':'paths[1][0->1]','x1':'650','y1':'530','x2':'651','y2':'530'})
         self.edit(split)
         after=self.budget(self.validate(),'B4')
         self.assertEqual(after['measured'],before['measured'])
@@ -68,7 +68,7 @@ class LayoutClearanceCLI(unittest.TestCase):
     def test_pipe_corridor_reports_actual_gap_and_deficit_as_warning(self):
         def detour(root):
             pipe=next(e for e in root.iter() if e.get('data-edge')=='paths[1][0->1]')
-            pipe.set('points','620,530 640,530 640,80 288,80 288,450 800,450 800,530 820,530')
+            pipe.set('points','650,530 670,530 670,80 318,80 318,450 830,450 830,530 850,530')
         self.edit(detour)
         report=self.validate()
         item=self.budget(report,'B6')
@@ -91,7 +91,7 @@ class LayoutClearanceCLI(unittest.TestCase):
         self.render()
         def narrow(root):
             frame=next(e for e in root.iter() if e.get('class')=='grp')
-            frame.set('x','815');frame.set('width','105')
+            frame.set('x','845');frame.set('width','105')
         self.edit(narrow)
         report=self.validate()
         item=self.budget(report,'B6')
@@ -121,8 +121,8 @@ class LayoutClearanceCLI(unittest.TestCase):
                 self.assertTrue(self.budget(report,'B6')['groups']['unchecked'])
 
     def test_real_short_bend_and_foldback_remain_short(self):
-        for points in ('620,530 640,530 640,536 800,536 800,530 820,530',
-                       '620,530 640,530 634,530 634,470 800,470 800,530 820,530'):
+        for points in ('650,530 670,530 670,536 830,536 830,530 850,530',
+                       '650,530 670,530 664,530 664,470 830,470 830,530 850,530'):
             with self.subTest(points=points):
                 self.render()
                 self.edit(lambda root:next(e for e in root.iter() if e.get('data-edge')=='paths[1][0->1]').set('points',points))
@@ -143,7 +143,7 @@ class LayoutClearanceCLI(unittest.TestCase):
         layout=json.loads(path.read_text())
         for rotation in (90,270):
             with self.subTest(rotation=rotation):
-                layout['nodes']['PF-001'].update(x=390,w=160,h=160,rot=rotation)
+                layout['nodes']['PF-001'].update(x=420,w=160,h=160,rot=rotation)
                 path.write_text(json.dumps(layout));self.render()
                 report=self.validate()
                 item=self.budget(report,'B5')
@@ -164,11 +164,11 @@ class LayoutClearanceCLI(unittest.TestCase):
         def bridge(root):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             pipe=next(e for e in group if e.get('data-edge')=='paths[1][0->1]')
-            pipe.set('points','620,530 735,530')
-            ET.SubElement(group,pipe.tag,{**pipe.attrib,'id':'bridge-tail','points':'745,530 820,530'})
+            pipe.set('points','650,530 765,530')
+            ET.SubElement(group,pipe.tag,{**pipe.attrib,'id':'bridge-tail','points':'775,530 850,530'})
             arcs=next(e for e in root.iter() if e.get('id')=='bridges')
             ET.SubElement(arcs,'{http://www.w3.org/2000/svg}path',{'class':'brg-hi','id':'clearance-bridge',
-                'd':'M735 530 A5 5 0 0 1 745 530','data-edge':'paths[1][0->1]','data-input-anchor':'paths[1][0->1]'})
+                'd':'M765 530 A5 5 0 0 1 775 530','data-edge':'paths[1][0->1]','data-input-anchor':'paths[1][0->1]'})
             tank=next(e for e in root.iter() if e.get('id')=='inst-TANK-001')
             tank.set('transform','translate(640,-164) '+tank.get('transform'))
         self.edit(bridge)
@@ -181,14 +181,14 @@ class LayoutClearanceCLI(unittest.TestCase):
 
     def test_connected_component_is_not_exempt_after_terminal_run_turns(self):
         self.edit(lambda root:next(e for e in root.iter() if e.get('data-edge')=='paths[1][0->1]').set(
-            'points','620,530 621,530 621,450 800,450 800,530 820,530'))
+            'points','650,530 651,530 651,450 830,450 830,530 850,530'))
         item=self.budget(self.validate(),'B6')
         self.assertEqual(item['measured']['avoid_corridor'],1)
         self.assertEqual(item['nearest_corridor']['component'],'EDP-001')
 
     def test_body_crossing_stays_a_failure_in_addition_to_corridor_warning(self):
         self.edit(lambda root:next(e for e in root.iter() if e.get('data-edge')=='paths[1][0->1]').set(
-            'points','620,530 640,530 640,510 920,510 920,600 800,600 800,530 820,530'))
+            'points','650,530 670,530 670,510 950,510 950,600 830,600 830,530 850,530'))
         report=self.validate()
         self.assertEqual(self.budget(report,'B6')['measured']['avoid_corridor'],0)
         self.assertTrue(any(c['id']=='V2' and c['result']=='fail' and c.get('obstacle')=='PF-001' for c in report['checks']))
@@ -197,7 +197,7 @@ class LayoutClearanceCLI(unittest.TestCase):
         def branch(root):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             ET.SubElement(group,'{http://www.w3.org/2000/svg}polyline',{
-                'class':'ln-pressure','points':'625,530 625,600','id':'branch',
+                'class':'ln-pressure','points':'655,530 655,600','id':'branch',
                 'data-edge':'paths[1][0->1]','data-input-anchor':'paths[1][0->1]'})
         self.edit(branch)
         item=self.budget(self.validate(),'B4')
@@ -212,7 +212,9 @@ class LayoutClearanceCLI(unittest.TestCase):
           <g id="connection-points"><circle cx="10" cy="40" data-port-id="inlet" data-anchor-direction="left" data-medium="hydraulic" data-port-role="pressure"/>
           <circle cx="90" cy="40" data-port-id="outlet" data-anchor-direction="right" data-medium="hydraulic" data-port-role="pressure"/></g></svg>''')
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
-        layout['nodes']['PF-001'].update(x=1560,y=800,w=160,h=160,rot=90)
+        layout['canvas']['width']=1710
+        layout['drawable']['width']=1680  # preserve the former physical content boundary
+        layout['nodes']['PF-001'].update(x=1590,y=800,w=160,h=160,rot=90)
         path.write_text(json.dumps(layout));self.render()
 
     def test_rotated_nonsquare_component_that_fits_canvas_has_no_false_bound_failure(self):
@@ -244,7 +246,7 @@ class LayoutClearanceCLI(unittest.TestCase):
         self.render()
         def expand(root):
             frame=next(e for e in root.iter() if e.get('class')=='grp')
-            frame.set('x','530');frame.set('width','390')
+            frame.set('x','560');frame.set('width','390')
         self.edit(expand)
         failures=[c for c in self.validate()['checks'] if c['id']=='V8']
         self.assertTrue(any(c.get('component')=='EDP-001' and c.get('group')=='FILTER' for c in failures),failures)
@@ -263,7 +265,7 @@ class LayoutClearanceCLI(unittest.TestCase):
     def test_rotated_nonsquare_component_does_not_falsely_overlap_adjacent_legend(self):
         self.prepare_edge_filter()
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
-        layout['nodes']['PF-001'].update(x=820,y=490)
+        layout['nodes']['PF-001'].update(x=850,y=490)
         layout['legend'].update(x=950,y=490)
         path.write_text(json.dumps(layout));self.render()
         self.assertFalse([c for c in self.validate()['checks'] if c['id']=='V7' and
@@ -272,7 +274,7 @@ class LayoutClearanceCLI(unittest.TestCase):
     def test_rotated_nonsquare_nonmember_outside_group_has_no_false_overlap(self):
         self.prepare_edge_filter()
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
-        layout['nodes']['PF-001'].update(x=390,y=490)
+        layout['nodes']['PF-001'].update(x=420,y=490)
         path.write_text(json.dumps(layout))
         from ruamel.yaml import YAML
         yaml=YAML();path=self.work/'1#系统.intent.yaml';intent=yaml.load(path.read_text())

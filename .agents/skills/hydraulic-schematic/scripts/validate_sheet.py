@@ -57,7 +57,7 @@ BUDGET = {
 }
 # 边界端子：图幅边缘外部接口。前两个来自 layout.externs（用户供/回油），
 # 第三个是油箱侧通道端子，坐标见 1# 图追溯清单披露的边界走廊终点。
-BOUNDARY_TERMINALS = [(1480.0, 300.0), (1480.0, 700.0), (60.0, 514.4)]
+
 # 存量披露：1# 系统图为历史版本（rendering-rules 预算表注¹），
 # 两条油箱侧通道线单条折返 4、绕行比 ≈1.6/≈4.0 超预算，
 # 按"下版改图收敛或显式披露"处理，记 exempt，不作为新出图先例。
@@ -139,7 +139,11 @@ def main(argv=None):
     contract_issues = symbol_contract(intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
     if contract_issues:
         return write_contract_failure(HERE, inventory, contract_issues, intent.get('unknown') or [])
-    SHIFT = L.get('canvas_shift_x', 0)
+    from layout_contract import drawable_bounds
+    try:
+        drawable = drawable_bounds(L)
+    except ValueError as error:
+        sys.exit(str(error))
     CW, CH = L['canvas']['width'], L['canvas']['height']
 
     # ---------- V1 SVG 可解析 + id 唯一 ----------
@@ -488,7 +492,7 @@ def main(argv=None):
     F.extend((c['id'],c['detail']) for c in junction_findings)
     ev.extend(junction_evidence)
 
-    bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser)
+    bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser,drawable)
     F.extend((c['id'],c['detail']) for c in bounds_findings)
     ev.append(bounds_evidence)
     budget_runs = measure_runs(geometry, topology)
@@ -511,7 +515,7 @@ def main(argv=None):
 
     def near_terminal(p):
         return any(abs(p[0] - t[0]) < 3 and abs(p[1] - t[1]) < 3
-                   for t in BOUNDARY_TERMINALS)
+                   for t in L.get('boundary_terminals', []))
 
     turn_total = 0
     turn_max = 0

@@ -1,5 +1,5 @@
 {
-  "source": "baseline-44 audited e911038 default seed; 13 genuine failures, not exemptions for new failures",
+  "source": "baseline-44 audited e911038 default seed; 13 genuine failures, not exemptions for new failures; unstructured V13 display coordinates normalized to root SVG units by #23",
   "checks": [
     {
       "id": "V3",
@@ -68,7 +68,7 @@
     {
       "id": "V13",
       "result": "fail",
-      "detail": "管线自身折返形成越界线头: ln-sense (1374.0, 89.5) -> (1392.0, 89.5) -> (1210.0, 89.5)"
+      "detail": "管线自身折返形成越界线头: ln-sense (1404.0, 89.5) -> (1422.0, 89.5) -> (1240.0, 89.5)"
     },
     {
       "id": "V10",

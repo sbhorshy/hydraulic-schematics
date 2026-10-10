@@ -1,4 +1,4 @@
-"""Read final SVG geometry in root SVG user units (including canvas shift).
+"""Read final SVG geometry in root SVG user units.
 
 Public boundary: load_geometry(root, layout, resolve_symbol). Nodes expose the
 actual instance matrix, transformed symbol viewBox footprint, and asset ports;

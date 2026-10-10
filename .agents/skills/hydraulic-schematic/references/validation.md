@@ -27,8 +27,8 @@
 使用最终 SVG 的实例及祖先累积变换、实际采用的符号文件端口与 viewBox，返回
 `nodes[实例].{matrix,footprint,ports}`、`pipes[].points` 和 `issues`。端口记录
 `position`、已旋转的单位 `direction`、`anchor_direction`、`role`、`medium`。
-所有结果和报告定位采用 **root SVG 用户坐标**，包含 `sheet` 的画布偏移；不能再加一次
-`canvas_shift_x`。`footprint` 是变换后的符号 viewBox 足迹，不是未旋转的 layout 占位框，
+所有结果、布局输入和报告定位统一采用 **root SVG 用户坐标**，没有额外画布平移。
+`drawable` 与 `edge_margin` 明确可绘制边界；旧格式必须经显式迁移。`footprint` 是变换后的符号 viewBox 足迹，不是未旋转的 layout 占位框，
 也不声称测量了轮廓墨迹。`walk`/`transform`/`multiply`/`point` 可用于同坐标系的后续校核。
 
 V3 按输入 `paths` 相邻连接的声明端口（裸实例只按目录 `main_path` 展开）及 `taps`

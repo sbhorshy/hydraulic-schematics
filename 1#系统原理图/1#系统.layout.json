@@ -25,13 +25,13 @@
     "2.1 fsov-cell60-placement:v1.8 方框两格各 60×60 落位——rot270 占位 204.003x362.304 @(294,333)（TANK/EDP 夹缝,吸油向 TANK→FSOV→EDP 自然贯通,零新增 V2 预期);CASE 母线回 620（rot270 宽 204 不再需要让位);EDP/EMP 保持 x=500",
     "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）",
     "2026-10-10 #49: TANK canonical viewBox 0 0 218 564; keep placement and footprint; pressure port local x 172 -> 155; add body_sense_tap (50,564); routes regenerated from SVG ports.",
-    "2026-10-10 #46: ACC liquid at PRV-002.outlet; ACC-PG-ACV taps share the single PG port. Explicit seed places the branch southeast of PRV-002; return corridor 890 -> 1010 clears the branch; only ACC/PG/ACV nodes and their label slots move."
+    "2026-10-10 #46: ACC liquid at PRV-002.outlet; ACC-PG-ACV taps share the single PG port. Explicit seed places the branch southeast of PRV-002; return corridor 890 -> 1010 clears the branch; only ACC/PG/ACV nodes and their label slots move.",
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30"
   ],
   "canvas": {
-    "width": 1680,
+    "width": 1710,
     "height": 1390
   },
-  "canvas_shift_x": 30,
   "style": {
     "base_line_width_T": 1.2,
     "symbol_stroke_width": 2,
@@ -40,14 +40,14 @@
   "externs": {},
   "nodes": {
     "TANK-001": {
-      "x": 60,
+      "x": 90.0,
       "y": 276,
       "symbol": "symbols/bootstrap-type-reservoir.svg",
       "w": 218,
       "h": 564
     },
     "FSOV-001": {
-      "x": 302,
+      "x": 332.0,
       "y": 283.7,
       "symbol": "symbols/firewall-shutoff-valve.svg",
       "w": 362.304,
@@ -55,28 +55,28 @@
       "rot": 270
     },
     "EDP-001": {
-      "x": 540,
+      "x": 570.0,
       "y": 290,
       "symbol": "symbols/edp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "EMP-001": {
-      "x": 540,
+      "x": 570.0,
       "y": 610,
       "symbol": "symbols/emp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "PF-001": {
-      "x": 1000,
+      "x": 1030.0,
       "y": 254,
       "symbol": "symbols/filter-line-shutoff-dp.svg",
       "w": 100,
       "h": 158
     },
     "CDF-001": {
-      "x": 420,
+      "x": 450.0,
       "y": 100,
       "symbol": "symbols/filter-line-shutoff-dp.svg",
       "w": 100,
@@ -84,7 +84,7 @@
       "rot": 270
     },
     "RF-001": {
-      "x": 1200,
+      "x": 1230.0,
       "y": 1012,
       "symbol": "symbols/filter-line-shutoff-dp-return-bypass.svg",
       "w": 100,
@@ -92,14 +92,14 @@
       "rot": 180
     },
     "PRV-001": {
-      "x": 1300,
+      "x": 1330.0,
       "y": 290,
       "symbol": "symbols/priority-valve.svg",
       "w": 140,
       "h": 78
     },
     "PRV-002": {
-      "x": 440,
+      "x": 470.0,
       "y": 730,
       "symbol": "symbols/priority-valve.svg",
       "w": 140,
@@ -107,7 +107,7 @@
       "rot": 180
     },
     "ACC-001": {
-      "x": 700,
+      "x": 730.0,
       "y": 840,
       "symbol": "symbols/accumulator.svg",
       "w": 60,
@@ -115,7 +115,7 @@
       "rot": 0
     },
     "ACV-001": {
-      "x": 800,
+      "x": 830.0,
       "y": 937,
       "symbol": "symbols/air-charging-valve.svg",
       "w": 134,
@@ -123,7 +123,7 @@
       "rot": 180
     },
     "PG-001": {
-      "x": 830,
+      "x": 860.0,
       "y": 832,
       "symbol": "symbols/pressure-gauge.svg",
       "w": 63,
@@ -131,7 +131,7 @@
       "rot": 90
     },
     "QDP-001": {
-      "x": 1186,
+      "x": 1216.0,
       "y": 560,
       "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
       "w": 160,
@@ -139,7 +139,7 @@
       "rot": 180
     },
     "QDR-001": {
-      "x": 1200,
+      "x": 1230.0,
       "y": 900,
       "symbol": "symbols/quick-disconnect-coupling-disconnected.svg",
       "w": 160,
@@ -147,7 +147,7 @@
       "rot": 180
     },
     "CV-002": {
-      "x": 1400,
+      "x": 1430.0,
       "y": 1120,
       "symbol": "symbols/check-valve.svg",
       "w": 80,
@@ -155,56 +155,56 @@
       "rot": 90
     },
     "USER-001": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 160,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-002": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 265,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-003": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 370,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-004": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 475,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-005": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 580,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-006": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 685,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-007": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 790,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
       "h": 60
     },
     "USER-008": {
-      "x": 1498,
+      "x": 1528.0,
       "y": 895,
       "symbol": "symbols/hydraulic-user.svg",
       "w": 120,
@@ -214,27 +214,27 @@
   "buses": {
     "PRESS": {
       "kind": "v",
-      "x": 880
+      "x": 910.0
     },
     "MANIFOLD": {
       "kind": "v",
-      "x": 1160
+      "x": 1190.0
     },
     "USR": {
       "kind": "v",
-      "x": 1470
+      "x": 1500.0
     },
     "USERR": {
       "kind": "v",
-      "x": 1646
+      "x": 1676.0
     },
     "RET": {
       "kind": "v",
-      "x": 940
+      "x": 970.0
     },
     "CASE": {
       "kind": "v",
-      "x": 620
+      "x": 650.0
     }
   },
   "labels": {
@@ -287,8 +287,8 @@
   ],
   "vlanes_note": "竖廊 290:油箱(278)与 FSOV(330) 之间供 TANK->FSOV 吸油上行;20:油箱西侧供 CDF 出油与回油接入 return_in。",
   "vlanes": [
-    290,
-    20
+    320.0,
+    50.0
   ],
   "group_padding": 20,
   "group_label_gap": 10,
@@ -306,5 +306,27 @@
   },
   "label_lift": {
     "ACC-001": 19
-  }
+  },
+  "boundary_terminals": [
+    [
+      1510.0,
+      300.0
+    ],
+    [
+      1510.0,
+      700.0
+    ],
+    [
+      90.0,
+      514.4
+    ]
+  ],
+  "coordinate_system": "root_svg_user_units",
+  "drawable": {
+    "x": 0,
+    "y": 0,
+    "width": 1680.0,
+    "height": 1390
+  },
+  "edge_margin": 30.0
 }
