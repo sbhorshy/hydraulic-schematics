@@ -6,7 +6,6 @@
     "width": 1680,
     "height": 1390
   },
-  "canvas_shift_x": 30,
   "style": {
     "base_line_width_T": 1.2,
     "symbol_stroke_width": 2,
@@ -14,7 +13,7 @@
   },
   "externs": {
     "USR-001": {
-      "x": 1120,
+      "x": 1150.0,
       "y": 530,
       "anchor": "left",
       "label": "USR-001"
@@ -22,21 +21,21 @@
   },
   "nodes": {
     "TANK-001": {
-      "x": 60,
+      "x": 90.0,
       "y": 120,
       "w": 218,
       "h": 564,
       "symbol": "symbols/bootstrap-type-reservoir.svg"
     },
     "EDP-001": {
-      "x": 540,
+      "x": 570.0,
       "y": 490,
       "w": 80,
       "h": 80,
       "symbol": "symbols/edp-provisional-stroke.svg"
     },
     "PF-001": {
-      "x": 820,
+      "x": 850.0,
       "y": 490,
       "w": 80,
       "h": 80,
@@ -59,8 +58,8 @@
     850
   ],
   "vlanes": [
-    20,
-    1200
+    50.0,
+    1230.0
   ],
   "group_padding": 20,
   "group_label_gap": 10,
@@ -78,8 +77,19 @@
   },
   "boundary_terminals": [
     [
-      1120,
+      1150.0,
       530
     ]
+  ],
+  "coordinate_system": "root_svg_user_units",
+  "drawable": {
+    "x": 0,
+    "y": 0,
+    "width": 1650.0,
+    "height": 1390
+  },
+  "edge_margin": 30.0,
+  "revision_log": [
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1680; edge_margin=30"
   ]
 }

@@ -12,13 +12,13 @@
     "1.3 改:线宽按企业标准两级(高压 3.0T / 低压 1.0T),撤除我自拟的 case_drain 虚线;图例改为如实列出两级并加跨线桥/三通/悬空端口说明。",
     "1.4 修:RF-001 与主回油带不同高,回油绕行时横穿其本体。移至 y=740 使回油笔直过滤。",
     "1.5 修:图例与图签栏重叠 56 单位,文字叠印;油箱缩放至 0.78 使内部机构不可辨,改为原尺寸 218x564。",
-    "1.6 修:两条回油共用同一水平廊 860,叠 80 单位。给出四条间距 30 的廊供走线器分配。"
+    "1.6 修:两条回油共用同一水平廊 860,叠 80 单位。给出四条间距 30 的廊供走线器分配。",
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1580→1580; edge_margin=30"
   ],
   "canvas": {
     "width": 1580,
     "height": 1210
   },
-  "canvas_shift_x": 30,
   "style": {
     "base_line_width_T": 1.2,
     "symbol_stroke_width": 2,
@@ -26,13 +26,13 @@
   },
   "externs": {
     "USR-001": {
-      "x": 1480,
+      "x": 1510.0,
       "y": 300,
       "anchor": "left",
       "label": "至用户 (供压)"
     },
     "USR-002": {
-      "x": 1480,
+      "x": 1510.0,
       "y": 700,
       "anchor": "left",
       "label": "自用户 (回油)"
@@ -41,14 +41,14 @@
   "symbol_substitution_note": "CDF/RF 用通用滤符号。line shutoff 是标准页 6.1.6 的特定构型,不可外推。PF 用带压差指示器版,依据是你的实物照片。",
   "nodes": {
     "TANK-001": {
-      "x": 60,
+      "x": 90.0,
       "y": 276,
       "symbol": "../油箱_开放描边_实线_draft.svg",
       "w": 218,
       "h": 564
     },
     "FSOV-001": {
-      "x": 330,
+      "x": 360.0,
       "y": 228,
       "symbol": "../firewall-shutoff-valve.svg",
       "w": 130,
@@ -56,14 +56,14 @@
       "rot": 270
     },
     "EDP-001": {
-      "x": 500,
+      "x": 530.0,
       "y": 250,
       "symbol": "../edp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "CDF-001": {
-      "x": 500,
+      "x": 530.0,
       "y": 400,
       "symbol": "../filter-plain-stroke.svg",
       "w": 80,
@@ -71,14 +71,14 @@
       "rot": 90
     },
     "EMP-001": {
-      "x": 500,
+      "x": 530.0,
       "y": 610,
       "symbol": "../emp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "CDF-002": {
-      "x": 500,
+      "x": 530.0,
       "y": 760,
       "symbol": "../filter-plain-stroke.svg",
       "w": 80,
@@ -86,14 +86,14 @@
       "rot": 90
     },
     "PF-001": {
-      "x": 790,
+      "x": 820.0,
       "y": 254,
       "symbol": "../filter-line-shutoff-dp-stroke.svg",
       "w": 80,
       "h": 158
     },
     "RF-001": {
-      "x": 1000,
+      "x": 1030.0,
       "y": 740,
       "symbol": "../filter-plain-stroke.svg",
       "w": 80,
@@ -101,7 +101,7 @@
       "rot": 180
     },
     "ACC-001": {
-      "x": 1160,
+      "x": 1190.0,
       "y": 90,
       "symbol": "../accumulator-stroke.svg",
       "w": 60,
@@ -111,11 +111,11 @@
   "buses": {
     "PRESS": {
       "kind": "v",
-      "x": 700
+      "x": 730.0
     },
     "MANIFOLD": {
       "kind": "v",
-      "x": 1190
+      "x": 1220.0
     }
   },
   "labels": {
@@ -150,13 +150,13 @@
   ],
   "lanes_detail": "190 顶部廊供回油族绕行(避开底部图例);850-940 底部廊供壳体回油近距接入。回油族仍绕行,根因是油箱单一回油口(return_port_count 未确认)。",
   "vlanes": [
-    280,
-    460,
-    640,
-    900,
-    20,
-    60,
-    100
+    310.0,
+    490.0,
+    670.0,
+    930.0,
+    50.0,
+    90.0,
+    130.0
   ],
   "vlanes_detail": "竖廊。280 在油箱右缘(230)与 FSOV(330)之间;460 在 FSOV 与泵列(500)之间;640 在泵列右缘(580)与母线(700)之间;900 在 PF 右缘(870)与 MANIFOLD(1190)之间。",
   "group_padding": 20,
@@ -176,5 +176,27 @@
     "y": 1140,
     "w": 1500,
     "h": 56
-  }
+  },
+  "boundary_terminals": [
+    [
+      1510.0,
+      300.0
+    ],
+    [
+      1510.0,
+      700.0
+    ],
+    [
+      90.0,
+      514.4
+    ]
+  ],
+  "coordinate_system": "root_svg_user_units",
+  "drawable": {
+    "x": 0,
+    "y": 0,
+    "width": 1550.0,
+    "height": 1210
+  },
+  "edge_margin": 30.0
 }

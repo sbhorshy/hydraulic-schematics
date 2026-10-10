@@ -218,37 +218,173 @@ def bridge_gap(bridge, row, box):
     return min(measured,key=lambda item:item[0])
 
 
-def canvas_bounds(geometry, topology, browser):
+def pipe_paint_bounds(pipe, row):
+    """Visible orthogonal stroke bounds in root units, including real end caps."""
+    bounds = list(row['bbox'])
+    width = computed_length(row['style'].get('stroke-width','0'))
+    color = color_rgba(row['style'].get('stroke','none'))
+    if width is None or color is None:
+        raise ValueError('Pipe stroke bounds unavailable')
+    if not width or not color[3]:
+        return bounds
+    matrix = row['matrix']
+    scale = 1 if row['style'].get('vector-effect') == 'non-scaling-stroke' else max(math.hypot(*matrix[:2]),math.hypot(*matrix[2:4]))
+    radius = width*scale/2
+    points = pipe.get('points',[])
+    if pipe.get('bridge') or not points:
+        return [bounds[0]-radius,bounds[1]-radius,bounds[2]+radius,bounds[3]+radius]
+    boxes=[]
+    for a,b in zip(points,points[1:]):
+        if abs(a[1]-b[1])<1e-6:
+            boxes.append([min(a[0],b[0]),a[1]-radius,max(a[0],b[0]),a[1]+radius])
+        elif abs(a[0]-b[0])<1e-6:
+            boxes.append([a[0]-radius,min(a[1],b[1]),a[0]+radius,max(a[1],b[1])])
+        else:
+            raise ValueError('Nonorthogonal pipe paint bounds unsupported')
+    if row['style'].get('stroke-linecap') in ('round','square'):
+        boxes.extend([[x-radius,y-radius,x+radius,y+radius] for x,y in (points[0],points[-1])])
+    return [min(b[0] for b in boxes),min(b[1] for b in boxes),max(b[2] for b in boxes),max(b[3] for b in boxes)] if boxes else bounds
+
+
+def component_paint_bounds(row):
+    """Visible symbol primitives, including stroke outside the source viewBox."""
+    from lead_geometry import segments, NUMBER
+    from sheet_geometry import point
+    from text_checks import display_effects
+    if not row.get('visible') or row['tag'] not in ('line','polyline','polygon','rect','circle','ellipse','path','text'):
+        return None
+    if display_effects(row):
+        raise ValueError('Component paint with clip/mask/filter needs additional bounds evidence')
+    painted={}
+    for kind in ('fill','stroke'):
+        color=color_rgba(row['style'].get(kind,'none'))
+        if color is None:raise ValueError('Component paint bounds unavailable')
+        painted[kind]=color[3]>0 and color[:3]!=(255.,255.,255.) and float(row['style'].get(kind+'-opacity',1))>0
+    if not any(painted.values()):return None
+    if row['tag']=='text':
+        if row.get('ink_status')!='pass':raise ValueError('Component glyph ink unavailable')
+        return row['ink_bbox']
+    box=list(row['bbox'])
+    if not painted['stroke']:return box
+    width=computed_length(row['style'].get('stroke-width','0'))
+    if width is None:raise ValueError('Component stroke width unavailable')
+    if width == 0:return box if painted['fill'] else None
+    matrix=row['matrix'];radius=width/2
+    unscaled=row['style'].get('vector-effect')=='non-scaling-stroke'
+    rx=radius if unscaled else radius*math.hypot(matrix[0],matrix[2])
+    ry=radius if unscaled else radius*math.hypot(matrix[1],matrix[3])
+    join=row['style'].get('stroke-linejoin','miter')
+    cap=row['style'].get('stroke-linecap','butt')
+    closed=bool(row.get('closed'))
+    if row['tag'] in ('circle','ellipse') or (row['tag']=='rect' and not row.get('linear_outline')) or (join=='round' and (closed or cap=='round')):
+        # Smooth closed shapes and round tubes are the geometry's Minkowski sum
+        # with the transformed stroke disk. This is not valid for sharp miters.
+        return [box[0]-rx,box[1]-ry,box[2]+rx,box[3]+ry]
+    if row['tag']=='polygon':
+        values=list(map(float,re.findall(NUMBER,row['attrs'].get('points',''))))
+        if len(values)<6 or len(values)%2:raise ValueError('Invalid polygon paint geometry')
+        vertices=list(zip(values[::2],values[1::2]));vertices.append(vertices[0])
+        parts=list(zip(vertices,vertices[1:]));closed=True
+    elif row['tag']=='rect':
+        x,y,w,h=row['local_bbox'];vertices=[(x,y),(x+w,y),(x+w,y+h),(x,y+h),(x,y)]
+        parts=list(zip(vertices,vertices[1:]));closed=True
+    elif row['tag']=='path' and closed:
+        d=row['attrs'].get('d','')
+        if len(re.findall('[mM]',d))!=1 or len(re.findall('[zZ]',d))!=1 or not d.rstrip().endswith(('z','Z')):
+            raise ValueError('Multiple closed subpaths require additional miter bounds evidence')
+        parts=segments('path',{**row['attrs'],'d':re.sub('[zZ]','',d)})
+        if parts:parts.append((parts[-1][1],parts[0][0]))
+    else:
+        parts=segments(row['tag'],row['attrs'])
+    if not parts:raise ValueError('Component stroke path bounds not measured')
+    points=[];directions=[]
+    for a,b in parts:
+        if unscaled:a,b=point(matrix,a),point(matrix,b)
+        length=math.dist(a,b)
+        if not length:continue
+        u=((b[0]-a[0])/length,(b[1]-a[1])/length);n=(-u[1],u[0])
+        points.extend((p[0]+sign*radius*n[0],p[1]+sign*radius*n[1]) for p in (a,b) for sign in (-1,1))
+        directions.append((a,b,u,n))
+    if not directions:return box
+    if not closed:
+        for index,(a,b,u,n) in enumerate(directions):
+            ends=[]
+            if index==0 or math.dist(directions[index-1][1],a)>1e-6:ends.append((a,-1))
+            if index==len(directions)-1 or math.dist(b,directions[index+1][0])>1e-6:ends.append((b,1))
+            for p,end in ends:
+                if cap=='round':points.extend((p[0]+dx*radius,p[1]+dy*radius) for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)))
+                elif cap=='square':points.extend((p[0]+end*radius*u[0]+side*radius*n[0],p[1]+end*radius*u[1]+side*radius*n[1]) for side in (-1,1))
+    following=directions[1:]+(directions[:1] if closed else [])
+    for first,second in zip(directions,following):
+        if math.dist(first[1],second[0])>1e-6:continue
+        p=first[1];u,v=first[2],second[2];n,m=first[3],second[3]
+        cross=u[0]*v[1]-u[1]*v[0];den=1+n[0]*m[0]+n[1]*m[1]
+        if abs(cross)<1e-9:continue
+        side=-1 if cross>0 else 1
+        if join=='miter' and den>1e-9:
+            offset=(radius*(n[0]+m[0])/den,radius*(n[1]+m[1])/den)
+            if math.hypot(*offset)<=radius*float(row['style'].get('stroke-miterlimit',4)):
+                points.append((p[0]+side*offset[0],p[1]+side*offset[1]))
+        elif join=='round':
+            start=math.atan2(side*n[1],side*n[0]);finish=math.atan2(side*m[1],side*m[0]);direction=1 if cross>0 else -1
+            sweep=(direction*(finish-start))%(2*math.pi)
+            for angle in (0,math.pi/2,math.pi,3*math.pi/2):
+                if (direction*(angle-start))%(2*math.pi)<=sweep+1e-9:
+                    points.append((p[0]+radius*math.cos(angle),p[1]+radius*math.sin(angle)))
+        elif join not in ('bevel','miter'):
+            raise ValueError('Unsupported stroke join '+join)
+    if not unscaled:points=[point(matrix,p) for p in points]
+    if painted['fill']:points.extend(((box[0],box[1]),(box[2],box[3])))
+    return [min(p[0] for p in points),min(p[1] for p in points),max(p[0] for p in points),max(p[1] for p in points)]
+
+
+def canvas_bounds(geometry, topology, browser, drawable=None):
     """V6 component footprints and visible pipe bounds in root SVG coordinates."""
     rows={row['id']:row for row in browser.get('elements',[]) if row['id']}
     canvas=browser.get('viewbox')
     if not canvas:
         return [],{'id':'V6','coverage_status':'not_checked','coverage_detail':'Actual SVG canvas/display bounds unavailable.'}
-    x,y,w,h=canvas; limit=[x,y,x+w,y+h]
-    objects=[]
+    x,y,w,h=canvas; canvas_limit=[x,y,x+w,y+h]
+    limit=list(drawable) if drawable is not None else canvas_limit
+    x,y=limit[:2]
+    objects=[]; paint_unchecked=[]
+    painted_pipes={pipe['svg_id']:pipe for pipe in geometry['pipes']}
     for inst,node in geometry['nodes'].items():
         if rows.get('inst-'+inst,{}).get('visible',True):
             objects.append({'component':inst,'box':node['footprint']})
+    for row in browser.get('elements',[]):
+        if not row.get('instance'):continue
+        try:
+            box=component_paint_bounds(row)
+            if box is not None:
+                objects.append({'component':row['instance'],'svg_id':row['id'] or str(row['key']),
+                                'paint':True,'box':box})
+        except ValueError as error:
+            paint_unchecked.append({'component':row['instance'],'detail':str(error)})
     pipes={s['svg_id']:s['anchor'] for s in topology.get('segments',[])}
     for sid,anchor in pipes.items():
         row=rows.get(sid)
         if row and row['visible']:
-            objects.append({'svg_id':sid,'anchor':anchor,'box':row['bbox']})
+            try:
+                box=pipe_paint_bounds(painted_pipes.get(sid,{}),row)
+                objects.append({'svg_id':sid,'anchor':anchor,'box':box})
+            except ValueError as error:
+                paint_unchecked.append({'svg_id':sid,'detail':str(error)})
     findings=[]
     for item in objects:
         box=item['box']
         overflow=dict(zip(('left','top','right','bottom'),(max(0,x-box[0]),max(0,y-box[1]),max(0,box[2]-limit[2]),max(0,box[3]-limit[3]))))
         if any(overflow.values()):
             name=item.get('component') or item.get('svg_id')
-            findings.append({'id':'V6','result':'fail','kind':'canvas_overflow',**item,'overflow':overflow,
-                             'detail':'%s 实际根 SVG 范围 %s 越出画布 %s，超出 %s' % (name,box,limit,overflow)})
-    unchecked=geometry['issues'] or topology.get('display_evidence',{}).get('unchecked')
-    return findings,{'id':'V6','canvas':[w,h],'canvas_bounds':limit,'coordinate_system':'root_svg_user_units',
+            findings.append({'id':'V6','result':'fail','kind':'drawable_overflow' if drawable is not None else 'canvas_overflow',**item,'overflow':overflow,
+                             'detail':'%s 实际根 SVG 范围 %s 越出可绘制范围 %s，超出 %s' % (name,box,limit,overflow)})
+    unchecked=geometry['issues'] or topology.get('display_evidence',{}).get('unchecked') or paint_unchecked
+    return findings,{'id':'V6','canvas':[w,h],'canvas_bounds':canvas_limit,'drawable_bounds':limit,'coordinate_system':'root_svg_user_units',
                      'coverage_status':'not_checked' if unchecked else 'pass',
-                     'coverage_detail':'Final component footprints and browser-visible pipe bounds checked against the actual SVG viewBox.',
+                     'coverage_detail':'Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox).',
                      'content_x':[min(o['box'][0] for o in objects),max(o['box'][2] for o in objects)] if objects else None,
                      'content_y':[min(o['box'][1] for o in objects),max(o['box'][3] for o in objects)] if objects else None,
-                     'objects':objects}
+                     'objects':objects,'unchecked':paint_unchecked}
 
 
 class InvisibleFrameError(ValueError):

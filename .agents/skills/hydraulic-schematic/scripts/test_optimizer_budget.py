@@ -104,7 +104,8 @@ class BudgetTests(unittest.TestCase):
         catalog = json.loads((library / 'component-catalog.json').read_text(encoding='utf-8'))
         intent = {'parts': {'U1': 'hydraulic_user', 'U2': 'hydraulic_user'},
                   'paths': [['U1.return_out', 'U2.pressure_in']], 'taps': []}
-        layout = {'canvas': {'width': 800, 'height': 600}, 'externs': {}, 'buses': {},
+        layout = {'canvas': {'width': 800, 'height': 600},
+                  'drawable': {'x':0,'y':0,'width':770,'height':600}, 'edge_margin':30, 'externs': {}, 'buses': {},
                   'lanes': [180, 320], 'vlanes': [350], 'labels': {}, 'nodes': {
                       'U1': {'x': 180, 'y': 180, 'w': 180, 'h': 80, 'symbol': 'hydraulic-user.svg'},
                       'U2': {'x': 380, 'y': 300, 'w': 180, 'h': 80, 'symbol': 'hydraulic-user.svg'}}}
