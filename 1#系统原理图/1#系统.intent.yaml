@@ -75,7 +75,7 @@ paths:
   - ["@USR", "USER-006.pressure_in"]
   - ["@USR", "USER-007.pressure_in"]
   - ["@USR", "USER-008.pressure_in"]
-  - ["@MANIFOLD", "ACC-001.hydraulic_port"]
+  - ["PRV-002.outlet", "ACC-001.hydraulic_port"]  # 与油箱增压口共挂 PRV-002 下游
   - ["@PRESS", "PRV-002", "TANK-001.bootstrap_pressure_in"]
   - ["@MANIFOLD", "QDP-001.aircraft_side"]   # 2026-09-07 侧别同步:机侧座端接压力总管(v1.3 口径,原 inlet)
 
@@ -104,8 +104,9 @@ paths:
 
 # 气侧/测量支路（预检处方：气侧件不入 paths，走 taps）。
 taps:
-  - {sensor: "ACV-001.accumulator_gas", at: "ACC-001.gas_port"}   # 充气活门接蓄压器气口
-  - {sensor: "PG-001.pressure_sense", at: "ACV-001.charge_port"}  # 压力表接充气活门充气口
+  # SysML 气侧链 ACC -> PG -> ACV；PG 两条边共用其唯一物理测压口，非新增贯通口。
+  - {sensor: "PG-001.pressure_sense", at: "ACC-001.gas_port"}
+  - {sensor: "ACV-001.accumulator_gas", at: "PG-001.pressure_sense"}  # charge_port 仍接未建模充气源
 
 unknown:
   # ---- 清单中未入图的 3 项 ----
