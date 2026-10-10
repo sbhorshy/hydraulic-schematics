@@ -15,3 +15,5 @@ python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
 `proto/`（包括 `proto_b_rules.py` 与 `frozen/` 全套脚本、布局和旧符号）是版本化原型/冻结证据；它的 FOOTPRINT、catalog、符号和 PNG 必须作为一套历史版本解释。禁止在活动项目里调用这些原型生成器。若需复现实验，请从上述 Git 提交导出整个历史目录到独立工作区；保留其旧输入，不将旧图像的来源替换成新油箱。`skill-chain-e2e/` 同为历史冻结样本，其已知旧端口预检红由冻结重钉票处理。
 
 活动 `build_catalog.py` 暂时在任何文件 I/O 前 fail-closed，防止硬编码 Windows 写路径/旧覆盖策略把活动目录回退。[build_catalog 重构与双册对齐](https://github.com/sbhorshy/hydraulic-schematics/issues/48)负责后续正式生成入口，本次未执行旧生成器、未重构生成策略。
+
+2026-10-10，[蓄压器同步](https://github.com/sbhorshy/hydraulic-schematics/issues/46)已把活动 intent 的液端改接 PRV-002 下游，气侧按 ACC→PG→ACV 两条 taps 表达。项目显式 seed 是本支路当前受支持的布局入口；不带 seed 的 R1–R16 引擎仍报告 ACC/PG/ACV 未布。三层对账、新 PNG 与实际残差见 `research/ready-work-20261009/accumulator-46/`；历史图像不因这段说明升级为新交付。
