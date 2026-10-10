@@ -1,0 +1,25 @@
+catalog: comac-hydraulic-components@0.7-draft
+extern:
+  USR-001: outlet
+l0_version: '1.1'
+maturity: concept
+parts:
+  EDP-001: engine_driven_pump
+  PF-001: pressure_filter
+  TANK-001: bootstrap_reservoir
+  RF-001: filter_line_shutoff_dp_return_bypass
+paths:
+- - TANK-001.suction_out
+  - EDP-001.suction
+- - EDP-001.pressure_out
+  - PF-001
+  - USR-001
+- - '@USERR'
+  - RF-001
+  - '@RET'
+system: HYD-SUPPLY-FIXTURE
+unknown:
+- supply-only-regression-return-circuit-not-modeled
+- TANK-001.bootstrap_pressure_in-not-modeled
+- EDP-001.case_drain-not-modeled
+- EDP-001.drive_shaft-not-modeled

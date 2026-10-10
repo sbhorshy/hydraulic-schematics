@@ -285,16 +285,18 @@ def check_template_gate():
 # ---------- F. 性能、入口与证据专项回归（证据用例启动本机 Chrome） ----------
 
 def check_l0_regressions():
-    # End-to-end browser suites share this aggregate hang guard; it is not a performance assertion.
-    suites = ('test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_accumulator_branch', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
+    # Aggregate process hang guard, not optimizer/performance budget. Measured old
+    # 226-test run: 809s; #39 (~94s), #62 (~60s), #49 (~14s) already exceed
+    # the former 900s, before #42/#46/#23 browser suites. Root runs full suite once.
+    suites = ('test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_reservoir_retirement', 'test_accumulator_branch', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
               'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
-              'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
+              'test_rotation_routes', 'test_editor_rotation', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
     try:
         result = subprocess.run([sys.executable, '-m', 'unittest', *suites],
                                 cwd=HERE, env=CHILD_ENV, capture_output=True,
-                                timeout=900)
+                                timeout=1800)
     except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 900 秒进程保护上限，未通过') from exc
+        raise Fail('L0 专项测试超过 1800 秒进程保护上限，未通过') from exc
     output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
     if result.returncode:
         raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'

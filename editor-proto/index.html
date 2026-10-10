@@ -86,7 +86,7 @@ async function api(path, opts) {
 function setSide(d) {
   const passed = !!d.passed;
   $('dot').className = 'dot ' + (passed ? 'ok' : 'bad');
-  $('state').textContent = passed ? '过闸（成品有效）' : '未过闸（无成品，手调已落盘）';
+  $('state').textContent = passed ? '完整校验及回读通过' : '未过闸（无成品，手调已落盘）';
   const lat = d.latency;
   $('latency').innerHTML = lat
     ? ['render_ms', 'validate_ms', 'total_ms'].map((k, i) =>
@@ -334,7 +334,7 @@ function select(id) { // 原地点击选中：虚线框 + 侧栏旋转控制（�
   const hint = $('selHint');
   if (n > 0) {
     hint.style.display = 'block';
-    hint.textContent = '⚠ 有连线：旋转会改变端口方位，管线按新端口重连，可能干涉本体——校核红灯即披露，转回原方位可消除。';
+    hint.textContent = '有连线：旋转后保持原端口语义，管线按新装位避让自身本体；其余干涉按本轮校核如实披露。';
   } else {
     hint.style.display = 'none';
   }
