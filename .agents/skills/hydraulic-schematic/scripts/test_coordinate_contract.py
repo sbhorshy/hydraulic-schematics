@@ -81,6 +81,24 @@ class CoordinateContract(unittest.TestCase):
             self.assertNotEqual(blocked.returncode,0)
             self.assertIn('coordinate_system',blocked.stdout+blocked.stderr)
 
+    def test_migration_rejects_unknown_coordinates_in_both_format_branches(self):
+        with tempfile.TemporaryDirectory(prefix='unknown-coordinate-migration-') as directory:
+            source=Path(directory)/'input.json';target=Path(directory)/'output.json'
+            layout=json.loads((SKILL/'assets/fixtures/l0-small-seed/1#系统.layout.json').read_text())
+            layout['coordinate_system']='unknown_space'
+            for shift in (None,30):
+                for flag in ([],['--declare-root']):
+                    with self.subTest(legacy_shift=shift,flag=flag):
+                        candidate=dict(layout)
+                        if shift is not None:candidate['canvas_shift_x']=shift
+                        source.write_text(json.dumps(candidate));target.write_text('existing output')
+                        run=subprocess.run([sys.executable,str(SKILL/'scripts/migrate_layout.py'),
+                                            str(source),'-o',str(target),*flag],capture_output=True,text=True)
+                        self.assertNotEqual(run.returncode,0,run.stdout+run.stderr)
+                        self.assertIn('coordinate_system',run.stdout+run.stderr)
+                        self.assertEqual(target.read_text(),'existing output')
+                        self.assertEqual(json.loads(source.read_text()),candidate)
+
     def test_validator_checks_bus_paint_not_only_centerline_against_drawable(self):
         with tempfile.TemporaryDirectory(prefix='paint-margin-') as directory:
             work = make_render_workspace(Path(directory), SKILL/'assets/fixtures/l0-current')

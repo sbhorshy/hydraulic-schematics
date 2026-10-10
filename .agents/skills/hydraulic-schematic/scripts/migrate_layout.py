@@ -16,6 +16,8 @@ LEGACY_BOUNDARY_TERMINALS = [[1480.0,300.0],[1480.0,700.0],[60.0,514.4]]
 
 def migrate(layout, margin=EDGE_MARGIN, declare_root=False):
     result = copy.deepcopy(layout)
+    if result.get('coordinate_system') not in (None, 'root_svg_user_units'):
+        raise ValueError('Unsupported coordinate_system; recover a layout with known coordinates before migration')
     if declare_root:
         if ('canvas_shift_x' in result or 'drawable' not in result
                 or result.get('coordinate_system') not in (None, 'root_svg_user_units')):
