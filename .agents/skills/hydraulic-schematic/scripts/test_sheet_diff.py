@@ -118,7 +118,7 @@ class SheetDiffCLI(unittest.TestCase):
         svg = self.work / '1#系统原理图.svg'
         root = ET.parse(svg).getroot()
         line = next(e for e in root.iter() if e.get('data-edge') == 'paths[1][0->1]')
-        line.set('points', '620,530 640,530 640,470 920,470 920,530 900,530')
+        line.set('points', '650,530 670,530 670,470 950,470 950,530 930,530')
         ET.register_namespace('', 'http://www.w3.org/2000/svg')
         svg.write_text(ET.tostring(root, encoding='unicode'))
         self.refresh(expected=1)

@@ -30,6 +30,8 @@
      已知几何缺陷仍须被拦截。主自检包含真实 Chrome 栅格化/显示测量，
      并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
 
+可选 HYDRAULIC_SELFTEST_UNIT_LOG=/新日志路径 保存 F 组完整输出（直接流式写入，已有文件不覆盖）；
+指定日志时开启逐用例详细输出；控制台仍只给尾部摘要，不以摘要代替完整失败证据。
 全部输入来自 skill 随附资产，不依赖仓库外层的历史 frozen 目录。
 仓库编辑器/活动项目集成测试另在 tests/repository/ 显式运行，不计入本自检。
 自动测试验证出图、显示及证据协议，不等于已完成实际图纸的感知回读签认；
@@ -294,13 +296,29 @@ L0_SUITES = ('test_coordinate_contract', 'test_assembly_layout', 'test_assemblie
 def check_l0_regressions():
     # Aggregate hang guard for bundled browser regressions, not the optimizer
     # performance budget. Repository integration runs under its own command.
+    unit_log = os.environ.get('HYDRAULIC_SELFTEST_UNIT_LOG')
+    command = [sys.executable, '-m', 'unittest', *(['-v'] if unit_log else []), *L0_SUITES]
     try:
-        result = subprocess.run([sys.executable, '-m', 'unittest', *L0_SUITES],
-                                cwd=HERE, env=CHILD_ENV, capture_output=True,
-                                timeout=1800)
+        if unit_log:
+            # Reserve a new caller-selected file before starting the expensive
+            # run; stream directly so failures, timeouts and restarts retain output.
+            try:
+                log = open(unit_log, 'xb')
+            except OSError as error:
+                raise Fail('无法新建完整单元日志 %s；请提供可写的新路径: %s' % (unit_log, error)) from error
+            print('完整单元输出: %s' % os.path.abspath(unit_log), flush=True)
+            with log:
+                result = subprocess.run(command, cwd=HERE, env=CHILD_ENV,
+                                        stdout=log, stderr=subprocess.STDOUT, timeout=1800)
+            with open(unit_log, 'rb') as recorded:
+                recorded.seek(max(0, os.path.getsize(unit_log)-5000))
+                output = recorded.read().decode('utf-8', 'replace')
+        else:
+            result = subprocess.run(command, cwd=HERE, env=CHILD_ENV, capture_output=True, timeout=1800)
+            output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
     except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 1800 秒进程保护上限，未通过') from exc
-    output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
+        raise Fail('L0 专项测试超过 1800 秒进程保护上限，未通过' +
+                   ('；已捕获输出保留于 %s' % unit_log if unit_log else '')) from exc
     if result.returncode:
         raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'
                    % (result.returncode, output[-5000:]))

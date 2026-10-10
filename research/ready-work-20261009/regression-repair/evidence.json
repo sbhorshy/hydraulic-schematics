@@ -1,0 +1,100 @@
+{
+  "failed_full_commit": "c215799dd606ca2c4c55663c1c6c79eb5d22e95a",
+  "failed_full": {
+    "tests": 260,
+    "failures": 17,
+    "errors": 5,
+    "elapsed_seconds": 1374.902
+  },
+  "failure_reconciliation": [
+    {
+      "module": "test_junction_semantics",
+      "failures": 7,
+      "errors": 5
+    },
+    {
+      "module": "test_readback_review",
+      "failures": 2,
+      "errors": 0
+    },
+    {
+      "module": "test_port_geometry",
+      "failures": 5,
+      "errors": 0
+    },
+    {
+      "module": "test_topology_reconciliation",
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "module": "test_display_widths",
+      "failures": 1,
+      "errors": 0
+    },
+    {
+      "module": "test_text_display",
+      "failures": 1,
+      "errors": 0
+    }
+  ],
+  "assertion_preservation": {
+    "test_junction_semantics.py": {
+      "assertion_count": 43,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_readback_review.py": {
+      "assertion_count": 55,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_port_geometry.py": {
+      "assertion_count": 31,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_topology_reconciliation.py": {
+      "assertion_count": 51,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_display_widths.py": {
+      "assertion_count": 42,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_text_display.py": {
+      "assertion_count": 48,
+      "all_assertion_expressions_unchanged": true
+    },
+    "test_sheet_diff.py": {
+      "assertion_count": 54,
+      "all_assertion_expressions_unchanged": true
+    }
+  },
+  "focused_verification": [
+    {
+      "scope": "junction module plus two readback failures",
+      "tests": 22,
+      "seconds": 146.615,
+      "exit": 0,
+      "log": "review-fix-junction-readback-green.log"
+    },
+    {
+      "scope": "port geometry and topology modules plus two display/text failures",
+      "tests": 32,
+      "seconds": 146.682,
+      "exit": 0,
+      "log": "review-fix-port-topology-display-green.log"
+    },
+    {
+      "scope": "sheet diff port-swap scenario",
+      "tests": 1,
+      "seconds": 9.664,
+      "exit": 0,
+      "log": "review-fix-sheet-diff-root.log"
+    }
+  ],
+  "full_suite_rerun": false,
+  "original_failure_artifacts": {
+    "selftest.log": "3be17bbe51504de65b8726ad352d462c5a7b75eeefefe3adf801da89454e56d3",
+    "selftest.json": "adac128ad24be7d5f4140f61f49d9bac57fd12086a79c4c1c735dc04c373cb19",
+    "verification.json": "59e252a1b10153e954593645e0e6d80f6af8e92c686721278472e76c1447fad8"
+  }
+}

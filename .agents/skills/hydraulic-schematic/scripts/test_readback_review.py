@@ -49,7 +49,7 @@ class ReadbackCLI(unittest.TestCase):
     def test_localized_foldback_finding_and_component_overviews_are_covered(self):
         svg=self.work/'1#系统原理图.svg';root=ET.parse(svg).getroot()
         line=next(e for e in root.iter() if e.get('data-edge')=='paths[1][0->1]')
-        line.set('points','620,530 640,530 640,494 640,500 800,500 800,530 820,530')
+        line.set('points','650,530 670,530 670,494 670,500 830,500 830,530 850,530')
         ET.register_namespace('','http://www.w3.org/2000/svg');svg.write_text(ET.tostring(root,encoding='unicode'))
         self.run_cli('rasterize_sheet.py',svg,'-o',self.work/'sheet-readback.png')
         self.run_cli('validate_sheet.py',self.work,expected=1)
@@ -185,7 +185,7 @@ class ReadbackCLI(unittest.TestCase):
         for lead in valve.iter():
             if lead.get('data-interface-port'):lead.attrib.pop('class',None)
         pipe=next(e for e in root.iter() if e.get('data-edge')=='paths[1][1->2]')
-        pipe.set('points','506,449 529,449 523,449 523,330 540,330')
+        pipe.set('points','536,449 559,449 553,449 553,330 570,330')
         ET.register_namespace('','http://www.w3.org/2000/svg');svg.write_text(ET.tostring(root,encoding='unicode'))
         self.run_cli('rasterize_sheet.py',svg,'-o',png)
         self.run_cli('validate_sheet.py',self.work,expected=1)

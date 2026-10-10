@@ -50,7 +50,7 @@ class PortGeometryCLI(unittest.TestCase):
         def damage(root):
             line = next(e for e in root.iter() if e.get('class') == 'ln-pressure')
             points = line.get('points').split()
-            points[0] = '622.0,530.0'  # EDP pressure_out is (620,530), before canvas shift.
+            points[0] = '652.0,530.0'  # EDP pressure_out is root (650,530); keep the original 2 px gap.
             line.set('points', ' '.join(points))
         self.edit(damage)
         failures = [c for c in self.validate()['checks'] if c['id'] == 'V3']
@@ -65,8 +65,8 @@ class PortGeometryCLI(unittest.TestCase):
         def damage(root):
             line = next(e for e in root.iter() if e.get('class') == 'ln-pressure')
             points = line.get('points').split()
-            line.set('points', ' '.join([points[0], '610.0,530.0', '610.0,470.0',
-                                         '800.0,470.0', '800.0,530.0'] + points[-1:]))
+            line.set('points', ' '.join([points[0], '640.0,530.0', '640.0,470.0',
+                                         '830.0,470.0', '830.0,530.0'] + points[-1:]))
         self.edit(damage)
         failures = [c for c in self.validate()['checks'] if c['id'] == 'V3']
         self.assertTrue(any(c.get('kind') == 'anchor_direction' and
@@ -75,8 +75,8 @@ class PortGeometryCLI(unittest.TestCase):
     def test_boundary_coordinate_does_not_exempt_a_body_crossing(self):
         def damage(root):
             line = next(e for e in root.iter() if e.get('class') == 'ln-pressure')
-            line.set('points', '620,530 620,510 820,510 920,510 920,480 '
-                               '800,480 800,530 820,530')
+            line.set('points', '650,530 650,510 850,510 950,510 950,480 '
+                               '830,480 830,530 850,530')
         self.edit(damage)
         failures = [c for c in self.validate()['checks'] if c['id'] == 'V2']
         finding = next((c for c in failures if c.get('obstacle') == 'PF-001'), None)
@@ -88,7 +88,7 @@ class PortGeometryCLI(unittest.TestCase):
         def damage(root):
             line = next(e for e in root.iter() if e.get('class') == 'ln-pressure')
             points = line.get('points').split()
-            line.set('points', ' '.join([points[0], '640,530', '634,530'] + points[1:]))
+            line.set('points', ' '.join([points[0], '670,530', '664,530'] + points[1:]))
         self.edit(damage)
         failures = [c for c in self.validate()['checks'] if c['id'] == 'V3']
         finding = next((c for c in failures if c.get('kind') == 'foldback'), None)
@@ -99,8 +99,8 @@ class PortGeometryCLI(unittest.TestCase):
     def test_connection_cannot_cross_an_unrelated_reservoir_body(self):
         def damage(root):
             line = next(e for e in root.iter() if e.get('class') == 'ln-pressure')
-            line.set('points', '620,530 640,530 640,100 60,100 60,200 300,200 '
-                               '300,100 800,100 800,530 820,530')
+            line.set('points', '650,530 670,530 670,100 90,100 90,200 330,200 '
+                               '330,100 830,100 830,530 850,530')
         self.edit(damage)
         failures = [c for c in self.validate()['checks'] if c['id'] == 'V2']
         finding = next(c for c in failures if c.get('obstacle') == 'TANK-001')
@@ -140,7 +140,7 @@ class PortGeometryCLI(unittest.TestCase):
     def test_actual_nested_svg_transform_is_used_for_ports_and_pipes(self):
         def move(root):
             sheet = next(e for e in root.iter() if e.get('id') == 'sheet')
-            sheet.set('transform', 'translate(30,0) translate(5,-7) matrix(1 0 0 1 0 0)')
+            sheet.set('transform', 'translate(5,-7) matrix(1 0 0 1 0 0)')
         self.edit(move)
         report = self.validate()
         self.assertFalse([c for c in report['checks'] if c['id'] == 'V3'])

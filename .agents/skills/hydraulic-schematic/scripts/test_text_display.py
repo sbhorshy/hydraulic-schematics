@@ -191,7 +191,7 @@ class TextDisplay(unittest.TestCase):
         text=self.probe_text(root,y+4,'H',x=str(x-4),**{'font-size':'11','class':'lbl'})
         self.save(root);report=self.validate()
         self.assertFalse(any(c['id']=='V17' and '文字 H' in c['detail'] for c in report['checks']))
-        text.set('x',str(x+230-4))
+        text.set('x',str(x+200-4))
         self.save(root);report=self.validate()
         self.assertTrue(any(c['id']=='V17' and '文字 H' in c['detail'] for c in report['checks']))
         self.assertTrue(any(c.get('element')=='probe-text' and c.get('obstacle_kind')=='suction_marker'
