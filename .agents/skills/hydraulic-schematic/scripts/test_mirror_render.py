@@ -28,9 +28,10 @@ PROD_CATALOG = json.loads((LIB / 'component-catalog.json').read_text(encoding='u
 SMALL = SKILL / 'assets' / 'fixtures' / 'l0-small-seed'
 PUMPS = ('engine_driven_pump', 'electric_motor_driven_pump')
 
-# 登记口径键清单(#63 固定,测试内独立字面量,勿从被测模块取)
+# 登记口径键清单(#63 固定,测试内独立字面量,勿从被测模块取;端口类别
+# 是目录真实字段 ports[].kind,枚举名才是 port_kind)
 PORT_FIELDS = ('id', 'svg_element_id', 'medium', 'role',
-               'flow_capability', 'anchor_direction', 'port_kind')
+               'flow_capability', 'anchor_direction', 'kind')
 
 # place() 既有 90/180/270° 锚向表,字面量拷贝只组合不重算;镜像锚向表按
 # #63 契约(先镜像再旋转)同样以字面量给出。
@@ -345,6 +346,16 @@ class MirrorPlacementTest(unittest.TestCase):
         component = _enabled('electric_motor_driven_pump')
         asset = self.work / 'symbols' / Path(component['symbol']['asset']).name
         asset.write_bytes(asset.read_bytes() + b'\n<!-- post-approval edit -->\n')
+        sheet = self.build([('P-001', component, {'mirror': 'x'})])
+        with self.assertRaises(ValueError) as ctx:
+            sheet.place()
+        self.assertIn('失效', str(ctx.exception))
+
+    def test_place_rejects_stale_registration_after_port_kind_edit(self):
+        # 登记后端口契约新增/改写 ports[].kind(目录真实字段,枚举
+        # port_kind:flow/body_tap)——摘要必须变化,place 硬失败不换帧。
+        component = _enabled('engine_driven_pump')
+        component['ports'][0]['kind'] = 'body_tap'
         sheet = self.build([('P-001', component, {'mirror': 'x'})])
         with self.assertRaises(ValueError) as ctx:
             sheet.place()

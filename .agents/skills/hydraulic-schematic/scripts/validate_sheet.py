@@ -590,7 +590,10 @@ def main(argv=None):
     # B1 交叉默认恒 0 硬 fail（唯一走 fail 通道的预算项）；#23 登记政策
     # 放行的口径：V4/V14 findings 全空且覆盖 pass、每个实际交叉有且仅有
     # 一条连续、归属正确、非未校核的真桥，且交叉数 ≤ 登记 allowance。
-    # 第二个交叉即使同样验证通过也超出 allowance=1，仍 fail。
+    # 第二个交叉即使同样验证通过也超出 allowance=1，仍 fail。默认路径
+    # （policy_id=None 且 allowance=0）的 F 诊断保持原始措辞；登记政策下
+    # 交叉数未超预算、仅因证据被拒时按"证据不完整"披露，真正数量超限
+    # 才说超出放行预算。
     b1_positions=sorted(set(b1_cross))
     b1_measured=len(b1_positions)
     b1_verified_count=sum(1 for p in b1_positions if b1_verified(p))
@@ -610,7 +613,13 @@ def main(argv=None):
         F.append(('V19','构图预算 B1：跳线许可解析失败（fail-closed，按'
                   '未获准处理）：%s'%policy_error))
     elif b1_measured:
-        if (covered and b1_verified_count==b1_measured
+        if bridge_policy['policy_id'] is None and bridge_policy['allowance']==0:
+            # 未申请政策的默认零交叉硬失败：维持原始诊断措辞（兼容既有
+            # 基线）；measured 仍是真实交叉数，policy/allowance/
+            # verified_bridges 与 covered 披露口径均不变。
+            add('B1',b1_measured,'fail','交叉 %d 处 > 0，须改道消除'%b1_measured)
+            F.append(('V19','构图预算 B1：交叉 %d 处 > 0，须改道消除'%b1_measured))
+        elif (covered and b1_verified_count==b1_measured
                 and b1_measured<=bridge_policy['allowance']):
             add('B1',b1_measured,'pass',
                 '经验证跳线 %d 处 ≤ 登记 %s 放行 %d 处（#23 定案；其余交叉仍禁止）'
@@ -628,9 +637,14 @@ def main(argv=None):
                 gaps.append('交叉 %d 处 > 放行 %d 处'%(b1_measured,bridge_policy['allowance']))
             detail='；'.join(gaps)
             add('B1',b1_measured,'fail',detail)
-            F.append(('V19','构图预算 B1：交叉 %d 处超出放行预算 %d（%s）'
-                      '，须改道消除或按 #23 重新登记'
-                      %(b1_measured,bridge_policy['allowance'],detail)))
+            if b1_measured>bridge_policy['allowance']:
+                F.append(('V19','构图预算 B1：交叉 %d 处超出放行预算 %d（%s）'
+                          '，须改道消除或按 #23 重新登记'
+                          %(b1_measured,bridge_policy['allowance'],detail)))
+            else:
+                F.append(('V19','构图预算 B1：交叉 %d 处在放行预算 %d 内，'
+                          '证据不完整不予放行（%s）'
+                          %(b1_measured,bridge_policy['allowance'],detail)))
     else:
         add('B1', 0, 'not_measured' if b1_unchecked else 'pass',
             'Crossing route/display evidence incomplete.' if b1_unchecked else None)

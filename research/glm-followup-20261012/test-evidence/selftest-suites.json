@@ -1,0 +1,2505 @@
+{
+  "schema": "hydraulic-selftest-runner/1",
+  "started_at": "2026-10-12T12:24:56.386003+00:00",
+  "finished_at": "2026-10-12T12:37:15.017911+00:00",
+  "wall_seconds": 738.632,
+  "jobs": 4,
+  "suite_timeout_seconds": 600.0,
+  "python": "/usr/bin/python",
+  "cwd": "/tmp/hydraulic-skill-final-89xoqucg/skill/scripts",
+  "log_dir": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites",
+  "merged_log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/units.log",
+  "report": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites.json",
+  "suites": [
+    {
+      "suite": "test_coordinate_contract",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_coordinate_contract"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 45.73749327659607,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_coordinate_contract.log",
+      "tests_ran": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_closed_acute_miter_stroke_cannot_escape_the_drawable_gate",
+          "id": "test_coordinate_contract.CoordinateContract.test_closed_acute_miter_stroke_cannot_escape_the_drawable_gate",
+          "result": "ok"
+        },
+        {
+          "name": "test_legacy_seed_keeps_actual_positions_and_gains_explicit_right_margin",
+          "id": "test_coordinate_contract.CoordinateContract.test_legacy_seed_keeps_actual_positions_and_gains_explicit_right_margin",
+          "result": "ok"
+        },
+        {
+          "name": "test_migration_rejects_unknown_coordinates_in_both_format_branches",
+          "id": "test_coordinate_contract.CoordinateContract.test_migration_rejects_unknown_coordinates_in_both_format_branches",
+          "result": "ok"
+        },
+        {
+          "name": "test_renderer_rejects_legacy_shift_with_an_actionable_migration_error",
+          "id": "test_coordinate_contract.CoordinateContract.test_renderer_rejects_legacy_shift_with_an_actionable_migration_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_renderer_requires_an_explicit_coordinate_system",
+          "id": "test_coordinate_contract.CoordinateContract.test_renderer_requires_an_explicit_coordinate_system",
+          "result": "ok"
+        },
+        {
+          "name": "test_system_and_assembly_engines_emit_the_same_explicit_contract",
+          "id": "test_coordinate_contract.CoordinateContract.test_system_and_assembly_engines_emit_the_same_explicit_contract",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_checks_bus_paint_not_only_centerline_against_drawable",
+          "id": "test_coordinate_contract.CoordinateContract.test_validator_checks_bus_paint_not_only_centerline_against_drawable",
+          "result": "ok"
+        },
+        {
+          "name": "test_visible_component_stroke_beyond_its_viewbox_is_rejected",
+          "id": "test_coordinate_contract.CoordinateContract.test_visible_component_stroke_beyond_its_viewbox_is_rejected",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_assembly_layout",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_assembly_layout"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 73.59800910949707,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_assembly_layout.log",
+      "tests_ran": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_below_labels_expand_gap_only_as_far_as_actual_ink_requires",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_below_labels_expand_gap_only_as_far_as_actual_ink_requires",
+          "result": "ok"
+        },
+        {
+          "name": "test_boundary_lead_too_short_for_padded_enclosure_is_rejected",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_boundary_lead_too_short_for_padded_enclosure_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_cdf_no_tank_layout_aligns_real_ports_and_passes_fresh_driver",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_cdf_no_tank_layout_aligns_real_ports_and_passes_fresh_driver",
+          "result": "ok"
+        },
+        {
+          "name": "test_changed_nonsquare_symbol_rotates_actual_source_ports_and_ignores_old_size",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_changed_nonsquare_symbol_rotates_actual_source_ports_and_ignores_old_size",
+          "result": "ok"
+        },
+        {
+          "name": "test_driver_without_seed_selects_assembly_branch_and_real_png",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_driver_without_seed_selects_assembly_branch_and_real_png",
+          "result": "ok"
+        },
+        {
+          "name": "test_knobs_control_run_height_gap_and_endpoint_leads",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_knobs_control_run_height_gap_and_endpoint_leads",
+          "result": "ok"
+        },
+        {
+          "name": "test_long_body_label_flips_next_label_above_at_b5_minimum",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_long_body_label_flips_next_label_above_at_b5_minimum",
+          "result": "ok"
+        },
+        {
+          "name": "test_narrow_canvas_rejects_panels_instead_of_emitting_clipped_layout",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_narrow_canvas_rejects_panels_instead_of_emitting_clipped_layout",
+          "result": "ok"
+        },
+        {
+          "name": "test_unsupported_graph_fails_closed_and_removes_previous_output",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_unsupported_graph_fails_closed_and_removes_previous_output",
+          "result": "ok"
+        },
+        {
+          "name": "test_unsupported_orientation_and_lowered_budgets_are_actionable",
+          "id": "test_assembly_layout.AssemblyLayoutCLI.test_unsupported_orientation_and_lowered_budgets_are_actionable",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_assemblies",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_assemblies"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 87.51627826690674,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_assemblies.log",
+      "tests_ran": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_assembly_invariants_hold_without_optional_jsonschema",
+          "id": "test_assemblies.AssemblyCLI.test_assembly_invariants_hold_without_optional_jsonschema",
+          "result": "ok"
+        },
+        {
+          "name": "test_assembly_label_must_stay_left_aligned_above_frame",
+          "id": "test_assemblies.AssemblyCLI.test_assembly_label_must_stay_left_aligned_above_frame",
+          "result": "ok"
+        },
+        {
+          "name": "test_assembly_panel_overlap_has_zero_budget",
+          "id": "test_assemblies.AssemblyCLI.test_assembly_panel_overlap_has_zero_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_cdf_seed_driver_produces_png_and_assembly_crossing_evidence",
+          "id": "test_assemblies.AssemblyCLI.test_cdf_seed_driver_produces_png_and_assembly_crossing_evidence",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_glyph_measurement_cannot_certify_enclosure",
+          "id": "test_assemblies.AssemblyCLI.test_missing_glyph_measurement_cannot_certify_enclosure",
+          "result": "ok"
+        },
+        {
+          "name": "test_preflight_allows_auxiliary_member_without_new_connections",
+          "id": "test_assemblies.AssemblyCLI.test_preflight_allows_auxiliary_member_without_new_connections",
+          "result": "ok"
+        },
+        {
+          "name": "test_preflight_rejects_undeclared_assembly_member_even_in_concept",
+          "id": "test_assemblies.AssemblyCLI.test_preflight_rejects_undeclared_assembly_member_even_in_concept",
+          "result": "ok"
+        },
+        {
+          "name": "test_preflight_structural_errors_are_not_downgraded_for_concept",
+          "id": "test_assemblies.AssemblyCLI.test_preflight_structural_errors_are_not_downgraded_for_concept",
+          "result": "ok"
+        },
+        {
+          "name": "test_renderer_encloses_actual_long_member_labels_and_keeps_groups_distinct",
+          "id": "test_assemblies.AssemblyCLI.test_renderer_encloses_actual_long_member_labels_and_keeps_groups_distinct",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_rejects_assembly_frame_cutting_member_and_wrong_width",
+          "id": "test_assemblies.AssemblyCLI.test_validator_rejects_assembly_frame_cutting_member_and_wrong_width",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_rejects_enclosure_including_a_nonmember",
+          "id": "test_assemblies.AssemblyCLI.test_validator_rejects_enclosure_including_a_nonmember",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_rejects_unrelated_pipe_crossing_enclosure",
+          "id": "test_assemblies.AssemblyCLI.test_validator_rejects_unrelated_pipe_crossing_enclosure",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_entrypoints",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_entrypoints"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 29.571138858795166,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_entrypoints.log",
+      "tests_ran": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_cli_places_spring_valve_and_reports_nodes_matching_symbol_facts",
+          "id": "test_entrypoints.FootprintRegistration45.test_cli_places_spring_valve_and_reports_nodes_matching_symbol_facts",
+          "result": "ok"
+        },
+        {
+          "name": "test_cli_reports_unregistered_types_fail_closed_with_actionable_list",
+          "id": "test_entrypoints.FootprintRegistration45.test_cli_reports_unregistered_types_fail_closed_with_actionable_list",
+          "result": "ok"
+        },
+        {
+          "name": "test_refuel_catalog_entry_matches_symbol_facts",
+          "id": "test_entrypoints.FootprintRegistration45.test_refuel_catalog_entry_matches_symbol_facts",
+          "result": "ok"
+        },
+        {
+          "name": "test_spring_valve_catalog_entry_matches_symbol_port_group",
+          "id": "test_entrypoints.FootprintRegistration45.test_spring_valve_catalog_entry_matches_symbol_port_group",
+          "result": "ok"
+        },
+        {
+          "name": "test_cli_rejects_reference_layout_with_active_mirror",
+          "id": "test_entrypoints.LayoutEntrypoints.test_cli_rejects_reference_layout_with_active_mirror",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_fixture_cli_preflight_and_rule_layout",
+          "id": "test_entrypoints.LayoutEntrypoints.test_current_fixture_cli_preflight_and_rule_layout",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_refuel_type_is_placed_without_changing_topology",
+          "id": "test_entrypoints.LayoutEntrypoints.test_current_refuel_type_is_placed_without_changing_topology",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_seed_renders_and_retains_geometry_failure_gate",
+          "id": "test_entrypoints.LayoutEntrypoints.test_current_seed_renders_and_retains_geometry_failure_gate",
+          "result": "ok"
+        },
+        {
+          "name": "test_in_place_validation_uses_catalog_symbols_without_local_copies",
+          "id": "test_entrypoints.LayoutEntrypoints.test_in_place_validation_uses_catalog_symbols_without_local_copies",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_reference_labels_allow_renderer_to_prepare_all_nodes",
+          "id": "test_entrypoints.LayoutEntrypoints.test_no_reference_labels_allow_renderer_to_prepare_all_nodes",
+          "result": "ok"
+        },
+        {
+          "name": "test_partial_reference_labels_keep_defaults_for_other_nodes",
+          "id": "test_entrypoints.LayoutEntrypoints.test_partial_reference_labels_keep_defaults_for_other_nodes",
+          "result": "ok"
+        },
+        {
+          "name": "test_reference_mirror_request_is_rejected_not_silently_dropped",
+          "id": "test_entrypoints.LayoutEntrypoints.test_reference_mirror_request_is_rejected_not_silently_dropped",
+          "result": "ok"
+        },
+        {
+          "name": "test_small_seed_passes_preflight_render_and_geometry",
+          "id": "test_entrypoints.LayoutEntrypoints.test_small_seed_passes_preflight_render_and_geometry",
+          "result": "ok"
+        },
+        {
+          "name": "test_unknown_and_unregistered_types_fail_with_actionable_message",
+          "id": "test_entrypoints.LayoutEntrypoints.test_unknown_and_unregistered_types_fail_with_actionable_message",
+          "result": "ok"
+        },
+        {
+          "name": "test_unsupported_refuel_connection_is_not_guessed",
+          "id": "test_entrypoints.LayoutEntrypoints.test_unsupported_refuel_connection_is_not_guessed",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_optimizer_budget",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_optimizer_budget"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 1.0019316673278809,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_optimizer_budget.log",
+      "tests_ran": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_budget_keeps_best_evaluated_candidate",
+          "id": "test_optimizer_budget.BudgetTests.test_budget_keeps_best_evaluated_candidate",
+          "result": "ok"
+        },
+        {
+          "name": "test_elapsed_budget_stops_after_inflight_evaluation_and_keeps_improvement",
+          "id": "test_optimizer_budget.BudgetTests.test_elapsed_budget_stops_after_inflight_evaluation_and_keeps_improvement",
+          "result": "ok"
+        },
+        {
+          "name": "test_explicit_polish_is_bounded",
+          "id": "test_optimizer_budget.BudgetTests.test_explicit_polish_is_bounded",
+          "result": "ok"
+        },
+        {
+          "name": "test_initial_panel_is_reused_and_counts_in_budget",
+          "id": "test_optimizer_budget.BudgetTests.test_initial_panel_is_reused_and_counts_in_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_local_minimum",
+          "id": "test_optimizer_budget.BudgetTests.test_local_minimum",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_sheet_returns_valid_evaluated_layout_under_budget",
+          "id": "test_optimizer_budget.BudgetTests.test_real_sheet_returns_valid_evaluated_layout_under_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_reject_invalid_limits",
+          "id": "test_optimizer_budget.BudgetTests.test_reject_invalid_limits",
+          "result": "ok"
+        },
+        {
+          "name": "test_satisfied_seed_needs_no_polish",
+          "id": "test_optimizer_budget.BudgetTests.test_satisfied_seed_needs_no_polish",
+          "result": "ok"
+        },
+        {
+          "name": "test_step_budget_counts_accepted_moves",
+          "id": "test_optimizer_budget.BudgetTests.test_step_budget_counts_accepted_moves",
+          "result": "ok"
+        },
+        {
+          "name": "test_zero_step_or_time_returns_seed_without_probing",
+          "id": "test_optimizer_budget.BudgetTests.test_zero_step_or_time_returns_seed_without_probing",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_driver",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_driver"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 3.123563051223755,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_driver.log",
+      "tests_ran": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_bounded_search_still_runs_complete_automatic_pipeline",
+          "id": "test_driver.DriverTests.test_bounded_search_still_runs_complete_automatic_pipeline",
+          "result": "ok"
+        },
+        {
+          "name": "test_changed_asset_is_refreshed_on_keep",
+          "id": "test_driver.DriverTests.test_changed_asset_is_refreshed_on_keep",
+          "result": "ok"
+        },
+        {
+          "name": "test_default_workspace_is_independent_temporary_directory",
+          "id": "test_driver.DriverTests.test_default_workspace_is_independent_temporary_directory",
+          "result": "ok"
+        },
+        {
+          "name": "test_in_workspace_inputs_survive_keep",
+          "id": "test_driver.DriverTests.test_in_workspace_inputs_survive_keep",
+          "result": "ok"
+        },
+        {
+          "name": "test_inherited_pipes_do_not_escape_timeout",
+          "id": "test_driver.DriverTests.test_inherited_pipes_do_not_escape_timeout",
+          "result": "ok"
+        },
+        {
+          "name": "test_keep_rejects_asset_directory_symlink_outside_workspace",
+          "id": "test_driver.DriverTests.test_keep_rejects_asset_directory_symlink_outside_workspace",
+          "result": "ok"
+        },
+        {
+          "name": "test_keep_reuses_assets_but_refreshes_input_and_invalidates_stale_outputs",
+          "id": "test_driver.DriverTests.test_keep_reuses_assets_but_refreshes_input_and_invalidates_stale_outputs",
+          "result": "ok"
+        },
+        {
+          "name": "test_local_seed_keeps_provisional_and_draft_title_disclosures",
+          "id": "test_driver.DriverTests.test_local_seed_keeps_provisional_and_draft_title_disclosures",
+          "result": "ok"
+        },
+        {
+          "name": "test_local_seed_symbol_is_preserved_and_source_seed_not_modified",
+          "id": "test_driver.DriverTests.test_local_seed_symbol_is_preserved_and_source_seed_not_modified",
+          "result": "ok"
+        },
+        {
+          "name": "test_managed_directory_can_be_rebuilt",
+          "id": "test_driver.DriverTests.test_managed_directory_can_be_rebuilt",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_png_is_not_convergence_even_when_geometry_passes",
+          "id": "test_driver.DriverTests.test_missing_png_is_not_convergence_even_when_geometry_passes",
+          "result": "ok"
+        },
+        {
+          "name": "test_reused_seed_symbol_reference_stays_stable",
+          "id": "test_driver.DriverTests.test_reused_seed_symbol_reference_stays_stable",
+          "result": "ok"
+        },
+        {
+          "name": "test_schema_copy_is_inside_workspace_and_outside_schema_untouched",
+          "id": "test_driver.DriverTests.test_schema_copy_is_inside_workspace_and_outside_schema_untouched",
+          "result": "ok"
+        },
+        {
+          "name": "test_skill_tree_and_ancestors_are_protected_even_through_symlinks",
+          "id": "test_driver.DriverTests.test_skill_tree_and_ancestors_are_protected_even_through_symlinks",
+          "result": "ok"
+        },
+        {
+          "name": "test_stale_controlled_template_is_removed_on_keep",
+          "id": "test_driver.DriverTests.test_stale_controlled_template_is_removed_on_keep",
+          "result": "ok"
+        },
+        {
+          "name": "test_stale_validation_report_cannot_mask_child_failure",
+          "id": "test_driver.DriverTests.test_stale_validation_report_cannot_mask_child_failure",
+          "result": "ok"
+        },
+        {
+          "name": "test_subprocess_stderr_does_not_pollute_json_stdout",
+          "id": "test_driver.DriverTests.test_subprocess_stderr_does_not_pollute_json_stdout",
+          "result": "ok"
+        },
+        {
+          "name": "test_subprocess_timeout_is_recorded",
+          "id": "test_driver.DriverTests.test_subprocess_timeout_is_recorded",
+          "result": "ok"
+        },
+        {
+          "name": "test_unmanaged_nonempty_directory_is_preserved",
+          "id": "test_driver.DriverTests.test_unmanaged_nonempty_directory_is_preserved",
+          "result": "ok"
+        },
+        {
+          "name": "test_validation_residuals_survive_optimizer_budget",
+          "id": "test_driver.DriverTests.test_validation_residuals_survive_optimizer_budget",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_proofreading_evidence",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_proofreading_evidence"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 92.07605814933777,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_proofreading_evidence.log",
+      "tests_ran": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_driver_does_not_deliver_automated_success_without_perceptual_review",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_driver_does_not_deliver_automated_success_without_perceptual_review",
+          "result": "ok"
+        },
+        {
+          "name": "test_geometry_success_discloses_unchecked_required_evidence",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_geometry_success_discloses_unchecked_required_evidence",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_required_symbol_keeps_diagnostics_but_cannot_verify_current",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_missing_required_symbol_keeps_diagnostics_but_cannot_verify_current",
+          "result": "ok"
+        },
+        {
+          "name": "test_parse_failure_replaces_old_success_report",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_parse_failure_replaces_old_success_report",
+          "result": "ok"
+        },
+        {
+          "name": "test_review_is_bound_to_content_and_report_not_filenames",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_review_is_bound_to_content_and_report_not_filenames",
+          "result": "ok"
+        },
+        {
+          "name": "test_same_size_replaced_png_is_unchecked_after_revalidation",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_same_size_replaced_png_is_unchecked_after_revalidation",
+          "result": "ok"
+        },
+        {
+          "name": "test_standalone_validator_accepts_explicit_workdir",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_standalone_validator_accepts_explicit_workdir",
+          "result": "ok"
+        },
+        {
+          "name": "test_windows_symbol_reference_binds_the_selected_catalog_asset",
+          "id": "test_proofreading_evidence.ProofreadingEvidenceCLI.test_windows_symbol_reference_binds_the_selected_catalog_asset",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_route_pruning",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_route_pruning"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.7168445587158203,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_route_pruning.log",
+      "tests_ran": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_equal_score_routes_keep_first_candidate",
+          "id": "test_route_pruning.RendererDefaultsTest.test_equal_score_routes_keep_first_candidate",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_or_null_labels_match_explicit_empty_maps",
+          "id": "test_route_pruning.RendererDefaultsTest.test_missing_or_null_labels_match_explicit_empty_maps",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_rasterize_sheet",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_rasterize_sheet"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 0.5824084281921387,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_rasterize_sheet.log",
+      "tests_ran": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_backend_fallback_uses_available_chrome",
+          "id": "test_rasterize_sheet.ReadbackTests.test_backend_fallback_uses_available_chrome",
+          "result": "ok"
+        },
+        {
+          "name": "test_input_svg_cannot_be_overwritten",
+          "id": "test_rasterize_sheet.ReadbackTests.test_input_svg_cannot_be_overwritten",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_renderer_does_not_leave_old_readback",
+          "id": "test_rasterize_sheet.ReadbackTests.test_missing_renderer_does_not_leave_old_readback",
+          "result": "ok"
+        },
+        {
+          "name": "test_nonzero_origin_rejected_for_pixel_probes",
+          "id": "test_rasterize_sheet.ReadbackTests.test_nonzero_origin_rejected_for_pixel_probes",
+          "result": "ok"
+        },
+        {
+          "name": "test_scaled_image_rejected_and_old_readback_removed",
+          "id": "test_rasterize_sheet.ReadbackTests.test_scaled_image_rejected_and_old_readback_removed",
+          "result": "ok"
+        },
+        {
+          "name": "test_wrong_size_renderer_output_is_not_published",
+          "id": "test_rasterize_sheet.ReadbackTests.test_wrong_size_renderer_output_is_not_published",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_priority_valve_leads",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_priority_valve_leads"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 34.64069080352783,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_priority_valve_leads.log",
+      "tests_ran": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_missing_pressure_style_is_rejected",
+          "id": "test_priority_valve_leads.PriorityValveLeads.test_missing_pressure_style_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_port_path_cannot_evade_width_check",
+          "id": "test_priority_valve_leads.PriorityValveLeads.test_port_path_cannot_evade_width_check",
+          "result": "ok"
+        },
+        {
+          "name": "test_pressure_leads_match_connected_network_for_both_rotations",
+          "id": "test_priority_valve_leads.PriorityValveLeads.test_pressure_leads_match_connected_network_for_both_rotations",
+          "result": "ok"
+        },
+        {
+          "name": "test_valid_external_leads_pass_v16",
+          "id": "test_priority_valve_leads.PriorityValveLeads.test_valid_external_leads_pass_v16",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_display_widths",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_display_widths"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 214.91156721115112,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_display_widths.log",
+      "tests_ran": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_actual_png_width_ratios_at_normal_and_double_scale",
+          "id": "test_display_widths.DisplayWidths.test_actual_png_width_ratios_at_normal_and_double_scale",
+          "result": "ok"
+        },
+        {
+          "name": "test_both_gas_tap_ends_follow_sense_width_and_keep_internal_strokes",
+          "id": "test_display_widths.DisplayWidths.test_both_gas_tap_ends_follow_sense_width_and_keep_internal_strokes",
+          "result": "ok"
+        },
+        {
+          "name": "test_browser_unavailable_is_unchecked_and_stale_sidecar_is_not_reused",
+          "id": "test_display_widths.DisplayWidths.test_browser_unavailable_is_unchecked_and_stale_sidecar_is_not_reused",
+          "result": "ok"
+        },
+        {
+          "name": "test_css_overrides_and_extra_scale_cannot_hide_behind_correct_class",
+          "id": "test_display_widths.DisplayWidths.test_css_overrides_and_extra_scale_cannot_hide_behind_correct_class",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_leads_have_complete_browser_measurement_coverage",
+          "id": "test_display_widths.DisplayWidths.test_current_leads_have_complete_browser_measurement_coverage",
+          "result": "ok"
+        },
+        {
+          "name": "test_equivalent_source_path_and_polyline_leads_follow_network",
+          "id": "test_display_widths.DisplayWidths.test_equivalent_source_path_and_polyline_leads_follow_network",
+          "result": "ok"
+        },
+        {
+          "name": "test_gas_css_polyline_and_extra_scale_corruption_are_localized",
+          "id": "test_display_widths.DisplayWidths.test_gas_css_polyline_and_extra_scale_corruption_are_localized",
+          "result": "ok"
+        },
+        {
+          "name": "test_gas_source_path_polyline_and_compensated_scale_are_equivalent",
+          "id": "test_display_widths.DisplayWidths.test_gas_source_path_polyline_and_compensated_scale_are_equivalent",
+          "result": "ok"
+        },
+        {
+          "name": "test_inherited_width_and_compensated_nested_source_scale_are_valid",
+          "id": "test_display_widths.DisplayWidths.test_inherited_width_and_compensated_nested_source_scale_are_valid",
+          "result": "ok"
+        },
+        {
+          "name": "test_pneumatic_pressure_gauge_12px_override_fails_with_fresh_png",
+          "id": "test_display_widths.DisplayWidths.test_pneumatic_pressure_gauge_12px_override_fails_with_fresh_png",
+          "result": "ok"
+        },
+        {
+          "name": "test_pressure_lead_cannot_extend_past_defined_body_boundary",
+          "id": "test_display_widths.DisplayWidths.test_pressure_lead_cannot_extend_past_defined_body_boundary",
+          "result": "ok"
+        },
+        {
+          "name": "test_tampered_browser_measurements_are_invalidated_and_remeasured",
+          "id": "test_display_widths.DisplayWidths.test_tampered_browser_measurements_are_invalidated_and_remeasured",
+          "result": "ok"
+        },
+        {
+          "name": "test_unannotated_curved_source_lead_cannot_disappear_from_coverage",
+          "id": "test_display_widths.DisplayWidths.test_unannotated_curved_source_lead_cannot_disappear_from_coverage",
+          "result": "ok"
+        },
+        {
+          "name": "test_use_lead_is_explicitly_unchecked_with_object_location",
+          "id": "test_display_widths.DisplayWidths.test_use_lead_is_explicitly_unchecked_with_object_location",
+          "result": "ok"
+        },
+        {
+          "name": "test_width_transition_in_blank_lead_is_rejected",
+          "id": "test_display_widths.DisplayWidths.test_width_transition_in_blank_lead_is_rejected",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_paint_evidence",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_paint_evidence"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 192.4336404800415,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_paint_evidence.log",
+      "tests_ran": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_dashed_pressure_lead_is_not_a_continuous_measured_connection",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_dashed_pressure_lead_is_not_a_continuous_measured_connection",
+          "result": "ok"
+        },
+        {
+          "name": "test_each_body_primitive_rejects_a_12px_stroke",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_each_body_primitive_rejects_a_12px_stroke",
+          "result": "ok"
+        },
+        {
+          "name": "test_fat_symbol_body_fails_while_its_pressure_leads_keep_correct_width",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_fat_symbol_body_fails_while_its_pressure_leads_keep_correct_width",
+          "result": "ok"
+        },
+        {
+          "name": "test_nonuniform_body_primitives_are_explicitly_unchecked",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_nonuniform_body_primitives_are_explicitly_unchecked",
+          "result": "ok"
+        },
+        {
+          "name": "test_percentage_stroke_preserves_report_and_discloses_unmeasured_width",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_percentage_stroke_preserves_report_and_discloses_unmeasured_width",
+          "result": "ok"
+        },
+        {
+          "name": "test_source_scaled_body_primitives_keep_prescribed_display_width",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_source_scaled_body_primitives_keep_prescribed_display_width",
+          "result": "ok"
+        },
+        {
+          "name": "test_supported_visible_color_passes_and_paint_servers_remain_unchecked",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_supported_visible_color_passes_and_paint_servers_remain_unchecked",
+          "result": "ok"
+        },
+        {
+          "name": "test_transparent_colored_body_cannot_supply_lead_transition_contact",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_transparent_colored_body_cannot_supply_lead_transition_contact",
+          "result": "ok"
+        },
+        {
+          "name": "test_transparent_colored_geometry_does_not_create_a_text_obstacle",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_transparent_colored_geometry_does_not_create_a_text_obstacle",
+          "result": "ok"
+        },
+        {
+          "name": "test_transparent_colored_lead_has_no_png_ink_and_fails_width_checks",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_transparent_colored_lead_has_no_png_ink_and_fails_width_checks",
+          "result": "ok"
+        },
+        {
+          "name": "test_transparent_colored_pipe_has_no_png_ink_and_cannot_connect_terminals",
+          "id": "test_paint_evidence.PaintEvidenceCLI.test_transparent_colored_pipe_has_no_png_ink_and_cannot_connect_terminals",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_rotation_routes",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_rotation_routes"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 91.27035307884216,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_rotation_routes.log",
+      "tests_ran": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_other_rf_and_cv_orientations",
+          "id": "test_rotation_routes.RotationRoutes.test_other_rf_and_cv_orientations",
+          "result": "ok"
+        },
+        {
+          "name": "test_rf_270_does_not_move_its_collision_into_the_neighbor",
+          "id": "test_rotation_routes.RotationRoutes.test_rf_270_does_not_move_its_collision_into_the_neighbor",
+          "result": "ok"
+        },
+        {
+          "name": "test_rf_zero_rotation_avoids_its_body",
+          "id": "test_rotation_routes.RotationRoutes.test_rf_zero_rotation_avoids_its_body",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotation_positive_has_zero_failures_and_all_budgets",
+          "id": "test_rotation_routes.RotationRoutes.test_rotation_positive_has_zero_failures_and_all_budgets",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_route_terminals",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_route_terminals"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 5.931275844573975,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_route_terminals.log",
+      "tests_ran": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_six_pixel_tail_is_rejected_by_sheet_validator",
+          "id": "test_route_terminals.BacktrackValidation.test_six_pixel_tail_is_rejected_by_sheet_validator",
+          "result": "ok"
+        },
+        {
+          "name": "test_facing_collinear_ports_remain_direct",
+          "id": "test_route_terminals.CloseFacingPorts.test_facing_collinear_ports_remain_direct",
+          "result": "ok"
+        },
+        {
+          "name": "test_reported_valve_to_pump_route_has_no_tail",
+          "id": "test_route_terminals.CloseFacingPorts.test_reported_valve_to_pump_route_has_no_tail",
+          "result": "ok"
+        },
+        {
+          "name": "test_short_clearances_in_all_four_orientations",
+          "id": "test_route_terminals.CloseFacingPorts.test_short_clearances_in_all_four_orientations",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_dangling_ports",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_dangling_ports"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 271.0513195991516,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_dangling_ports.log",
+      "tests_ran": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_ancestor_clipping_that_removes_circles_is_not_checked",
+          "id": "test_dangling_ports.DanglingPorts.test_ancestor_clipping_that_removes_circles_is_not_checked",
+          "result": "ok"
+        },
+        {
+          "name": "test_ancestor_css_hiding_and_zero_opacity_remove_visible_markers",
+          "id": "test_dangling_ports.DanglingPorts.test_ancestor_css_hiding_and_zero_opacity_remove_visible_markers",
+          "result": "ok"
+        },
+        {
+          "name": "test_bare_last_instance_uses_only_main_path_in_and_inline_uses_both",
+          "id": "test_dangling_ports.DanglingPorts.test_bare_last_instance_uses_only_main_path_in_and_inline_uses_both",
+          "result": "ok"
+        },
+        {
+          "name": "test_body_tap_consumes_measurement_anchor_without_exempting_other_open_ports",
+          "id": "test_dangling_ports.DanglingPorts.test_body_tap_consumes_measurement_anchor_without_exempting_other_open_ports",
+          "result": "ok"
+        },
+        {
+          "name": "test_broken_local_port_group_blocks_render_and_validation_with_same_contract",
+          "id": "test_dangling_ports.DanglingPorts.test_broken_local_port_group_blocks_render_and_validation_with_same_contract",
+          "result": "ok"
+        },
+        {
+          "name": "test_circle_without_red_paint_fails_despite_visible_geometry",
+          "id": "test_dangling_ports.DanglingPorts.test_circle_without_red_paint_fails_despite_visible_geometry",
+          "result": "ok"
+        },
+        {
+          "name": "test_connected_gas_taps_agree_with_open_ports_circles_and_title",
+          "id": "test_dangling_ports.DanglingPorts.test_connected_gas_taps_agree_with_open_ports_circles_and_title",
+          "result": "ok"
+        },
+        {
+          "name": "test_full_driver_preserves_local_contract_failure_for_standalone_validation",
+          "id": "test_dangling_ports.DanglingPorts.test_full_driver_preserves_local_contract_failure_for_standalone_validation",
+          "result": "ok"
+        },
+        {
+          "name": "test_hidden_red_circle_group_cannot_satisfy_disclosure",
+          "id": "test_dangling_ports.DanglingPorts.test_hidden_red_circle_group_cannot_satisfy_disclosure",
+          "result": "ok"
+        },
+        {
+          "name": "test_local_symbol_missing_open_port_is_contract_error",
+          "id": "test_dangling_ports.DanglingPorts.test_local_symbol_missing_open_port_is_contract_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_connected_port_marker_is_drawing_error",
+          "id": "test_dangling_ports.DanglingPorts.test_missing_connected_port_marker_is_drawing_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_red_circle_is_drawing_omission_not_input_change",
+          "id": "test_dangling_ports.DanglingPorts.test_missing_red_circle_is_drawing_omission_not_input_change",
+          "result": "ok"
+        },
+        {
+          "name": "test_red_circle_positions_use_actual_svg_transforms",
+          "id": "test_dangling_ports.DanglingPorts.test_red_circle_positions_use_actual_svg_transforms",
+          "result": "ok"
+        },
+        {
+          "name": "test_removing_tap_exposes_both_endpoints_and_keeps_unknowns",
+          "id": "test_dangling_ports.DanglingPorts.test_removing_tap_exposes_both_endpoints_and_keeps_unknowns",
+          "result": "ok"
+        },
+        {
+          "name": "test_stale_title_count_is_rejected",
+          "id": "test_dangling_ports.DanglingPorts.test_stale_title_count_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_standalone_cli_resolves_workdir_and_catalog_assets_from_elsewhere",
+          "id": "test_dangling_ports.DanglingPorts.test_standalone_cli_resolves_workdir_and_catalog_assets_from_elsewhere",
+          "result": "ok"
+        },
+        {
+          "name": "test_stylesheet_hidden_circles_fail_with_actual_png_evidence",
+          "id": "test_dangling_ports.DanglingPorts.test_stylesheet_hidden_circles_fail_with_actual_png_evidence",
+          "result": "ok"
+        },
+        {
+          "name": "test_unavailable_browser_is_unchecked_but_known_omissions_still_fail",
+          "id": "test_dangling_ports.DanglingPorts.test_unavailable_browser_is_unchecked_but_known_omissions_still_fail",
+          "result": "ok"
+        },
+        {
+          "name": "test_visible_rotated_and_shifted_circles_pass_actual_display_check",
+          "id": "test_dangling_ports.DanglingPorts.test_visible_rotated_and_shifted_circles_pass_actual_display_check",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_port_geometry",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_port_geometry"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 79.23303079605103,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_port_geometry.log",
+      "tests_ran": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_actual_nested_svg_transform_is_used_for_ports_and_pipes",
+          "id": "test_port_geometry.PortGeometryCLI.test_actual_nested_svg_transform_is_used_for_ports_and_pipes",
+          "result": "ok"
+        },
+        {
+          "name": "test_boundary_coordinate_does_not_exempt_a_body_crossing",
+          "id": "test_port_geometry.PortGeometryCLI.test_boundary_coordinate_does_not_exempt_a_body_crossing",
+          "result": "ok"
+        },
+        {
+          "name": "test_completed_port_check_explains_its_actual_coverage",
+          "id": "test_port_geometry.PortGeometryCLI.test_completed_port_check_explains_its_actual_coverage",
+          "result": "ok"
+        },
+        {
+          "name": "test_connection_cannot_cross_an_unrelated_reservoir_body",
+          "id": "test_port_geometry.PortGeometryCLI.test_connection_cannot_cross_an_unrelated_reservoir_body",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_firewall_valve_short_clearance_is_a_positive_endpoint_case",
+          "id": "test_port_geometry.PortGeometryCLI.test_current_firewall_valve_short_clearance_is_a_positive_endpoint_case",
+          "result": "ok"
+        },
+        {
+          "name": "test_mutating_only_the_visible_instance_cannot_reuse_layout_ports",
+          "id": "test_port_geometry.PortGeometryCLI.test_mutating_only_the_visible_instance_cannot_reuse_layout_ports",
+          "result": "ok"
+        },
+        {
+          "name": "test_reverse_incidence_fails_even_when_endpoint_is_exact",
+          "id": "test_port_geometry.PortGeometryCLI.test_reverse_incidence_fails_even_when_endpoint_is_exact",
+          "result": "ok"
+        },
+        {
+          "name": "test_scaled_nonzero_origin_symbol_in_all_four_rotations",
+          "id": "test_port_geometry.PortGeometryCLI.test_scaled_nonzero_origin_symbol_in_all_four_rotations",
+          "result": "ok"
+        },
+        {
+          "name": "test_six_pixel_foldback_has_v3_connection_location",
+          "id": "test_port_geometry.PortGeometryCLI.test_six_pixel_foldback_has_v3_connection_location",
+          "result": "ok"
+        },
+        {
+          "name": "test_unsupported_visible_geometry_is_explicitly_rejected",
+          "id": "test_port_geometry.PortGeometryCLI.test_unsupported_visible_geometry_is_explicitly_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_visible_endpoint_gap_fails_with_port_and_input_location",
+          "id": "test_port_geometry.PortGeometryCLI.test_visible_endpoint_gap_fails_with_port_and_input_location",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_topology_reconciliation",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_topology_reconciliation"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 125.90967059135437,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_topology_reconciliation.log",
+      "tests_ran": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_added_connection_cannot_borrow_an_existing_edge_claim",
+          "id": "test_topology_reconciliation.TopologyCLI.test_added_connection_cannot_borrow_an_existing_edge_claim",
+          "result": "ok"
+        },
+        {
+          "name": "test_ancestor_clipping_cannot_certify_visible_connectivity",
+          "id": "test_topology_reconciliation.TopologyCLI.test_ancestor_clipping_cannot_certify_visible_connectivity",
+          "result": "ok"
+        },
+        {
+          "name": "test_branch_moved_to_wrong_bus_fails_at_its_input_anchor",
+          "id": "test_topology_reconciliation.TopologyCLI.test_branch_moved_to_wrong_bus_fails_at_its_input_anchor",
+          "result": "ok"
+        },
+        {
+          "name": "test_contiguous_split_and_bridge_fragments_remain_one_connection",
+          "id": "test_topology_reconciliation.TopologyCLI.test_contiguous_split_and_bridge_fragments_remain_one_connection",
+          "result": "ok"
+        },
+        {
+          "name": "test_css_hidden_line_is_missing_even_though_geometry_and_claim_remain",
+          "id": "test_topology_reconciliation.TopologyCLI.test_css_hidden_line_is_missing_even_though_geometry_and_claim_remain",
+          "result": "ok"
+        },
+        {
+          "name": "test_current_seed_discloses_actual_pressure_case_and_gas_short_circuits",
+          "id": "test_topology_reconciliation.TopologyCLI.test_current_seed_discloses_actual_pressure_case_and_gas_short_circuits",
+          "result": "ok"
+        },
+        {
+          "name": "test_deleted_connection_fails_at_its_input_anchor",
+          "id": "test_topology_reconciliation.TopologyCLI.test_deleted_connection_fails_at_its_input_anchor",
+          "result": "ok"
+        },
+        {
+          "name": "test_driver_and_standalone_report_same_measured_topology",
+          "id": "test_topology_reconciliation.TopologyCLI.test_driver_and_standalone_report_same_measured_topology",
+          "result": "ok"
+        },
+        {
+          "name": "test_hidden_component_cannot_supply_a_visible_terminal",
+          "id": "test_topology_reconciliation.TopologyCLI.test_hidden_component_cannot_supply_a_visible_terminal",
+          "result": "ok"
+        },
+        {
+          "name": "test_markdown_manifest_separates_logical_edges_nodes_and_svg_fragments",
+          "id": "test_topology_reconciliation.TopologyCLI.test_markdown_manifest_separates_logical_edges_nodes_and_svg_fragments",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_browser_measurement_never_claims_visible_graph_pass",
+          "id": "test_topology_reconciliation.TopologyCLI.test_missing_browser_measurement_never_claims_visible_graph_pass",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_port_anchor_is_a_topology_traceability_failure",
+          "id": "test_topology_reconciliation.TopologyCLI.test_missing_port_anchor_is_a_topology_traceability_failure",
+          "result": "ok"
+        },
+        {
+          "name": "test_renderer_emits_input_anchors_and_manifest_without_extra_script",
+          "id": "test_topology_reconciliation.TopologyCLI.test_renderer_emits_input_anchors_and_manifest_without_extra_script",
+          "result": "ok"
+        },
+        {
+          "name": "test_series_connections_are_measured_and_coverage_is_complete",
+          "id": "test_topology_reconciliation.TopologyCLI.test_series_connections_are_measured_and_coverage_is_complete",
+          "result": "ok"
+        },
+        {
+          "name": "test_shared_overlaid_suction_trunk_has_one_physical_incidence",
+          "id": "test_topology_reconciliation.TopologyCLI.test_shared_overlaid_suction_trunk_has_one_physical_incidence",
+          "result": "ok"
+        },
+        {
+          "name": "test_target_ports_swapped_with_same_edge_count_and_claims_fail",
+          "id": "test_topology_reconciliation.TopologyCLI.test_target_ports_swapped_with_same_edge_count_and_claims_fail",
+          "result": "ok"
+        },
+        {
+          "name": "test_two_pumps_shared_suction_buses_branches_and_gas_taps",
+          "id": "test_topology_reconciliation.TopologyCLI.test_two_pumps_shared_suction_buses_branches_and_gas_taps",
+          "result": "ok"
+        },
+        {
+          "name": "test_unclassified_extra_visible_wire_cannot_escape_topology",
+          "id": "test_topology_reconciliation.TopologyCLI.test_unclassified_extra_visible_wire_cannot_escape_topology",
+          "result": "ok"
+        },
+        {
+          "name": "test_unknowns_are_disclosed_and_never_generate_edges",
+          "id": "test_topology_reconciliation.TopologyCLI.test_unknowns_are_disclosed_and_never_generate_edges",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_text_display",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_text_display"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 281.7052857875824,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_text_display.log",
+      "tests_ran": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_b7_measures_six_pixel_clearance_without_calling_near_text_overlap",
+          "id": "test_text_display.TextDisplay.test_b7_measures_six_pixel_clearance_without_calling_near_text_overlap",
+          "result": "ok"
+        },
+        {
+          "name": "test_browser_unavailable_keeps_v12_and_b7_explicitly_unchecked",
+          "id": "test_text_display.TextDisplay.test_browser_unavailable_keeps_v12_and_b7_explicitly_unchecked",
+          "result": "ok"
+        },
+        {
+          "name": "test_driver_and_standalone_use_identical_text_evidence",
+          "id": "test_text_display.TextDisplay.test_driver_and_standalone_use_identical_text_evidence",
+          "result": "ok"
+        },
+        {
+          "name": "test_font_fallback_change_can_make_the_same_name_overflow",
+          "id": "test_text_display.TextDisplay.test_font_fallback_change_can_make_the_same_name_overflow",
+          "result": "ok"
+        },
+        {
+          "name": "test_generated_three_line_title_fits_without_smaller_font",
+          "id": "test_text_display.TextDisplay.test_generated_three_line_title_fits_without_smaller_font",
+          "result": "ok"
+        },
+        {
+          "name": "test_internal_text_uses_its_circular_container_not_only_its_box",
+          "id": "test_text_display.TextDisplay.test_internal_text_uses_its_circular_container_not_only_its_box",
+          "result": "ok"
+        },
+        {
+          "name": "test_legend_text_cannot_overflow_its_frame",
+          "id": "test_text_display.TextDisplay.test_legend_text_cannot_overflow_its_frame",
+          "result": "ok"
+        },
+        {
+          "name": "test_long_cjk_user_name_is_checked_against_its_own_frame",
+          "id": "test_text_display.TextDisplay.test_long_cjk_user_name_is_checked_against_its_own_frame",
+          "result": "ok"
+        },
+        {
+          "name": "test_long_title_is_rejected_even_though_its_origin_and_frame_fit",
+          "id": "test_text_display.TextDisplay.test_long_title_is_rejected_even_though_its_origin_and_frame_fit",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_declared_labels_and_title_text_cannot_look_complete",
+          "id": "test_text_display.TextDisplay.test_missing_declared_labels_and_title_text_cannot_look_complete",
+          "result": "ok"
+        },
+        {
+          "name": "test_multiline_cjk_name_and_motor_text_keep_their_own_containers",
+          "id": "test_text_display.TextDisplay.test_multiline_cjk_name_and_motor_text_keep_their_own_containers",
+          "result": "ok"
+        },
+        {
+          "name": "test_pipeline_crossing_actual_glyphs_reports_text_box_and_connection",
+          "id": "test_text_display.TextDisplay.test_pipeline_crossing_actual_glyphs_reports_text_box_and_connection",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_png_ink_agrees_with_measured_rotated_cjk_text",
+          "id": "test_text_display.TextDisplay.test_real_png_ink_agrees_with_measured_rotated_cjk_text",
+          "result": "ok"
+        },
+        {
+          "name": "test_required_component_labels_hidden_by_stylesheet_fail",
+          "id": "test_text_display.TextDisplay.test_required_component_labels_hidden_by_stylesheet_fail",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotated_scaled_anchor_and_left_viewport_clipping_use_actual_bounds",
+          "id": "test_text_display.TextDisplay.test_rotated_scaled_anchor_and_left_viewport_clipping_use_actual_bounds",
+          "result": "ok"
+        },
+        {
+          "name": "test_two_independent_texts_overlapping_are_localized",
+          "id": "test_text_display.TextDisplay.test_two_independent_texts_overlapping_are_localized",
+          "result": "ok"
+        },
+        {
+          "name": "test_unowned_label_inside_a_symbol_is_not_an_internal_annotation",
+          "id": "test_text_display.TextDisplay.test_unowned_label_inside_a_symbol_is_not_an_internal_annotation",
+          "result": "ok"
+        },
+        {
+          "name": "test_unpainted_user_span_and_hidden_title_are_known_failures",
+          "id": "test_text_display.TextDisplay.test_unpainted_user_span_and_hidden_title_are_known_failures",
+          "result": "ok"
+        },
+        {
+          "name": "test_v17_and_v12_share_root_coordinates_for_suction_marks",
+          "id": "test_text_display.TextDisplay.test_v17_and_v12_share_root_coordinates_for_suction_marks",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_layout_clearance",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_layout_clearance"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 143.2166748046875,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_layout_clearance.log",
+      "tests_ran": 19,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_actual_component_canvas_overflow_identifies_component_and_extent",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_actual_component_canvas_overflow_identifies_component_and_extent",
+          "result": "ok"
+        },
+        {
+          "name": "test_arbitrary_collinear_svg_split_does_not_change_short_segment_budget",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_arbitrary_collinear_svg_split_does_not_change_short_segment_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_body_crossing_stays_a_failure_in_addition_to_corridor_warning",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_body_crossing_stays_a_failure_in_addition_to_corridor_warning",
+          "result": "ok"
+        },
+        {
+          "name": "test_bridge_arc_clearance_uses_curved_ink_instead_of_chord",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_bridge_arc_clearance_uses_curved_ink_instead_of_chord",
+          "result": "ok"
+        },
+        {
+          "name": "test_component_gap_uses_final_instance_position_and_reports_nearest_pair",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_component_gap_uses_final_instance_position_and_reports_nearest_pair",
+          "result": "ok"
+        },
+        {
+          "name": "test_connected_component_is_not_exempt_after_terminal_run_turns",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_connected_component_is_not_exempt_after_terminal_run_turns",
+          "result": "ok"
+        },
+        {
+          "name": "test_expanded_actual_group_frame_catches_foreign_component",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_expanded_actual_group_frame_catches_foreign_component",
+          "result": "ok"
+        },
+        {
+          "name": "test_group_padding_is_measured_from_actual_frame_and_member_footprint",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_group_padding_is_measured_from_actual_frame_and_member_footprint",
+          "result": "ok"
+        },
+        {
+          "name": "test_moved_actual_legend_frame_occlusion_is_detected",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_moved_actual_legend_frame_occlusion_is_detected",
+          "result": "ok"
+        },
+        {
+          "name": "test_nonsquare_scaled_symbol_90_and_270_use_actual_footprint",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_nonsquare_scaled_symbol_90_and_270_use_actual_footprint",
+          "result": "ok"
+        },
+        {
+          "name": "test_pipe_corridor_reports_actual_gap_and_deficit_as_warning",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_pipe_corridor_reports_actual_gap_and_deficit_as_warning",
+          "result": "ok"
+        },
+        {
+          "name": "test_plain_terminal_departures_have_measured_corridor_coverage",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_plain_terminal_departures_have_measured_corridor_coverage",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_branch_is_a_semantic_end_for_short_segment_budget",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_real_branch_is_a_semantic_end_for_short_segment_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_short_bend_and_foldback_remain_short",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_real_short_bend_and_foldback_remain_short",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotated_nonsquare_component_does_not_falsely_overlap_adjacent_legend",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_rotated_nonsquare_component_does_not_falsely_overlap_adjacent_legend",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotated_nonsquare_component_that_fits_canvas_has_no_false_bound_failure",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_rotated_nonsquare_component_that_fits_canvas_has_no_false_bound_failure",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotated_nonsquare_nonmember_outside_group_has_no_false_overlap",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_rotated_nonsquare_nonmember_outside_group_has_no_false_overlap",
+          "result": "ok"
+        },
+        {
+          "name": "test_unchecked_frame_clip_is_disclosed_instead_of_certified",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_unchecked_frame_clip_is_disclosed_instead_of_certified",
+          "result": "ok"
+        },
+        {
+          "name": "test_unpainted_group_frame_cannot_certify_padding_or_membership",
+          "id": "test_layout_clearance.LayoutClearanceCLI.test_unpainted_group_frame_cannot_certify_padding_or_membership",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_junction_semantics",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_junction_semantics"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 183.24048733711243,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_junction_semantics.log",
+      "tests_ran": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_bridge_claim_cannot_change_its_actual_pipe_owner",
+          "id": "test_junction_semantics.JunctionCLI.test_bridge_claim_cannot_change_its_actual_pipe_owner",
+          "result": "ok"
+        },
+        {
+          "name": "test_bridge_may_not_cut_a_genuine_shared_trunk_branch",
+          "id": "test_junction_semantics.JunctionCLI.test_bridge_may_not_cut_a_genuine_shared_trunk_branch",
+          "result": "ok"
+        },
+        {
+          "name": "test_correct_branches_buses_and_bridges_have_complete_coverage",
+          "id": "test_junction_semantics.JunctionCLI.test_correct_branches_buses_and_bridges_have_complete_coverage",
+          "result": "ok"
+        },
+        {
+          "name": "test_correct_bridge_does_not_exempt_existing_zero_crossing_budget",
+          "id": "test_junction_semantics.JunctionCLI.test_correct_bridge_does_not_exempt_existing_zero_crossing_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_deleted_bridge_is_detected_even_though_crossing_has_a_gap",
+          "id": "test_junction_semantics.JunctionCLI.test_deleted_bridge_is_detected_even_though_crossing_has_a_gap",
+          "result": "ok"
+        },
+        {
+          "name": "test_false_dot_cannot_legalize_unbridged_crossing",
+          "id": "test_junction_semantics.JunctionCLI.test_false_dot_cannot_legalize_unbridged_crossing",
+          "result": "ok"
+        },
+        {
+          "name": "test_hidden_junction_ancestor_does_not_count_as_painted_marker",
+          "id": "test_junction_semantics.JunctionCLI.test_hidden_junction_ancestor_does_not_count_as_painted_marker",
+          "result": "ok"
+        },
+        {
+          "name": "test_inherited_marker_clip_is_explicitly_not_checked",
+          "id": "test_junction_semantics.JunctionCLI.test_inherited_marker_clip_is_explicitly_not_checked",
+          "result": "ok"
+        },
+        {
+          "name": "test_legend_and_internal_symbol_example_dots_are_excluded",
+          "id": "test_junction_semantics.JunctionCLI.test_legend_and_internal_symbol_example_dots_are_excluded",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_bridge_claim_reports_failure_without_crashing",
+          "id": "test_junction_semantics.JunctionCLI.test_missing_bridge_claim_reports_failure_without_crashing",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_suction_fork_dot_fails_at_both_input_connections",
+          "id": "test_junction_semantics.JunctionCLI.test_missing_suction_fork_dot_fails_at_both_input_connections",
+          "result": "ok"
+        },
+        {
+          "name": "test_offset_bridge_fails_actual_center_and_continuity",
+          "id": "test_junction_semantics.JunctionCLI.test_offset_bridge_fails_actual_center_and_continuity",
+          "result": "ok"
+        },
+        {
+          "name": "test_optimizer_cli_b1_matches_final_bridged_crossing_budget",
+          "id": "test_junction_semantics.JunctionCLI.test_optimizer_cli_b1_matches_final_bridged_crossing_budget",
+          "result": "ok"
+        },
+        {
+          "name": "test_outline_only_transparent_and_css_hidden_fork_dots_are_missing",
+          "id": "test_junction_semantics.JunctionCLI.test_outline_only_transparent_and_css_hidden_fork_dots_are_missing",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_four_way_junction_is_a_semantic_topology_vertex",
+          "id": "test_junction_semantics.JunctionCLI.test_real_four_way_junction_is_a_semantic_topology_vertex",
+          "result": "ok"
+        },
+        {
+          "name": "test_renderer_marks_shared_suction_fork_away_from_bus",
+          "id": "test_junction_semantics.JunctionCLI.test_renderer_marks_shared_suction_fork_away_from_bus",
+          "result": "ok"
+        },
+        {
+          "name": "test_straight_baseline_under_bridge_is_not_an_unconnected_crossing",
+          "id": "test_junction_semantics.JunctionCLI.test_straight_baseline_under_bridge_is_not_an_unconnected_crossing",
+          "result": "ok"
+        },
+        {
+          "name": "test_true_unconnected_crossing_with_continuous_bridge_passes",
+          "id": "test_junction_semantics.JunctionCLI.test_true_unconnected_crossing_with_continuous_bridge_passes",
+          "result": "ok"
+        },
+        {
+          "name": "test_unpainted_bridge_cannot_supply_continuity",
+          "id": "test_junction_semantics.JunctionCLI.test_unpainted_bridge_cannot_supply_continuity",
+          "result": "ok"
+        },
+        {
+          "name": "test_wrong_corner_dot_and_offset_dot_are_rejected",
+          "id": "test_junction_semantics.JunctionCLI.test_wrong_corner_dot_and_offset_dot_are_rejected",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_bridge_allowance",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_bridge_allowance"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 59.29594016075134,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_bridge_allowance.log",
+      "tests_ran": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_dashed_bridge_fails_b1_without_verified_disclosure",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_dashed_bridge_fails_b1_without_verified_disclosure",
+          "result": "ok"
+        },
+        {
+          "name": "test_layout_numeric_budget_keys_hard_fail",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_layout_numeric_budget_keys_hard_fail",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_bridge_and_false_dot_leave_crossing_unverified",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_missing_bridge_and_false_dot_leave_crossing_unverified",
+          "result": "ok"
+        },
+        {
+          "name": "test_plain_seed_b1_stays_zero_and_unclaimed",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_plain_seed_b1_stays_zero_and_unclaimed",
+          "result": "ok"
+        },
+        {
+          "name": "test_registered_policy_with_wrong_intent_bytes_hard_fails",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_registered_policy_with_wrong_intent_bytes_hard_fails",
+          "result": "ok"
+        },
+        {
+          "name": "test_second_verified_crossing_still_fails",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_second_verified_crossing_still_fails",
+          "result": "ok"
+        },
+        {
+          "name": "test_unapproved_fixture_verified_bridge_keeps_b1_fail",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_unapproved_fixture_verified_bridge_keeps_b1_fail",
+          "result": "ok"
+        },
+        {
+          "name": "test_unknown_marker_paint_blocks_b1_and_verified_disclosure",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_unknown_marker_paint_blocks_b1_and_verified_disclosure",
+          "result": "ok"
+        },
+        {
+          "name": "test_unknown_policy_id_hard_fails_not_silently_zero",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_unknown_policy_id_hard_fails_not_silently_zero",
+          "result": "ok"
+        },
+        {
+          "name": "test_wrong_bridge_owner_is_not_a_verified_bridge",
+          "id": "test_bridge_allowance.BridgeAllowanceCLI.test_wrong_bridge_owner_is_not_a_verified_bridge",
+          "result": "ok"
+        },
+        {
+          "name": "test_bad_policy_id_shapes_are_rejected",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_bad_policy_id_shapes_are_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_layout_numeric_budget_keys_are_rejected",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_layout_numeric_budget_keys_are_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_matching_digest_grants_registered_allowance",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_matching_digest_grants_registered_allowance",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_policy_request_defaults_to_zero_without_reading_intent",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_no_policy_request_defaults_to_zero_without_reading_intent",
+          "result": "ok"
+        },
+        {
+          "name": "test_non_string_policy_field_is_rejected",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_non_string_policy_field_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_none_policy_id_resolves_to_none",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_none_policy_id_resolves_to_none",
+          "result": "ok"
+        },
+        {
+          "name": "test_production_entrypoint_has_no_registry_injection",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_production_entrypoint_has_no_registry_injection",
+          "result": "ok"
+        },
+        {
+          "name": "test_production_registry_binds_exactly_the_decided_grant",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_production_registry_binds_exactly_the_decided_grant",
+          "result": "ok"
+        },
+        {
+          "name": "test_production_registry_cannot_be_satisfied_by_arbitrary_bytes",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_production_registry_cannot_be_satisfied_by_arbitrary_bytes",
+          "result": "ok"
+        },
+        {
+          "name": "test_registry_entry_shape_is_validated",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_registry_entry_shape_is_validated",
+          "result": "ok"
+        },
+        {
+          "name": "test_stale_intent_digest_hard_fails_with_both_digests",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_stale_intent_digest_hard_fails_with_both_digests",
+          "result": "ok"
+        },
+        {
+          "name": "test_unknown_policy_id_is_a_hard_failure",
+          "id": "test_bridge_allowance.RegistryResolutionTest.test_unknown_policy_id_is_a_hard_failure",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_sheet_diff",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_sheet_diff"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 306.18813586235046,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_sheet_diff.log",
+      "tests_ran": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_canvas_mismatch_writes_an_explicit_not_comparable_report",
+          "id": "test_sheet_diff.SheetDiffCLI.test_canvas_mismatch_writes_an_explicit_not_comparable_report",
+          "result": "ok"
+        },
+        {
+          "name": "test_changed_installed_fonts_block_local_masks_but_not_global_png_comparison",
+          "id": "test_sheet_diff.SheetDiffCLI.test_changed_installed_fonts_block_local_masks_but_not_global_png_comparison",
+          "result": "ok"
+        },
+        {
+          "name": "test_changed_tspan_paint_is_attributed_to_its_declared_label_node",
+          "id": "test_sheet_diff.SheetDiffCLI.test_changed_tspan_paint_is_attributed_to_its_declared_label_node",
+          "result": "ok"
+        },
+        {
+          "name": "test_driver_compares_after_full_validation_and_preserves_pending_delivery",
+          "id": "test_sheet_diff.SheetDiffCLI.test_driver_compares_after_full_validation_and_preserves_pending_delivery",
+          "result": "ok"
+        },
+        {
+          "name": "test_explicit_topology_transition_is_checked_against_both_input_and_actual_edges",
+          "id": "test_sheet_diff.SheetDiffCLI.test_explicit_topology_transition_is_checked_against_both_input_and_actual_edges",
+          "result": "ok"
+        },
+        {
+          "name": "test_freeze_preserves_tool_and_symbol_versions_independent_of_live_workspace",
+          "id": "test_sheet_diff.SheetDiffCLI.test_freeze_preserves_tool_and_symbol_versions_independent_of_live_workspace",
+          "result": "ok"
+        },
+        {
+          "name": "test_frozen_local_font_resources_survive_source_removal_and_scope_mask_relocation",
+          "id": "test_sheet_diff.SheetDiffCLI.test_frozen_local_font_resources_survive_source_removal_and_scope_mask_relocation",
+          "result": "ok"
+        },
+        {
+          "name": "test_global_font_change_is_explicit_and_needs_no_scope_rasterizations",
+          "id": "test_sheet_diff.SheetDiffCLI.test_global_font_change_is_explicit_and_needs_no_scope_rasterizations",
+          "result": "ok"
+        },
+        {
+          "name": "test_legacy_frozen_package_with_unbound_required_symbol_is_rejected",
+          "id": "test_sheet_diff.SheetDiffCLI.test_legacy_frozen_package_with_unbound_required_symbol_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_local_lead_repair_reports_unchanged_topology_and_local_pixels",
+          "id": "test_sheet_diff.SheetDiffCLI.test_local_lead_repair_reports_unchanged_topology_and_local_pixels",
+          "result": "ok"
+        },
+        {
+          "name": "test_port_swap_inside_target_and_adjacent_edge_scope_is_unexpected_topology",
+          "id": "test_sheet_diff.SheetDiffCLI.test_port_swap_inside_target_and_adjacent_edge_scope_is_unexpected_topology",
+          "result": "ok"
+        },
+        {
+          "name": "test_removed_input_port_anchor_is_reported_even_when_pixels_and_connections_match",
+          "id": "test_sheet_diff.SheetDiffCLI.test_removed_input_port_anchor_is_reported_even_when_pixels_and_connections_match",
+          "result": "ok"
+        },
+        {
+          "name": "test_rotating_target_allows_its_connected_routes_without_granting_topology_changes",
+          "id": "test_sheet_diff.SheetDiffCLI.test_rotating_target_allows_its_connected_routes_without_granting_topology_changes",
+          "result": "ok"
+        },
+        {
+          "name": "test_stale_png_and_rectangular_ignore_masks_cannot_produce_a_pass",
+          "id": "test_sheet_diff.SheetDiffCLI.test_stale_png_and_rectangular_ignore_masks_cannot_produce_a_pass",
+          "result": "ok"
+        },
+        {
+          "name": "test_unrelated_object_change_is_reported_outside_the_declared_node",
+          "id": "test_sheet_diff.SheetDiffCLI.test_unrelated_object_change_is_reported_outside_the_declared_node",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_readback_review",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_readback_review"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 271.7930362224579,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_readback_review.log",
+      "tests_ran": 15,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_changed_manifest_is_rejected_without_reusing_confirmed_state",
+          "id": "test_readback_review.ReadbackCLI.test_changed_manifest_is_rejected_without_reusing_confirmed_state",
+          "result": "ok"
+        },
+        {
+          "name": "test_driver_with_current_residuals_still_produces_local_review",
+          "id": "test_readback_review.ReadbackCLI.test_driver_with_current_residuals_still_produces_local_review",
+          "result": "ok"
+        },
+        {
+          "name": "test_explicit_item_review_survives_regeneration_and_revalidation",
+          "id": "test_readback_review.ReadbackCLI.test_explicit_item_review_survives_regeneration_and_revalidation",
+          "result": "ok"
+        },
+        {
+          "name": "test_full_driver_produces_current_unviewed_readback_bundle",
+          "id": "test_readback_review.ReadbackCLI.test_full_driver_produces_current_unviewed_readback_bundle",
+          "result": "ok"
+        },
+        {
+          "name": "test_keep_preserves_explicit_version_reviews_and_changed_layout_resets_them",
+          "id": "test_readback_review.ReadbackCLI.test_keep_preserves_explicit_version_reviews_and_changed_layout_resets_them",
+          "result": "ok"
+        },
+        {
+          "name": "test_localized_foldback_finding_and_component_overviews_are_covered",
+          "id": "test_readback_review.ReadbackCLI.test_localized_foldback_finding_and_component_overviews_are_covered",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_manifest_cannot_remove_required_local_review_gate",
+          "id": "test_readback_review.ReadbackCLI.test_missing_manifest_cannot_remove_required_local_review_gate",
+          "result": "ok"
+        },
+        {
+          "name": "test_off_sheet_targets_remain_explicitly_unavailable",
+          "id": "test_readback_review.ReadbackCLI.test_off_sheet_targets_remain_explicitly_unavailable",
+          "result": "ok"
+        },
+        {
+          "name": "test_priority_width_and_six_pixel_firewall_tail_are_visible_in_bound_crops",
+          "id": "test_readback_review.ReadbackCLI.test_priority_width_and_six_pixel_firewall_tail_are_visible_in_bound_crops",
+          "result": "ok"
+        },
+        {
+          "name": "test_questioned_item_remains_independent_and_blocks_delivery",
+          "id": "test_readback_review.ReadbackCLI.test_questioned_item_remains_independent_and_blocks_delivery",
+          "result": "ok"
+        },
+        {
+          "name": "test_replaced_crop_invalidates_confirmation_and_blocks_new_signing",
+          "id": "test_readback_review.ReadbackCLI.test_replaced_crop_invalidates_confirmation_and_blocks_new_signing",
+          "result": "ok"
+        },
+        {
+          "name": "test_replaced_source_png_cannot_reuse_existing_local_confirmation",
+          "id": "test_readback_review.ReadbackCLI.test_replaced_source_png_cannot_reuse_existing_local_confirmation",
+          "result": "ok"
+        },
+        {
+          "name": "test_static_report_links_each_crop_to_its_full_image_roi",
+          "id": "test_readback_review.ReadbackCLI.test_static_report_links_each_crop_to_its_full_image_roi",
+          "result": "ok"
+        },
+        {
+          "name": "test_verified_png_produces_all_port_crops_without_signing_review",
+          "id": "test_readback_review.ReadbackCLI.test_verified_png_produces_all_port_crops_without_signing_review",
+          "result": "ok"
+        },
+        {
+          "name": "test_whole_sheet_confirmation_does_not_complete_unviewed_local_items",
+          "id": "test_readback_review.ReadbackCLI.test_whole_sheet_confirmation_does_not_complete_unviewed_local_items",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_symbol_gate",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_symbol_gate"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 1.3911776542663574,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_symbol_gate.log",
+      "tests_ran": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_empty_lib_directory_fails_closed",
+          "id": "test_symbol_gate.SymbolGateCLI.test_empty_lib_directory_fails_closed",
+          "result": "ok"
+        },
+        {
+          "name": "test_explicit_symbol_from_arbitrary_cwd_passes",
+          "id": "test_symbol_gate.SymbolGateCLI.test_explicit_symbol_from_arbitrary_cwd_passes",
+          "result": "ok"
+        },
+        {
+          "name": "test_full_library_scan_reports_known_defects_and_exit_1",
+          "id": "test_symbol_gate.SymbolGateCLI.test_full_library_scan_reports_known_defects_and_exit_1",
+          "result": "ok"
+        },
+        {
+          "name": "test_lib_sandbox_override_scans_only_that_library",
+          "id": "test_symbol_gate.SymbolGateCLI.test_lib_sandbox_override_scans_only_that_library",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_explicit_file_fails_closed_without_traceback",
+          "id": "test_symbol_gate.SymbolGateCLI.test_missing_explicit_file_fails_closed_without_traceback",
+          "result": "ok"
+        },
+        {
+          "name": "test_unanchored_copy_fails_closed_when_library_missing",
+          "id": "test_symbol_gate.SymbolGateCLI.test_unanchored_copy_fails_closed_when_library_missing",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_check_symbol_cli",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_check_symbol_cli"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 3.3236637115478516,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_check_symbol_cli.log",
+      "tests_ran": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_all_with_existing_file_is_usage_error",
+          "id": "test_check_symbol_cli.AllFlagConflictTest.test_all_with_existing_file_is_usage_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_all_with_missing_file_is_usage_error",
+          "id": "test_check_symbol_cli.AllFlagConflictTest.test_all_with_missing_file_is_usage_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_malformed_catalogs_exit_1_with_error",
+          "id": "test_check_symbol_cli.BadCatalogFailClosedTest.test_malformed_catalogs_exit_1_with_error",
+          "result": "ok"
+        },
+        {
+          "name": "test_missing_catalog_exits_1",
+          "id": "test_check_symbol_cli.BadCatalogFailClosedTest.test_missing_catalog_exits_1",
+          "result": "ok"
+        },
+        {
+          "name": "test_unreadable_catalog_exits_1",
+          "id": "test_check_symbol_cli.BadCatalogFailClosedTest.test_unreadable_catalog_exits_1",
+          "result": "ok"
+        },
+        {
+          "name": "test_baseline_two_known_errors_with_catalog_crosscheck",
+          "id": "test_check_symbol_cli.DefaultLibraryBaselineTest.test_baseline_two_known_errors_with_catalog_crosscheck",
+          "result": "ok"
+        },
+        {
+          "name": "test_sandbox_real_catalog_clean_symbol_exits_zero",
+          "id": "test_check_symbol_cli.SeverityRulesPreservedTest.test_sandbox_real_catalog_clean_symbol_exits_zero",
+          "result": "ok"
+        },
+        {
+          "name": "test_valid_catalog_unknown_type_warns_not_errors",
+          "id": "test_check_symbol_cli.SeverityRulesPreservedTest.test_valid_catalog_unknown_type_warns_not_errors",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_mirror_policy",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_mirror_policy"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 1.0212759971618652,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_mirror_policy.log",
+      "tests_ran": 41,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_anchor_rejects_non_directions_and_bad_axes",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_anchor_rejects_non_directions_and_bad_axes",
+          "result": "ok"
+        },
+        {
+          "name": "test_anchor_swaps_all_four_directions_on_x",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_anchor_swaps_all_four_directions_on_x",
+          "result": "ok"
+        },
+        {
+          "name": "test_anchor_swaps_all_four_directions_on_y",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_anchor_swaps_all_four_directions_on_y",
+          "result": "ok"
+        },
+        {
+          "name": "test_none_axis_is_identity",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_none_axis_is_identity",
+          "result": "ok"
+        },
+        {
+          "name": "test_point_rejects_bad_coordinates_and_axes",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_point_rejects_bad_coordinates_and_axes",
+          "result": "ok"
+        },
+        {
+          "name": "test_point_rejects_nonfinite_or_nonpositive_dimensions",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_point_rejects_nonfinite_or_nonpositive_dimensions",
+          "result": "ok"
+        },
+        {
+          "name": "test_svg_transform_strings_are_literal",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_svg_transform_strings_are_literal",
+          "result": "ok"
+        },
+        {
+          "name": "test_svg_transform_validates_arguments_even_without_mirror",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_svg_transform_validates_arguments_even_without_mirror",
+          "result": "ok"
+        },
+        {
+          "name": "test_transform_string_reflects_points",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_transform_string_reflects_points",
+          "result": "ok"
+        },
+        {
+          "name": "test_x_reflection_only_touches_x",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_x_reflection_only_touches_x",
+          "result": "ok"
+        },
+        {
+          "name": "test_y_reflection_only_touches_y",
+          "id": "test_mirror_policy.MirrorGeometryTest.test_y_reflection_only_touches_y",
+          "result": "ok"
+        },
+        {
+          "name": "test_asset_path_must_be_readable",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_asset_path_must_be_readable",
+          "result": "ok"
+        },
+        {
+          "name": "test_component_must_be_a_dict_when_mirroring",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_component_must_be_a_dict_when_mirroring",
+          "result": "ok"
+        },
+        {
+          "name": "test_errors_are_locatable",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_errors_are_locatable",
+          "result": "ok"
+        },
+        {
+          "name": "test_explicitly_unregistered_entry_rejects_mirror",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_explicitly_unregistered_entry_rejects_mirror",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_axis_must_be_registered",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_axis_must_be_registered",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_digest_fields_must_be_hex64",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_digest_fields_must_be_hex64",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_layout_allow_mirror_must_be_strictly_true",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_layout_allow_mirror_must_be_strictly_true",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_malformed_axes_are_rejected",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_malformed_axes_are_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_mirror_safe_must_be_strictly_true",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_mirror_safe_must_be_strictly_true",
+          "result": "ok"
+        },
+        {
+          "name": "test_gate_registration_must_exist",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_gate_registration_must_exist",
+          "result": "ok"
+        },
+        {
+          "name": "test_port_kind_add_or_change_invalidates_registration",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_port_kind_add_or_change_invalidates_registration",
+          "result": "ok"
+        },
+        {
+          "name": "test_port_kind_participates_and_extras_are_ignored",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_port_kind_participates_and_extras_are_ignored",
+          "result": "ok"
+        },
+        {
+          "name": "test_registered_mirror_passes_both_axes",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_registered_mirror_passes_both_axes",
+          "result": "ok"
+        },
+        {
+          "name": "test_registration_binds_to_current_asset_bytes",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_registration_binds_to_current_asset_bytes",
+          "result": "ok"
+        },
+        {
+          "name": "test_registration_binds_to_current_port_contract",
+          "id": "test_mirror_policy.MirrorRegistrationTest.test_registration_binds_to_current_port_contract",
+          "result": "ok"
+        },
+        {
+          "name": "test_anchor_mirror_then_rotation_is_hand_derived",
+          "id": "test_mirror_policy.MirrorTransformChainTest.test_anchor_mirror_then_rotation_is_hand_derived",
+          "result": "ok"
+        },
+        {
+          "name": "test_mirror_precedes_rotation_in_application_order",
+          "id": "test_mirror_policy.MirrorTransformChainTest.test_mirror_precedes_rotation_in_application_order",
+          "result": "ok"
+        },
+        {
+          "name": "test_mirror_segment_sits_between_rotate_and_scale",
+          "id": "test_mirror_policy.MirrorTransformChainTest.test_mirror_segment_sits_between_rotate_and_scale",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_mirror_chain_matches_renderer_bytes",
+          "id": "test_mirror_policy.MirrorTransformChainTest.test_no_mirror_chain_matches_renderer_bytes",
+          "result": "ok"
+        },
+        {
+          "name": "test_nonzero_viewbox_origin_and_scale",
+          "id": "test_mirror_policy.MirrorTransformChainTest.test_nonzero_viewbox_origin_and_scale",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_mirror_values_are_compatible_without_registration",
+          "id": "test_mirror_policy.MirrorValueDomainTest.test_no_mirror_values_are_compatible_without_registration",
+          "result": "ok"
+        },
+        {
+          "name": "test_node_must_be_a_dict",
+          "id": "test_mirror_policy.MirrorValueDomainTest.test_node_must_be_a_dict",
+          "result": "ok"
+        },
+        {
+          "name": "test_rejected_mirror_values",
+          "id": "test_mirror_policy.MirrorValueDomainTest.test_rejected_mirror_values",
+          "result": "ok"
+        },
+        {
+          "name": "test_zero_is_not_false",
+          "id": "test_mirror_policy.MirrorValueDomainTest.test_zero_is_not_false",
+          "result": "ok"
+        },
+        {
+          "name": "test_every_other_type_is_denied_by_default",
+          "id": "test_mirror_policy.ProductionRegistrationTest.test_every_other_type_is_denied_by_default",
+          "result": "ok"
+        },
+        {
+          "name": "test_only_the_two_pumps_carry_mirror_permission",
+          "id": "test_mirror_policy.ProductionRegistrationTest.test_only_the_two_pumps_carry_mirror_permission",
+          "result": "ok"
+        },
+        {
+          "name": "test_registered_pumps_pass_check_mirror_on_real_assets",
+          "id": "test_mirror_policy.ProductionRegistrationTest.test_registered_pumps_pass_check_mirror_on_real_assets",
+          "result": "ok"
+        },
+        {
+          "name": "test_port_contract_edit_invalidates_registration",
+          "id": "test_mirror_policy.TempSymbolMirrorTest.test_port_contract_edit_invalidates_registration",
+          "result": "ok"
+        },
+        {
+          "name": "test_registered_mirror_passes_on_temp_symbol",
+          "id": "test_mirror_policy.TempSymbolMirrorTest.test_registered_mirror_passes_on_temp_symbol",
+          "result": "ok"
+        },
+        {
+          "name": "test_source_edit_invalidates_registration",
+          "id": "test_mirror_policy.TempSymbolMirrorTest.test_source_edit_invalidates_registration",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    },
+    {
+      "suite": "test_mirror_render",
+      "command": [
+        "/usr/bin/python",
+        "-m",
+        "unittest",
+        "-v",
+        "test_mirror_render"
+      ],
+      "status": "passed",
+      "exit_code": 0,
+      "timed_out": false,
+      "duration_seconds": 36.52508544921875,
+      "log": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/skill-final-validation-pass/suites/test_mirror_render.log",
+      "tests_ran": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        {
+          "name": "test_cancellable_huge_viewbox_origin_cannot_buy_tolerance",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_cancellable_huge_viewbox_origin_cannot_buy_tolerance",
+          "result": "ok"
+        },
+        {
+          "name": "test_declared_mirror_missing_from_matrix_is_an_issue",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_declared_mirror_missing_from_matrix_is_an_issue",
+          "result": "ok"
+        },
+        {
+          "name": "test_declared_mirror_without_trace_attributes_is_rejected",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_declared_mirror_without_trace_attributes_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_huge_origin_exact_pose_still_loads",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_huge_origin_exact_pose_still_loads",
+          "result": "ok"
+        },
+        {
+          "name": "test_mirror_attributes_without_declaration_are_rejected",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_mirror_attributes_without_declaration_are_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_percent_g_scale_rounding_still_passes",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_percent_g_scale_rounding_still_passes",
+          "result": "ok"
+        },
+        {
+          "name": "test_permission_axis_must_match_declaration",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_permission_axis_must_match_declaration",
+          "result": "ok"
+        },
+        {
+          "name": "test_permitted_reflection_loads_mirrored_ports",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_permitted_reflection_loads_mirrored_ports",
+          "result": "ok"
+        },
+        {
+          "name": "test_plain_transform_keeps_existing_behaviour",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_plain_transform_keeps_existing_behaviour",
+          "result": "ok"
+        },
+        {
+          "name": "test_recorded_input_anchor_must_point_at_own_node",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_recorded_input_anchor_must_point_at_own_node",
+          "result": "ok"
+        },
+        {
+          "name": "test_recorded_mirror_axis_must_match_declaration",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_recorded_mirror_axis_must_match_declaration",
+          "result": "ok"
+        },
+        {
+          "name": "test_reflection_without_permission_is_rejected_by_default",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_reflection_without_permission_is_rejected_by_default",
+          "result": "ok"
+        },
+        {
+          "name": "test_small_k_large_viewbox_correct_pose_loads",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_small_k_large_viewbox_correct_pose_loads",
+          "result": "ok"
+        },
+        {
+          "name": "test_small_k_large_viewbox_doubled_scale_is_rejected",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_small_k_large_viewbox_doubled_scale_is_rejected",
+          "result": "ok"
+        },
+        {
+          "name": "test_undeclared_reflection_is_rejected_even_without_declaration",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_undeclared_reflection_is_rejected_even_without_declaration",
+          "result": "ok"
+        },
+        {
+          "name": "test_wrong_axis_or_pose_is_an_explicit_issue",
+          "id": "test_mirror_render.MirrorGeometryLoadTest.test_wrong_axis_or_pose_is_an_explicit_issue",
+          "result": "ok"
+        },
+        {
+          "name": "test_mirror_axes_reports_only_permitted_instances",
+          "id": "test_mirror_render.MirrorPlacementTest.test_mirror_axes_reports_only_permitted_instances",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_mirror_markup_stays_byte_compatible",
+          "id": "test_mirror_render.MirrorPlacementTest.test_no_mirror_markup_stays_byte_compatible",
+          "result": "ok"
+        },
+        {
+          "name": "test_nonzero_viewbox_scaled_mirror_matches_independent_derivation",
+          "id": "test_mirror_render.MirrorPlacementTest.test_nonzero_viewbox_scaled_mirror_matches_independent_derivation",
+          "result": "ok"
+        },
+        {
+          "name": "test_place_rejects_explicitly_unregistered_entry",
+          "id": "test_mirror_render.MirrorPlacementTest.test_place_rejects_explicitly_unregistered_entry",
+          "result": "ok"
+        },
+        {
+          "name": "test_place_rejects_illegal_values_and_wrong_axis",
+          "id": "test_mirror_render.MirrorPlacementTest.test_place_rejects_illegal_values_and_wrong_axis",
+          "result": "ok"
+        },
+        {
+          "name": "test_place_rejects_stale_registration_after_asset_edit",
+          "id": "test_mirror_render.MirrorPlacementTest.test_place_rejects_stale_registration_after_asset_edit",
+          "result": "ok"
+        },
+        {
+          "name": "test_place_rejects_stale_registration_after_port_kind_edit",
+          "id": "test_mirror_render.MirrorPlacementTest.test_place_rejects_stale_registration_after_port_kind_edit",
+          "result": "ok"
+        },
+        {
+          "name": "test_real_pump_ports_and_anchors_across_axes_and_rotations",
+          "id": "test_mirror_render.MirrorPlacementTest.test_real_pump_ports_and_anchors_across_axes_and_rotations",
+          "result": "ok"
+        },
+        {
+          "name": "test_symbols_chain_and_instance_attributes",
+          "id": "test_mirror_render.MirrorPlacementTest.test_symbols_chain_and_instance_attributes",
+          "result": "ok"
+        },
+        {
+          "name": "test_cli_contract_failure_on_explicitly_unregistered_catalog",
+          "id": "test_mirror_render.MirrorRenderCLI.test_cli_contract_failure_on_explicitly_unregistered_catalog",
+          "result": "ok"
+        },
+        {
+          "name": "test_cli_contract_failure_on_illegal_value",
+          "id": "test_mirror_render.MirrorRenderCLI.test_cli_contract_failure_on_illegal_value",
+          "result": "ok"
+        },
+        {
+          "name": "test_cli_contract_failure_on_stale_registration",
+          "id": "test_mirror_render.MirrorRenderCLI.test_cli_contract_failure_on_stale_registration",
+          "result": "ok"
+        },
+        {
+          "name": "test_no_mirror_output_is_byte_identical_to_production_catalog",
+          "id": "test_mirror_render.MirrorRenderCLI.test_no_mirror_output_is_byte_identical_to_production_catalog",
+          "result": "ok"
+        },
+        {
+          "name": "test_small_sheet_mirrors_edp_on_y_and_stays_green",
+          "id": "test_mirror_render.MirrorRenderCLI.test_small_sheet_mirrors_edp_on_y_and_stays_green",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_fails_inconsistent_mirror_trace_in_final_svg",
+          "id": "test_mirror_render.MirrorRenderCLI.test_validator_fails_inconsistent_mirror_trace_in_final_svg",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_fails_mirror_attributes_without_declaration",
+          "id": "test_mirror_render.MirrorRenderCLI.test_validator_fails_mirror_attributes_without_declaration",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_fails_undeclared_reflection_in_final_svg",
+          "id": "test_mirror_render.MirrorRenderCLI.test_validator_fails_undeclared_reflection_in_final_svg",
+          "result": "ok"
+        },
+        {
+          "name": "test_validator_fails_wrong_axis_reflection_in_final_svg",
+          "id": "test_mirror_render.MirrorRenderCLI.test_validator_fails_wrong_axis_reflection_in_final_svg",
+          "result": "ok"
+        }
+      ],
+      "detail": ""
+    }
+  ],
+  "summary": {
+    "status": "PASS",
+    "suites_total": 27,
+    "suites_by_status": {
+      "passed": 27
+    },
+    "tests_ran": 377,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

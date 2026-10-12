@@ -75,7 +75,13 @@ let drag = null;
 let selectedId = null;    // 原地点击选中的节点（旋转作用对象）
 let busy = false;         // 一次变更请求在途：忽略重复点击/按键/新拖拽
 
-const READ_TIMEOUT_MS = 5000;   // 短读取（GET）：服务重启窗口内失败要快速可见
+const READ_TIMEOUT_MS = 5000;   // 轻量读取（GET /api/layout）：JSON 直读，重启窗口内失败要快速可见
+// GET /api/sheet 是重读取：SVG + 校验报告 + layout + verify_report 证据
+// 指纹核对（产物哈希比对），冷启动/挂载盘可超 5s（实录见
+// ../browser-race-before-retry/result.json：5s abort 产生未捕获 Promise，
+// 页面停在"加载中"）。单独放宽等待上限，不与轻量 /api/layout 共用 5s；
+// 超时/失败明确提示并保持禁用，不无声假加载，也不猜已保存/未保存。
+const SHEET_TIMEOUT_MS = 60000;
 // 变更请求（POST /api/delta）走完整 render+rasterize+validate 子进程链：
 // 服务端 _run 各阶段 timeout=300s（至多 3×300s），另有进程启动/IO 开销。
 // 客户端时限必须晚于服务端自身超时——"链路超时"由服务端以 JSON 如实
@@ -101,6 +107,30 @@ function setBusy(on) { // 闭环期间禁用旋转/镜像按钮，拖拽与快�
     .forEach(id => { $(id).disabled = on; });
 }
 
+function releaseBusy() { // 权威节点状态已到手：放行镜像/旋转/拖动
+  busy = false;
+  setBusy(false);
+}
+
+function holdForUnknownState(message) {
+  // 权威节点状态不可得（刷新失败/读取失败）：按钮保持禁用、busy 保持
+  // 置位拦截一切新操作（键盘路径由 layoutIndex=null 守卫静默忽略，
+  // 不覆盖提示）；明示"请刷新"，不声称回滚、不用未知状态生成新操作。
+  setBusy(true);
+  $('state').textContent = message;
+}
+
+function holdAfterRefreshFailure() {
+  // POST 已确认写盘（ok 或 stage=render），但权威布局读取失败：
+  // 操作保持停用直至获得有效状态；明示"已保存 + 请刷新"，不声称回滚。
+  const msg = '已保存，但状态刷新失败——为避免用未知状态继续操作，'
+            + '镜像/旋转/拖动已停用；请刷新页面查看当前盘面（不声称回滚）';
+  holdForUnknownState(msg);
+  const banner = $('banner');
+  banner.style.display = 'block';
+  banner.textContent = msg;
+}
+
 function stateText(d) { // 状态行分级：未写盘 / 已落盘未过 / 未知——不再一律"手调已落盘"
   if (d.ok) {
     return d.passed ? '完整校验及回读通过'
@@ -115,18 +145,19 @@ function stateText(d) { // 状态行分级：未写盘 / 已落盘未过 / 未�
 }
 
 async function refreshAfterUnknown() {
-  // 变更请求超时/中断后落盘状态未知：不声称回滚或未写盘，重读当前盘面。
+  // 落盘状态未知：不声称回滚或未写盘，重读当前盘面（含权威布局刷新）。
+  // 返回是否拿到有效状态——读不到时由调用方停用操作并明示请刷新。
   try {
-    const d = await api('/api/sheet');
+    const d = await api('/api/sheet', undefined, SHEET_TIMEOUT_MS);
     if (d.ok) {
       stage.innerHTML = svgDoc(d.svg);
       decorate();
       ghostOverlay(d.issues);
       setSide(d);
-      return;
+      return await refreshLayout();
     }
-  } catch (e) { /* 读取同样失败：保持未知态提示 */ }
-  $('state').textContent = '状态未知：上次变更请求无应答且读取失败——请刷新页面';
+  } catch (e) { /* 读取同样失败：按调用方未知态处理 */ }
+  return false;
 }
 
 function setSide(d) {
@@ -239,18 +270,29 @@ function buildHitLayer() { // 透明命中垫：描边镂空/小尺寸/被管线
   });
 }
 
-function decorate() {
-  layoutIndex = null;
-  api('/api/layout').then(l => {
-    layoutIndex = l.nodes || {};
-    window.__canvas = l.canvas || {};
-    window.__conns = l.conns || {};
-    if (selectedId && layoutIndex[selectedId]) { drawSel(); select(selectedId); } // 布局到达后刷新选中框/rot/连线提示
-  });
+function decorate() { // 新帧 DOM 装饰（实例监听器 + 命中垫）；布局刷新在 refreshLayout
   document.querySelectorAll('g[id^="inst-"]').forEach(g => {
     g.addEventListener('pointerdown', ev => startDrag(ev, g));
   });
   buildHitLayer();
+}
+
+async function refreshLayout() {
+  // 权威布局刷新（可 await）：发起即置 layoutIndex=null——在途/失败期间
+  // 节点状态未知，镜像/旋转/拖动不得基于猜测（none/rot0）发起。读到
+  // 有效 nodes 才恢复 layoutIndex 并刷新选中框/rot/连线提示。
+  layoutIndex = null;
+  try {
+    const l = await api('/api/layout');
+    if (!l || !l.nodes) return false;
+    layoutIndex = l.nodes;
+    window.__canvas = l.canvas || {};
+    window.__conns = l.conns || {};
+    if (selectedId && layoutIndex[selectedId]) { drawSel(); select(selectedId); }
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 function guidesLayer(svg) {
@@ -279,13 +321,14 @@ function drawGuide(svg, x1, y1, x2, y2) {
 function startDrag(ev, g) {
   if (ev.button !== 0) return;
   if (busy) return; // 闭环在途：不接受新拖拽（位移无处提交，只会留失配定格）
+  const id = g.id.replace(/^inst-/, '');
+  const nd = layoutIndex ? layoutIndex[id] : null;
+  if (!nd) return; // 权威节点状态未知（刷新在途/失败）：不接受拖拽
   ev.preventDefault();
   const svg = g.ownerSVGElement;
   const ctm = svg.getScreenCTM().inverse();
   const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm);
   origTransform = g.getAttribute('transform');
-  const id = g.id.replace(/^inst-/, '');
-  const nd = (layoutIndex || {})[id] || {};
   drag = { g, svg, id, x0: pt.x, y0: pt.y, dx: 0, dy: 0, nd };
   g.classList.add('proto-drag');
   document.body.classList.add('proto-dragging');
@@ -397,7 +440,7 @@ async function postDelta(body) {
   }
   busy = true;
   setBusy(true);
-  $('state').textContent = '闭环中：写回 → 渲染 → 校核…（整链可能需十余秒，请勿重复操作）';
+  $('state').textContent = '闭环中：写回 → 渲染 → 校核 → 状态刷新…（整链可能需十余秒，请勿重复操作）';
   let res;
   try {
     res = await api('/api/delta', {
@@ -406,38 +449,65 @@ async function postDelta(body) {
       body: JSON.stringify(body),
     }, DELTA_TIMEOUT_MS);
   } catch (e) {
-    // 超时/断连：不声称回滚或未写盘——按当前盘面刷新（读取失败则明示未知）。
-    await refreshAfterUnknown();
+    // 超时/断连：不声称回滚或未写盘——按当前盘面刷新（读取失败则明示
+    // 未知并停用操作）。权威状态未知期间不得发起新的镜像/旋转/拖动。
+    layoutIndex = null;
+    const recovered = await refreshAfterUnknown();
     const banner = $('banner');
     banner.style.display = 'block';
     banner.textContent = '请求超时或中断：是否已写盘未知（不声称回滚）——'
-                       + '画面已尝试按当前盘面刷新，读取失败时状态未知。';
+                       + (recovered
+                          ? '画面已按当前盘面刷新。'
+                          : '画面刷新失败，状态未知——请刷新页面后重试。');
+    if (recovered) releaseBusy();
+    else holdForUnknownState('状态未知：上次变更请求无应答且读取失败——请刷新页面');
     return { ok: false, stage: 'timeout' };
-  } finally {
-    busy = false;
-    setBusy(false);
   }
   if (res.ok && res.svg) {
     stage.innerHTML = svgDoc(res.svg);
     decorate();
     ghostOverlay(res.issues);
     setSide(res);
-    if (selectedId && (layoutIndex || {})[selectedId]) drawSel(); // 选中跨刷新保持
+    // 权威 layout 刷新纳入同一闭环：busy/禁用覆盖 POST+刷新全过程，
+    // 刷新在途 layoutIndex=null（未知），完成后才放行镜像/旋转/拖动。
+    if (await refreshLayout()) releaseBusy();
+    else holdAfterRefreshFailure();
   } else if (res.stage === 'render') {
-    // 写盘后渲染/链路失败：如实报告"已落盘、无成品"，版本/日志随响应更新。
+    // 写盘后渲染/链路失败：如实报告"已落盘、无成品"，无新帧；layout 已
+    // 写，旧 layoutIndex 过期，仍须重取权威节点状态再放行操作。
     setSide(Object.assign({ passed: false }, res));
-  } else {
-    // permission/delta/request：写盘前拒绝；server：状态未知。画布保持上一帧。
+    layoutIndex = null;
+    if (await refreshLayout()) releaseBusy();
+    else holdAfterRefreshFailure();
+  } else if (res.stage === 'server') {
+    // 服务端异常：落盘状态未知——画布/权威状态按当前盘面重读，
+    // 读不到则停用操作并明示请刷新。
     showRejection(res);
+    layoutIndex = null;
+    if (await refreshAfterUnknown()) releaseBusy();
+    else holdForUnknownState('状态未知：服务端异常且读取失败——请刷新页面');
+  } else {
+    // permission/delta/request：写盘前拒绝，盘面与权威节点状态未变，
+    // 画布保持上一帧，可继续操作。
+    showRejection(res);
+    releaseBusy();
   }
   return res;
+}
+
+function authoritativeNode(id) {
+  // 权威节点状态：layoutIndex 未加载/刷新在途/刷新失败（null）或节点
+  // 不在其中时返回 null——绝不把缺失状态推测成 none/rot0。
+  return (layoutIndex && id && layoutIndex[id]) || null;
 }
 
 function select(id) { // 原地点击选中：虚线框 + 侧栏旋转/镜像控制（含连线/干涉提示）
   selectedId = id;
   $('selbox').style.display = 'block';
   $('selId').textContent = id;
-  $('selMirror').textContent = ((layoutIndex || {})[id] || {}).mirror || 'none';
+  const nd = authoritativeNode(id);
+  $('selMirror').textContent = nd ? (nd.mirror || 'none') : '未知';
+  $('selRot').textContent = nd ? (nd.rot || 0) : '?';
   const n = (window.__conns || {})[id] || 0;
   $('selConns').textContent = n;
   const hint = $('selHint');
@@ -473,22 +543,29 @@ function deselect() {
 
 async function rotateSel() {
   if (!selectedId) return;
-  const cur = ((layoutIndex || {})[selectedId] || {}).rot || 0;
-  await postDelta({ node: selectedId, dx: 0, dy: 0, rot: (cur + 90) % 360 });
+  const nd = authoritativeNode(selectedId);
+  if (!nd) return; // 状态未知：不发基于推测 rot0 的旋转
+  await postDelta({ node: selectedId, dx: 0, dy: 0,
+                    rot: ((nd.rot || 0) + 90) % 360 });
 }
 
 // 镜像：绝对请求 x/y/none（还原）。授权在服务端（mirror_policy 三道闸），
 // 本端不做本地"翻转假象"，拒绝时画布保持上一帧。
 async function mirrorSel(axis) {
   if (!selectedId) return;
+  if (!authoritativeNode(selectedId)) return; // 状态未知：不发镜像
   await postDelta({ node: selectedId, dx: 0, dy: 0, mirror: axis });
 }
 
 // M 键循环 none→x→y→none。焦点在输入框/下拉/contenteditable 内、按着任意
 // 修饰键（含 Shift）或键盘自动重复时不触发——守卫统一放在全局 keydown。
+// 上一轴只读权威 layoutIndex；状态未知（null/节点缺失）时静默不发，
+// 绝不把缺失推测成 none。
 function cycleMirror() {
   if (!selectedId) return;
-  const cur = ((layoutIndex || {})[selectedId] || {}).mirror;
+  const nd = authoritativeNode(selectedId);
+  if (!nd) return;
+  const cur = nd.mirror;
   const next = cur === 'x' ? 'y' : cur === 'y' ? 'none' : 'x';
   mirrorSel(next);
 }
@@ -510,12 +587,38 @@ window.addEventListener('keydown', ev => {
 });
 
 (async function init() {
-  const d = await api('/api/sheet');
-  if (!d.ok) { $('state').textContent = '加载失败：' + (d.error || ''); return; }
+  let d;
+  try {
+    d = await api('/api/sheet', undefined, SHEET_TIMEOUT_MS);
+  } catch (e) {
+    // 初始读取超时/中断：明确提示并保持禁用，不无声假加载；初始加载
+    // 没有变更请求，不猜"已保存/未保存"。
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：初始图纸读取'
+        + (e && e.name === 'AbortError'
+           ? '超过等待上限 ' + SHEET_TIMEOUT_MS + 'ms'
+           : '中断（' + ((e && e.message) || e) + '）')
+        + '——请刷新页面重试';
+    setBusy(true);
+    return;
+  }
+  if (!d.ok) {
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：' + (d.error || '');
+    setBusy(true);
+    return;
+  }
   stage.innerHTML = svgDoc(d.svg);
   decorate();
   ghostOverlay(d.issues);
   setSide(d);
+  if (!await refreshLayout()) {
+    // 图纸已显示但权威节点状态不可得：镜像/旋转/拖动保持停用。
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：权威布局状态读取失败'
+        + '——镜像/旋转/拖动保持停用，请刷新页面重试';
+    setBusy(true);
+  }
 })();
 </script>
 </body>

@@ -18,7 +18,7 @@ catalog 各自按真实符号字节登记 axes=['x','y'](两目录符号仅行�
 
 变换次序:先在已归零并缩放的本地盒([0,W]x[0,H])内镜像,再做既有
 0/90/180/270 旋转与平移;端口 id/svg_element_id/medium/role/
-flow_capability/anchor_direction 等身份字段一律不交换、不重命名,
+flow_capability/anchor_direction/kind 等身份字段一律不交换、不重命名,
 仅位置与锚向随镜像变换(锚向与坐标必须同步,同 place() 的旋转纪律)。
 
 镜像许可三道闸(全部满足才放行,缺一即 ValueError):
@@ -50,9 +50,12 @@ __all__ = ['check_mirror', 'port_contract_digest', 'mirror_point',
 
 MIRROR_AXES = ('x', 'y')
 ANCHOR_DIRECTIONS = ('left', 'right', 'up', 'down')
-# 端口契约摘要取键口径(#63 固定,只取存在者;'port_kind' 为键名本体)
+# 端口契约摘要取键口径(#63 固定,只取存在者)。端口类别是目录真实字段
+# ports[].kind(symbol-library"本体感测口":枚举名 port_kind,取值
+# flow/body_tap,缺省 flow)——不是 'port_kind' 键;登记后任一端口新增或
+# 改写 kind 必须改变摘要而令登记失效(rendering-rules #63 三道闸)。
 PORT_CONTRACT_FIELDS = ('id', 'svg_element_id', 'medium', 'role',
-                        'flow_capability', 'anchor_direction', 'port_kind')
+                        'flow_capability', 'anchor_direction', 'kind')
 
 _ANCHOR_X = {'left': 'right', 'right': 'left', 'up': 'up', 'down': 'down'}
 _ANCHOR_Y = {'left': 'left', 'right': 'right', 'up': 'down', 'down': 'up'}

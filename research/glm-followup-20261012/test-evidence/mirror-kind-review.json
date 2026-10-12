@@ -1,0 +1,38 @@
+[
+  {
+    "catalog": ".agents/skills/hydraulic-schematic/assets/component-library/component-catalog.json",
+    "type": "engine_driven_pump",
+    "accepted_axes": [
+      "x",
+      "y"
+    ],
+    "kind_drift_rejected": true
+  },
+  {
+    "catalog": ".agents/skills/hydraulic-schematic/assets/component-library/component-catalog.json",
+    "type": "electric_motor_driven_pump",
+    "accepted_axes": [
+      "x",
+      "y"
+    ],
+    "kind_drift_rejected": true
+  },
+  {
+    "catalog": "1#系统原理图/component-catalog.json",
+    "type": "engine_driven_pump",
+    "accepted_axes": [
+      "x",
+      "y"
+    ],
+    "kind_drift_rejected": true
+  },
+  {
+    "catalog": "1#系统原理图/component-catalog.json",
+    "type": "electric_motor_driven_pump",
+    "accepted_axes": [
+      "x",
+      "y"
+    ],
+    "kind_drift_rejected": true
+  }
+]

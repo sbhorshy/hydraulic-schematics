@@ -289,7 +289,7 @@ class BridgeAllowanceCLI(unittest.TestCase):
         self.assertEqual(b1['verified_bridges'], 2)
         self.assertEqual(b1['allowance'], 0)
         self.assertEqual(b1['status'], 'fail')
-        self.assertTrue(any(c['id'] == 'V19' and '交叉 2 处超出放行预算 0'
+        self.assertTrue(any(c['id'] == 'V19' and '交叉 2 处 > 0，须改道消除'
                             in c['detail'] for c in report['checks']),
                         report['checks'])
 

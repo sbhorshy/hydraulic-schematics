@@ -33,9 +33,10 @@ CATALOG = os.path.normpath(os.path.join(
     HERE, '..', 'assets', 'component-library', 'component-catalog.json'))
 LIB = os.path.dirname(CATALOG)
 
-# 登记口径的键清单(测试内独立字面量,勿从被测模块取)
+# 登记口径的键清单(测试内独立字面量,勿从被测模块取;端口类别是目录
+# 真实字段 ports[].kind,枚举名才是 port_kind)
 PORT_FIELDS = ('id', 'svg_element_id', 'medium', 'role',
-               'flow_capability', 'anchor_direction', 'port_kind')
+               'flow_capability', 'anchor_direction', 'kind')
 
 MINIMAL_SYMBOL_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" data-component-type="mini_pump">
   <g id="symbol">
@@ -366,7 +367,7 @@ class MirrorRegistrationTest(unittest.TestCase):
         component['ports'] = [
             {'id': 'a', 'svg_element_id': 'port-a', 'medium': 'hydraulic',
              'role': 'measurement', 'flow_capability': 'none',
-             'anchor_direction': 'down', 'port_kind': 'body_tap'},
+             'anchor_direction': 'down', 'kind': 'body_tap'},
             {'id': 'b', 'svg_element_id': 'port-b', 'medium': 'hydraulic',
              'role': 'pressure', 'flow_capability': 'out',
              'anchor_direction': 'right'},
@@ -379,12 +380,36 @@ class MirrorRegistrationTest(unittest.TestCase):
         component['ports'][0]['role_note'] = '说明不入摘要'
         self.assertEqual(
             mp.check_mirror({'mirror': 'x'}, component, self.asset), 'x')
-        # port_kind 被排除的口径登记 -> 必须拒绝(证明该字段参与契约)
-        without_kind = tuple(f for f in PORT_FIELDS if f != 'port_kind')
+        # kind 被排除的口径登记 -> 必须拒绝(证明该字段参与契约)
+        without_kind = tuple(f for f in PORT_FIELDS if f != 'kind')
         component['mirror_registration']['ports_sha256'] = _ports_sha256(
             component['component_type'], component['ports'], fields=without_kind)
         with self.assertRaises(ValueError):
             mp.check_mirror({'mirror': 'x'}, component, self.asset)
+
+    def test_port_kind_add_or_change_invalidates_registration(self):
+        # 公开 check_mirror 回归(2026-10-12 审核 A):目录真实字段是
+        # ports[].kind(枚举 port_kind:flow/body_tap,缺省 flow,见
+        # symbol-library"本体感测口"),不是 'port_kind' 键。生产两泵现存
+        # ports 均无 kind,登记按无 kind 口径成立;登记后给任一端口新增
+        # kind、或改写其值,端口契约摘要必须变化而令登记失效,重按新契约
+        # 登记后才重新放行。
+        component = self._enabled()  # 按当前 EDP 端口(无 kind)登记
+        self.assertEqual(
+            mp.check_mirror({'mirror': 'x'}, component, self.asset), 'x')
+        added = copy.deepcopy(component)
+        added['ports'][0]['kind'] = 'body_tap'
+        with self.assertRaises(ValueError) as ctx:
+            mp.check_mirror({'mirror': 'x'}, added, self.asset)
+        self.assertIn('失效', str(ctx.exception))
+        rebound = copy.deepcopy(added)
+        rebound['mirror_registration']['ports_sha256'] = _ports_sha256(
+            rebound['component_type'], rebound['ports'])
+        self.assertEqual(
+            mp.check_mirror({'mirror': 'x'}, rebound, self.asset), 'x')
+        rebound['ports'][0]['kind'] = 'flow'
+        with self.assertRaises(ValueError):
+            mp.check_mirror({'mirror': 'x'}, rebound, self.asset)
 
     def test_asset_path_must_be_readable(self):
         component = self._enabled()

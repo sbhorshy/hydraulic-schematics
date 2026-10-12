@@ -2,10 +2,14 @@
 
 只经验证过的边界取材：
   * 真实 runner CLI（scripts/selftest_runner.py 子进程）；
-  * 临时目录里生成的 tiny unittest 套件模块（睡眠/挂起/失败/零用例）；
-  * 产物文件（独立套件日志、合并完整日志、机器 JSON 报告、时间戳标记）。
-不测私有函数，不重算实现期望——期望值全部来自 tiny 模块自身声明的行为
-（睡眠秒数、打印标记、计划失败）。
+  * 临时目录里生成的 tiny unittest 套件模块（睡眠/挂起/失败/零用例/
+    subTest 失败）；
+  * 产物文件（独立套件日志、合并完整日志、机器 JSON 报告、时间戳标记）；
+  * 真实抓获的 unittest -v 输出片段（逐字保存的机器报告病例日志行）。
+不重算实现期望——期望值全部来自 tiny 模块自身声明的行为（睡眠秒数、
+打印标记、计划失败）或日志片段文本自身的事实；除输出片段回归组直接把
+真实日志文本喂给 runner 模块的解析入口（断言日志自身事实，非重算实现）
+外，不测私有函数。
 
 覆盖的调度契约：
   1. --jobs 并发上限（同一时刻不得超过 N 个套件进程）与真实并行生效；
@@ -23,7 +27,22 @@
      module.Class.test_method；
  11. suite-timeout 拒绝 NaN/Inf/非正数；空名、重复、路径分隔符/遍历的套件
      名在启动前拒绝；
- 12. 跳过用例如实披露；全套 skipped 记 all_skipped，明确不是 passed。
+ 12. 跳过用例如实披露；全套 skipped 记 all_skipped，明确不是 passed；
+ 13. Python 3.10 机器报告病例：方法内 subTest 失败的父方法不写结果词也
+     不换行、下一个方法头接在同一行——真实 tiny 模块经 CLI（run_suites）
+     报告 3 个完整唯一 ID、tests_ran=3、subTest 父方法 FAIL、普通异常
+     方法 ERROR、成功 ok、suite 失败、失败/错误计数如实，subTest 不折算
+     额外用例；
+ 14. 真实抓获的 -v 日志片段：同一行串接多个方法头时每个完整
+     module.Class.method 只记一次、摘要区 FAIL:/ERROR: 标题（含 subTest
+     描述）补定被截断父方法的状态——含 docstring 首行行尾串接下一方法
+     头的组合（行尾结果词记给串接的方法，父方法由摘要纠正为 FAIL，不
+     被误读的 ok 掩盖）；超时被杀截断、无摘要可考的用例显式记 unknown
+     而非 ok；
+ 15. 机器报告病例 runner-docsub-review：带 docstring 的方法内 subTest 失
+     败、后续成功方法串接在文档首行行尾——真实 tiny 模块经 CLI
+     （run_suites）报告 2 个完整唯一 ID、tests_ran=2、docstring 父方法
+     FAIL、后续成功方法 ok 不丢失、subTest 不折算额外用例数。
 
 本组不属于 selftest.py 的 F 组固定清单。那份清单以 selftest.py 的
 L0_SUITES 注册表为准，成员完整性由 test_selftest_cli.py 以显式必需模块
@@ -32,6 +51,7 @@ L0_SUITES 注册表为准，成员完整性由 test_selftest_cli.py 以显式必
 套件绝对数。
 """
 from pathlib import Path
+import importlib.util
 import json
 import subprocess
 import sys
@@ -109,6 +129,104 @@ class TestTinyMix(unittest.TestCase):
         self.fail('skipped case body must not run')
 '''
 
+TINY_SUBTEST_BODY = '''\
+import unittest
+
+
+class TestTinySubTest(unittest.TestCase):
+    # 方法名决定运行顺序（unittest 按字母序）：subTest 父方法在最前——
+    # Python 3.10 的 unittest 不为 subTest 失败的父方法补写结果词也不
+    # 换行，后继方法头会接在同一行（机器报告病例的真实形态）。
+    def test_a_subtest_parent_fail(self):
+        for value in (1, 2):
+            with self.subTest(value=value):
+                self.assertNotEqual(value, 2)
+
+    def test_b_plain_error(self):
+        raise RuntimeError('planned error for subtest parsing test')
+
+    def test_c_ok(self):
+        self.assertTrue(True)
+'''
+
+# 机器报告病例 runner-docsub-review 的组合形态：subTest 失败的父方法带
+# docstring——Python 3.10 不为父方法补写结果词也不换行，下一方法头串接
+# 在文档首行行尾，行尾的「ok」属于 test_b 而非 test_a。
+TINY_DOCSUB_BODY = '''\
+import unittest
+
+
+class TestTinyDocSub(unittest.TestCase):
+    def test_a(self):
+        """Descriptive case first line."""
+        for value in (1, 2):
+            with self.subTest(value=value):
+                self.assertNotEqual(value, 2)
+
+    def test_b(self):
+        self.assertTrue(True)
+'''
+
+# 本轮机器报告病例的真实抓获片段：../skill-final-validation/suites/
+# test_rotation_routes.log 首行逐字保存（该套件 tests_ran=4、failures=2，
+# 其中 test_other_rf_and_cv_orientations 因 subTest 失败未在本行收尾，
+# 下一个方法头直接接在同一行）；其后为 Python 3.10 unittest 摘要区
+# 标准形态补全。
+ROTATION_LOG_FRAGMENT = """\
+test_other_rf_and_cv_orientations (test_rotation_routes.RotationRoutes) ... test_rf_270_does_not_move_its_collision_into_the_neighbor (test_rotation_routes.RotationRoutes) ... FAIL
+test_rf_and_cv_neighbors_reconciled (test_rotation_routes.RotationRoutes) ... ok
+test_symmetric_mirror_kept_under_rotation (test_rotation_routes.RotationRoutes) ... ok
+
+======================================================================
+FAIL: test_other_rf_and_cv_orientations (test_rotation_routes.RotationRoutes) [rotation='rf270']
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_rotation_routes.py", line 88, in test_other_rf_and_cv_orientations
+    with self.subTest(rotation=rotation):
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_rf_270_does_not_move_its_collision_into_the_neighbor (test_rotation_routes.RotationRoutes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "test_rotation_routes.py", line 147, in test_rf_270_does_not_move_its_collision_into_the_neighbor
+    self.assertTrue(moved_into_neighbor)
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.012s
+
+FAILED (failures=2)
+"""
+
+# 套件进程超时被杀的截断形态：只剩未收尾的方法头，没有摘要区可考。
+TRUNCATED_LOG_FRAGMENT = (
+    "test_rotates_all_eight_directions "
+    "(test_rotation_routes.RotationRoutes) ... \n"
+    "test_mirror_policy_holds (test_rotation_routes.RotationRoutes)")
+
+# 机器报告病例 runner-docsub-review 的真实抓获形态：带 docstring 的
+# subTest 失败父方法——Python 3.10 不为父方法补写结果词也不换行，下一
+# 方法头串接在文档首行行尾，行尾的「ok」属于 test_b 而非 test_a；其中
+# traceback 与摘要区按 Python 3.10 unittest 标准形态补全。
+DOCSUB_LOG_FRAGMENT = """\
+test_a (docsub.Cases)
+Descriptive case first line. ... test_b (docsub.Cases) ... ok
+
+======================================================================
+FAIL: test_a (docsub.Cases) (value=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "docsub.py", line 6, in test_a
+    with self.subTest(value=value):
+AssertionError: 1 == 1
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.001s
+
+FAILED (failures=1)
+"""
+
 
 def _make_suite(directory, name, kind='pass', sleep='1.2'):
     if kind == 'pass':
@@ -125,6 +243,10 @@ def _make_suite(directory, name, kind='pass', sleep='1.2'):
         body = TINY_SKIP_BODY
     elif kind == 'mix':
         body = TINY_MIX_BODY
+    elif kind == 'subtest':
+        body = TINY_SUBTEST_BODY
+    elif kind == 'docsub':
+        body = TINY_DOCSUB_BODY
     else:
         raise ValueError(kind)
     (directory / (name + '.py')).write_text(body, encoding='utf-8')
@@ -165,6 +287,15 @@ def _max_concurrency(intervals):
         current += delta
         peak = max(peak, current)
     return peak
+
+
+def _load_runner_module():
+    """按路径加载 runner 模块本体（仅输出片段回归组使用，喂真实日志）。"""
+    spec = importlib.util.spec_from_file_location('selftest_runner_parse',
+                                                  RUNNER)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 class SelftestRunnerScheduling(unittest.TestCase):
@@ -461,6 +592,156 @@ class SelftestRunnerScheduling(unittest.TestCase):
             self.assertEqual(summary['status'], 'FAIL')
             self.assertEqual(summary['suites_by_status']['all_skipped'], 1)
             self.assertEqual(summary['skipped'], 2)
+
+    def test_subtest_failure_case_ids_complete_and_honest(self):
+        with tempfile.TemporaryDirectory(prefix='sched-subtest-') as raw:
+            tmp = Path(raw)
+            _make_suite(tmp, 'tiny_subtest', kind='subtest')
+            done = _run_runner(tmp, ['tiny_subtest'])
+            combined = done.stdout + done.stderr
+            self.assertNotEqual(done.returncode, 0, combined)
+            report = _load_report(tmp)
+            record = report['suites'][0]
+            self.assertEqual(record['status'], 'failed')
+            self.assertEqual(record['tests_ran'], 3)
+            cases = record['cases']
+            self.assertEqual(len(cases), 3,
+                             'subTest 失败截断父方法行时用例不得丢失')
+            by_id = {case['id']: case['result'] for case in cases}
+            self.assertEqual(len(by_id), 3,
+                             '每个完整 module.Class.method 只记一次')
+            self.assertEqual(
+                by_id.get('tiny_subtest.TestTinySubTest.test_a_subtest_parent_fail'),
+                'FAIL',
+                'subTest 失败的父方法应由摘要区 FAIL: 标题补定状态，'
+                '而不是吞掉串接在同一行的下一个方法头')
+            self.assertEqual(
+                by_id.get('tiny_subtest.TestTinySubTest.test_b_plain_error'),
+                'ERROR')
+            self.assertEqual(
+                by_id.get('tiny_subtest.TestTinySubTest.test_c_ok'), 'ok')
+            self.assertNotIn('unknown', by_id.values())
+            self.assertEqual(record['failures'], 1)
+            self.assertEqual(record['errors'], 1)
+            summary = report['summary']
+            self.assertEqual(summary['status'], 'FAIL')
+            self.assertEqual(summary['tests_ran'], 3)
+            self.assertEqual(summary['failures'], 1)
+            self.assertEqual(summary['errors'], 1)
+            merged = (tmp / 'merged.log').read_text(encoding='utf-8',
+                                                    errors='replace')
+            self.assertIn('(value=2)', merged,
+                          'subTest 条件描述应保留在完整日志证据里')
+
+    def test_docstring_subtest_parent_and_glued_next_method_both_recorded(self):
+        with tempfile.TemporaryDirectory(prefix='sched-docsub-') as raw:
+            tmp = Path(raw)
+            _make_suite(tmp, 'tiny_docsub', kind='docsub')
+            done = _run_runner(tmp, ['tiny_docsub'])
+            combined = done.stdout + done.stderr
+            self.assertNotEqual(done.returncode, 0, combined)
+            report = _load_report(tmp)
+            record = report['suites'][0]
+            self.assertEqual(record['status'], 'failed')
+            self.assertEqual(record['tests_ran'], 2,
+                             'subTest 失败不折算额外用例数（共 2 个方法）')
+            cases = record['cases']
+            self.assertEqual(len(cases), 2,
+                             'docstring 首行行尾串接下一方法头时用例不得丢失')
+            by_id = {case['id']: case['result'] for case in cases}
+            self.assertEqual(len(by_id), 2,
+                             '每个完整 module.Class.method 只记一次')
+            self.assertEqual(
+                by_id.get('tiny_docsub.TestTinyDocSub.test_a'), 'FAIL',
+                'subTest 失败的 docstring 父方法由摘要区 FAIL: 标题纠正，'
+                '不得窃取串接在文档首行行尾的下一方法结果词')
+            self.assertEqual(
+                by_id.get('tiny_docsub.TestTinyDocSub.test_b'), 'ok',
+                '串接在 docstring 首行行尾的后续成功方法不得丢失')
+            self.assertNotIn('unknown', by_id.values())
+            self.assertEqual(record['failures'], 1)
+            self.assertEqual(record['errors'], 0)
+            summary = report['summary']
+            self.assertEqual(summary['status'], 'FAIL')
+            self.assertEqual(summary['tests_ran'], 2)
+            self.assertEqual(summary['failures'], 1)
+            merged = (tmp / 'merged.log').read_text(encoding='utf-8',
+                                                    errors='replace')
+            self.assertIn('Descriptive case first line. ... test_b (', merged,
+                          '组合病例证据：下一方法头串接在 docstring 首行行尾')
+            self.assertIn('(value=2)', merged,
+                          'subTest 条件描述应保留在完整日志证据里')
+
+
+class SelftestRunnerCapturedOutputParsing(unittest.TestCase):
+    """真实抓获的 unittest -v 输出片段回归（机器报告病例的解析口径）。
+
+    例外说明：本组直接把保存的真实日志文本喂给 runner 模块的解析入口
+    （_parse_unittest_output，机器报告路径上的事实提取函数），期望值全部
+    来自日志文本自身的事实；公开 run_suites/CLI 路径的同类回归见
+    SelftestRunnerScheduling.test_subtest_failure_case_ids_complete_and_honest，
+    两者互补，并非只测内部实现。
+    """
+    maxDiff = None
+
+    def setUp(self):
+        self.runner = _load_runner_module()
+
+    def test_captured_concatenated_headers_parse_every_parent_once(self):
+        parsed = self.runner._parse_unittest_output(ROTATION_LOG_FRAGMENT)
+        self.assertEqual(parsed['ran'], 4)
+        self.assertEqual(parsed['failures'], 2)
+        self.assertTrue(parsed['failed'])
+        cases = parsed['cases']
+        self.assertEqual(len(cases), 4,
+                         '同一行串接两个方法头（subTest 截断父方法）时'
+                         '用例不得丢失')
+        ids = [case['id'] for case in cases]
+        self.assertEqual(len(set(ids)), 4,
+                         '每个完整 module.Class.method 只记一次')
+        by_id = {case['id']: case['result'] for case in cases}
+        expected = {
+            'test_rotation_routes.RotationRoutes.'
+            'test_other_rf_and_cv_orientations': 'FAIL',
+            'test_rotation_routes.RotationRoutes.'
+            'test_rf_270_does_not_move_its_collision_into_the_neighbor': 'FAIL',
+            'test_rotation_routes.RotationRoutes.'
+            'test_rf_and_cv_neighbors_reconciled': 'ok',
+            'test_rotation_routes.RotationRoutes.'
+            'test_symmetric_mirror_kept_under_rotation': 'ok',
+        }
+        self.assertEqual(by_id, expected)
+        for case in cases:
+            self.assertNotIn(' ', case['id'], '串接的方法名不得进 ID')
+            self.assertNotIn(' ', case['result'], '串接的方法头不得塞进 result')
+
+    def test_captured_truncated_output_marks_cases_unknown(self):
+        parsed = self.runner._parse_unittest_output(TRUNCATED_LOG_FRAGMENT)
+        by_id = {case['id']: case['result'] for case in parsed['cases']}
+        self.assertEqual(by_id, {
+            'test_rotation_routes.RotationRoutes.'
+            'test_rotates_all_eight_directions': 'unknown',
+            'test_rotation_routes.RotationRoutes.'
+            'test_mirror_policy_holds': 'unknown',
+        }, '进程被杀截断、无摘要可考的用例必须显式 unknown，不得臆断为 ok')
+
+    def test_captured_docstring_tail_glued_header_keeps_both_cases(self):
+        parsed = self.runner._parse_unittest_output(DOCSUB_LOG_FRAGMENT)
+        self.assertEqual(parsed['ran'], 2)
+        self.assertEqual(parsed['failures'], 1)
+        self.assertTrue(parsed['failed'])
+        cases = parsed['cases']
+        self.assertEqual(len(cases), 2,
+                         'docstring 首行行尾串接下一方法头时用例不得丢失')
+        by_id = {case['id']: case['result'] for case in cases}
+        self.assertEqual(by_id, {
+            'docsub.Cases.test_a': 'FAIL',
+            'docsub.Cases.test_b': 'ok',
+        }, 'subTest 失败的 docstring 父方法由摘要区 FAIL: 标题纠正为 '
+           'FAIL（不得窃取串接方法头的 ok），串接的后续成功方法不得丢失')
+        for case in cases:
+            self.assertNotIn(' ', case['id'])
+            self.assertNotIn(' ', case['result'])
 
 
 if __name__ == '__main__':

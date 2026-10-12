@@ -27,8 +27,16 @@
     绝不 unlink 调用者已有而本次未成功创建的路径；
   * 逐用例结果取自 -v 输出（日志文件保持子进程原样输出，不改写）：无
     docstring 时「method (module.Class) ... 结果」同行，有 docstring 时
-    结果随文档首行另起一行，两种形态都不得丢用例；机器记录的用例 ID
-    恒为 module.Class.method（unittest 括号里只给到类名，不是完整 ID）；
+    结果随文档首行另起一行，两种形态都不得丢用例；Python 3.10 的
+    unittest 在方法内 subTest 失败时不为父方法补写结果词也不换行，下一
+    个方法头会接在同一行——docstring 形态下串接发生在文档首行行尾，
+    「... ok」等结果词属于串接上的下一个方法而非父方法，须按段切开同
+    一行的多个方法头；被截断的父方法以摘要区「ERROR:/FAIL:」标题（含
+    subTest 描述）按 ERROR > FAIL > 进度区结果词的优先级补定或纠正
+    （串接形态下误读的 ok 掩盖不了摘要点名的失败），摘要也兜不住的
+    （如超时被杀截断）显式记 'unknown'，绝不臆断为 ok，subTest 不折算
+    额外用例数；机器记录的用例 ID 恒为 module.Class.method（unittest
+    括号里只给到 module.Class，不是完整 ID）；
   * 启动前参数预检：suite-timeout 必须为有限正数（拒绝 NaN/Inf）；套件
     名必须是非空、不重复的 Python 点分模块名（拒绝路径分隔符/路径遍历；
     重复名会让两个 worker 写同一份套件日志）。
@@ -70,13 +78,29 @@ _VERDICT_FAILED_RE = re.compile(r'^FAILED\b', re.M)
 _COUNT_RES = (('failures', re.compile(r'failures=(\d+)')),
               ('errors', re.compile(r'errors=(\d+)')),
               ('skipped', re.compile(r'skipped=(\d+)')))
-_CASE_INLINE_RE = re.compile(r'^(\S+) \(([^)]+)\) \.\.\. (.+?)\s*$')
+# unittest -v 写在方法头 / docstring 首行之后的结果分隔符；docstring 尾
+# 行里该分隔符之后的剩余文本若整体符合段语法，就是串接上的下一方法头
+# 及其结果词
+_DOTS_SEPARATOR = ' ... '
 # 带 docstring 时 unittest -v 先输出「method (module.Class)」独立一行，
-# 结果追加在 docstring 首行行尾（「文档首行 ... ok」）
-_CASE_HEAD_RE = re.compile(r'^(\S+) \(([^)]+)\)[ \t]*$')
+# 结果追加在 docstring 首行行尾（「文档首行 ... ok」）；父方法被 subTest
+# 失败截断时不写结果词，行尾串接的是下一方法头（本正则只是剩余文本不
+# 成段时的兜底）
 _CASE_TAIL_RE = re.compile(r'^(.*) \.\.\. (ok|ERROR|FAIL|skipped\b.*|'
-                           r'expected failure|unexpected success)[ \t]*$')
-
+                           r'expected failure|unexpected success)'
+                           r'( \([^)]*\))?[ \t]*$')
+# -v 进度行按「段」解析：一段 = 「method (module.Class)」+ 可选「 ... 」
+# + 行尾结果词。Python 3.10 的 unittest 在方法内 subTest 失败时不为父方法
+# 补写结果词也不换行，下一个方法头会直接接在同一行，一行可含多段。
+# 方法名限定 test 开头（unittest 加载器只收集 test* 方法），避免把
+# docstring 正文 / traceback 里恰好形如「词 (括号)」的行误认成用例头。
+_PROGRESS_HEAD_RE = re.compile(r'(test\S*) \(([^)]+)\)( \.\.\. )?')
+_PROGRESS_RESULT_RE = re.compile(r'(ok|ERROR|FAIL|skipped\b.*|expected failure|'
+                                 r'unexpected success)( \([^)]*\))?[ \t]*$')
+# 摘要区标题行（须紧跟 ===== 分隔线）：「ERROR:/FAIL: method (module.Class)」，
+# 括号后可能跟 subTest 描述（如 [rotation='rf270']），不影响识别父方法。
+_SUMMARY_HEAD_RE = re.compile(r'^(ERROR|FAIL): (test\S*) \(([^)]+)\)')
+_SEPARATOR_LINE_RE = re.compile(r'^=+$')
 USAGE = ('用法: python selftest_runner.py [--jobs N(默认1,允许1..4)] '
          '[--suite-timeout 秒(默认600,有限正数,单套件测试进程保护上限,非构图预算)] '
          '[--log-dir 新目录] [--merged-log 新文件] [--report 新文件] '
@@ -111,13 +135,84 @@ def read_log_tail(path, limit=1200):
         return '(无法读取日志 %s)' % path
 
 
+def _split_progress_line(line):
+    """把一行 -v 进度输出切成「(method, module.Class, 结果, 是否收尾)」段。
+
+    只有整行都能用「方法头 [ ' ... ' [结果词] ]」段语法完全消费时才返回
+    段清单，否则返回 None，交回 docstring 尾行等既有逻辑。段结果为 None
+    表示该父方法没有结果词收尾（Python 3.10 下 subTest 失败的父方法不
+    补结果也不换行，下一个方法头接在同一行）；「是否收尾」为 False 的
+    段是 docstring 形态方法头，结果在下一行。
+    """
+    segments = []
+    pos = 0
+    while pos < len(line):
+        head = _PROGRESS_HEAD_RE.match(line, pos)
+        if not head:
+            return None
+        method, owner, dots = head.group(1), head.group(2), head.group(3)
+        pos = head.end()
+        if dots is None:
+            # docstring 形态方法头只出现在行尾（容尾随空白）
+            if line[pos:].strip(' \t'):
+                return None
+            segments.append((method, owner, None, False))
+            return segments
+        result = _PROGRESS_RESULT_RE.match(line, pos)
+        if result:
+            # 结果词必然止于行尾（unittest 写完结果立即换行）
+            segments.append((method, owner, result.group(1), True))
+            return segments
+        # 无结果词：被截断的父方法，下一个方法头紧随其后（同一行）
+        segments.append((method, owner, None, True))
+    return segments or None
+
+
+def _pending_case(pending):
+    """docstring 形态方法头已见、结果词未见：暂记 None，交摘要区补定。"""
+    method, owner = pending
+    return {'name': method, 'id': '%s.%s' % (owner, method), 'result': None}
+
+
+def _collect_summary_verdicts(text):
+    """从摘要区标题行收集逐用例判定：{module.Class.method: 'ERROR'|'FAIL'}。
+
+    只认紧跟 ===== 分隔线的「ERROR:/FAIL: method (module.Class)」标题行
+    （traceback 正文里同形文字不会紧跟分隔线，不误伤）；括号后的 subTest
+    描述只是证据，不把每条 subTest 折算成额外用例；同一用例 ERROR 与
+    FAIL 并存时记 ERROR。
+    """
+    verdicts = {}
+    after_separator = False
+    for line in text.splitlines():
+        if after_separator:
+            match = _SUMMARY_HEAD_RE.match(line)
+            if match:
+                case_id = '%s.%s' % (match.group(3), match.group(2))
+                if verdicts.get(case_id) != 'ERROR':
+                    verdicts[case_id] = match.group(1)
+        after_separator = _SEPARATOR_LINE_RE.match(line) is not None
+    return verdicts
+
+
 def _parse_unittest_output(text):
     """从 unittest -v 输出解析套件级事实：用例数、判定、计数、逐用例结果。
 
-    逐用例有两种形态：无 docstring 时「method (module.Class) ... 结果」同行；
-    有 docstring 时先输出「method (module.Class)」独立一行，结果在 docstring
-    首行行尾——两种都要识别，cases 不得丢。用例 ID 记 module.Class.method
-    （unittest 的括号只给到 module.Class，不是完整 ID）。
+    逐用例有两种形态：无 docstring 时「method (module.Class) ... 结果」
+    同行；有 docstring 时先输出「method (module.Class)」独立一行，结果在
+    docstring 首行行尾——两种都要识别，cases 不得丢。用例 ID 记
+    module.Class.method（unittest 的括号只给到 module.Class，不是完整 ID）。
+
+    Python 3.10 的 unittest 在方法内 subTest 失败时不为父方法补写结果词
+    也不换行，下一个方法头会接在同一行：无 docstring 时整行按段语法切
+    开；有 docstring 时串接发生在文档首行行尾——剥掉「文档首行 ... 」
+    分隔符后，剩余文本若整体按段语法解析成功，说明父方法被截断、行尾
+    的结果词属于串接上的下一个方法，不得记给父方法。无结果词收尾的父
+    方法暂记 None，由摘要区「ERROR:/FAIL:」标题（含 subTest 描述）按
+    ERROR > FAIL > 进度区结果词的优先级补定或纠正（串接形态下误读的
+    ok 掩盖不了摘要点名的失败）；摘要也兜不住的（如进程超时被杀截断）
+    显式记 'unknown'，绝不臆断为 ok。subTest 不折算额外用例数，每个完整
+    module.Class.method 只记一次。
     """
     ran_match = _RAN_RE.search(text)
     counts = {}
@@ -127,12 +222,27 @@ def _parse_unittest_output(text):
     cases = []
     pending = None   # 已见用例行头、等待 docstring 行给出结果的用例
     for line in text.splitlines():
-        inline = _CASE_INLINE_RE.match(line)
-        if inline:
-            pending = None
-            cases.append({'name': inline.group(1),
-                          'id': '%s.%s' % (inline.group(2), inline.group(1)),
-                          'result': inline.group(3)})
+        segments = _split_progress_line(line)
+        if segments is None and pending is not None:
+            # docstring 尾行：剥掉「文档首行 ... 」后剩余文本若整体符合
+            # 段语法，那是串接上的下一方法头及其结果词，不属于父方法
+            sep = line.find(_DOTS_SEPARATOR)
+            if sep != -1:
+                segments = _split_progress_line(
+                    line[sep + len(_DOTS_SEPARATOR):])
+        if segments is not None:
+            if pending is not None:
+                # 父方法自己的结果词始终没出现（被串接方法头接走或输出
+                # 截断）：不丢用例，暂记 None 交摘要区补定
+                cases.append(_pending_case(pending))
+                pending = None
+            for method, owner, result, terminated in segments:
+                if terminated:
+                    cases.append({'name': method,
+                                  'id': '%s.%s' % (owner, method),
+                                  'result': result})
+                else:
+                    pending = (method, owner)   # docstring 行头，结果在下一行
             continue
         if pending is not None:
             tail = _CASE_TAIL_RE.match(line)
@@ -142,9 +252,27 @@ def _parse_unittest_output(text):
                               'result': tail.group(2)})
                 pending = None
                 continue
-        head = _CASE_HEAD_RE.match(line)
-        if head:
-            pending = (head.group(1), head.group(2))
+    if pending is not None:
+        # 直到输出结束都没等到结果行（如进程被杀截断）：不丢用例，显式未知
+        cases.append(_pending_case(pending))
+    summary_verdicts = _collect_summary_verdicts(text)
+    for case in cases:
+        flavour = summary_verdicts.get(case['id'])
+        if flavour == 'ERROR' or case['result'] == 'ERROR':
+            # 摘要区「ERROR:/FAIL:」标题是 unittest 对真实失败/错误的逐用
+            # 例记名证据，按 ERROR > FAIL > 进度区结果词取舍：串接形态下
+            # 被误读的 ok 不得掩盖摘要点名的失败
+            case['result'] = 'ERROR'
+        elif flavour == 'FAIL':
+            case['result'] = 'FAIL'
+        elif case['result'] is None:
+            case['result'] = flavour or 'unknown'
+    seen_ids = {case['id'] for case in cases}
+    for case_id, flavour in summary_verdicts.items():
+        if case_id not in seen_ids:
+            # 摘要点了名、但方法头未被解析到的用例（极端截断）：按摘要补回
+            cases.append({'name': case_id.rsplit('.', 1)[1],
+                          'id': case_id, 'result': flavour})
     return {
         'ran': int(ran_match.group(1)) if ran_match else None,
         'ok': bool(_VERDICT_OK_RE.search(text)),
