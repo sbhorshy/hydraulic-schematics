@@ -1,0 +1,19 @@
+test_cli_places_spring_valve_and_reports_nodes_matching_symbol_facts (test_entrypoints.FootprintRegistration45)
+冻结 l0-current 插入弹簧阀走真实 CLI：输出节点 w/h/symbol 对账 SVG 实读。 ... ok
+test_cli_reports_unregistered_types_fail_closed_with_actionable_list (test_entrypoints.FootprintRegistration45) ... ok
+test_refuel_catalog_entry_matches_symbol_facts (test_entrypoints.FootprintRegistration45) ... ok
+test_spring_valve_catalog_entry_matches_symbol_port_group (test_entrypoints.FootprintRegistration45) ... ok
+test_current_fixture_cli_preflight_and_rule_layout (test_entrypoints.LayoutEntrypoints) ... ok
+test_current_refuel_type_is_placed_without_changing_topology (test_entrypoints.LayoutEntrypoints) ... ok
+test_current_seed_renders_and_retains_geometry_failure_gate (test_entrypoints.LayoutEntrypoints) ... ok
+test_in_place_validation_uses_catalog_symbols_without_local_copies (test_entrypoints.LayoutEntrypoints) ... ok
+test_no_reference_labels_allow_renderer_to_prepare_all_nodes (test_entrypoints.LayoutEntrypoints) ... ok
+test_partial_reference_labels_keep_defaults_for_other_nodes (test_entrypoints.LayoutEntrypoints) ... ok
+test_small_seed_passes_preflight_render_and_geometry (test_entrypoints.LayoutEntrypoints) ... ok
+test_unknown_and_unregistered_types_fail_with_actionable_message (test_entrypoints.LayoutEntrypoints) ... ok
+test_unsupported_refuel_connection_is_not_guessed (test_entrypoints.LayoutEntrypoints) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 25.715s
+
+OK
