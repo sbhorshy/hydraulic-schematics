@@ -1,0 +1,18 @@
+test_bounded_jobs_cap_and_real_parallelism (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_docstring_case_result_recorded_with_full_id (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_failing_suite_keeps_other_suite_results (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_invalid_timeout_and_suite_names_rejected_before_launch (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_jobs_one_runs_suites_sequentially (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_jobs_out_of_range_is_rejected (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_merged_log_and_machine_report_contents (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_minimal_invocation_without_optional_outputs (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_output_paths_are_reserved_before_any_suite_starts (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_preflight_failure_only_cleans_files_created_this_run (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_skipped_disclosed_and_all_skipped_suite_not_passed (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_suite_timeout_kills_only_offending_suite (test_selftest_runner.SelftestRunnerScheduling) ... ok
+test_zero_test_suite_cannot_go_green (test_selftest_runner.SelftestRunnerScheduling) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 19.193s
+
+OK

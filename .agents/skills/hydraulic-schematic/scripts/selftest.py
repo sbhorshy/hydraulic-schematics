@@ -4,8 +4,10 @@
 一句话：改动符号 / catalog / 模板脚本后，一条命令知道出图能力是否被打破。
 
     python .agents/skills/hydraulic-schematic/scripts/selftest.py
+        [--jobs N(默认1,允许1..4)] [--suite-timeout 秒(默认600,有限正数)]
+        [--log-dir 新套件日志目录] [--report 新JSON机器报告]
     python .agents/skills/hydraulic-schematic/scripts/selftest.py --update-golden   # 重录金样
-    python .agents/skills/hydraulic-schematic/scripts/selftest.py --list-suites     # 仅列 F 组注册清单，不执行测试
+    python .agents/skills/hydraulic-schematic/scripts/selftest.py --list-suites     # 仅列 F 组注册清单（纯 JSON），不执行测试
 
 覆盖面（含真实浏览器显示与局部回读证据）：
 
@@ -32,18 +34,24 @@
      入口测试含小型 seed 的预检→渲染→几何全链回归；当前 23 部件 seed 的
      已知几何缺陷仍须被拦截。主自检包含真实 Chrome 栅格化/显示测量，
      并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
+     F 组由 scripts/selftest_runner.py 逐套件独立进程调度（--jobs/--suite-timeout/
+     --log-dir/--report）；固定执行完整 24 套件清单，任何套件未过即 F 与整体自检
+     失败。--suite-timeout 是单套件测试进程挂起保护上限，不是构图/寻优预算。
 
-可选 HYDRAULIC_SELFTEST_UNIT_LOG=/新日志路径 保存 F 组完整输出（直接流式写入，已有文件不覆盖）；
-指定日志时开启逐用例详细输出；控制台仍只给尾部摘要，不以摘要代替完整失败证据。
+可选 HYDRAULIC_SELFTEST_UNIT_LOG=/新日志路径 指定 F 组独占合并完整日志（新文件独占，
+按套件清单顺序整文件拼接，已有文件不覆盖）；--log-dir 另给逐套件实时日志便于运行中观察；
+逐套件固定 -v 完整记录，控制台只给逐套件摘要与日志路径，不以摘要代替完整失败证据。
 全部输入来自 skill 随附资产，不依赖仓库外层的历史 frozen 目录。
 仓库编辑器/活动项目集成测试另在 tests/repository/ 显式运行，不计入本自检。
 自动测试验证出图、显示及证据协议，不等于已完成实际图纸的感知回读签认；
 整图与逐项回读仍须明确记录，不能把测试通过宣称为图纸已获确认。
 
-失败出口：与渲染器同一退出码约定 0 过 / 1 断，供 CI 或钩子直接调用。
+失败出口：0 过 / 1 断 / 2 用法或输出路径预检失败（在任何测试启动前退出），
+供 CI 或钩子直接调用。
 守门基础设施，在仓库根原位运行，不复制到工作目录。
 """
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -68,6 +76,11 @@ PROD_MD_NAME = 'aircraft_hydraulic_system_topology.md'
 # 子进程统一 UTF-8 输出，避免 Windows 控制台代码页干扰解码
 CHILD_ENV = dict(os.environ, PYTHONIOENCODING='utf-8', PYTHONUTF8='1',
                  PYTHONDONTWRITEBYTECODE='1')
+
+# F 组逐套件调度深模块（同目录，公开接口见其模块头注）
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+import selftest_runner as RUNNER
 
 
 class Fail(Exception):
@@ -296,39 +309,30 @@ L0_SUITES = ('test_coordinate_contract', 'test_assembly_layout', 'test_assemblie
           'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli')
 
 
-def check_l0_regressions():
-    # Aggregate hang guard for bundled browser regressions, not the optimizer
-    # performance budget. Repository integration runs under its own command.
+def check_l0_regressions(jobs=1, suite_timeout=RUNNER.DEFAULT_SUITE_TIMEOUT,
+                         report_path=None, log_dir=None):
+    """F 组固定执行完整 L0_SUITES（24 模块）：逐套件独立进程、有界并行与
+    独占日志/报告由 selftest_runner.run_suites 调度（suite_timeout 是单套件
+    测试进程挂起保护上限，不是构图/寻优预算；仓库集成测试不在本命令）。
+    任何套件 status 非 passed 即本项与整体自检失败，不允许过滤或缩小清单。"""
     unit_log = os.environ.get('HYDRAULIC_SELFTEST_UNIT_LOG')
-    command = [sys.executable, '-m', 'unittest', *(['-v'] if unit_log else []), *L0_SUITES]
     try:
-        if unit_log:
-            # Reserve a new caller-selected file before starting the expensive
-            # run; stream directly so failures, timeouts and restarts retain output.
-            try:
-                log = open(unit_log, 'xb')
-            except OSError as error:
-                raise Fail('无法新建完整单元日志 %s；请提供可写的新路径: %s' % (unit_log, error)) from error
-            print('完整单元输出: %s' % os.path.abspath(unit_log), flush=True)
-            with log:
-                result = subprocess.run(command, cwd=HERE, env=CHILD_ENV,
-                                        stdout=log, stderr=subprocess.STDOUT, timeout=1800)
-            with open(unit_log, 'rb') as recorded:
-                recorded.seek(max(0, os.path.getsize(unit_log)-5000))
-                output = recorded.read().decode('utf-8', 'replace')
-        else:
-            result = subprocess.run(command, cwd=HERE, env=CHILD_ENV, capture_output=True, timeout=1800)
-            output = ((result.stdout or b'') + (result.stderr or b'')).decode('utf-8', 'replace')
-    except subprocess.TimeoutExpired as exc:
-        raise Fail('L0 专项测试超过 1800 秒进程保护上限，未通过' +
-                   ('；已捕获输出保留于 %s' % unit_log if unit_log else '')) from exc
-    if result.returncode:
-        raise Fail('L0 专项测试退出码 %d。输出尾部：\n%s'
-                   % (result.returncode, output[-5000:]))
-    lines = output.strip().splitlines()
-    summary = next((i for i, line in enumerate(lines) if line.startswith('Ran ')), None)
-    if summary is not None:
-        print('\n'.join(lines[summary:]))
+        report = RUNNER.run_suites(L0_SUITES, cwd=HERE, jobs=jobs,
+                                   suite_timeout=suite_timeout, log_dir=log_dir,
+                                   merged_log_path=unit_log,
+                                   report_path=report_path, env=CHILD_ENV)
+    except (ValueError, RUNNER.PreflightError) as error:
+        raise Fail('F 组输出路径/参数预检失败（未启动任何套件测试进程）：'
+                   '%s' % error)
+    RUNNER.print_summary(report)
+    print('以上为 F 组 %d 个套件的调度小结；整体自检结论由 A–F 全部结果决定。'
+          % len(report['suites']))
+    broken = ['%s(%s)' % (record['suite'], record['status'])
+              for record in report['suites'] if record['status'] != 'passed']
+    if broken:
+        raise Fail('L0 专项 %d/%d 套件未通过：%s。逐套件完整证据见上方日志'
+                   '路径，不以摘要代替' % (len(broken), len(report['suites']),
+                                       '、'.join(broken)))
 
 
 CHECKS = [
@@ -341,25 +345,120 @@ CHECKS = [
 ]
 
 
+USAGE = ('用法: python selftest.py [--jobs N(默认1,允许1..4)] '
+         '[--suite-timeout 秒(默认600,有限正数,单套件测试进程挂起保护上限,非构图/寻优预算)] '
+         '[--log-dir 新套件日志目录] [--report 新JSON机器报告] '
+         '[--list-suites] [--update-golden]')
+
+
+class UsageError(Exception):
+    """命令行用法/输出路径问题；在任何检查启动前以退出码 2 结束。"""
+
+
+def _reject_taken(option, path):
+    if os.path.exists(path):
+        raise UsageError('%s %s 已存在：输出一律新文件独占，不覆盖既有证据'
+                         % (option, path))
+
+
+def _parse_args(argv):
+    """解析并校验命令行（含 --report/--log-dir 输出路径占用预检），返回
+    选项 dict；用法错误抛 UsageError，保证不带着坏参数启动任何检查。"""
+    options = {'jobs': 1, 'suite_timeout': RUNNER.DEFAULT_SUITE_TIMEOUT,
+               'report': None, 'log_dir': None,
+               'list_suites': False, 'update_golden': False}
+    value_opts = ('--jobs', '--suite-timeout', '--report', '--log-dir')
+    index = 0
+    while index < len(argv):
+        token = argv[index]
+        if token in value_opts:
+            if index + 1 >= len(argv):
+                raise UsageError('%s 缺参数值' % token)
+            value = argv[index + 1]
+            index += 2
+            if not value:
+                raise UsageError('%s 需要非空参数值' % token)
+            if token == '--jobs':
+                try:
+                    options['jobs'] = int(value)
+                except ValueError:
+                    raise UsageError('--jobs 需为整数，收到 %r' % value)
+                if not RUNNER.MIN_JOBS <= options['jobs'] <= RUNNER.MAX_JOBS:
+                    raise UsageError('--jobs 允许 %d..%d，收到 %d'
+                                     % (RUNNER.MIN_JOBS, RUNNER.MAX_JOBS,
+                                        options['jobs']))
+            elif token == '--suite-timeout':
+                try:
+                    options['suite_timeout'] = float(value)
+                except ValueError:
+                    raise UsageError('--suite-timeout 需为数字，收到 %r' % value)
+                if not math.isfinite(options['suite_timeout']) \
+                        or options['suite_timeout'] <= 0:
+                    raise UsageError('--suite-timeout 需为有限正数，收到 %r'
+                                     % value)
+            elif token == '--report':
+                _reject_taken('--report', value)
+                parent = os.path.dirname(os.path.abspath(value))
+                if not os.path.isdir(parent):
+                    raise UsageError('--report %s 的父目录不存在' % value)
+                options['report'] = value
+            else:
+                _reject_taken('--log-dir', value)
+                options['log_dir'] = value
+        elif token == '--list-suites':
+            options['list_suites'] = True
+            index += 1
+        elif token == '--update-golden':
+            options['update_golden'] = True
+            index += 1
+        else:
+            raise UsageError('未知参数 %r（本入口不接受位置参数）' % token)
+    return options
+
+
 def main():
     sys.dont_write_bytecode = True
     sys.path.insert(0, HERE)
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding='utf-8')
+        except (AttributeError, ValueError, OSError):
+            pass
 
-    if '--list-suites' in sys.argv[1:]:
+    try:
+        options = _parse_args(sys.argv[1:])
+    except UsageError as error:
+        sys.stderr.write('selftest: %s\n%s\n' % (error, USAGE))
+        return 2
+
+    if options['list_suites']:
         print(json.dumps({'scope': 'standalone-skill', 'suites': L0_SUITES,
                           'repository_integration': 'not_run; execute tests/repository separately'}))
         return 0
 
-    update = '--update-golden' in sys.argv[1:]
-    if update:
+    if options['update_golden']:
         print('== 重录金样（从当前快照渲染器重新生成） ==')
         update_golden()
         print('selftest: 金样重录完成，随后再跑一次确认 0 过。')
         return 0
 
+    unit_log = os.environ.get('HYDRAULIC_SELFTEST_UNIT_LOG')
+    if unit_log and os.path.exists(unit_log):
+        sys.stderr.write('selftest: HYDRAULIC_SELFTEST_UNIT_LOG %s 已存在：'
+                         '合并日志一律新文件独占，不覆盖既有证据\n' % unit_log)
+        return 2
+
     print('范围: skill 随附资产与工具；仓库 editor/project 集成测试未在此命令执行。')
+
+    def run_f_suites():
+        check_l0_regressions(jobs=options['jobs'],
+                             suite_timeout=options['suite_timeout'],
+                             report_path=options['report'],
+                             log_dir=options['log_dir'])
+
+    checks = CHECKS[:-1] + [(CHECKS[-1][0], run_f_suites)]
     failed = []
-    for name, fn in CHECKS:
+    for name, fn in checks:
         try:
             fn()
             print('[PASS] %s' % name)
@@ -369,9 +468,9 @@ def main():
 
     print('\n---- selftest 小结 ----')
     if failed:
-        print('FAIL %d/%d：\n  - %s' % (len(failed), len(CHECKS), '\n  - '.join(failed)))
+        print('FAIL %d/%d：\n  - %s' % (len(failed), len(checks), '\n  - '.join(failed)))
         return 1
-    print('PASS %d/%d 出图能力完好。' % (len(CHECKS), len(CHECKS)))
+    print('PASS %d/%d 出图能力完好。' % (len(checks), len(checks)))
     return 0
 
 

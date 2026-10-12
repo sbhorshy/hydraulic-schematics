@@ -127,5 +127,12 @@ python .agents/skills/hydraulic-schematic/scripts/check_library.py     # 0 过 /
 改动符号、catalog 或模板脚本后，跑一条命令的基准图回归确认出图能力未被打破（详细覆盖面见 `scripts/selftest.py` 头注）：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/selftest.py    # 0 过 / 1 断
+python .agents/skills/hydraulic-schematic/scripts/selftest.py    # 0 过 / 1 断 / 2 用法或输出路径预检失败
+# 可选：--jobs N(1..4) 逐套件有界并行；--suite-timeout 秒 单套件测试进程挂起保护上限
+# （不是构图/寻优预算——寻优预算见 Phase 2.5 的 --max-evals/--max-seconds）；
+# --log-dir 新目录 逐套件实时日志；--report 新 JSON 完整机器报告；
+# --list-suites 纯 JSON 列 F 组 24 套件；--update-golden 重录金样；
+# HYDRAULIC_SELFTEST_UNIT_LOG=/新路径 另存 F 组独占合并完整日志。
 ```
+
+F 组固定执行完整 24 套件清单（由 `scripts/selftest_runner.py` 逐套件独立进程调度），任何套件未过即整体失败，没有缩小范围却宣称完整通过的旁路。逐套件调度器的专项测试（`tests/scheduler/`）与仓库 editor/project 集成测试（`tests/repository/`）都不在本自检内，各自单独命令运行。

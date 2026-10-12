@@ -1,0 +1,104 @@
+test_bounded_jobs_cap_and_real_parallelism (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_failing_suite_keeps_other_suite_results (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_jobs_one_runs_suites_sequentially (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_jobs_out_of_range_is_rejected (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_merged_log_and_machine_report_contents (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_minimal_invocation_without_optional_outputs (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_output_paths_are_reserved_before_any_suite_starts (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_suite_timeout_kills_only_offending_suite (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+test_zero_test_suite_cannot_go_green (test_selftest_runner.SelftestRunnerScheduling) ... ERROR
+
+======================================================================
+ERROR: test_bounded_jobs_cap_and_real_parallelism (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 128, in test_bounded_jobs_cap_and_real_parallelism
+    _make_suite(tmp, name, sleep='1.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_failing_suite_keeps_other_suite_results (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 208, in test_failing_suite_keeps_other_suite_results
+    _make_suite(tmp, 'good_suite', sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_jobs_one_runs_suites_sequentially (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 152, in test_jobs_one_runs_suites_sequentially
+    _make_suite(tmp, name, sleep='1.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_jobs_out_of_range_is_rejected (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 296, in test_jobs_out_of_range_is_rejected
+    _make_suite(tmp, 'tiny_a', sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_merged_log_and_machine_report_contents (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 261, in test_merged_log_and_machine_report_contents
+    _make_suite(tmp, name, sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_minimal_invocation_without_optional_outputs (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 307, in test_minimal_invocation_without_optional_outputs
+    _make_suite(tmp, 'tiny_a', sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_output_paths_are_reserved_before_any_suite_starts (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 231, in test_output_paths_are_reserved_before_any_suite_starts
+    _make_suite(tmp, 'tiny_a', sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_suite_timeout_kills_only_offending_suite (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 169, in test_suite_timeout_kills_only_offending_suite
+    _make_suite(tmp, 'hang_suite', kind='hang')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 77, in _make_suite
+    body = TINY_PASS_BODY.format(sleep='60.0')
+KeyError: "'suite'"
+
+======================================================================
+ERROR: test_zero_test_suite_cannot_go_green (test_selftest_runner.SelftestRunnerScheduling)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 193, in test_zero_test_suite_cannot_go_green
+    _make_suite(tmp, 'ok_suite', sleep='0.2')
+  File "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/selftest/tests/scheduler/test_selftest_runner.py", line 71, in _make_suite
+    body = TINY_PASS_BODY.format(sleep=sleep)
+KeyError: "'suite'"
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.108s
+
+FAILED (errors=9)
