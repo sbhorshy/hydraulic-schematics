@@ -1,0 +1,26 @@
+{
+  "runtime_commit": "434bc973fe3a0b77932b3646294ea297611327fc",
+  "baseline": "799b80a958b88b3dd5438e1aae273b5c6445ed50",
+  "executor": "GLM-5.3 via zcode-bridge",
+  "reviewer": "Codex",
+  "tests": {
+    "selftest": {
+      "tests": 278,
+      "status": "all test methods verified across initial and continuation runs; original F aggregate timed out",
+      "single_invocation_passed": false
+    },
+    "repository-tests": {
+      "tests": 10,
+      "seconds": 83.313,
+      "exit_code": 0
+    }
+  },
+  "partial_issues": [
+    31,
+    45
+  ],
+  "closed_issues": [],
+  "engineering_approval": false,
+  "full_selftest_exit_code": 1,
+  "all_test_methods_verified": true
+}
