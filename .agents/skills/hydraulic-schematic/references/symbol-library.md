@@ -66,6 +66,7 @@
 3. 按 API 添加 `connection-points`：cx/cy 用 viewBox 用户坐标写在引线上。
 4. 更新 `component-catalog.json`：该组件的 `symbol.asset` 指向新文件，`symbol_status: annotated`，`ports[]` 逐条补齐（`id` / `svg_element_id` / `medium` / `role` / `flow_capability` / `anchor_direction`）。
 5. 端口契约变化属于目录修订——递增 `catalog_revision` 并在 status 里记录冻结与否。
+6. 入库前过门禁：`python scripts/check_symbol.py <file.svg>`（0 过 / 1 ERROR；与 check_library 同款锚定 skill 自带库，无位置参数或 `--all` 即全量扫默认库，沙箱可 `--lib DIR`）。
 
 ## 方框本体基准
 
@@ -81,7 +82,7 @@
 - **豁免**（本体非方框，省略该属性，门禁不校核）：accumulator（圆角矩形）、球式 check-valve / check-valve-spring、air-charging-valve（弓形）、quick-disconnect-coupling 配对件与原始件、pressure-gauge（圆表盘）、bootstrap 油箱。油滤的**菱形框**不是方框，同样不适用本基准。**hydraulic_user 用户名框**也豁免——它是长方形名容器（120×60 起步），尺寸随名字排版伸缩，不是信封本体。
 - 信封方框是"描边闭合正方"：`fill=none`、非虚线、path 以 Z 收尾/rect/polygon。虚线框是先导回路或装配界线，不算信封。
 - **附件方框**（感温包、接线盒等，含用户确认的"共边正方形"约定件）不设基准，但边长须 **< 60**（基准的 3/4），否则视为第二本体，C13 拦截。
-- 门禁 **C13**（符号入库门禁 `check_symbol.py`：技术规范 6.4 第 1–12 条 + C13 方框基准）按上述判据校核：`single` 须恰有一个本体级方框（边≥60 中恰一个 80×80）；`multi` 逐格校核。该脚本暂随工作区携带，规范源归位挂账 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)。
+- 门禁 **C13**（符号入库门禁 `check_symbol.py`：技术规范 6.4 第 1–12 条 + C13 方框基准）按上述判据校核：`single` 须恰有一个本体级方框（边≥60 中恰一个 80×80）；`multi` 逐格校核。门禁脚本已归位 skill `scripts/check_symbol.py`（[#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)）：默认库与 catalog 锚定 skill 自带 `assets/component-library/`，任意 cwd 可用；无位置参数或 `--all` 全量扫默认库（`_` 前缀等非组件件自动跳过，与显式文件互斥），退出码 0 过 / 1 ERROR，文件/库目录/catalog 缺失或畸形（空/坏 JSON/类型重复/端口 id 重复）一律 fail-closed。当前全量基线未绿——`fsov-provisional-stroke.svg` 与接通位 `quick-disconnect-coupling.svg` 两件已知 ERROR（明细见 SKILL.md「随附资产与单源纪律」），不得以跳过或 WARN 冒充通过。
 - catalog 对应字段 `symbol.envelope_class`，与根属性保持一致。
 
 ## 通用用户框（hydraulic_user）

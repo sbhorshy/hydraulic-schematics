@@ -25,7 +25,10 @@
      普通滤型）必须 fail-closed——exit 1 且报「未布元件」，绝不静默出图。
   E. preflight 模板门禁（#22 沉淀批）：intent 同目录空背书受控模板 →
      对账 E-RECON 必须拦截（exit 1）且 concept 未签认 W-SIGN-UNSIGNED 披露。
-  F. L0 入口、有界寻优、驱动器、路线剪枝、光栅化适配器的专项 unittest。
+  F. L0 入口、有界寻优、驱动器、路线剪枝、光栅化适配器、符号入库门禁 CLI 的
+     专项 unittest。符号门禁用例（test_symbol_gate，#31）以真实命令行检验
+     单源锚定与 fail-closed，并钉住全库当前红基线（两件已知缺陷符号报
+     ERROR、退出码 1；缺陷转正时更新期望即验收动作）。
      入口测试含小型 seed 的预检→渲染→几何全链回归；当前 23 部件 seed 的
      已知几何缺陷仍须被拦截。主自检包含真实 Chrome 栅格化/显示测量，
      并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
@@ -290,7 +293,7 @@ def check_template_gate():
 
 L0_SUITES = ('test_coordinate_contract', 'test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
           'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
-          'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review')
+          'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli')
 
 
 def check_l0_regressions():
@@ -334,7 +337,7 @@ CHECKS = [
     ('C. L0 预检器：负例七类违规拦截报齐 / 正例放行', check_preflight),
     ('D. 布局引擎烟测（自包含当前输入出全量布局 / 未覆盖形态拦截）', check_layout_engine),
     ('E. preflight 模板门禁（空背书对账拦截 / concept 未签认披露，#22）', check_template_gate),
-    ('F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器专项测试', check_l0_regressions),
+    ('F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器 / 符号入库门禁 CLI 专项测试', check_l0_regressions),
 ]
 
 

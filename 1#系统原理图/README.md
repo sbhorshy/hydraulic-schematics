@@ -1,6 +1,6 @@
 # 1# 系统活动输入与历史证据
 
-活动输入为本目录 `1#系统.intent.yaml`、`1#系统.layout.json`、`component-catalog.json`。使用规范源驱动器，并指定新的独立 `--workdir`；本目录 `render.py`/`validate_sheet.py` 现为规范源薄入口，支持显式工作目录；没有第二份渲染/校核实现。旧 SVG/PNG/topology/report 不构成当前通过证明。
+活动输入为本目录 `1#系统.intent.yaml`、`1#系统.layout.json`、`component-catalog.json`。使用规范源驱动器，并指定新的独立 `--workdir`；本目录 `render.py`/`validate_sheet.py`/`check_symbol.py` 现为规范源薄入口（前两者支持显式工作目录；`check_symbol.py` 透传参数，无位置参数时由规范源全量扫 skill 自带符号库——入库门禁规范源已随 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31) 归位 `.agents/skills/hydraulic-schematic/scripts/`）；没有第二份渲染/校核/门禁实现。旧 SVG/PNG/topology/report 不构成当前通过证明。
 
 ```bash
 python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \

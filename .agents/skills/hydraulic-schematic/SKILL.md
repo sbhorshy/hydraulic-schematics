@@ -51,7 +51,7 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 组件库**只有一处**：本 skill 的 `assets/component-library/` 即唯一规范源（单源化，#20/#21 定案；旧"已标注规范源→快照"两处库教义随规范源归档作废）。文件按文件名在其中定位，catalog 0.6-draft 登记 22 个组件类型（0.6 增油箱本体感测口 body_sense_tap 与 port_kind 枚举，2026-09-07 签认 B 类）。
 
-**新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完过符号入库门禁 `check_symbol.py <file.svg>`（6.4 第 1–12 条 + C13 方框基准；脚本暂随工作区携带，规范源归位挂账 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)）再入库；模板与规范条文两处同步修订。
+**新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完过符号入库门禁 `scripts/check_symbol.py <file.svg>`（6.4 第 1–12 条 + C13 方框基准；#31 已归位 skill scripts：默认库与 catalog 锚定本 skill 自带 `assets/component-library/`，任意 cwd 可用，`--all` 全量扫默认库（与显式文件互斥），退出码 0 过 / 1 ERROR，文件/库目录/catalog 缺失或畸形一律 fail-closed——空/坏 JSON/类型重复/端口 id 重复同拦）再入库；模板与规范条文两处同步修订。
 
 **用户（用油设备）不需要新符号**：intent `parts` 直接写 `<inst>: hydraulic_user`，画成"用户名+长方形框"，左压力进口/右回油出口，名字由 L0 渲染器写入框内名槽（`data-name-slot`）——详见 [references/symbol-library.md](references/symbol-library.md) 的通用用户框一节。
 
@@ -91,7 +91,7 @@ python <skill>/scripts/validate_driver.py --intent <intent.yaml> --layout-seed <
 |---|---|
 | `assets/component-library/` | 描边符号 SVG（kebab-case 规范名）+ component-catalog.json |
 | `assets/contracts/` | `l0-input-contract.schema.json`——L0 intent 结构契约（预检器形状层，也可被编辑器/CI 独立消费） |
-| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器（含模板门禁）、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`layout_engine.py` 布局引擎（规则+守门+寻优）、`proto_optimize.py` 寻优层、`validate_driver.py` 校核驱动器、`topology_confirm.py` 拓扑确认单、`test_suction_markers.py` 专项测试范例 |
+| `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器（含模板门禁）、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`check_symbol.py` 符号入库门禁（6.4 第 1–12 条 + C13 方框基准，#31 归位）、`layout_engine.py` 布局引擎（规则+守门+寻优）、`proto_optimize.py` 寻优层、`validate_driver.py` 校核驱动器、`topology_confirm.py` 拓扑确认单、`test_suction_markers.py` 专项测试范例 |
 | `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对；`negative-mixed-violations` 为七类违规混样、`positive-preflight-cleared` 为预检正例，供 preflight 回归） |
 
 依赖提示：L0 需要 `ruamel.yaml`；形状预检需要 `jsonschema`（缺失时披露 WARN）；布局守门需要 `kiwisolver`。PNG 回读需要本机 Inkscape 或 Chrome，像素检查需要 Pillow 与 NumPy。
@@ -111,9 +111,18 @@ python .agents/skills/hydraulic-schematic/scripts/check_library.py     # 0 过 /
   与跟踪票，白名单是挂账不是赦免）；**L3** catalog↔symbol 交叉校验：`symbol.asset`
   解析不到库内文件或 catalog 声明端口缺于符号端口组，**默认即硬失败**
   （#21 回登记完成后转正；`--lenient-catalog` 可临时降宽容档出清单）。
-- 改动符号/catalog 后先跑它，再跑 selftest（见下）。**pre-push 钩子**
-  （`.git/hooks/pre-push`，不入库）已接本工具：库结构不过即拒绝推送；
-  确需强行越过用 `git push --no-verify`（不建议，须披露）。
+- 逐件入库门禁 `scripts/check_symbol.py` 与 check_library 同款锚定（默认库=catalog=
+  skill 自带资产）。当前全量基线**未绿**：旧 `fsov-provisional-stroke.svg`（端口与
+  catalog `main_upper/main_lower` 双向失配，待工程处置）与接通位
+  `quick-disconnect-coupling.svg`（无端口组/无类型标注/尺寸带 mm 单位，B-2 挂账
+  [#22](https://github.com/sbhorshy/hydraulic-schematics/issues/22)）两件 ERROR、
+  退出码 1；「22 只存量符号全量绿跑」仍是 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)
+  未完成验收项，不得以跳过、白名单或 WARN 冒充通过（WARN 只披露，不构成工程签认）。
+- 改动符号/catalog 后先跑 `check_library.py`（库结构校验器），再跑 selftest
+  （见下）。**pre-push 钩子**（`.git/hooks/pre-push`，不入库）接的是
+  check_library.py，#31 未改钩子；check_symbol.py 的全量扫描不在 pre-push
+  内，维持既有披露口径手动/CI 运行。库结构不过即拒绝推送；确需强行越过用
+  `git push --no-verify`（不建议，须披露）。
 
 改动符号、catalog 或模板脚本后，跑一条命令的基准图回归确认出图能力未被打破（详细覆盖面见 `scripts/selftest.py` 头注）：
 
