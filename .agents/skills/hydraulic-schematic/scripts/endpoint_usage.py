@@ -92,6 +92,33 @@ def symbol_contract(intent, types, nodes, workdir, catalog_dir):
     return issues
 
 
+def mirror_contract(intent, types, nodes, workdir, catalog_dir):
+    """#63 镜像许可审计:逐实例以实际解析符号资产裁决 mirror 声明。
+
+    返回 (issues, axes):issues 与 symbol_contract 同口径,经
+    write_contract_failure 硬失败(concept 成熟度也不豁免);axes 为通过
+    mirror_policy 三道闸的逐实例许可轴,供 sheet_geometry.load_geometry
+    的姿态校验与装配测量使用。非镜像请求不要求任何登记。
+    """
+    from mirror_policy import check_mirror
+    issues, axes = [], {}
+    for inst, node in nodes.items():
+        if inst not in intent['parts']:
+            continue
+        source = resolve_symbol(node['symbol'], workdir, catalog_dir)
+        component = types.get(intent['parts'][inst])
+        try:
+            axis = check_mirror(node, component, source)
+        except ValueError as error:
+            issues.append({'kind': 'mirror_permission', 'component': inst,
+                           'endpoint': None, 'symbol': str(source),
+                           'detail': '%s 镜像许可: %s' % (inst, error)})
+        else:
+            if axis:
+                axes[inst] = axis
+    return issues, axes
+
+
 def write_contract_failure(workdir, inventory, issues, unknown):
     """Keep an actionable report even when broken assets prevent rendering."""
     from proofreading_evidence import enrich_report, write_report

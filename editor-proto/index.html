@@ -47,11 +47,15 @@
     </label>
   </div>
   <div id="selbox" style="display:none;margin:6px 0;padding:6px;background:#f1f0ec;border-radius:6px;font-size:12px">
-    选中 <b id="selId"></b> · rot <span id="selRot">0</span> · 连线 <span id="selConns">?</span> 条
+    选中 <b id="selId"></b> · rot <span id="selRot">0</span> · 镜像 <span id="selMirror">none</span> · 连线 <span id="selConns">?</span> 条
     <button id="rotBtn" style="margin:0 4px">旋转 90°</button>
-    <button id="deselBtn">取消</button>
+    <button id="mirrorXBtn" style="margin:0 4px">左右镜像 (x)</button>
+    <button id="mirrorYBtn" style="margin:0 4px">上下镜像 (y)</button>
+    <button id="mirrorNoneBtn">还原 (none)</button>
+    <button id="deselBtn" style="margin-left:4px">取消</button>
     <div id="selHint" class="note" style="display:none;color:#8a5a00"></div>
-    <div class="note">原地点击=选中 · R=旋转 · Esc=取消</div>
+    <div class="note">镜像=整符号翻转（端口 id/角色不变，仅位置与锚向随动）；未登记组件被服务器拒绝，画布不换帧。<br>
+    原地点击=选中 · R=旋转 · M=镜像（none→x→y→none 循环） · Esc=取消</div>
   </div>
   <div><span class="dot" id="dot"></span><span id="state">加载中…</span></div>
   <div class="chips" id="latency"></div>
@@ -69,24 +73,66 @@ let layoutIndex = null;   // {id:{x,y,w,h,rot?}} —— 对齐参考线/夹取/�
 let origTransform = null; // 拖拽中的 inst 原始 transform
 let drag = null;
 let selectedId = null;    // 原地点击选中的节点（旋转作用对象）
+let busy = false;         // 一次变更请求在途：忽略重复点击/按键/新拖拽
+
+const READ_TIMEOUT_MS = 5000;   // 短读取（GET）：服务重启窗口内失败要快速可见
+// 变更请求（POST /api/delta）走完整 render+rasterize+validate 子进程链：
+// 服务端 _run 各阶段 timeout=300s（至多 3×300s），另有进程启动/IO 开销。
+// 客户端时限必须晚于服务端自身超时——"链路超时"由服务端以 JSON 如实
+// 回答，客户端不抢先 abort 进"未知是否已写盘"态（本机实链约 13s 起，
+// 挂载盘更慢；5s 放弃会在已写盘后留下旧帧）。
+const DELTA_TIMEOUT_MS = 300000 * 3 + 20000;
 
 function svgDoc(text){ // 剥 xml 声明后注入
   return text.replace(/<\?xml[^?]*\?>\s*/, '');
 }
 
-async function api(path, opts) {
-  const ctrl = new AbortController();          // 5s 超时：服务重启窗口内失败要快速可见，
-  const t = setTimeout(() => ctrl.abort(), 5000); // 否则拖拽视觉停在失配态等不到回弹
+async function api(path, opts, timeoutMs = READ_TIMEOUT_MS) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const r = await fetch(path, Object.assign({ signal: ctrl.signal }, opts));
     return await r.json();
   } finally { clearTimeout(t); }
 }
 
+function setBusy(on) { // 闭环期间禁用旋转/镜像按钮，拖拽与快捷键由 busy 标志忽略
+  ['rotBtn', 'mirrorXBtn', 'mirrorYBtn', 'mirrorNoneBtn']
+    .forEach(id => { $(id).disabled = on; });
+}
+
+function stateText(d) { // 状态行分级：未写盘 / 已落盘未过 / 未知——不再一律"手调已落盘"
+  if (d.ok) {
+    return d.passed ? '完整校验及回读通过'
+                    : '已落盘：校核未全过（红=扣留无成品，git 可回退）';
+  }
+  if (d.stage === 'permission') return '镜像许可拒绝——本次未写盘';
+  if (d.stage === 'delta') return '请求被拒（值域/零位移）——本次未写盘';
+  if (d.stage === 'request') return '请求非法——本次未写盘';
+  if (d.stage === 'render') return '已落盘，渲染/链路失败（无成品，git 可回退）';
+  if (d.stage === 'server') return '服务端异常——落盘状态未知';
+  return d.error ? '结果未知：' + d.error : '结果未知';
+}
+
+async function refreshAfterUnknown() {
+  // 变更请求超时/中断后落盘状态未知：不声称回滚或未写盘，重读当前盘面。
+  try {
+    const d = await api('/api/sheet');
+    if (d.ok) {
+      stage.innerHTML = svgDoc(d.svg);
+      decorate();
+      ghostOverlay(d.issues);
+      setSide(d);
+      return;
+    }
+  } catch (e) { /* 读取同样失败：保持未知态提示 */ }
+  $('state').textContent = '状态未知：上次变更请求无应答且读取失败——请刷新页面';
+}
+
 function setSide(d) {
   const passed = !!d.passed;
   $('dot').className = 'dot ' + (passed ? 'ok' : 'bad');
-  $('state').textContent = passed ? '完整校验及回读通过' : '未过闸（无成品，手调已落盘）';
+  $('state').textContent = stateText(d);
   const lat = d.latency;
   $('latency').innerHTML = lat
     ? ['render_ms', 'validate_ms', 'total_ms'].map((k, i) =>
@@ -95,16 +141,49 @@ function setSide(d) {
   const m = d.layout_meta || {};
   if (m.version) $('ver').textContent = 'layout ' + m.version;
   if (m.revision_log_tail) $('log').textContent = m.revision_log_tail.join('\n');
-  $('banner').style.display = d.render_stderr ? 'block' : 'none';
-  if (d.render_stderr) $('banner').textContent = '渲染失败：\n' + d.render_stderr;
-  const box = $('issues'); box.innerHTML = '';
-  (d.issues || []).forEach(it => {
-    const div = document.createElement('div');
-    div.className = 'issue ' + it.sev;
-    div.textContent = `${it.id} [${it.result}] ${it.detail}`;
-    div.onclick = () => highlight(it.detail);
-    box.appendChild(div);
-  });
+  const err = d.error || d.render_stderr;
+  $('banner').style.display = err ? 'block' : 'none';
+  if (err) $('banner').textContent = (d.stage === 'render'
+      ? '已落盘，链路错误：\n' : '错误：\n') + err;
+  if (d.issues) {  // 拒绝响应没有新 issues 时不清空上一帧列表
+    const box = $('issues'); box.innerHTML = '';
+    d.issues.forEach(it => {
+      const div = document.createElement('div');
+      div.className = 'issue ' + it.sev;
+      div.textContent = `${it.id} [${it.result}] ${it.detail}`;
+      div.onclick = () => highlight(it.detail);
+      box.appendChild(div);
+    });
+  }
+}
+
+function showRejection(res) {
+  // 服务器写盘前拒绝（permission/delta/request）或请求被忽略（busy）：
+  // 如实显示 res.error，画布/红绿点/layout 版本与日志保持上一成功态，
+  // 不冒充任何落盘结果。server 异常归"状态未知"，不声称未写盘。
+  const unwritten = res.stage === 'permission' || res.stage === 'delta'
+                    || res.stage === 'request';
+  const heads = {
+    permission: '镜像被服务器拒绝（未写盘）：\n',
+    delta: '操作被服务器拒绝（未写盘）：\n',
+    request: '请求非法（未写盘）：\n',
+    busy: '上一请求仍在闭环中，已忽略本次操作',
+    server: '服务端异常（落盘状态未知）：\n',
+  };
+  const labels = {
+    permission: '镜像许可拒绝——本次未写盘',
+    delta: '请求被拒（值域/零位移）——本次未写盘',
+    request: '请求非法——本次未写盘',
+    busy: '上一请求仍在闭环中，已忽略本次操作',
+    server: '服务端异常——落盘状态未知',
+  };
+  const head = heads[res.stage] || '请求未完成：\n';
+  const detail = unwritten || res.stage === 'server'
+    ? (res.error || res.render_stderr || '') : '';
+  const banner = $('banner');
+  banner.style.display = 'block';
+  banner.textContent = detail ? head + detail : head;
+  if (labels[res.stage]) $('state').textContent = labels[res.stage];
 }
 
 function ghostOverlay(issues) { // 违规残影：只显示不判定（#59 2a）
@@ -199,6 +278,7 @@ function drawGuide(svg, x1, y1, x2, y2) {
 
 function startDrag(ev, g) {
   if (ev.button !== 0) return;
+  if (busy) return; // 闭环在途：不接受新拖拽（位移无处提交，只会留失配定格）
   ev.preventDefault();
   const svg = g.ownerSVGElement;
   const ctm = svg.getScreenCTM().inverse();
@@ -295,46 +375,75 @@ async function onUp(ev) {
     res = await postDelta({ node: d.id,
       dx: Math.round((nx - d.nd.x) * 10) / 10,
       dy: Math.round((ny - d.nd.y) * 10) / 10 });
-  } catch (e) { // 服务未响应（重启窗口/断连）：回弹+提示，防「符号已拖走、线在旧位」的失配定格
+  } catch (e) { // 网络层异常（连接拒绝等）：回弹+提示；超时路径在 postDelta 内按未知态刷新
     d.g.setAttribute('transform', origTransform);
     clearGuides(d.svg);
     $('banner').style.display = 'block';
-    $('banner').textContent = '服务未响应——拖拽已回弹，稍候刷新页面重试';
+    $('banner').textContent = '服务未响应——拖拽已回弹（落盘状态未知），稍候刷新页面重试';
     return;
   }
-  // 拖拽位保持不回弹，等链产物换帧；失败才回弹
-  if (!res.ok && d.g.isConnected) d.g.setAttribute('transform', origTransform);
+  // 拖拽位保持不回弹，等链产物换帧；写盘前拒绝（或请求被忽略）才回弹。
+  // 超时/已落盘的失败由 postDelta 按当前盘面刷新或如实报告，此处不回弹
+  // 冒充"已回退"。
+  if (!res.ok && res.stage !== 'render' && res.stage !== 'timeout'
+      && d.g.isConnected) d.g.setAttribute('transform', origTransform);
 }
 
 async function postDelta(body) {
-  $('state').textContent = '闭环中：写回 → 渲染 → 校核…';
-  const res = await api('/api/delta', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  if (busy) { // 忽略重复提交（双击/连点/自动重复）：不打断在途闭环
+    const skipped = { ok: false, stage: 'busy' };
+    showRejection(skipped);
+    return skipped;
+  }
+  busy = true;
+  setBusy(true);
+  $('state').textContent = '闭环中：写回 → 渲染 → 校核…（整链可能需十余秒，请勿重复操作）';
+  let res;
+  try {
+    res = await api('/api/delta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }, DELTA_TIMEOUT_MS);
+  } catch (e) {
+    // 超时/断连：不声称回滚或未写盘——按当前盘面刷新（读取失败则明示未知）。
+    await refreshAfterUnknown();
+    const banner = $('banner');
+    banner.style.display = 'block';
+    banner.textContent = '请求超时或中断：是否已写盘未知（不声称回滚）——'
+                       + '画面已尝试按当前盘面刷新，读取失败时状态未知。';
+    return { ok: false, stage: 'timeout' };
+  } finally {
+    busy = false;
+    setBusy(false);
+  }
   if (res.ok && res.svg) {
     stage.innerHTML = svgDoc(res.svg);
     decorate();
     ghostOverlay(res.issues);
     setSide(res);
     if (selectedId && (layoutIndex || {})[selectedId]) drawSel(); // 选中跨刷新保持
-  } else {
+  } else if (res.stage === 'render') {
+    // 写盘后渲染/链路失败：如实报告"已落盘、无成品"，版本/日志随响应更新。
     setSide(Object.assign({ passed: false }, res));
+  } else {
+    // permission/delta/request：写盘前拒绝；server：状态未知。画布保持上一帧。
+    showRejection(res);
   }
   return res;
 }
 
-function select(id) { // 原地点击选中：虚线框 + 侧栏旋转控制（含连线/干涉提示）
+function select(id) { // 原地点击选中：虚线框 + 侧栏旋转/镜像控制（含连线/干涉提示）
   selectedId = id;
   $('selbox').style.display = 'block';
   $('selId').textContent = id;
+  $('selMirror').textContent = ((layoutIndex || {})[id] || {}).mirror || 'none';
   const n = (window.__conns || {})[id] || 0;
   $('selConns').textContent = n;
   const hint = $('selHint');
   if (n > 0) {
     hint.style.display = 'block';
-    hint.textContent = '有连线：旋转后保持原端口语义，管线按新装位避让自身本体；其余干涉按本轮校核如实披露。';
+    hint.textContent = '有连线：旋转/镜像后保持原端口语义，管线按新装位避让自身本体；其余干涉按本轮校核如实披露。';
   } else {
     hint.style.display = 'none';
   }
@@ -368,11 +477,36 @@ async function rotateSel() {
   await postDelta({ node: selectedId, dx: 0, dy: 0, rot: (cur + 90) % 360 });
 }
 
+// 镜像：绝对请求 x/y/none（还原）。授权在服务端（mirror_policy 三道闸），
+// 本端不做本地"翻转假象"，拒绝时画布保持上一帧。
+async function mirrorSel(axis) {
+  if (!selectedId) return;
+  await postDelta({ node: selectedId, dx: 0, dy: 0, mirror: axis });
+}
+
+// M 键循环 none→x→y→none。焦点在输入框/下拉/contenteditable 内、按着任意
+// 修饰键（含 Shift）或键盘自动重复时不触发——守卫统一放在全局 keydown。
+function cycleMirror() {
+  if (!selectedId) return;
+  const cur = ((layoutIndex || {})[selectedId] || {}).mirror;
+  const next = cur === 'x' ? 'y' : cur === 'y' ? 'none' : 'x';
+  mirrorSel(next);
+}
+
 $('rotBtn').onclick = rotateSel;
+$('mirrorXBtn').onclick = () => mirrorSel('x');
+$('mirrorYBtn').onclick = () => mirrorSel('y');
+$('mirrorNoneBtn').onclick = () => mirrorSel('none');
 $('deselBtn').onclick = deselect;
 window.addEventListener('keydown', ev => {
+  if (ev.repeat) return; // 自动重复不连发操作（busy 在 postDelta 再兜底）
+  if (ev.key === 'Escape') { deselect(); return; }
+  if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'
+             || el.tagName === 'SELECT' || el.isContentEditable)) return;
   if (/^(r|R)$/.test(ev.key)) rotateSel();
-  if (ev.key === 'Escape') deselect();
+  if (/^(m|M)$/.test(ev.key)) cycleMirror();
 });
 
 (async function init() {

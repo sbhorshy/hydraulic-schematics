@@ -35,7 +35,8 @@
      已知几何缺陷仍须被拦截。主自检包含真实 Chrome 栅格化/显示测量，
      并用 Pillow 验证 PNG、局部裁图和图像版本绑定的正反例；适配器异常路径另有桩测试。
      F 组由 scripts/selftest_runner.py 逐套件独立进程调度（--jobs/--suite-timeout/
-     --log-dir/--report）；固定执行完整 24 套件清单，任何套件未过即 F 与整体自检
+     --log-dir/--report）；固定执行完整 L0_SUITES 清单（以 selftest.py 注册表为准，
+     不在本文件头注写死绝对数），任何套件未过即 F 与整体自检
      失败。--suite-timeout 是单套件测试进程挂起保护上限，不是构图/寻优预算。
 
 可选 HYDRAULIC_SELFTEST_UNIT_LOG=/新日志路径 指定 F 组独占合并完整日志（新文件独占，
@@ -306,12 +307,13 @@ def check_template_gate():
 
 L0_SUITES = ('test_coordinate_contract', 'test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
           'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
-          'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli')
+          'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_bridge_allowance', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli',
+          'test_mirror_policy', 'test_mirror_render')
 
 
 def check_l0_regressions(jobs=1, suite_timeout=RUNNER.DEFAULT_SUITE_TIMEOUT,
                          report_path=None, log_dir=None):
-    """F 组固定执行完整 L0_SUITES（24 模块）：逐套件独立进程、有界并行与
+    """F 组固定执行完整 L0_SUITES 清单：逐套件独立进程、有界并行与
     独占日志/报告由 selftest_runner.run_suites 调度（suite_timeout 是单套件
     测试进程挂起保护上限，不是构图/寻优预算；仓库集成测试不在本命令）。
     任何套件 status 非 passed 即本项与整体自检失败，不允许过滤或缩小清单。"""

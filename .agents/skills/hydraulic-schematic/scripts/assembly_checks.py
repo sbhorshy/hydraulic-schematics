@@ -41,11 +41,14 @@ def member_boxes(assembly, geometry, browser):
     return boxes,unchecked
 
 
-def render_enclosures(svg_path, intent, layout, resolve_symbol):
+def render_enclosures(svg_path, intent, layout, resolve_symbol, mirror_axes=None):
+    """mirror_axes carries the renderer's validated per-instance mirror
+    permissions (#63) so approved mirrored members are measured; without it
+    load_geometry rejects every reflected instance as unchecked."""
     if not intent.get('assemblies'): return
     path=Path(svg_path);raw=path.read_text(encoding='utf-8')
     browser=collect(path)
-    geometry=load_geometry(ET.fromstring(raw),layout,resolve_symbol)
+    geometry=load_geometry(ET.fromstring(raw),layout,resolve_symbol,mirror_axes)
     frames=[]
     padding=max(PADDING,float(layout.get('group_padding',PADDING)))
     gap=max(8.,float(layout.get('group_label_gap',8)))

@@ -1,9 +1,13 @@
-"""selftest.py 公开 CLI 入口的快速门禁测试（不跑 278 项全量）。
+"""selftest.py 公开 CLI 入口的快速门禁测试（不跑 F 组全量套件）。
 
-只测参数面：--list-suites 纯 JSON 清单仍为固定 24 套件；无效 --jobs、
-NaN/Inf 或非正 --suite-timeout、未知参数一律退出码 2 且不启动任何检查；
-已有 --report/--log-dir 输出路径保留不覆盖。逐套件调度语义（并行/超时/
-清理）在 test_selftest_runner.py；F 组全量验收由 Codex 以 --jobs 2 实跑。
+只测参数面：--list-suites 纯 JSON 清单与 F 组必需套件集合完全一致
+（不写死绝对数，按显式必需模块清单对账：原 24 套件 + #63 的
+test_mirror_policy / test_mirror_render + #23 的 test_bridge_allowance，
+新增/移除套件须同步本清单）；
+无效 --jobs、NaN/Inf 或非正 --suite-timeout、未知参数一律退出码 2 且
+不启动任何检查；已有 --report/--log-dir 输出路径保留不覆盖。逐套件
+调度语义（并行/超时/清理）在 test_selftest_runner.py；F 组全量验收由
+Codex 以 --jobs 2 实跑。
 """
 from pathlib import Path
 import json
@@ -16,7 +20,25 @@ REPO = Path(__file__).resolve().parents[2]
 SELFTEST = (REPO / '.agents' / 'skills' / 'hydraulic-schematic'
             / 'scripts' / 'selftest.py')
 
-EXPECTED_SUITE_COUNT = 24
+# F 组固定清单的必需模块（与 selftest.py 的 L0_SUITES 注册表对账）。
+# 存量 24 套件一个不能少；#63 步骤一/二新增 mirror_policy 与 mirror_render；
+# #23 新增 bridge_allowance（跳线许可登记与 B1 放行门禁）。
+# --list-suites 必须恰好给出这份集合：缺失、多余、重复都是注册表漂移。
+REQUIRED_SUITES = frozenset({
+    # ---- 存量 24 套件 ----
+    'test_coordinate_contract', 'test_assembly_layout', 'test_assemblies',
+    'test_entrypoints', 'test_optimizer_budget', 'test_driver',
+    'test_proofreading_evidence', 'test_route_pruning', 'test_rasterize_sheet',
+    'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
+    'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports',
+    'test_port_geometry', 'test_topology_reconciliation', 'test_text_display',
+    'test_layout_clearance', 'test_junction_semantics', 'test_sheet_diff',
+    'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli',
+    # ---- #63 镜像（步骤一/二）----
+    'test_mirror_policy', 'test_mirror_render',
+    # ---- #23 跳线许可（B1 放行）----
+    'test_bridge_allowance',
+})
 
 
 def _run_cli(args, timeout=60):
@@ -28,15 +50,24 @@ def _run_cli(args, timeout=60):
 class SelftestCliGate(unittest.TestCase):
     maxDiff = None
 
-    def test_list_suites_stays_pure_json_with_24_suites(self):
+    def test_list_suites_stays_pure_json_with_required_suites(self):
         done = _run_cli(['--list-suites'])
         combined = done.stdout + done.stderr
         self.assertEqual(done.returncode, 0, combined)
         selection = json.loads(done.stdout)  # 任何多余打印都会破坏纯 JSON
         self.assertEqual(selection['scope'], 'standalone-skill')
-        self.assertEqual(len(selection['suites']), EXPECTED_SUITE_COUNT)
-        self.assertIn('test_symbol_gate', selection['suites'])
-        self.assertIn('test_check_symbol_cli', selection['suites'])
+        suites = selection['suites']
+        self.assertEqual(len(suites), len(set(suites)),
+                         '套件清单不得出现重复: %s' % suites)
+        self.assertEqual(set(suites), REQUIRED_SUITES,
+                         'F 组清单漂移——缺失: %s 多余: %s'
+                         % (sorted(REQUIRED_SUITES - set(suites)),
+                            sorted(set(suites) - REQUIRED_SUITES)))
+        self.assertIn('test_symbol_gate', suites)
+        self.assertIn('test_check_symbol_cli', suites)
+        self.assertIn('test_mirror_policy', suites)
+        self.assertIn('test_mirror_render', suites)
+        self.assertIn('test_bridge_allowance', suites)
 
     def test_invalid_jobs_rejected_before_any_check_runs(self):
         for bad in ('0', '5', 'abc', '1.5', ''):

@@ -57,7 +57,7 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 ### Phase 2 · 布局与渲染
 
-线宽/线型/走线/镜像/分区框/图签图例的完整约定见 [references/rendering-rules.md](references/rendering-rules.md)。照抄模板脚本的结构（局部回路 + 水平镜像，或 layout.json 显式坐标），只改拓扑数据，不改约定本身。
+线宽/线型/走线/镜像/分区框/图签图例的完整约定见 [references/rendering-rules.md](references/rendering-rules.md)。照抄模板脚本的结构（局部回路 + 水平镜像，或 layout.json 显式坐标），只改拓扑数据，不改约定本身。L0 链路镜像默认禁止（#63 条件解禁）：布局节点 `mirror: 'x'/'y'` 仅对目录完成三道闸登记（`mirror_safe` + `layout.allow_mirror` + `mirror_registration`）的组件放行——当前生产仅发动机驱动泵与电动泵（axes x/y），端口 id/role/medium/flow 不交换，实例记 `data-mirror` 并入追溯清单，登记不提升成熟度；SysML 模板的"局部回路 + 水平镜像"是整图 `<image>` 翻转技法，不经此闸。
 
 ### Phase 2.5 · 自动布局与自动收敛（#22 沉淀）
 
@@ -131,8 +131,9 @@ python .agents/skills/hydraulic-schematic/scripts/selftest.py    # 0 过 / 1 断
 # 可选：--jobs N(1..4) 逐套件有界并行；--suite-timeout 秒 单套件测试进程挂起保护上限
 # （不是构图/寻优预算——寻优预算见 Phase 2.5 的 --max-evals/--max-seconds）；
 # --log-dir 新目录 逐套件实时日志；--report 新 JSON 完整机器报告；
-# --list-suites 纯 JSON 列 F 组 24 套件；--update-golden 重录金样；
+# --list-suites 纯 JSON 列 F 组全部套件（以 selftest.py 的 L0_SUITES 注册表为准）；
+# --update-golden 重录金样；
 # HYDRAULIC_SELFTEST_UNIT_LOG=/新路径 另存 F 组独占合并完整日志。
 ```
 
-F 组固定执行完整 24 套件清单（由 `scripts/selftest_runner.py` 逐套件独立进程调度），任何套件未过即整体失败，没有缩小范围却宣称完整通过的旁路。逐套件调度器的专项测试（`tests/scheduler/`）与仓库 editor/project 集成测试（`tests/repository/`）都不在本自检内，各自单独命令运行。
+F 组固定执行完整 L0_SUITES 清单（由 `scripts/selftest_runner.py` 逐套件独立进程调度；套件数以注册表为准，不在文档写死绝对数），任何套件未过即整体失败，没有缩小范围却宣称完整通过的旁路。逐套件调度器的专项测试（`tests/scheduler/`）与仓库 editor/project 集成测试（`tests/repository/`）都不在本自检内，各自单独命令运行。

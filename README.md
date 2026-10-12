@@ -49,6 +49,7 @@
 │       ├── examples/                     # 正例 / 负例（含期望报告）/ 预检放行样例
 │       └── fixtures/                     # selftest 金样基准
 ├── 1#系统原理图/                          # 1# 系统端到端实证工作区（intent/layout/SVG/校验报告）
+├── editor-proto/                         # #60/#58/#59 拖拽写回闭环原型（无导出；#63 起含镜像操作面，见 research/glm-followup-20261012/mirror-editor.md）
 ├── docs/规格与需求.md                     # spec + PRD 合一评审稿（现状快照，非规范源）
 ├── issues/                               # wayfinder 决策票（本地镜像）
 ├── research/                             # spec 素材

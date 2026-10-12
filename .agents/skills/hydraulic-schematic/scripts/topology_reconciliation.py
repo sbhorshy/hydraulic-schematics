@@ -77,6 +77,13 @@ def write_manifest(workdir, intent, catalog, fragments):
         lines.append('| `%s` | `%s` | %s |' % (item['anchor'],item['id'],', '.join(item.get('svg_ids',[]))))
     lines += ['', '## 简化说明 / 未知项', '', '以下未知项只披露，不生成连接；逻辑实例数不按 SVG 片段数累加。', '']
     lines += ['- ' + str(value) for value in manifest['unknown']] or ['- 无声明的未知项。']
+    mirrors = sorted((inst, node.get('mirror')) for inst, node in selected.items()
+                     if node.get('mirror') not in (None, False, 'none'))
+    if mirrors:
+        lines += ['', '### 镜像操作披露（#63 逐组件镜像许可登记）', '',
+                  '镜像只翻转绘图姿态：端口 id/role/medium/flow_capability 不变，',
+                  '符号成熟度不因镜像提升（provisional/draft 仍按目录 symbol_status 在图签披露）。', '']
+        lines += ['- %s: mirror=%s' % (inst, axis) for inst, axis in mirrors]
     target.with_suffix('.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     return manifest
 

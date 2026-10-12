@@ -1,0 +1,359 @@
+{
+  "input": ".scratch/glm-followup-20261012/integration/1#系统原理图/1#系统.intent.yaml",
+  "input_sha256": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888",
+  "networkx_version": "3.3",
+  "scope": "Hydraulic paths only; component ports contracted to their disjoint symbol regions; connected bus traces contracted to bus vertices. No taps required. This is a necessary condition for continuous non-crossing external wiring with non-overlapping symbols.",
+  "nodes": 27,
+  "edges": 38,
+  "planar": false,
+  "K33_partitions": [
+    [
+      "EDP-001",
+      "EMP-001",
+      "@RET"
+    ],
+    [
+      "TANK-001",
+      "@PRESS",
+      "@CASE"
+    ]
+  ],
+  "internally_vertex_disjoint_paths": [
+    {
+      "path": [
+        "EDP-001",
+        "FSOV-001",
+        "TANK-001"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 1,
+            "tokens": [
+              "FSOV-001",
+              "EDP-001.suction"
+            ],
+            "line": 59
+          }
+        ],
+        [
+          {
+            "path_index": 1,
+            "tokens": [
+              "TANK-001.suction_out",
+              "FSOV-001"
+            ],
+            "line": 59
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "EMP-001",
+        "TANK-001"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 0,
+            "tokens": [
+              "TANK-001.suction_out",
+              "EMP-001.suction"
+            ],
+            "line": 58
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "EDP-001",
+        "@PRESS"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 2,
+            "tokens": [
+              "EDP-001.pressure_out",
+              "@PRESS"
+            ],
+            "line": 63
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "EMP-001",
+        "@PRESS"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 3,
+            "tokens": [
+              "EMP-001.pressure_out",
+              "@PRESS"
+            ],
+            "line": 64
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "EDP-001",
+        "@CASE"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 29,
+            "tokens": [
+              "EDP-001.case_drain",
+              "@CASE"
+            ],
+            "line": 101
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "EMP-001",
+        "@CASE"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 30,
+            "tokens": [
+              "EMP-001.case_drain",
+              "@CASE"
+            ],
+            "line": 102
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "@RET",
+        "TANK-001"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 27,
+            "tokens": [
+              "@RET",
+              "TANK-001.return_in"
+            ],
+            "line": 96
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "@RET",
+        "CDF-001",
+        "@CASE"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 31,
+            "tokens": [
+              "CDF-001",
+              "@RET"
+            ],
+            "line": 103
+          }
+        ],
+        [
+          {
+            "path_index": 31,
+            "tokens": [
+              "@CASE",
+              "CDF-001"
+            ],
+            "line": 103
+          }
+        ]
+      ]
+    },
+    {
+      "path": [
+        "@RET",
+        "RF-001",
+        "@USERR",
+        "USER-001",
+        "@USR",
+        "PRV-001",
+        "@MANIFOLD",
+        "PF-001",
+        "@PRESS"
+      ],
+      "source_edges": [
+        [
+          {
+            "path_index": 25,
+            "tokens": [
+              "RF-001",
+              "@RET"
+            ],
+            "line": 94
+          }
+        ],
+        [
+          {
+            "path_index": 25,
+            "tokens": [
+              "@USERR",
+              "RF-001"
+            ],
+            "line": 94
+          }
+        ],
+        [
+          {
+            "path_index": 17,
+            "tokens": [
+              "USER-001.return_out",
+              "@USERR"
+            ],
+            "line": 86
+          }
+        ],
+        [
+          {
+            "path_index": 6,
+            "tokens": [
+              "@USR",
+              "USER-001.pressure_in"
+            ],
+            "line": 70
+          }
+        ],
+        [
+          {
+            "path_index": 5,
+            "tokens": [
+              "PRV-001",
+              "@USR"
+            ],
+            "line": 69
+          }
+        ],
+        [
+          {
+            "path_index": 5,
+            "tokens": [
+              "@MANIFOLD",
+              "PRV-001"
+            ],
+            "line": 69
+          }
+        ],
+        [
+          {
+            "path_index": 4,
+            "tokens": [
+              "PF-001",
+              "@MANIFOLD"
+            ],
+            "line": 65
+          }
+        ],
+        [
+          {
+            "path_index": 4,
+            "tokens": [
+              "@PRESS",
+              "PF-001"
+            ],
+            "line": 65
+          }
+        ]
+      ]
+    }
+  ],
+  "kuratowski_counterexample_edges": [
+    [
+      "TANK-001",
+      "EMP-001"
+    ],
+    [
+      "TANK-001",
+      "FSOV-001"
+    ],
+    [
+      "TANK-001",
+      "@RET"
+    ],
+    [
+      "EMP-001",
+      "@PRESS"
+    ],
+    [
+      "EMP-001",
+      "@CASE"
+    ],
+    [
+      "FSOV-001",
+      "EDP-001"
+    ],
+    [
+      "@RET",
+      "RF-001"
+    ],
+    [
+      "@RET",
+      "CDF-001"
+    ],
+    [
+      "@PRESS",
+      "EDP-001"
+    ],
+    [
+      "@PRESS",
+      "PF-001"
+    ],
+    [
+      "@CASE",
+      "EDP-001"
+    ],
+    [
+      "@CASE",
+      "CDF-001"
+    ],
+    [
+      "PF-001",
+      "@MANIFOLD"
+    ],
+    [
+      "@MANIFOLD",
+      "PRV-001"
+    ],
+    [
+      "PRV-001",
+      "@USR"
+    ],
+    [
+      "@USR",
+      "USER-008"
+    ],
+    [
+      "USER-008",
+      "@USERR"
+    ],
+    [
+      "@USERR",
+      "RF-001"
+    ]
+  ],
+  "mirror_invariance": "Reflections and rotations change the port rotation system, not this abstract K3,3 subdivision. This obstruction is stronger than the earlier fixed-port K2,3 obstruction."
+}

@@ -21,6 +21,12 @@ def reject(detail):
 
 def source_node(inst,typ,reference,source_dir,catalog_dir):
     selected=reference.get('nodes',{}).get(inst,{})
+    # R17 不自动镜像,也不得静默丢弃输入请求的镜像(那会换掉左右主口);
+    # 显式拒绝,让调用方提供显式布局或去掉镜像声明。
+    requested=selected.get('mirror')
+    if requested not in (None, False, 'none'):
+        reject(inst+' 参照请求 mirror=%r;R17 单行装配不自动镜像也不换端口,'
+               '请提供显式布局或移除镜像声明' % (requested,))
     asset=selected.get('symbol') or typ.get('symbol',{}).get('asset')
     if not asset: reject(inst+' 无符号资产')
     path=resolve_symbol(asset,source_dir,catalog_dir)

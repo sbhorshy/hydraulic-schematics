@@ -11,7 +11,8 @@ from junction_semantics import renderer_events, merge_collinear
 from lead_geometry import source_leads, perpendicular_scale, segments
 from sheet_geometry import walk
 from layout_contract import drawable_bounds
-from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure
+from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure, mirror_contract
+from mirror_policy import check_mirror, mirror_point, mirror_anchor, mirror_svg_transform
 
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
 
@@ -239,15 +240,24 @@ class Sheet(object):
             rot = int(nd.get('rot', 0)) % 360
             if rot not in (0, 90, 180, 270):
                 raise ValueError('%s: rot=%s 不在目录允许的 0/90/180/270' % (inst, rot))
-            if nd.get('mirror'):
-                raise ValueError(
-                    '%s: 已禁用 mirror。规范 6.3.3 要求优先用旋转与重排,'
-                    '镜像会互换进出口而读图人先信符号朝向。' % inst)
+            # #63 条件解禁:逐实例按实际解析资产过 mirror_policy 三道闸
+            # (mirror_safe / layout.allow_mirror / 与当前符号字节+端口契约
+            # 绑定的登记);未登记、旧资产、非法轴一律拒绝。
+            component = self.types.get(self.i['parts'].get(inst))
+            try:
+                axis = check_mirror(nd, component, path)
+            except ValueError as error:
+                raise ValueError('%s: %s' % (inst, error))
             nd['_k'], nd['_vx'], nd['_vy'] = k, vx, vy
-            nd['_W'], nd['_H'], nd['_rot'] = W, H, rot
+            nd['_W'], nd['_H'], nd['_rot'], nd['_mirror'] = W, H, rot, axis
             self.sym[inst] = (markup, vb, ports, nd)
             for pid, (px, py, anch, role, med) in ports.items():
                 lx, ly = (px - vx) * k, (py - vy) * k
+                if axis:
+                    # 归零缩放盒内先镜像,再沿用既有旋转/平移;端口 id 与
+                    # role/medium/flow 一律不换,仅位置与锚向随镜像同步。
+                    lx, ly = mirror_point(lx, ly, W, H, axis)
+                    anch = mirror_anchor(anch, axis)
                 # 旋转端口坐标与锚点方向。锚点必须同步旋转,否则出线方向
                 # 与端口实际位置不符,走线越过端口再折回(规范 6.3.3)。
                 if rot == 90:
@@ -263,6 +273,11 @@ class Sheet(object):
                     anch = {'left': 'down', 'down': 'right',
                             'right': 'up', 'up': 'left'}[anch]
                 self.abs[(inst, pid)] = (nd['x'] + lx, nd['y'] + ly, anch)
+
+    def mirror_axes(self):
+        """已过 check_mirror 的逐实例许可轴(#63),供装配框测量等下游复用。"""
+        return {inst: nd['_mirror'] for inst, nd in self.L['nodes'].items()
+                if nd.get('_mirror')}
 
     def resolve(self, token, want=None):
         """token -> (inst, pid)。裸实例名按目录 main_path 补出端口。"""
@@ -1016,12 +1031,18 @@ class Sheet(object):
         for inst, (markup, vb, ports, nd) in self.sym.items():
             k, vx, vy = nd['_k'], nd['_vx'], nd['_vy']
             W, H, rot = nd['_W'], nd['_H'], nd['_rot']
-            # 先落位,再旋转,最后缩放并归零 viewBox 原点。
-            # 旋转后的补偿平移使符号仍占据 (x,y) 起始的正矩形。
+            axis = nd.get('_mirror')
+            # 先落位,再旋转,镜像段插在 rotate 之后、scale(k) 之前
+            # (应用序=归零缩放盒内先镜像,再旋转平移),最后缩放并归零
+            # viewBox 原点。无镜像插入空串,既有输出逐字节不变。
+            # 旋转后的补偿平移使符号仍占据 (x,y) 起始的正矩形;
+            # 镜像把盒映射回自身,补偿表不必改。
             comp = {0: (0, 0), 90: (H, 0), 180: (W, H), 270: (0, W)}[rot]
-            tf = ('translate(%g,%g) translate(%g,%g) rotate(%d) scale(%g) '
-                  'translate(%g,%g)' % (nd['x'], nd['y'], comp[0], comp[1],
-                                        rot, k, -vx, -vy))
+            segment = mirror_svg_transform(W, H, axis)
+            tf = ('translate(%g,%g) translate(%g,%g) rotate(%d) %s%sscale(%g) '
+                  'translate(%g,%g)'
+                  % (nd['x'], nd['y'], comp[0], comp[1], rot,
+                     segment, ' ' if segment else '', k, -vx, -vy))
             # 先归一本体线宽,再把端口引线改判为管线宽。顺序不能反:
             # norm_stroke 会给带 stroke-width 的父 <g> 挂上 sym-outline,
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
@@ -1044,8 +1065,12 @@ class Sheet(object):
             # 补偿静默失效。
             comp = ('' if abs(k - 1.0) < 1e-9
                     else ' style="--kc:%.6f"' % (1.0 / k))
-            out.append('<g id="inst-%s" data-node="%s" data-input-anchor="parts.%s" transform="%s"%s>\n%s\n</g>'
-                       % (inst, inst, inst, tf, comp, mk))
+            # 获准镜像的实例记录 data-mirror 与其 layout 输入锚,供追溯
+            # 与校核读取;非镜像 markup 保持原样(不加属性)。
+            mirror_attr = (' data-mirror="%s" data-mirror-input-anchor="nodes.%s.mirror"'
+                           % (axis, inst)) if axis else ''
+            out.append('<g id="inst-%s" data-node="%s" data-input-anchor="parts.%s"%s transform="%s"%s>\n%s\n</g>'
+                       % (inst, inst, inst, mirror_attr, tf, comp, mk))
         return out
 
     @staticmethod
@@ -1398,11 +1423,18 @@ def main(argv=None):
         sys.exit(str(error))
     types = {c['component_type']: c for c in catalog['components']}
     contract_issues = symbol_contract(intent, types, layout['nodes'], workdir, cat_dir)
+    # 镜像许可审计与符号端口契约同出口:违法即 contract 级硬失败(#63)。
+    mirror_issues, _mirror_axes = mirror_contract(
+        intent, types, layout['nodes'], workdir, cat_dir)
+    contract_issues.extend(mirror_issues)
     if contract_issues:
         sys.exit(write_contract_failure(workdir, endpoint_usage(intent, types, layout['nodes']),
                                         contract_issues, intent.get('unknown') or []))
     s = Sheet(intent, layout, catalog, cat_dir=cat_dir, workdir=workdir)
-    s.place()
+    try:
+        s.place()
+    except ValueError as error:
+        sys.exit(str(error))
     s.build_textboxes()
     _segs, junc, bus, polys = s.wire()
 
@@ -1526,9 +1558,17 @@ def main(argv=None):
         f.write('\n'.join(P))
     from assembly_checks import render_enclosures
     from endpoint_usage import resolve_symbol
-    render_enclosures(outp, intent, layout, lambda ref: resolve_symbol(ref, workdir, cat_dir))
+    render_enclosures(outp, intent, layout,
+                      lambda ref: resolve_symbol(ref, workdir, cat_dir),
+                      mirror_axes=s.mirror_axes())
     write_manifest(workdir, intent, catalog, fragments)
     print('wrote', outp)
+    mirrors = s.mirror_axes()
+    if mirrors:
+        # 追溯披露:镜像是许可登记下的绘图操作,不改变端口身份,
+        # 也不提升 provisional/draft 成熟度(图签仍按 symbol_status 披露)。
+        print('mirror: %s (逐组件镜像许可登记;端口身份不变,不提升成熟度)'
+              % ' '.join('%s=%s' % (i, a) for i, a in sorted(mirrors.items())))
     print('nets=%d  segments=%d  junctions=%d  buses=%s'
           % (nnet, len(segs), len(junc), {k: len(v) for k, v in bus.items()}))
     for w in s.warn:

@@ -26,7 +26,8 @@ def make_render_workspace(root, fixture):
     for name in ('layout_contract.py', 'assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
-                 'sheet_geometry.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
+                 'sheet_geometry.py', 'mirror_policy.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
+                 'bridge_allowance.py',
                  'sheet_version.py', 'sheet_diff.py', 'readback_review.py'):
         shutil.copy2(SKILL / 'scripts' / name, work / name)
     shutil.copytree(SKILL / 'assets/contracts', root / 'assets/contracts')
@@ -84,6 +85,19 @@ class LayoutEntrypoints(unittest.TestCase):
         self.assertEqual(layout['labels']['TANK-001'], 'Custom reservoir')
         self.assertEqual(set(layout['labels']), set(self.intent['parts']))
 
+    def test_reference_mirror_request_is_rejected_not_silently_dropped(self):
+        # #63: R1–R16 的 put() 从零造节点(只写 x/y/w/h/rot),参照中的
+        # 活跃 mirror 若被静默丢弃,用户手调的左右/上下主口互换即被无声
+        # 清除。与 R17 同口径显式拒绝;类型全部登记,防"类型未登记"
+        # 先行报错掩盖镜像拒绝。'none'/缺省不是活跃镜像,默认行为不变。
+        ref = copy.deepcopy(self.ref)
+        ref['nodes']['CV-002']['mirror'] = 'x'
+        with self.assertRaisesRegex(SystemExit, 'CV-002.*mirror'):
+            engine.rules(self.intent, self.catalog, engine.P, ref)
+        ref['nodes']['CV-002']['mirror'] = 'none'
+        layout, _ = engine.rules(self.intent, self.catalog, engine.P, ref)
+        self.assertNotIn('mirror', layout['nodes']['CV-002'])
+
     def test_unknown_and_unregistered_types_fail_with_actionable_message(self):
         for registered in (False, True):
             with self.subTest(registered=registered):
@@ -120,6 +134,29 @@ class LayoutEntrypoints(unittest.TestCase):
             self.assertEqual(len(layout['labels']), 23)
             self.run_script(work / 'render_l0_sheet.py', work)
             self.assertTrue((work / '1#系统原理图.svg').is_file())
+
+    def test_cli_rejects_reference_layout_with_active_mirror(self):
+        # 真实 CLI 证明:参照布局带活跃 mirror 时 fail-closed 退出且不
+        # 落盘新布局——绝不静默清掉镜像手调。类型全部登记,防"类型未
+        # 登记"先行报错掩盖镜像拒绝(#63,与 R17 同口径)。
+        with tempfile.TemporaryDirectory(prefix='l0-ref-mirror-') as directory:
+            work = make_render_workspace(Path(directory), FIXTURE)
+            ref_path = work / 'ref.layout.json'
+            ref = json.loads((FIXTURE / '1#系统.layout.json')
+                             .read_text(encoding='utf-8'))
+            ref['nodes']['CV-002']['mirror'] = 'x'
+            ref_path.write_text(json.dumps(ref, ensure_ascii=False),
+                                encoding='utf-8')
+            output = work / 'out.layout.json'
+            result = self.run_script(SKILL / 'scripts/layout_engine.py', work,
+                                     [work / '1#系统.intent.yaml', CATALOG,
+                                      ref_path, '-o', output,
+                                      '--guard-report', work / 'guard.json'],
+                                     expected=1)
+            combined = result.stdout + result.stderr
+            self.assertIn('CV-002', combined)
+            self.assertIn('mirror', combined)
+            self.assertFalse(output.exists())
 
     def test_current_seed_renders_and_retains_geometry_failure_gate(self):
         with tempfile.TemporaryDirectory(prefix='l0-current-seed-') as directory:

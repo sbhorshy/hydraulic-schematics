@@ -8,7 +8,8 @@
 退出码 1 表示 validation: failed。
 """
 from endpoint_usage import (endpoint_usage, check_disclosure, check_marker_display, symbol_contract,
-                            write_contract_failure, resolve_symbol)
+                            write_contract_failure, resolve_symbol, mirror_contract)
+from mirror_policy import mirror_point, mirror_anchor
 
 import io
 import json
@@ -19,7 +20,8 @@ import sys
 import time
 from sheet_geometry import load_geometry
 from topology_reconciliation import reconcile_topology
-from junction_semantics import check_junctions
+from junction_semantics import check_junctions, TOLERANCE as JUNCTION_TOLERANCE
+from bridge_allowance import check_bridge_policy
 from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
 from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
@@ -39,12 +41,14 @@ NS = 'http://www.w3.org/2000/svg'
 # ---------- 构图预算（B1–B7）----------
 # 与 .agents/skills/hydraulic-schematic/references/rendering-rules.md
 # 『数值构图预算（concept 档 v1）』表同源，改动须两处同步。
-# 定位是"预算披露 + 超限告警"：除交叉（B1，恒为 0）硬 fail 外，
+# 定位是"预算披露 + 超限告警"：除交叉（B1，默认恒为 0，仅 #23 登记政策
+# 按内容绑定的 intent 放行"最多 N 处经验证跳线"）硬 fail 外，
 # 其余超限记 WARN（V19）。composition_budget 状态口径：
 #   pass=达标 / over=超限走告警通道 / exempt=表注豁免或存量披露 / fail=B1 专用失败通道。
 BUDGET = {
     'B1': {'metric': '线线交叉', 'budget': 0,
-           'note': '恒为 0，无桥接豁免——难避免优先改道'},
+           'note': '默认恒为 0；仅 bridge_allowance.py 登记政策内容绑定的'
+                   'intent 放行最多 N 处经验证跳线（#23）'},
     'B2': {'metric': '折返次数', 'budget_max_single': 3, 'budget_total': 40},
     'B3': {'metric': '绕行比（路线长÷直角曼哈顿距）', 'budget': 1.5,
            'budget_boundary': 4.0,
@@ -137,6 +141,11 @@ def main(argv=None):
     T = {c['component_type']: c for c in cat['components']}
     inventory = endpoint_usage(intent, T, L['nodes'])
     contract_issues = symbol_contract(intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
+    # #63 镜像许可与符号端口契约同出口硬失败(concept 亦不豁免);
+    # 通过审计的逐实例许可轴随后交给几何读取做获准反射的姿态校验。
+    mirror_issues, mirror_axes = mirror_contract(
+        intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
+    contract_issues.extend(mirror_issues)
     if contract_issues:
         return write_contract_failure(HERE, inventory, contract_issues, intent.get('unknown') or [])
     from layout_contract import drawable_bounds
@@ -169,7 +178,7 @@ def main(argv=None):
     measurement_started = time.monotonic()
     browser = collect(SHEET)
     timings = {'browser_evidence_s': round(time.monotonic()-measurement_started,6)}
-    geometry = load_geometry(root, L, symbol_path)
+    geometry = load_geometry(root, L, symbol_path, mirror_axes)
     endpoint_findings, endpoint_evidence = check_endpoints(geometry, intent, cat)
     endpoint_findings.extend(check_bodies(geometry, endpoint_evidence['terminals']))
     F.extend((c['id'], c['detail']) for c in endpoint_findings)
@@ -192,8 +201,14 @@ def main(argv=None):
                            if rot in (90, 270)
                            else (nd['x'], nd['y'], nd['x'] + sw, nd['y'] + sh))
         pabs = {}
+        axis = mirror_axes.get(inst)
         for pid, (px, py, anch, role, med) in ps.items():
             lx, ly = (px - vx) * k, (py - vy) * k
+            if axis:
+                # 与渲染器同口径(#63):归零缩放盒内先镜像再旋转平移,
+                # 避免 V13 等旧端口坐标循环与 load_geometry 两套口径。
+                lx, ly = mirror_point(lx, ly, sw, sh, axis)
+                anch = mirror_anchor(anch, axis)
             if rot == 90:
                 lx, ly = sh - ly, lx
             elif rot == 180:
@@ -529,14 +544,35 @@ def main(argv=None):
         if man > 0:
             ratios.append((length / man, pts))
 
-    # B1 retains the zero-crossing policy, including real bridged crossings.
-    # Facing loose ends diagnose a missing bridge but do not invent a route.
+    # B1 默认保留零交叉政策（含真实跨线桥）。#23 定案(2026-10-12)：仅
+    # bridge_allowance 登记政策按 intent 内容 SHA-256 绑定放行"最多 N 处
+    # 经验证跳线"。放行不改变实测口径：measured 仍是真实交叉数；
+    # verified_bridges 逐点复用 V4/V14 浏览器几何证据（check_junctions
+    # 的 bridges 记录），此处不另造低保真替代。面对断点诊断缺桥，
+    # 不发明路线。
     crossing_evidence = next(e for e in junction_evidence if e['id']=='V14')
     crossing_events = [e for e in crossing_evidence.get('events',[]) if e['kind']=='crossing']
     b1_cross = [tuple(e['position']) for e in crossing_events
                 if e.get('measurement_status')=='measured' and (e.get('visible_horizontal') or e.get('bridge_ids'))]
     b1_unchecked = (crossing_evidence['coverage_status']=='not_checked' or
                     any(not e.get('visible_horizontal') and not e.get('bridge_ids') for e in crossing_events))
+    # B1 放行的前提是 V4/V14 全部 findings 为空且覆盖 pass：假接点、
+    # 无桥、错归属、孤桥、直线压桥等任何失败都已在 findings 里，
+    # 不允许带着这些证据缺口按"经验证跳线"放行。
+    junction_clean = not [f for f in junction_findings if f['id'] in ('V4','V14')]
+    bridge_records = crossing_evidence.get('bridges',[])
+    def b1_verified(position):
+        arcs=[b for b in bridge_records
+              if math.dist(b['position'],position)<=JUNCTION_TOLERANCE]
+        return (len(arcs)==1 and bool(arcs[0].get('continuous'))
+                and bool(arcs[0].get('valid_owner'))
+                and not arcs[0].get('unchecked'))
+    try:
+        bridge_policy=check_bridge_policy(L,INTENT)
+        policy_error=None
+    except ValueError as error:
+        bridge_policy={'policy_id':None,'allowance':0}
+        policy_error=str(error)
 
     # B5 uses the final transformed source footprints, including nested transforms.
     b5_nearest = nearest_components(geometry)
@@ -551,15 +587,61 @@ def main(argv=None):
         items.append(it)
         return it
 
-    # B1 交叉恒 0，硬 fail（唯一走 fail 通道的预算项）。
-    if b1_cross:
-        add('B1', len(set(b1_cross)), 'fail',
-            '非连通交叉 %d 处，预算恒为 0（含跨线桥也不豁免）' % len(set(b1_cross)))
-        F.append(('V19', '构图预算 B1：交叉 %d 处 > 0，须改道消除'
-                  % len(set(b1_cross))))
+    # B1 交叉默认恒 0 硬 fail（唯一走 fail 通道的预算项）；#23 登记政策
+    # 放行的口径：V4/V14 findings 全空且覆盖 pass、每个实际交叉有且仅有
+    # 一条连续、归属正确、非未校核的真桥，且交叉数 ≤ 登记 allowance。
+    # 第二个交叉即使同样验证通过也超出 allowance=1，仍 fail。
+    b1_positions=sorted(set(b1_cross))
+    b1_measured=len(b1_positions)
+    b1_verified_count=sum(1 for p in b1_positions if b1_verified(p))
+    v4_evidence = next(e for e in junction_evidence if e['id']=='V4')
+    # covered：V4 与 V14 覆盖都必须 pass（junction_semantics 的 unsupported
+    # marker 只记 V4 not_checked，V14 仍可 pass——只查 V14 会把带未知
+    # marker 的跳线称"经验证"）；findings 空、无未核交叉证据才放行。
+    covered=(junction_clean
+             and v4_evidence['coverage_status']=='pass'
+             and crossing_evidence['coverage_status']=='pass'
+             and not b1_unchecked)
+    # 披露单值：B1 item 与 V19 evidence 必须同口径（covered 才逐点报数，
+    # 否则整组 0），不允许一个出口 0、另一个出口还挂着未过滤计数。
+    b1_verified_disclosed=b1_verified_count if covered else 0
+    if policy_error:
+        add('B1',b1_measured,'fail',policy_error)
+        F.append(('V19','构图预算 B1：跳线许可解析失败（fail-closed，按'
+                  '未获准处理）：%s'%policy_error))
+    elif b1_measured:
+        if (covered and b1_verified_count==b1_measured
+                and b1_measured<=bridge_policy['allowance']):
+            add('B1',b1_measured,'pass',
+                '经验证跳线 %d 处 ≤ 登记 %s 放行 %d 处（#23 定案；其余交叉仍禁止）'
+                %(b1_measured,bridge_policy['policy_id'],bridge_policy['allowance']))
+        else:
+            gaps=[]
+            if not junction_clean:gaps.append('V4/V14 存在失败')
+            if (v4_evidence['coverage_status']!='pass'
+                    or crossing_evidence['coverage_status']!='pass'
+                    or b1_unchecked):
+                gaps.append('交叉测量证据不完整')
+            if b1_verified_count<b1_measured:
+                gaps.append('经验证跳线仅 %d/%d 处'%(b1_verified_count,b1_measured))
+            if b1_measured>bridge_policy['allowance']:
+                gaps.append('交叉 %d 处 > 放行 %d 处'%(b1_measured,bridge_policy['allowance']))
+            detail='；'.join(gaps)
+            add('B1',b1_measured,'fail',detail)
+            F.append(('V19','构图预算 B1：交叉 %d 处超出放行预算 %d（%s）'
+                      '，须改道消除或按 #23 重新登记'
+                      %(b1_measured,bridge_policy['allowance'],detail)))
     else:
         add('B1', 0, 'not_measured' if b1_unchecked else 'pass',
             'Crossing route/display evidence incomplete.' if b1_unchecked else None)
+    items[-1]['policy']=bridge_policy['policy_id']
+    items[-1]['allowance']=bridge_policy['allowance']
+    # verified_bridges 披露口径：逐点核实（continuous/valid_owner/非未核）
+    # 只是必要条件——V4/V14 任一 findings（虚线桥、假接点）或覆盖缺口
+    # 存在时，整组按 0 披露，不得一边 fail 一边报"已验证 1 处"误导为
+    # "桥本身没问题"。B1 item 与下方 V19 evidence 共用 b1_verified_disclosed，
+    # 所有出口同口径。measured 始终是真实交叉数，不因放行减少。
+    items[-1]['verified_bridges']=b1_verified_disclosed
 
     # B2 折返：单条 ≤3 且全图 ≤40。超限走 WARN；落在边界端子上的
     # 存量走线按表注¹披露为 exempt。
@@ -668,6 +750,9 @@ def main(argv=None):
         'not_measured' if b7=='not_checked' else 'over' if b7 in ('warn','fail') else 'pass',
         'Browser glyph ink bounds and actual SVG contours; intra-label line spacing is typography.')
     ev.append({'id': 'V19', 'crossings': len(set(b1_cross)),
+               'bridge_policy': bridge_policy['policy_id'],
+               'bridge_allowance': bridge_policy['allowance'],
+               'verified_bridges': b1_verified_disclosed,
                'turns_total': turn_total, 'turns_max_single': turn_max,
                'detour_max': round(max(r for r, _ in ratios), 3) if ratios else None,
                'min_segment': round(min_seg, 1) if min_seg is not None else None, 'box_gap_min': b5_gap})

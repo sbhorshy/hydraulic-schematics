@@ -431,6 +431,7 @@
       "component_type": "engine_driven_pump",
       "display_name": "发动机驱动泵",
       "connection_role": "inline",
+      "mirror_safe": true,
       "symbol": {
         "asset": "symbols/edp-provisional-stroke.svg",
         "symbol_status": "provisional",
@@ -479,13 +480,23 @@
           180,
           270
         ],
-        "allow_mirror": false
+        "allow_mirror": true
+      },
+      "mirror_registration": {
+        "axes": [
+          "x",
+          "y"
+        ],
+        "asset_sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b",
+        "ports_sha256": "678bb3e4ba438225032b874721f1850175a5d8950eaed6cc18c39f7ada46a7df",
+        "note": "#63 条件解禁登记(2026-10-12,1# 工作目录 catalog):依据用户签认的逐组件镜像许可政策与源事实核验(登记清单与原始字节差异见 research/glm-followup-20261012/mirror-registration.md)——符号无内部文字,整体反射后泵压力三角仍指向 pressure_out,四端口 id/role/medium/flow_capability 身份保留(drive_shaft 机械口不得冒充 case_drain 溢流口)。登记是政策许可记录,不是逐组件工程签认,symbol_status 维持 provisional 不因镜像提升;asset_sha256 绑定本工作目录 symbols/ 下符号的真实原始字节(与规范源副本仅行尾 CRLF 差异,不共用摘要,不弱化绑定),ports_sha256 绑定本目录端口契约,任一变更登记即失效,须按新状态重新登记。"
       }
     },
     {
       "component_type": "electric_motor_driven_pump",
       "display_name": "电动泵",
       "connection_role": "inline",
+      "mirror_safe": true,
       "symbol": {
         "asset": "symbols/emp-provisional-stroke.svg",
         "symbol_status": "provisional",
@@ -534,7 +545,16 @@
           180,
           270
         ],
-        "allow_mirror": false
+        "allow_mirror": true
+      },
+      "mirror_registration": {
+        "axes": [
+          "x",
+          "y"
+        ],
+        "asset_sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34",
+        "ports_sha256": "fed45b70d01d3d6e5baf09340c89f533a29db9e000f366be931c7a2e14abcb60",
+        "note": "#63 条件解禁登记(2026-10-12,1# 工作目录 catalog):依据用户签认的逐组件镜像许可政策与源事实核验(登记清单与原始字节差异见 research/glm-followup-20261012/mirror-registration.md)——符号无内部文字,整体反射后泵压力三角仍指向 pressure_out,四端口 id/role/medium/flow_capability 身份保留(elec_power 电气口不得冒充 case_drain 溢流口)。登记是政策许可记录,不是逐组件工程签认,symbol_status 维持 provisional 不因镜像提升;asset_sha256 绑定本工作目录 symbols/ 下符号的真实原始字节(与规范源副本仅行尾 CRLF 差异,不共用摘要,不弱化绑定),ports_sha256 绑定本目录端口契约,任一变更登记即失效,须按新状态重新登记。"
       }
     },
     {

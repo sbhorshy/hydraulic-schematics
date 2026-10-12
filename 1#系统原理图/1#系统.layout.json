@@ -1,8 +1,9 @@
 {
-  "layout_version": "2.2",
+  "layout_version": "2.4",
   "source_l0": "1#系统.intent.yaml",
   "source_components_json": "./1#系统组件.json",
-  "note": "油箱置左,回路闭合。压力侧两条母线:@PRESS(泵汇合+滤+自增压优先阀+地面压力接头) x=880,@MANIFOLD(分配:优先阀/蓄压器) x=1160;用户供压母线 @USR x=1470,用户回油收集母线 @USERR x=1646。回油母线 @RET x=940,壳体回油母线 @CASE x=620。吸油走廊 x=290。全部坐标手工给定,无自动布局。",
+  "bridge_policy": "current-1-verified-single-bridge-20261012",
+  "note": "油箱置左,回路闭合。压力侧两条母线:@PRESS(泵汇合+滤+自增压优先阀+地面压力接头) x=910,@MANIFOLD(分配:优先阀/蓄压器) x=1190;用户供压母线 @USR x=1500,用户回油收集母线 @USERR x=1676。回油母线 @RET x=970,壳体回油母线 @CASE x=700。吸油走廊 x=320。全部坐标手工给定,无自动布局。",
   "revision_log": [
     "1.0 初版:18 项组件清单落图。14 受控实例 + 2 用户边界 + 2 气侧 taps;",
     "2.0 重排:QDP 移 @MANIFOLD 下方(1186,760);CDF 移顶部 (420,180) rot270;气侧组件移 ACC 上方(ACV 1240,60 / PG 1414,50);PRV-001 (1300,290);QDR (1200,900);EDP/FSOV 行下移至 y=290;吸油两行换序。走廊:lane 245 供 @RET->油箱 顶绕;vlanes 290/20 供吸油与回油。",
@@ -26,7 +27,10 @@
     "2.2 fsov-cell60-tune:TANK 双吸油馈线(y=686 TANK/EMP 馈线与 x=480 EMP 垂线)穿越占位带——FSOV-001 上提 @(302,283.7)（底缘 646,让出 650/686 走廊）;EDP/EMP x 500→540（选1 授权,右端口出线空间;集液/压力干线随端口平移,母线 620/880 不变）",
     "2026-10-10 #49: TANK canonical viewBox 0 0 218 564; keep placement and footprint; pressure port local x 172 -> 155; add body_sense_tap (50,564); routes regenerated from SVG ports.",
     "2026-10-10 #46: ACC liquid at PRV-002.outlet; ACC-PG-ACV taps share the single PG port. Explicit seed places the branch southeast of PRV-002; return corridor 890 -> 1010 clears the branch; only ACC/PG/ACV nodes and their label slots move.",
-    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30"
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30",
+    "2026-10-12 #23: bridge_policy 显式选择登记政策 current-1-verified-single-bridge-20261012（内容绑定 intent SHA-256，放行最多 1 处经验证跳线；非平面证据 research/glm-followup-20261012/whole-graph-planarity.md）",
+    "2026-10-12 #23 候选落盘（2.3）: 单跳线布局——EMP-001 mirror=y（case_drain 移顶；镜像经 1# 工作目录 catalog 两泵 #63 登记授权，未提升 provisional 成熟度）; CDF-001 (450,100)→(730,430) rot270/100x158 不变（RET 上端下移，原 PF 进线跨 RET 消失，CDF.out 跨 @PRESS 单处）; @CASE x 650→700（CASE 主干置于两泵中间，不再贴压力口）; EMP 标签 above→right、CDF right→below(drop 20) 避让端口出线。Codex 临时沙箱实测仅旧 B1(=0) 失败、其余 hardfail 0（../layout-probe-summary.json、../bridge-second-review.json），本政策 allowance=1 下预期 fail0，待 Codex 完整实跑确认后冻结。",
+    "2026-10-12 #23 第二轮间距候选落盘（2.4）: 在 2.3 单跳线候选上仅微调布局六处——FSOV-001 x 332→352、EDP-001 x 570→610、EMP-001 (570,610)→(610,606)、ACC-001 x 730→726、ACV-001 y 937→939、CV-002 y 1120→1128；不改算法/阈值/符号/intent/标签/母线/走廊，note 坐标摘要同步刷为当前值。Codex 实跑 render+raster+validate（../layout-budget-probe-summary.json）：fail0；B1 raw1/pass（allowance=1，verified=1）、B2 total24/max3、B3 max1.281、B4 18、B5 44——满足原票到站口径 fail0/B3≤1.447/B4≥16/B5≥43（原始验收依据 docs/specs/ready-tickets-20261009-review.md:30，#22 决议原值 1.447/16/43；近期残差 10/24 档不可作关票基线）；B6 avoid_corridor 6/over、B7 min_clearance 2.101（1 violation）/over 仍按事实披露。"
   ],
   "canvas": {
     "width": 1710,
@@ -47,7 +51,7 @@
       "h": 564
     },
     "FSOV-001": {
-      "x": 332.0,
+      "x": 352.0,
       "y": 283.7,
       "symbol": "symbols/firewall-shutoff-valve.svg",
       "w": 362.304,
@@ -55,18 +59,19 @@
       "rot": 270
     },
     "EDP-001": {
-      "x": 570.0,
+      "x": 610.0,
       "y": 290,
       "symbol": "symbols/edp-provisional-stroke.svg",
       "w": 80,
       "h": 80
     },
     "EMP-001": {
-      "x": 570.0,
-      "y": 610,
+      "x": 610.0,
+      "y": 606,
       "symbol": "symbols/emp-provisional-stroke.svg",
       "w": 80,
-      "h": 80
+      "h": 80,
+      "mirror": "y"
     },
     "PF-001": {
       "x": 1030.0,
@@ -76,8 +81,8 @@
       "h": 158
     },
     "CDF-001": {
-      "x": 450.0,
-      "y": 100,
+      "x": 730.0,
+      "y": 430,
       "symbol": "symbols/filter-line-shutoff-dp.svg",
       "w": 100,
       "h": 158,
@@ -107,7 +112,7 @@
       "rot": 180
     },
     "ACC-001": {
-      "x": 730.0,
+      "x": 726.0,
       "y": 840,
       "symbol": "symbols/accumulator.svg",
       "w": 60,
@@ -116,7 +121,7 @@
     },
     "ACV-001": {
       "x": 830.0,
-      "y": 937,
+      "y": 939,
       "symbol": "symbols/air-charging-valve.svg",
       "w": 134,
       "h": 57,
@@ -148,7 +153,7 @@
     },
     "CV-002": {
       "x": 1430.0,
-      "y": 1120,
+      "y": 1128,
       "symbol": "symbols/check-valve.svg",
       "w": 80,
       "h": 80,
@@ -234,7 +239,7 @@
     },
     "CASE": {
       "kind": "v",
-      "x": 650.0
+      "x": 700.0
     }
   },
   "labels": {
@@ -265,9 +270,9 @@
     "TANK-001": "below",
     "FSOV-001": "below",
     "EDP-001": "below",
-    "EMP-001": "above",
+    "EMP-001": "right",
     "PF-001": "right",
-    "CDF-001": "right",
+    "CDF-001": "below",
     "RF-001": "below",
     "PRV-001": "above",
     "PRV-002": "below",
@@ -279,7 +284,8 @@
   },
   "label_drop": {
     "TANK-001": 100,
-    "EDP-001": 40
+    "EDP-001": 40,
+    "CDF-001": 20
   },
   "lanes_note": "#46 水平走廊 1010: @RET->油箱 支路从油箱西侧下绕，越过 PRV-002 下游 ACC/PG/ACV 支路底缘(994)，从图例顶缘(1020)上方接入 @RET；原890会穿新气侧件/支路。仅更改候选走廊，不改任何连接与其他节点坐标。",
   "lanes": [

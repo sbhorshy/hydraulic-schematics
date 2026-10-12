@@ -13,6 +13,25 @@ IDENTITY = (1., 0., 0., 1., 0., 0.)
 DIRECTIONS = {'left': (-1., 0.), 'right': (1., 0.),
               'up': (0., -1.), 'down': (0., 1.)}
 NUMBER = r'[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?'
+# Pose comparisons run on source-viewBox control points transformed into root
+# SVG user units, never on raw matrix coefficients: a coefficient tuple mixes
+# the dimensionless scale with translations, so an absolute per-coefficient
+# epsilon accepts a doubled scale whenever k is small (0.001 vs 0.002 both sit
+# inside 0.01). Each coordinate's budget = POSE_TOLERANCE (absolute floor for
+# %g rounding at ordinary coordinate magnitudes) plus POSE_RELATIVE_TOLERANCE
+# times the transformed point's own magnitude, capped at POSE_TOLERANCE_CAP.
+# The budget deliberately never scales with the source-viewBox terms that
+# produce a coordinate (|a*x| + |e| can individually reach 1e9 while the point
+# lands at ordinary sheet coordinates, because the terms cancel): a huge
+# cancellable viewBox origin would then buy a huge tolerance and swallow a
+# whole-symbol misplacement (audit counterexample: viewBox x=1e9 with a 100px
+# translation error passed). %g rounding acts on the renderer's final-chain
+# parameters, whose effect shows up at the transformed point's own size; a
+# declaration so large that %g cannot express it inside the cap is rejected
+# as unrepresentable precision rather than accepted misaligned.
+POSE_TOLERANCE = 0.01
+POSE_RELATIVE_TOLERANCE = 1e-4
+POSE_TOLERANCE_CAP = 1.0
 
 
 def multiply(a, b):
@@ -67,6 +86,129 @@ def orthogonal_similarity(m):
             and (abs(a) < 1e-6 or abs(b) < 1e-6))
 
 
+def determinant(m):
+    return m[0]*m[3] - m[1]*m[2]
+
+
+def reflected_orthogonal_similarity(m):
+    """Axis-aligned orthogonal similarity with a negative determinant."""
+    a, b, c, d, _, _ = m
+    return (a*d-b*c < 0 and abs(a*c+b*d) < 1e-6
+            and abs(math.hypot(a, b)-math.hypot(c, d)) < 1e-6
+            and (abs(a) < 1e-6 or abs(b) < 1e-6))
+
+
+def declared_mirror_axis(node):
+    """Layout node mirror value -> None/'x'/'y'; anything else is rejected.
+
+    0 is deliberately not treated as False, matching mirror_policy's domain.
+    """
+    value = node.get('mirror')
+    if value is None or value is False or value == 'none':
+        return None
+    if isinstance(value, str) and value in ('x', 'y'):
+        return value
+    raise ValueError('unsupported mirror declaration %r '
+                     '(allowed: absent/None/False/none/x/y)' % (value,))
+
+
+def _translate(x, y):
+    return (1., 0., 0., 1., float(x), float(y))
+
+
+def _uniform_scale(s):
+    return (float(s), 0., 0., float(s), 0., 0.)
+
+
+def _rotation(degrees):
+    angle = math.radians(degrees)
+    cos, sin = math.cos(angle), math.sin(angle)
+    return (cos, sin, -sin, cos, 0., 0.)
+
+
+def _reflection(width, height, axis):
+    # Same geometry as mirror_policy.mirror_svg_transform, kept local so this
+    # module stays dependency-free: 'x' -> translate(W,0) scale(-1,1).
+    if axis == 'x':
+        return (-1., 0., 0., 1., float(width), 0.)
+    return (1., 0., 0., -1., 0., float(height))
+
+
+def declared_instance_matrix(node, vb, axis):
+    """Expected instance matrix for the declared pose, matching the renderer
+    chain place -> rotate -> optional mirror -> uniform viewBox scale ->
+    viewBox origin shift. Requires a finite non-degenerate viewBox and
+    rot in 0/90/180/270."""
+    vx, vy, vw, vh = vb
+    if not all(math.isfinite(v) for v in vb) or vw <= 0 or vh <= 0:
+        raise ValueError('symbol viewBox must be finite with positive size: %r'
+                         % (vb,))
+    k = min(float(node['w'])/vw, float(node['h'])/vh)
+    W, H = vw*k, vh*k
+    rot = int(node.get('rot', 0)) % 360
+    if rot not in (0, 90, 180, 270):
+        raise ValueError('declared rot %r outside 0/90/180/270'
+                         % (node.get('rot'),))
+    comp = {0: (0., 0.), 90: (H, 0.), 180: (W, H), 270: (0., W)}[rot]
+    m = multiply(multiply(_translate(node['x'], node['y']),
+                          _translate(*comp)), _rotation(rot))
+    if axis:
+        m = multiply(m, _reflection(W, H, axis))
+    return multiply(m, multiply(_uniform_scale(k), _translate(-vx, -vy)))
+
+
+def _pose_control_points(vb):
+    """The four source viewBox corners, in source user units."""
+    vx, vy, vw, vh = vb
+    return ((vx, vy), (vx + vw, vy), (vx + vw, vy + vh), (vx, vy + vh))
+
+
+def _pose_matches(expected, actual, control_points):
+    """Match two instance poses by their effect on the control points.
+
+    Both matrices transform the same source viewBox corners; agreement is
+    required in root SVG user units within a budget tied to each transformed
+    point's own magnitude on the sheet (the size %g rounding actually acts
+    on), floored at POSE_TOLERANCE and capped at POSE_TOLERANCE_CAP. The
+    budget must not scale with the cancellable source-coordinate terms
+    feeding the point: a viewBox origin of 1e9 with a ~100px translation
+    error must stay a rejection, not ride a 1e9-sized tolerance.
+    """
+    for xy in control_points:
+        for want, got in zip(point(expected, xy), point(actual, xy)):
+            budget = min(POSE_RELATIVE_TOLERANCE * max(abs(want), abs(got)),
+                         POSE_TOLERANCE_CAP)
+            if abs(want - got) > max(POSE_TOLERANCE, budget):
+                return False
+    return True
+
+
+def _check_mirror_trace(inst, element, axis):
+    """#63 traceability: the instance group's data-mirror records must agree
+    with the layout declaration. The renderer emits data-mirror and
+    data-mirror-input-anchor only for authorized mirrors, so a declared mirror
+    without its record, a record without a declaration, a wrong recorded axis,
+    or an input anchor pointing anywhere but this node's own mirror field is a
+    broken trace and an issue — never a silent pass."""
+    reported = element.get('data-mirror')
+    anchor = element.get('data-mirror-input-anchor')
+    if axis is None:
+        if reported is not None:
+            raise ValueError('instance %s records data-mirror=%r but the '
+                             'layout declares no mirror' % (inst, reported))
+        if anchor is not None:
+            raise ValueError('instance %s carries data-mirror-input-anchor=%r '
+                             'without a declared mirror' % (inst, anchor))
+        return
+    if reported != axis:
+        raise ValueError('declared mirror=%r but instance %s records '
+                         'data-mirror=%r' % (axis, inst, reported))
+    if anchor != 'nodes.%s.mirror' % inst:
+        raise ValueError('declared mirror=%r but instance %s records '
+                         'data-mirror-input-anchor=%r (expected nodes.%s.mirror)'
+                         % (axis, inst, anchor, inst))
+
+
 def walk(root, matrix=IDENTITY):
     """Yield (element, actual cumulative matrix), including the root."""
     matrix = multiply(matrix, transform(root.get('transform')))
@@ -75,7 +217,22 @@ def walk(root, matrix=IDENTITY):
         yield from walk(child, matrix)
 
 
-def load_geometry(root, layout, resolve_symbol):
+def load_geometry(root, layout, resolve_symbol, mirror_axes=None):
+    """Read final SVG geometry, optionally honouring validated mirrors (#63).
+
+    mirror_axes maps instance -> 'x'/'y' for mirrors whose catalog permission
+    the caller already validated (mirror_policy.check_mirror). Without a
+    permission every reflected (det<0) instance matrix is rejected; with one,
+    the declared axis, rotation, uniform scale and translation must match the
+    actual SVG matrix (including non-zero viewBox origins, compared through
+    the transformed source viewBox corners so scale errors are judged at their
+    real geometric size). The instance group's data-mirror /
+    data-mirror-input-anchor traceability attributes must agree with the
+    declaration in both directions. A missing mirror, a wrong axis/rotation,
+    an undeclared negative matrix and an inconsistent mirror trace are issues,
+    never silent passes. Apart from an authorized reflection, nonuniform,
+    non-orthogonal and degenerate transforms stay rejected.
+    """
     result = {'coordinate_system': 'root_svg_user_units', 'nodes': {},
               'pipes': [], 'issues': []}
     try:
@@ -90,9 +247,40 @@ def load_geometry(root, layout, resolve_symbol):
             if inst not in instances:
                 raise ValueError('missing final SVG instance ' + inst)
             element, matrix = instances[inst]
-            if not orthogonal_similarity(matrix):
-                raise ValueError('unsupported mirrored/nonuniform/nonorthogonal instance transform')
             source = ET.parse(resolve_symbol(node['symbol'])).getroot()
+            axis = declared_mirror_axis(node)
+            permission = (mirror_axes or {}).get(inst)
+            if axis is None:
+                if determinant(matrix) < 0:
+                    raise ValueError('reflected instance transform without a declared mirror')
+                if not orthogonal_similarity(matrix):
+                    raise ValueError('unsupported mirrored/nonuniform/nonorthogonal instance transform')
+                _check_mirror_trace(inst, element, axis)
+            else:
+                if permission is None:
+                    raise ValueError("declared mirror=%r has no validated catalog permission" % axis)
+                if permission != axis:
+                    raise ValueError('declared mirror=%r differs from the validated permission axis %r'
+                                     % (axis, permission))
+                _check_mirror_trace(inst, element, axis)
+                if determinant(matrix) > 0:
+                    raise ValueError('declared mirror=%r but the instance transform has no reflection' % axis)
+                if not reflected_orthogonal_similarity(matrix):
+                    raise ValueError('mirrored instance transform is nonuniform/nonorthogonal/degenerate')
+                vb = tuple(map(float,
+                               source.get('viewBox').replace(',', ' ').split()))
+                control = _pose_control_points(vb)
+                expected = declared_instance_matrix(node, vb, axis)
+                if not _pose_matches(expected, matrix, control):
+                    other = 'y' if axis == 'x' else 'x'
+                    if _pose_matches(declared_instance_matrix(node, vb, other),
+                                     matrix, control):
+                        raise ValueError('declared mirror=%r but the instance transform reflects the %s axis'
+                                         % (axis, other))
+                    raise ValueError('mirrored instance pose (rotation/scale/translation) does not '
+                                     'match the declared layout: expected %s actual %s'
+                                     % (tuple(round(v, 6) for v in expected),
+                                        tuple(round(v, 6) for v in matrix)))
             vx, vy, w, h = map(float, source.get('viewBox').replace(',', ' ').split())
             corners = [point(matrix, p) for p in ((vx, vy), (vx+w, vy),
                                                 (vx+w, vy+h), (vx, vy+h))]

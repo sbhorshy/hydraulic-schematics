@@ -207,6 +207,17 @@ def rules(intent, cat, params, ref=None, *, source_dir=None, catalog_dir=None):
     labels = {inst: inst for inst in parts}
     labels.update({inst: label for inst, label in ((ref or {}).get('labels') or {}).items()
                    if inst in parts})
+    # #63: R1–R16 的节点由 put() 从零重建(只写 x/y/w/h/rot),参照里的
+    # mirror 会被静默丢掉——那等于悄悄撤掉用户手调的左右/上下主口互换。
+    # 与 R17 同口径显式拒绝(fail-closed):要么直接以该参照布局为种子
+    # 渲染(不再过引擎),要么移除镜像声明;不得无声清除。
+    for inst, ref_node in ((ref or {}).get('nodes') or {}).items():
+        requested = ref_node.get('mirror') if isinstance(ref_node, dict) else None
+        if requested not in (None, False, 'none'):
+            raise SystemExit(
+                '规则引擎 R1–R16: 参照节点 %s 声明 mirror=%r;规则布局不自动'
+                '镜像,也不得静默丢弃镜像手调(那会换掉左右/上下主口)——'
+                '请以该布局为显式种子直接渲染,或移除镜像声明' % (inst, requested))
 
     # ---- 识别(按连接形态与端口 role,不认实例名)----
     tank = next(i for i, r in roles.items()
