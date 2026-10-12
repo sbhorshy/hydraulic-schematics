@@ -122,6 +122,11 @@ FOOTPRINT = {
     'pressure_switch': (190, 89, 'symbols/pressure-switch.svg', None),
     'temperature_switch': (148, 89, 'symbols/temperature-switch.svg', None),
     'temperature_transducer': (148, 89, 'symbols/temperature-transducer.svg', None),
+    # ---- #45 登记(2026-10-12):check_valve_spring 足迹按符号库实读 ----
+    # ---- (viewBox "-48 0 96 142";竖直变体,主端口 inlet 在下缘 y=142)。 ----
+    # ---- 接通位 QD(符号无端口组)与 eco_bottle(无符号/无目录)事实 ----
+    # ---- 不足,暂不登记;待工程澄清补齐端口/符号事实后再入表。      ----
+    'check_valve_spring': (96, 142, 'symbols/check-valve-spring.svg', 142.0),
 }
 
 

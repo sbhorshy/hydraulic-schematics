@@ -146,6 +146,49 @@
       }
     },
     {
+      "component_type": "check_valve_spring",
+      "display_name": "弹簧单向阀",
+      "description": "弹簧加载常闭单向阀(压差超弹簧设定值即开)。Drawing2.dxf 块「单向阀(简易符号)带弹簧」竖直重绘件:下口进/上口出。回油滤组件(filter_line_shutoff_dp_return_bypass)旁通腿的独立登记类型(sysml part def check_valve_spring,#45 2026-10-12 补登记);端口 role 按符号 connection-points 实测登记为 pressure。",
+      "connection_role": "inline",
+      "symbol": {
+        "asset": "check-valve-spring.svg",
+        "symbol_status": "provisional",
+        "note": "竖直带弹簧变体 v1.0,端口组实读:inlet 下油口(0,142) anchor=down / outlet 上油口(0,0) anchor=up;符号文件头 data-component-type 仍记 check_valve,目录拆分随本条落位(符号原注「catalog 拆分待修订」);无标准页依据,引用本符号的 L0 文件须在 unknown 登记。"
+      },
+      "ports": [
+        {
+          "id": "inlet",
+          "svg_element_id": "port-inlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "outlet",
+          "svg_element_id": "port-outlet",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": {
+        "in": "inlet",
+        "out": "outlet"
+      },
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": false,
+        "mirror_note": "镜像会反转符号指向的允许通流方向(同 check_valve 先例)"
+      }
+    },
+    {
       "component_type": "pressure_filter",
       "display_name": "压力油滤",
       "connection_role": "inline",
