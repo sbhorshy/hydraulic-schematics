@@ -1,0 +1,19 @@
+test_empty_lib_directory_fails_closed (test_symbol_gate.SymbolGateCLI) ... ok
+test_explicit_symbol_from_arbitrary_cwd_passes (test_symbol_gate.SymbolGateCLI) ... ok
+test_full_library_scan_reports_known_defects_and_exit_1 (test_symbol_gate.SymbolGateCLI) ... ok
+test_lib_sandbox_override_scans_only_that_library (test_symbol_gate.SymbolGateCLI) ... ok
+test_missing_explicit_file_fails_closed_without_traceback (test_symbol_gate.SymbolGateCLI) ... ok
+test_unanchored_copy_fails_closed_when_library_missing (test_symbol_gate.SymbolGateCLI) ... ok
+test_all_with_existing_file_is_usage_error (test_check_symbol_cli.AllFlagConflictTest) ... ok
+test_all_with_missing_file_is_usage_error (test_check_symbol_cli.AllFlagConflictTest) ... ok
+test_malformed_catalogs_exit_1_with_error (test_check_symbol_cli.BadCatalogFailClosedTest) ... ok
+test_missing_catalog_exits_1 (test_check_symbol_cli.BadCatalogFailClosedTest) ... ok
+test_unreadable_catalog_exits_1 (test_check_symbol_cli.BadCatalogFailClosedTest) ... ok
+test_baseline_two_known_errors_with_catalog_crosscheck (test_check_symbol_cli.DefaultLibraryBaselineTest) ... ok
+test_sandbox_real_catalog_clean_symbol_exits_zero (test_check_symbol_cli.SeverityRulesPreservedTest) ... ok
+test_valid_catalog_unknown_type_warns_not_errors (test_check_symbol_cli.SeverityRulesPreservedTest) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 6.332s
+
+OK

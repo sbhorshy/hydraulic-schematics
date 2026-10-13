@@ -1,0 +1,15 @@
+{
+  "commit": "native archive snapshot",
+  "cases": [
+    {
+      "case": "null-layout",
+      "http": 500,
+      "body": "{\"error\": \"'NoneType' object has no attribute 'get'\"}"
+    },
+    {
+      "case": "valid-contract-invalid-intent",
+      "http": 500,
+      "body": "{\"error\": \"'NoneType' object has no attribute 'get'\"}"
+    }
+  ]
+}

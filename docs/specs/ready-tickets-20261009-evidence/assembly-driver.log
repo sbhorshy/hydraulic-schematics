@@ -1,0 +1,20 @@
+[driver] setup started
+[driver] setup completed 3.520s
+[driver] preflight started
+[driver] preflight completed 0.317s
+[driver] layout started
+[driver] layout completed 2.326s
+[driver] render started
+[driver] render completed 2.475s
+[driver] readback started
+[driver] readback completed 2.877s
+[driver] validate started
+[driver] validate completed 2.735s
+[driver] local_readback started
+[driver] local_readback completed 7.585s
+==== 校核驱动器 ====
+工作区: /mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/assembly
+preflight: cleared_for_layout
+  轮1 布局=engine           回读=regenerated -> fail 0, warn 1
+局部回读: 12 个对象 / 7 张局部图，5.311s -> /mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/assembly/readback.html
+结论: 已执行校核零失败；交付证据未齐备（PERCEPTUAL, READBACK_ITEMS）  (23.0s, 报告 -> /mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/assembly/convergence-report.json)

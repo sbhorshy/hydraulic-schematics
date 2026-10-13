@@ -1,0 +1,566 @@
+{
+  "tested_code_head": "763960b920060114c8d39b7074479950a6304d79",
+  "before_project_source_commit": "ed0fa5d3e4a197794db0cec9981b5cf4b5cfb069",
+  "same_driver_and_validator": true,
+  "before_counts": [
+    13,
+    9
+  ],
+  "after_counts": [
+    6,
+    9
+  ],
+  "added_hard_findings": [],
+  "remaining_hard_findings": [
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Actual endpoints disagree with input paths[2][0->1]: ['@CASE', '@PRESS', 'EDP-001.pressure_out'] (unattached [])",
+      "kind": "additional_or_wrong_connection",
+      "anchor": "paths[2][0->1]",
+      "expected_endpoints": [
+        "EDP-001.pressure_out",
+        "@PRESS"
+      ],
+      "actual_endpoints": [
+        "@CASE",
+        "@PRESS",
+        "EDP-001.pressure_out"
+      ],
+      "positions": [
+        [
+          650.0,
+          330.0
+        ],
+        [
+          910.0,
+          330.0
+        ]
+      ],
+      "svg_ids": [
+        "wire-3-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Actual endpoints disagree with input paths[3][0->1]: ['@CASE', '@PRESS', 'EMP-001.pressure_out'] (unattached [])",
+      "kind": "additional_or_wrong_connection",
+      "anchor": "paths[3][0->1]",
+      "expected_endpoints": [
+        "EMP-001.pressure_out",
+        "@PRESS"
+      ],
+      "actual_endpoints": [
+        "@CASE",
+        "@PRESS",
+        "EMP-001.pressure_out"
+      ],
+      "positions": [
+        [
+          650.0,
+          650.0
+        ],
+        [
+          910.0,
+          650.0
+        ]
+      ],
+      "svg_ids": [
+        "wire-4-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Visible geometry joins separate input networks: @CASE, @PRESS, CDF-001.inlet, EDP-001.case_drain, EDP-001.pressure_out, EMP-001.case_drain, EMP-001.pressure_out, PF-001.inlet, PRV-002.inlet",
+      "kind": "wrong_network_join",
+      "anchor": "paths[15][0->1]",
+      "endpoints": [
+        "@CASE",
+        "@PRESS",
+        "CDF-001.inlet",
+        "EDP-001.case_drain",
+        "EDP-001.pressure_out",
+        "EMP-001.case_drain",
+        "EMP-001.pressure_out",
+        "PF-001.inlet",
+        "PRV-002.inlet"
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "buses.PRESS",
+        "paths[15][0->1]",
+        "paths[29][0->1]",
+        "paths[2][0->1]",
+        "paths[30][0->1]",
+        "paths[31][0->1]",
+        "paths[3][0->1]",
+        "paths[4][0->1]"
+      ]
+    },
+    {
+      "id": "V14",
+      "result": "fail",
+      "detail": "Distinct input networks touch at a terminal/T; a marker cannot legalize this connection",
+      "kind": "false_connection",
+      "position": [
+        650.0,
+        330.0
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "paths[2][0->1]"
+      ],
+      "networks": [
+        "@CASE",
+        "@PRESS"
+      ]
+    },
+    {
+      "id": "V14",
+      "result": "fail",
+      "detail": "Distinct input networks touch at a terminal/T; a marker cannot legalize this connection",
+      "kind": "false_connection",
+      "position": [
+        650.0,
+        650.0
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "paths[3][0->1]"
+      ],
+      "networks": [
+        "@CASE",
+        "@PRESS"
+      ]
+    },
+    {
+      "id": "V19",
+      "result": "fail",
+      "detail": "构图预算 B1：交叉 1 处 > 0，须改道消除"
+    }
+  ],
+  "budgets": {
+    "before": [
+      {
+        "id": "B1",
+        "status": "fail",
+        "measured": 1
+      },
+      {
+        "id": "B2",
+        "status": "pass",
+        "measured": {
+          "total": 22,
+          "max_single": 3
+        }
+      },
+      {
+        "id": "B3",
+        "status": "pass",
+        "measured": {
+          "max": 1.308,
+          "over_budget": []
+        }
+      },
+      {
+        "id": "B4",
+        "status": "pass",
+        "measured": 9.2
+      },
+      {
+        "id": "B5",
+        "status": "over",
+        "measured": 24.0
+      },
+      {
+        "id": "B6",
+        "status": "over",
+        "measured": {
+          "group_padding": null,
+          "avoid_corridor": 0.0
+        }
+      },
+      {
+        "id": "B7",
+        "status": "over",
+        "measured": {
+          "min_clearance": 1.101,
+          "no_obstacles_within_budget": false,
+          "violations": 2
+        }
+      }
+    ],
+    "after": [
+      {
+        "id": "B1",
+        "status": "fail",
+        "measured": 1
+      },
+      {
+        "id": "B2",
+        "status": "pass",
+        "measured": {
+          "total": 24,
+          "max_single": 3
+        }
+      },
+      {
+        "id": "B3",
+        "status": "pass",
+        "measured": {
+          "max": 1.29,
+          "over_budget": []
+        }
+      },
+      {
+        "id": "B4",
+        "status": "pass",
+        "measured": 10.0
+      },
+      {
+        "id": "B5",
+        "status": "over",
+        "measured": 24.0
+      },
+      {
+        "id": "B6",
+        "status": "over",
+        "measured": {
+          "group_padding": null,
+          "avoid_corridor": 0.0
+        }
+      },
+      {
+        "id": "B7",
+        "status": "over",
+        "measured": {
+          "min_clearance": 1.101,
+          "no_obstacles_within_budget": false,
+          "violations": 2
+        }
+      }
+    ]
+  },
+  "changed_edge_geometry": {
+    "paths[14][0->1]": {
+      "before": [
+        "1210.0,290.0 1210.0,308.0 1160.0,308.0"
+      ],
+      "after": [
+        "440.0,780.6 420.0,780.6 420.0,960.0 730.0,960.0 730.0,940.0"
+      ]
+    },
+    "paths[15][1->2]": {
+      "before": [
+        "440.0,780.6 420.0,780.6 420.0,860.0 215.0,860.0 215.0,840.0"
+      ],
+      "after": [
+        "440.0,780.6 317.5,780.6 317.5,860.0 215.0,860.0 215.0,840.0"
+      ]
+    },
+    "paths[27][0->1]": {
+      "before": [
+        "60.0,686.0 42.0,686.0 42.0,890.0 940.0,890.0"
+      ],
+      "after": [
+        "60.0,686.0 42.0,686.0 42.0,1010.0 940.0,1010.0"
+      ]
+    },
+    "taps[0]": {
+      "before": [
+        "1374.0,89.5 1392.0,89.5 1210.0,89.5 1210.0,190.0"
+      ],
+      "after": [
+        "830.0,864.0 812.0,864.0 812.0,822.0 730.0,822.0 730.0,840.0"
+      ]
+    },
+    "taps[1]": {
+      "before": [
+        "1446.0,117.0 1446.0,135.0 1222.0,135.0 1222.0,89.5 1240.0,89.5"
+      ],
+      "after": [
+        "800.0,964.5 782.0,964.5 782.0,864.0 830.0,864.0"
+      ]
+    }
+  },
+  "edge_points_coordinate_system": "SVG polyline local units under sheet transform; labels below are root SVG units",
+  "signed_branch_edges": [
+    {
+      "anchor": "paths[14][0->1]",
+      "endpoints": [
+        "PRV-002.outlet",
+        "ACC-001.hydraulic_port"
+      ],
+      "kind": "path"
+    },
+    {
+      "anchor": "taps[0]",
+      "endpoints": [
+        "PG-001.pressure_sense",
+        "ACC-001.gas_port"
+      ],
+      "kind": "tap"
+    },
+    {
+      "anchor": "taps[1]",
+      "endpoints": [
+        "ACV-001.accumulator_gas",
+        "PG-001.pressure_sense"
+      ],
+      "kind": "tap"
+    }
+  ],
+  "branch_label_measurements": {
+    "coverage": "measured",
+    "required_clearance": 6,
+    "violations": [],
+    "clearance_lower_bound": 6,
+    "note": "The validator prunes shapes outside the 6-unit search margin; this is a proven threshold lower bound, not an invented exact minimum.",
+    "glyph_ink_bounds": [
+      {
+        "element": 475,
+        "text": "ACC-001",
+        "bbox": [
+          738.9609375,
+          792,
+          780.9140625,
+          800
+        ],
+        "layout_bbox": [
+          738.9609375,
+          787,
+          781.0390625,
+          803
+        ],
+        "owner": "label:ACC-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      },
+      {
+        "element": 476,
+        "text": "系统蓄压器",
+        "bbox": [
+          732.5,
+          803,
+          787.484375,
+          815
+        ],
+        "layout_bbox": [
+          732.5,
+          800,
+          787.5,
+          816
+        ],
+        "owner": "label:ACC-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      },
+      {
+        "element": 477,
+        "text": "ACV-001",
+        "bbox": [
+          876.109375,
+          908,
+          917.765625,
+          916
+        ],
+        "layout_bbox": [
+          876.109375,
+          903,
+          917.890625,
+          919
+        ],
+        "owner": "label:ACV-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      },
+      {
+        "element": 478,
+        "text": "充气活门",
+        "bbox": [
+          875,
+          918,
+          918.984375,
+          931
+        ],
+        "layout_bbox": [
+          875,
+          916,
+          919,
+          932
+        ],
+        "owner": "label:ACV-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      },
+      {
+        "element": 479,
+        "text": "PG-001",
+        "bbox": [
+          876.15625,
+          803,
+          911.71875,
+          811
+        ],
+        "layout_bbox": [
+          875.15625,
+          798,
+          911.84375,
+          814
+        ],
+        "owner": "label:PG-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      },
+      {
+        "element": 480,
+        "text": "充气压力表",
+        "bbox": [
+          866,
+          813,
+          920.984375,
+          826
+        ],
+        "layout_bbox": [
+          866,
+          811,
+          921,
+          827
+        ],
+        "owner": "label:PG-001",
+        "instance": null,
+        "font": "\"Noto Sans CJK SC\", \"Microsoft YaHei\", sans-serif",
+        "font_size": "11px",
+        "matrix": [
+          1,
+          0,
+          0,
+          1,
+          30,
+          0
+        ]
+      }
+    ]
+  },
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "V4",
+      "V10",
+      "V14",
+      "V19",
+      "B1",
+      "PERCEPTUAL",
+      "READBACK_ITEMS"
+    ]
+  },
+  "stages": [
+    {
+      "stage": "setup",
+      "status": "completed",
+      "elapsed_s": 0.612401
+    },
+    {
+      "stage": "preflight",
+      "status": "completed",
+      "elapsed_s": 0.215992
+    },
+    {
+      "stage": "local_readback",
+      "status": "completed",
+      "object_count": 128,
+      "crop_count": 62,
+      "elapsed_s": 3.070449
+    }
+  ],
+  "round_stages": [
+    [
+      {
+        "stage": "layout",
+        "status": "completed",
+        "elapsed_s": 2.6e-05
+      },
+      {
+        "stage": "render",
+        "status": "completed",
+        "elapsed_s": 0.416404
+      },
+      {
+        "stage": "readback",
+        "status": "completed",
+        "elapsed_s": 1.119324
+      },
+      {
+        "stage": "validate",
+        "status": "completed",
+        "elapsed_s": 3.645635
+      }
+    ]
+  ],
+  "artifact_sha256": {
+    "before": {
+      "1#系统.intent.yaml": "8e160fd7251429f55dcb3a9cef9978cffb0d6c04306dced56459bd819a8117ae",
+      "1#系统.layout.json": "64b94c0b83bdd83cf1f7c4118198b18516d7cb2408a1fcd36ef777130be83901",
+      "1#系统原理图.svg": "9ceb55f2cc3474a1fc1052b988848ab624b16ec32ee79b1c979b57938a89ed6b",
+      "sheet-readback.png": "0d2e53833f04307e16ee4fe5be5c13502c00be166159b14c3107d7b215905082",
+      "validation-report.json": "76143822cedd49b9523b5d410060b44bffb880a38469fc0d068fccbf92d3dca0",
+      "convergence-report.json": "86f5579ddd7a288bd76fc01e2db4144a1d3d3563f26f1e15492a67254345e06e"
+    },
+    "after": {
+      "1#系统.intent.yaml": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888",
+      "1#系统.layout.json": "1a539f6d8fee8ca8fbfc96bbb64e2201a2f3b078e6c0d8d0e3d53c74043346b5",
+      "1#系统原理图.svg": "69cff7d94352b2fdd2ae8041c2db5cbc722811445b3f9fff053672c719d3817a",
+      "sheet-readback.png": "39581838775aab6e968c824192c56ba0646eb3e1b5f3d8feb0fce62aabbcb5c0",
+      "validation-report.json": "52eab493ea371889bfa1f0cf8221aba324146d317c90135f4aca6701c648f1a4",
+      "convergence-report.json": "59072ee6ca357458fb1e22f939663446161799aa881217ed9cfa0764bb32c3f3"
+    }
+  }
+}

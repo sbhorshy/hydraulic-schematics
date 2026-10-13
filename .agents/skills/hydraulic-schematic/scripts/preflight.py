@@ -34,6 +34,7 @@ REQUIRED_SECTIONS = ('l0_version', 'system', 'catalog', 'maturity',
 
 def default_schema_path():
     cands = (
+        os.path.join(HERE, 'assets', 'contracts', SCHEMA_NAME),                # 自包含驱动沙箱
         os.path.join(HERE, '..', 'assets', 'contracts', SCHEMA_NAME),          # skill 快照侧
         os.path.join(HERE, '..', '..', '.agents', 'skills', 'hydraulic-schematic',
                      'assets', 'contracts', SCHEMA_NAME),                      # 规范源侧
@@ -140,6 +141,58 @@ def semantic_findings(intent, catalog, source_text):
                 "类型 %s 不在目录 %s 内，其端口集合无从谈起" % (typ, intent.get('catalog')),
                 "改用目录内类型，或先把类型登记进 component-catalog.json 再引用")
 
+    # Assembly is a grouping declaration, never a synthetic part or port.
+    assemblies = intent.get('assemblies', {})
+    if not isinstance(assemblies, dict):
+        add('E-ASSEMBLY-SHAPE', 'ERROR', None, 'assemblies',
+            'assemblies 必须是装配声明映射', '按装配 id 声明 label 与 members')
+        assemblies = {}
+    owners = {}
+    if isinstance(assemblies, dict):
+        for aid, assembly in assemblies.items():
+            anchor = 'assemblies.' + str(aid)
+            if not isinstance(aid, str) or not re.fullmatch(r'[A-Z][A-Za-z0-9_-]*', aid):
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 必须以大写字母开头，仅含字母、数字、下划线或连字符', '修正装配 id')
+            if not isinstance(assembly, dict):
+                add('E-ASSEMBLY-SHAPE', 'ERROR', None, anchor,
+                    '装配声明必须包含 label 与 members', '改为装配声明映射')
+                continue
+            label = assembly.get('label')
+            if not isinstance(label, str) or not label.strip():
+                add('E-ASSEMBLY-LABEL', 'ERROR', None, anchor,
+                    '装配 label 必须是非空文本', '提供可读的装配名称')
+            if aid in parts or aid in externs:
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 与 part/extern 重名', '使用独立装配 id')
+            members = assembly.get('members')
+            if not isinstance(members, list):
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配 members 必须是至少两个成员的列表', '列出已声明的组件实例')
+                continue
+            if len(members) < 2:
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配至少包含两个成员', '列出至少两个不同的已声明组件实例')
+            for member in members:
+                if not isinstance(member, str) or not member:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '装配成员必须是非空组件实例名称', '使用 parts 中的组件实例名称')
+                    continue
+                if member not in parts or member in assemblies:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '成员 %s 必须是已声明 part，禁止装配嵌套' % member,
+                        '仅引用 parts 中的组件实例')
+                if member in owners:
+                    add('E-ASSEMBLY-OWNER', 'ERROR', None, anchor,
+                        '成员 %s 重复归属 %s / %s' % (member, owners[member], aid),
+                        '每个成员仅属于一个装配且只列一次')
+                owners[member] = aid
+        for pi, path in enumerate(intent.get('paths') or []):
+            for token in path:
+                if str(token).split('.')[0] in assemblies:
+                    add('E-ASSEMBLY-ENDPOINT', 'ERROR', None, 'paths[%d]' % pi,
+                        '装配不是管线端点: %s' % token, '连接实际成员端口或 extern')
+
     # 逐 path 核对：引用 / 裸实例 / 端口存在性 / medium / role / terminal 端点合法性
     for pi, path in enumerate(intent.get('paths') or []):
         line = lm['paths'][pi] if pi < len(lm['paths']) else None
@@ -188,15 +241,96 @@ def semantic_findings(intent, catalog, source_text):
                     "medium 兼容: paths 属液压主路，%s 的 medium=%s"
                     % (tok, ports[pid].get('medium')),
                     "该端口属电气/气侧，走 taps 或专线，不入 paths")
+
+    # taps 语义核对：两端都必须是「已声明实例.已登记端口」。本体感测口
+    # （role=measurement/kind=body_tap，挂油箱壁等本体安装座）与网络锚
+    # （at 为被测网络的流口）在此同权存在性核对——渲染期 wire_taps 都按
+    # 端口锚点画专线，差别只在布局规则与悬空豁免，不在合法性。
+    for ti, t in enumerate(intent.get('taps') or []):
+        for key in ('sensor', 'at'):
+            tok = str(t.get(key) or '')
+            inst, _, pid = tok.partition('.')
+            if inst in externs:
+                add('E-TAP-%d-%s-EXT' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 引用边界标记 %s：传感支路两端须是元件端口"
+                    % (key, inst),
+                    "把 %s 改为 parts 中已声明实例的显式端口" % tok)
+                continue
+            if inst not in parts or not pid:
+                add('E-TAP-%d-%s-TOK' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 不是「实例.端口」形，或实例未在 parts 声明: %s"
+                    % (key, tok),
+                    "写成已声明实例的显式端口，如 TANK-001.body_sense_tap")
+                continue
+            ct = types.get(parts[inst])
+            if ct is None:
+                continue
+            ports = {p['id']: p for p in ct.get('ports', [])}
+            if pid not in ports:
+                add('E-TAP-%d-%s-PORT' % (ti, key), 'ERROR', None, tok,
+                    "端口存在性: 类型 %s 无端口 %s（可用: %s）"
+                    % (parts[inst], pid, ', '.join(sorted(ports))),
+                    "改成列出的真实端口 id")
+    return findings
+
+
+# ---------- 模板门禁（#12 定案：串联组合第三环；#22 沉淀进 skill）----------
+
+def default_template_path(intent_path):
+    """受控清单模板解析：intent 同目录下唯一 *受控模板.yaml；无或多则不启用
+    （模板是可选输入，缺失不拦路；存在但与 intent 不符才拦）。"""
+    if not intent_path:
+        return None
+    import glob as _glob
+    d = os.path.dirname(os.path.abspath(intent_path))
+    hits = sorted(_glob.glob(os.path.join(d, '*受控模板.yaml')))
+    return hits[0] if len(hits) == 1 else None
+
+
+def template_findings(intent, catalog, source_text, tpl):
+    """受控清单模板三向对账 + 签认状态，进 preflight 统一出口：
+    对账差异 = ERROR——intent 不得发明清单模板之外的连接，模板不得漏背书；
+    签认按 maturity 分级：concept 未签认 = WARN 披露（演练不被签认卡死），
+    其余 maturity 未签认 = ERROR 拦截（正式出图必须先签认）。
+    对账实现复用 topology_confirm.audit，不复制不漂移。"""
+    import topology_confirm as _tc
+    findings = []
+    problems, _ctx = _tc.audit(intent, tpl, source_text or '')
+    for i, pr in enumerate(problems):
+        findings.append(dict(id='E-RECON-%d' % i, level='ERROR',
+                             rule='template-reconciliation',
+                             yamlline=None, object='受控清单模板',
+                             message='对账差异: %s' % pr,
+                             remedy='改 intent 或改受控清单模板，二者须互为背书；'
+                                    '对账干净并签认后再进布局'))
+    sig = tpl.get('签认') or {}
+    mat = (intent.get('maturity') or 'concept')
+    if sig.get('状态') != 'signed':
+        if mat == 'concept':
+            findings.append(dict(
+                id='W-SIGN-UNSIGNED', level='WARN', rule='template-signoff',
+                yamlline=None, object='受控清单模板.签认',
+                message='拓扑确认单未签认（maturity=%s，按披露放行）' % mat,
+                remedy='工程师对照确认单逐行签认后，把模板签认区状态改 signed'))
+        else:
+            findings.append(dict(
+                id='E-SIGN-UNSIGNED', level='ERROR', rule='template-signoff',
+                yamlline=None, object='受控清单模板.签认',
+                message='maturity=%s 未签认，拓扑确认单未过人工对账' % mat,
+                remedy='工程师签认确认单并在模板签认区登记 signed 后再出图'))
     return findings
 
 
 # ---------- 合并出口 ----------
 
-def preflight(intent, catalog, source_text=None, skip_schema=False):
-    """parse 后、布局前的全量预检。形状层+语义层收齐合并，一次报齐。"""
+def preflight(intent, catalog, source_text=None, skip_schema=False,
+              template=None):
+    """parse 后、布局前的全量预检。形状层+语义层+模板门禁（可选）收齐
+    合并，一次报齐。template 为受控清单模板 dict（None=未启用）。"""
     findings = [] if skip_schema else schema_findings(intent)
     findings += semantic_findings(intent, catalog, source_text)
+    if template is not None:
+        findings += template_findings(intent, catalog, source_text, template)
     errs = [f for f in findings if f['level'] == 'ERROR']
     return dict(tool='l0-preflight',
                 ok=not errs,
@@ -238,12 +372,15 @@ def main(argv=None):
     intent, text = load_yaml_text(args[0])
     with io.open(catp, encoding='utf-8') as f:
         catalog = json.load(f)
-    rep = preflight(intent, catalog, text)
+    tplp = default_template_path(args[0])
+    tpl = load_yaml_text(tplp)[0] if tplp else None
+    rep = preflight(intent, catalog, text, template=tpl)
     if '--json' in flags:
         print(json.dumps(rep, ensure_ascii=False, indent=1))
     elif rep['ok']:
-        print('[l0-preflight] %s -> cleared_for_layout，进入 place()/wire()。'
-              % os.path.basename(args[0]))
+        print('[l0-preflight] %s%s -> cleared_for_layout，进入 place()/wire()。'
+              % (os.path.basename(args[0]),
+                 '' if tpl else '（无受控清单模板，模板门禁未启用）'))
     else:
         emit_preflight_failure(rep)
     return 0 if rep['ok'] else 1

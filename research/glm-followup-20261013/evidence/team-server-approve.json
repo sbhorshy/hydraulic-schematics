@@ -1,0 +1,7 @@
+{
+  "action": "approve",
+  "task_id": "server-bounds",
+  "candidate_commit": "839e85337b418d49cefe6be357e20db1a1178ed3",
+  "reviewer": "Codex-independent-review",
+  "summary": "Read full cumulative patch against 0cc5e1c and both test additions. Standards: only allowed server/test files, canonical drawable_bounds/number reused, original baseline/assets untouched. Spec: rotated footprint clamps within explicit bounds without second margin; invalid numeric/dimension/contract paths reject before writes; existing mirror permission retained. Independently reproduced original drawable overflow in real Chrome. Found and revised two GET disconnect regressions; reran actual HTTP probes on this fixed commit: null layout→JSON400, valid layout/null intent→JSON500. 31 controller editor tests pass, including original full-chain mirror/rotation. No unresolved findings in server scope; frontend task remains necessary."
+}

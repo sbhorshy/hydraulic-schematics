@@ -1,0 +1,10 @@
+[driver] setup started
+[driver] setup completed 0.809s
+[driver] preflight started
+[driver] preflight completed 0.216s
+==== 校核驱动器 ====
+工作区: /tmp/ready-44-audit/historical-e2e
+preflight: blocked_pre_layout
+残差 E-PORT-p16.0 [R0]: 端口存在性: 类型 quick_disconnect_coupling_disconnected 无端口 inlet（可用: aircraft_side, gr
+残差 E-PORT-p27.0 [R0]: 端口存在性: 类型 quick_disconnect_coupling_disconnected_return 无端口 inlet（可用: aircraft_s
+结论: 残差上报，需人工/AI 介入  (1.0s, 报告 -> /tmp/ready-44-audit/historical-e2e/convergence-report.json)

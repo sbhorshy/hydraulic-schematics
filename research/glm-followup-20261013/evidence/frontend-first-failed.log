@@ -1,0 +1,152 @@
+test_api_layout_bad_contract_returns_http_400 (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_api_layout_exposes_drawable_bounds_array (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_api_layout_non_dict_top_level_returns_http_400_without_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_api_layout_null_intent_returns_json_500_without_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_bad_contract_rejects_before_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_clamps_to_nonzero_drawable_origin_not_canvas_zero (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_http_delta_clamps_right_edge_and_writes_layout (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_http_delta_nan_displacement_rejected_without_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_invalid_size_rejects_before_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_nonfinite_delta_rejects_before_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_nonfinite_stored_coordinates_reject_before_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_right_edge_clamps_inside_drawable_without_double_margin (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_rot90_and_rot270_swap_occupied_width_height_for_clamp (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_rotated_oversize_rejects_before_write (test_editor_drag_bounds.EditorDragBounds) ... ok
+test_grid_snap_at_non_aligned_bottom_right_clamps (test_editor_drag_frontend.EditorDragDrawableClampTest) ... FAIL
+test_nonsquare_rot90_270_swaps_placeholder (test_editor_drag_frontend.EditorDragDrawableClampTest) ... FAIL
+test_nonzero_start_commit_is_relative_to_node (test_editor_drag_frontend.EditorDragDrawableClampTest) ... FAIL
+test_unknown_bounds_disable_drag_and_write (test_editor_drag_frontend.EditorDragDrawableClampTest) ... FAIL
+test_absent_mirror_key_keeps_current_pose_and_rechecks_on_move (test_editor_mirror.EditorMirror) ... ok
+test_authorized_mirror_persists_and_logs_before_after_axis (test_editor_mirror.EditorMirror) ... ok
+test_function_entry_rejects_non_string_mirror_requests (test_editor_mirror.EditorMirror) ... ok
+test_illegal_axis_rejects_whole_transaction (test_editor_mirror.EditorMirror) ... ok
+test_instance_type_missing_from_catalog_rejects_before_write (test_editor_mirror.EditorMirror) ... ok
+test_mirror_with_move_and_rotation_keeps_all_three (test_editor_mirror.EditorMirror) ... ok
+test_node_missing_from_intent_parts_rejects_before_write (test_editor_mirror.EditorMirror) ... ok
+test_none_removes_mirror_and_logs_axis_pair (test_editor_mirror.EditorMirror) ... ok
+test_request_layer_rejects_non_string_mirror_values (test_editor_mirror.EditorMirror) ... ok
+test_same_axis_request_without_other_change_is_zero_displacement (test_editor_mirror.EditorMirror) ... ok
+test_stale_registration_rejects_before_write (test_editor_mirror.EditorMirror) ... ok
+test_stocked_mirror_false_move_kept_but_false_request_rejected (test_editor_mirror.EditorMirror) ... ok
+test_unregistered_component_rejects_whole_transaction_without_write (test_editor_mirror.EditorMirror) ... ok
+test_yaml11_bool_spelling_id_registered_mirror_still_works (test_editor_mirror.EditorMirror) ... ok
+test_yaml11_bool_spelling_ids_cannot_bypass_permission (test_editor_mirror.EditorMirror) ... ok
+test_full_chain_mirror_y_over_http (test_editor_mirror.EditorMirrorFullChain) ... ok
+test_rotation_persists_and_runs_canonical_chain_without_legacy_scripts (test_editor_rotation.EditorRotation) ... ok
+
+======================================================================
+FAIL: test_grid_snap_at_non_aligned_bottom_right_clamps (test_editor_drag_frontend.EditorDragDrawableClampTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 252, in test_grid_snap_at_non_aligned_bottom_right_clamps
+    out = self.run_harness('grid_bottom_right')
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 240, in run_harness
+    self.fail('node harness(%s) 失败 rc=%s:\n%s\n%s'
+AssertionError: node harness(grid_bottom_right) 失败 rc=1:
+
+/tmp/tmp_qvimdkj/harness.js:70
+  if (routeSheet.__hang) return new Promise(() {});
+                                             ^
+
+SyntaxError: Unexpected token ')'
+    at wrapSafe (node:internal/modules/cjs/loader:1624:18)
+    at Module._compile (node:internal/modules/cjs/loader:1666:20)
+    at Object..js (node:internal/modules/cjs/loader:1824:10)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.3.0
+
+
+======================================================================
+FAIL: test_nonsquare_rot90_270_swaps_placeholder (test_editor_drag_frontend.EditorDragDrawableClampTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 261, in test_nonsquare_rot90_270_swaps_placeholder
+    out = self.run_harness('nonsquare_rot')
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 240, in run_harness
+    self.fail('node harness(%s) 失败 rc=%s:\n%s\n%s'
+AssertionError: node harness(nonsquare_rot) 失败 rc=1:
+
+/tmp/tmpusm3fxdf/harness.js:70
+  if (routeSheet.__hang) return new Promise(() {});
+                                             ^
+
+SyntaxError: Unexpected token ')'
+    at wrapSafe (node:internal/modules/cjs/loader:1624:18)
+    at Module._compile (node:internal/modules/cjs/loader:1666:20)
+    at Object..js (node:internal/modules/cjs/loader:1824:10)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.3.0
+
+
+======================================================================
+FAIL: test_nonzero_start_commit_is_relative_to_node (test_editor_drag_frontend.EditorDragDrawableClampTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 245, in test_nonzero_start_commit_is_relative_to_node
+    out = self.run_harness('nonzero_start')
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 240, in run_harness
+    self.fail('node harness(%s) 失败 rc=%s:\n%s\n%s'
+AssertionError: node harness(nonzero_start) 失败 rc=1:
+
+/tmp/tmpgm_x5k71/harness.js:70
+  if (routeSheet.__hang) return new Promise(() {});
+                                             ^
+
+SyntaxError: Unexpected token ')'
+    at wrapSafe (node:internal/modules/cjs/loader:1624:18)
+    at Module._compile (node:internal/modules/cjs/loader:1666:20)
+    at Object..js (node:internal/modules/cjs/loader:1824:10)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.3.0
+
+
+======================================================================
+FAIL: test_unknown_bounds_disable_drag_and_write (test_editor_drag_frontend.EditorDragDrawableClampTest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 273, in test_unknown_bounds_disable_drag_and_write
+    out = self.run_harness('unknown_bounds')
+  File "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/worktrees/frontend-bounds/tests/repository/test_editor_drag_frontend.py", line 240, in run_harness
+    self.fail('node harness(%s) 失败 rc=%s:\n%s\n%s'
+AssertionError: node harness(unknown_bounds) 失败 rc=1:
+
+/tmp/tmpo6f213eq/harness.js:70
+  if (routeSheet.__hang) return new Promise(() {});
+                                             ^
+
+SyntaxError: Unexpected token ')'
+    at wrapSafe (node:internal/modules/cjs/loader:1624:18)
+    at Module._compile (node:internal/modules/cjs/loader:1666:20)
+    at Object..js (node:internal/modules/cjs/loader:1824:10)
+    at Module.load (node:internal/modules/cjs/loader:1427:32)
+    at Module._load (node:internal/modules/cjs/loader:1250:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:152:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.3.0
+
+
+----------------------------------------------------------------------
+Ran 35 tests in 68.231s
+
+FAILED (failures=4)

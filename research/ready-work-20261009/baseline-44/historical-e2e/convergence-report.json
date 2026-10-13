@@ -1,0 +1,79 @@
+{
+  "driver": "validate-driver-1.2-bounded",
+  "converged": false,
+  "validation_scope": "automated_structure_geometry_and_pixel_checks",
+  "perceptual_review": "pending",
+  "stages": [
+    {
+      "stage": "setup",
+      "status": "completed",
+      "elapsed_s": 0.809069
+    },
+    {
+      "stage": "preflight",
+      "status": "completed",
+      "elapsed_s": 0.215666
+    }
+  ],
+  "rounds": [],
+  "prescriptions": [],
+  "residuals": [
+    {
+      "id": "E-PORT-p16.0",
+      "level": "ERROR",
+      "rule": "E-PORT",
+      "yamlline": 77,
+      "object": "QDP-001.inlet",
+      "message": "端口存在性: 类型 quick_disconnect_coupling_disconnected 无端口 inlet（可用: aircraft_side, ground_side）",
+      "remedy": "改成列出的真实端口 id",
+      "stage": "R0",
+      "hint": "无机械修法，需修正输入后重跑"
+    },
+    {
+      "id": "E-PORT-p27.0",
+      "level": "ERROR",
+      "rule": "E-PORT",
+      "yamlline": 92,
+      "object": "QDR-001.inlet",
+      "message": "端口存在性: 类型 quick_disconnect_coupling_disconnected_return 无端口 inlet（可用: aircraft_side, ground_side）",
+      "remedy": "改成列出的真实端口 id",
+      "stage": "R0",
+      "hint": "无机械修法，需修正输入后重跑"
+    }
+  ],
+  "optimization_budgets": {
+    "max_evals": 200,
+    "max_steps": 50,
+    "max_seconds": 30.0,
+    "polish_steps": 0
+  },
+  "local_symbol_sources": [],
+  "inject": null,
+  "exit_code": 2,
+  "automated_validation": {
+    "status": "not_checked"
+  },
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "VALIDATION",
+      "PERCEPTUAL"
+    ]
+  },
+  "workspace": {
+    "kept": false,
+    "copied_files": 70,
+    "reused_files": 0
+  },
+  "preflight": {
+    "status": "blocked_pre_layout",
+    "findings": 3
+  },
+  "local_readback": {
+    "status": "not_generated",
+    "complete": false,
+    "detail": "No verified final PNG/report was produced."
+  },
+  "elapsed_s": 1.025
+}

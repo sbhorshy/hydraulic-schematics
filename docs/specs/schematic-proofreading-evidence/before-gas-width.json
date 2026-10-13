@@ -1,0 +1,17 @@
+{
+  "frozen_head": "ff212000df32c8f7ef3c281f004a0904cf29f6c9",
+  "computed_width": "12px",
+  "matrix": [
+    1,
+    0,
+    0,
+    1,
+    1444,
+    50
+  ],
+  "coverage": {
+    "V15": "pass",
+    "V16": "pass"
+  },
+  "width_failures": []
+}

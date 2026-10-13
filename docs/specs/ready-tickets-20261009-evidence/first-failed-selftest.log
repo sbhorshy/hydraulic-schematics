@@ -1,0 +1,81 @@
+范围: skill 随附资产与工具；仓库 editor/project 集成测试未在此命令执行。
+[PASS] A. SysML 链路金样比对（渲染退出码/结构自检/SVG+清单逐字节）
+[PASS] B. check_library 结构闸门（自带库默认过闸 / 沙箱缺端口组拦截）
+[PASS] C. L0 预检器：负例七类违规拦截报齐 / 正例放行
+[PASS] D. 布局引擎烟测（自包含当前输入出全量布局 / 未覆盖形态拦截）
+[PASS] E. preflight 模板门禁（空背书对账拦截 / concept 未签认披露，#22）
+[FAIL] F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器专项测试
+       L0 专项测试退出码 1。输出尾部：
+]
+
+======================================================================
+FAIL: test_offset_bridge_fails_actual_center_and_continuity (test_junction_semantics.JunctionCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_junction_semantics.py", line 120, in test_offset_bridge_fails_actual_center_and_continuity
+    self.assertTrue(any(c.get('kind')=='missing_bridge' and c.get('position')==[770,530] for c in findings),findings)
+AssertionError: False is not true : [{'id': 'V14', 'result': 'fail', 'detail': 'Bridge does not continuously join its claimed pipe at both ends', 'kind': 'bridge_gap', 'position': [742.0, 530.0], 'input_anchors': ['paths[1][0->1]'], 'svg_id': 'cross-bridge', 'endpoints': [[737.0, 530.0], [747.0, 530.0]]}, {'id': 'V14', 'result': 'fail', 'detail': 'Unconnected crossing lacks its actual continuous bridge', 'kind': 'missing_bridge', 'position': [740.0, 530.0], 'input_anchors': ['paths[0][0->1]', 'paths[1][0->1]'], 'networks': ['EDP-001.pressure_out', 'EDP-001.suction']}, {'id': 'V14', 'result': 'fail', 'detail': 'Bridge is not centered on an actual crossing', 'kind': 'orphan_bridge', 'position': [742.0, 530.0], 'input_anchors': ['paths[1][0->1]'], 'svg_id': 'cross-bridge'}]
+
+======================================================================
+FAIL: test_renderer_marks_shared_suction_fork_away_from_bus (test_junction_semantics.JunctionCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_junction_semantics.py", line 48, in test_renderer_marks_shared_suction_fork_away_from_bus
+    self.assertEqual(len(dots),1,'The actual suction fork at root(320,686) needs one junction dot')
+AssertionError: 0 != 1 : The actual suction fork at root(320,686) needs one junction dot
+
+======================================================================
+FAIL: test_true_unconnected_crossing_with_continuous_bridge_passes (test_junction_semantics.JunctionCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_junction_semantics.py", line 81, in test_true_unconnected_crossing_with_continuous_bridge_passes
+    self.assertEqual(next(c['status'] for c in report['coverage'] if c['id']=='V14'),'pass')
+AssertionError: 'not_checked' != 'pass'
+- not_checked
++ pass
+
+
+======================================================================
+FAIL: test_wrong_corner_dot_and_offset_dot_are_rejected (test_junction_semantics.JunctionCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_junction_semantics.py", line 129, in test_wrong_corner_dot_and_offset_dot_are_rejected
+    self.assertTrue(any(c.get('kind')=='unexpected_junction' and c.get('position')==[328,450] for c in findings),findings)
+AssertionError: False is not true : [{'id': 'V4', 'result': 'fail', 'detail': 'Filled dot is offset from a real branch or lies on an ordinary corner/straight run', 'kind': 'unexpected_junction', 'position': [298.0, 450.0], 'input_anchors': ['paths[0][0->1]'], 'svg_id': ''}]
+
+======================================================================
+FAIL: test_localized_foldback_finding_and_component_overviews_are_covered (test_readback_review.ReadbackCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_readback_review.py", line 58, in test_localized_foldback_finding_and_component_overviews_are_covered
+    self.assertEqual(finding['position'],[670,494])
+AssertionError: Lists differ: [640.0, 494.0] != [670, 494]
+
+First differing element 0:
+640.0
+670
+
+- [640.0, 494.0]
+?   ^^^      --
+
++ [670, 494]
+?   ^
+
+
+======================================================================
+FAIL: test_priority_width_and_six_pixel_firewall_tail_are_visible_in_bound_crops (test_readback_review.ReadbackCLI)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_readback_review.py", line 210, in test_priority_width_and_six_pixel_firewall_tail_are_visible_in_bound_crops
+    self.assertLess(image.convert('L').getpixel((x,y)),128)
+AssertionError: 255 not less than 128
+
+----------------------------------------------------------------------
+Ran 260 tests in 1374.902s
+
+FAILED (failures=17, errors=5)
+
+
+---- selftest 小结 ----
+FAIL 1/6：
+  - F. L0 入口 / 寻优预算 / 驱动器 / 路由剪枝 / PNG 适配器专项测试

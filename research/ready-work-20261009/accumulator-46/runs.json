@@ -1,0 +1,63 @@
+{
+  "before": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/tmp/ready46-final/old-input/1#系统.intent.yaml",
+      "--catalog",
+      "/tmp/ready46-final/old-input/component-catalog.json",
+      "--layout-seed",
+      "/tmp/ready46-final/old-input/1#系统.layout.json",
+      "--workdir",
+      "/tmp/ready46-final/before"
+    ],
+    "exit": 1,
+    "seconds": 10.495
+  },
+  "after": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "--intent",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/1#系统.intent.yaml",
+      "--catalog",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/component-catalog.json",
+      "--layout-seed",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/1#系统.layout.json",
+      "--workdir",
+      "/tmp/ready46-final/after"
+    ],
+    "exit": 1,
+    "seconds": 10.496
+  },
+  "focused": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/test_accumulator_branch.py"
+    ],
+    "exit": 0,
+    "seconds": 10.758
+  },
+  "library": {
+    "command": [
+      "/usr/bin/python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/check_library.py"
+    ],
+    "exit": 0,
+    "seconds": 0.652
+  },
+  "engine_probe": {
+    "command": [
+      "python",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/.agents/skills/hydraulic-schematic/scripts/layout_engine.py",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/1#系统.intent.yaml",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/component-catalog.json",
+      "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-46/1#系统原理图/1#系统.layout.json",
+      "-o",
+      "/tmp/ready46-engine-final.layout.json"
+    ],
+    "exit": 1,
+    "scope": "Independent unsupported-auto-layout diagnostic, not the successful explicit-seed branch"
+  }
+}

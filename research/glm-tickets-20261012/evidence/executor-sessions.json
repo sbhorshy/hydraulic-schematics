@@ -1,0 +1,116 @@
+[
+  {
+    "task": "45",
+    "session_id": "sess_e3d56c4b-58a3-4f67-a4f1-f0083fd8854f",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 71,
+      "inputTokens": 7063857,
+      "outputTokens": 52419,
+      "totalTokens": 7116276,
+      "cacheReadTokens": 6809664,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  },
+  {
+    "task": "45-review",
+    "session_id": "sess_4e051b30-165e-437e-913e-7bd794fe2e90",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 47,
+      "inputTokens": 3013291,
+      "outputTokens": 32532,
+      "totalTokens": 3045823,
+      "cacheReadTokens": 2949952,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  },
+  {
+    "task": "45-final",
+    "session_id": "sess_30182ab8-66ca-444f-a4ce-f2129ccb053d",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 3,
+      "inputTokens": 127429,
+      "outputTokens": 20177,
+      "totalTokens": 147606,
+      "cacheReadTokens": 96576,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  },
+  {
+    "task": "31",
+    "session_id": "sess_4eb30c51-02cb-49ee-8342-af609d7f7d33",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 38,
+      "inputTokens": 4768221,
+      "outputTokens": 58426,
+      "totalTokens": 4826647,
+      "cacheReadTokens": 4608064,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  },
+  {
+    "task": "31-review",
+    "session_id": "sess_fb78a6a3-9501-40fb-ba8e-2ac8df4691dd",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 22,
+      "inputTokens": 1587193,
+      "outputTokens": 35958,
+      "totalTokens": 1623151,
+      "cacheReadTokens": 1513216,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  },
+  {
+    "task": "31-final",
+    "session_id": "sess_0b039761-2128-4af8-b495-0bc557f22039",
+    "observed_model": "GLM-5.3",
+    "bridge_exit_code": 0,
+    "usage": {
+      "source": "provider",
+      "modelRequestCount": 3,
+      "inputTokens": 112438,
+      "outputTokens": 2130,
+      "totalTokens": 114568,
+      "cacheReadTokens": 96640,
+      "cacheWriteTokens": 0,
+      "reasoningTokens": 0,
+      "webFetchRequests": 0,
+      "webSearchRequests": 0
+    },
+    "execution_limit": "Bash permission client absent; tests run independently by Codex"
+  }
+]

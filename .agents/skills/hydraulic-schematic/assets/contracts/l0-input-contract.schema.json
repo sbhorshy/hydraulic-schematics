@@ -29,6 +29,19 @@
                   "pattern": "^(@[A-Za-z0-9_-]+|[A-Z][A-Za-z0-9_-]*)(\\.[a-z][a-z0-9_]*)?$"}
       }
     },
+    "assemblies": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[A-Z][A-Za-z0-9_-]*$"},
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "required": ["label", "members"],
+        "properties": {
+          "label": {"type": "string", "pattern": "\\S"},
+          "members": {"type": "array", "minItems": 2, "uniqueItems": true,
+                      "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
     "groups": {
       "type": "array",
       "items": {

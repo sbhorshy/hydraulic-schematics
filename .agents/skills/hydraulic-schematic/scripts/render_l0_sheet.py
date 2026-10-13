@@ -6,6 +6,14 @@
 """
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
+from topology_reconciliation import write_manifest, declared_topology
+from junction_semantics import renderer_events, merge_collinear
+from lead_geometry import source_leads, perpendicular_scale, segments
+from sheet_geometry import walk
+from layout_contract import drawable_bounds
+from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure, mirror_contract
+from mirror_policy import check_mirror, mirror_point, mirror_anchor, mirror_svg_transform
+
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -200,6 +208,8 @@ class Sheet(object):
         self.warn = []
         self.drawn = []      # 已画线段,供避重叠用
         self.textboxes = []  # 文字包围盒,供避压字用
+        self.label_offsets = {}  # derived horizontal placement within the declared slot
+        self.poly_anchors = []
         self.polys = []      # (line_type, 点串),供求交叉与打断用
         # (点串,start_terminal,end_terminal)。同一 intent path 内的 FSOV 等
         # 串联部件不终止吸油流道,其两侧 net 共享路径级端部语义。
@@ -230,15 +240,24 @@ class Sheet(object):
             rot = int(nd.get('rot', 0)) % 360
             if rot not in (0, 90, 180, 270):
                 raise ValueError('%s: rot=%s 不在目录允许的 0/90/180/270' % (inst, rot))
-            if nd.get('mirror'):
-                raise ValueError(
-                    '%s: 已禁用 mirror。规范 6.3.3 要求优先用旋转与重排,'
-                    '镜像会互换进出口而读图人先信符号朝向。' % inst)
+            # #63 条件解禁:逐实例按实际解析资产过 mirror_policy 三道闸
+            # (mirror_safe / layout.allow_mirror / 与当前符号字节+端口契约
+            # 绑定的登记);未登记、旧资产、非法轴一律拒绝。
+            component = self.types.get(self.i['parts'].get(inst))
+            try:
+                axis = check_mirror(nd, component, path)
+            except ValueError as error:
+                raise ValueError('%s: %s' % (inst, error))
             nd['_k'], nd['_vx'], nd['_vy'] = k, vx, vy
-            nd['_W'], nd['_H'], nd['_rot'] = W, H, rot
+            nd['_W'], nd['_H'], nd['_rot'], nd['_mirror'] = W, H, rot, axis
             self.sym[inst] = (markup, vb, ports, nd)
             for pid, (px, py, anch, role, med) in ports.items():
                 lx, ly = (px - vx) * k, (py - vy) * k
+                if axis:
+                    # 归零缩放盒内先镜像,再沿用既有旋转/平移;端口 id 与
+                    # role/medium/flow 一律不换,仅位置与锚向随镜像同步。
+                    lx, ly = mirror_point(lx, ly, W, H, axis)
+                    anch = mirror_anchor(anch, axis)
                 # 旋转端口坐标与锚点方向。锚点必须同步旋转,否则出线方向
                 # 与端口实际位置不符,走线越过端口再折回(规范 6.3.3)。
                 if rot == 90:
@@ -254,6 +273,11 @@ class Sheet(object):
                     anch = {'left': 'down', 'down': 'right',
                             'right': 'up', 'up': 'left'}[anch]
                 self.abs[(inst, pid)] = (nd['x'] + lx, nd['y'] + ly, anch)
+
+    def mirror_axes(self):
+        """已过 check_mirror 的逐实例许可轴(#63),供装配框测量等下游复用。"""
+        return {inst: nd['_mirror'] for inst, nd in self.L['nodes'].items()
+                if nd.get('_mirror')}
 
     def resolve(self, token, want=None):
         """token -> (inst, pid)。裸实例名按目录 main_path 补出端口。"""
@@ -331,7 +355,10 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             if inst in exclude:
                 continue
-            out.append((nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h']))
+            w, h = nd.get('_W', nd['w']), nd.get('_H', nd['h'])
+            if int(nd.get('rot', 0)) % 180:
+                w, h = h, w
+            out.append((nd['x'], nd['y'], nd['x'] + w, nd['y'] + h))
         return out
 
     @staticmethod
@@ -420,6 +447,18 @@ class Sheet(object):
                 out.append(p)
         return out
 
+    @staticmethod
+    def backtracks(points):
+        """是否沿同一直线反向折返；这种候选会在拐点外留下多余线头。"""
+        for a, b, c in zip(points, points[1:], points[2:]):
+            if (max(a[1], b[1], c[1]) - min(a[1], b[1], c[1]) < 1e-6
+                    and (b[0] - a[0]) * (c[0] - b[0]) < -1e-6):
+                return True
+            if (max(a[0], b[0], c[0]) - min(a[0], b[0], c[0]) < 1e-6
+                    and (b[1] - a[1]) * (c[1] - b[1]) < -1e-6):
+                return True
+        return False
+
     def route(self, a, b, exclude=(), lanes=()):
         """正交走线,择优避开元件本体。
 
@@ -430,6 +469,13 @@ class Sheet(object):
         ax, ay, aa = a
         bx, by, ba = b
         S = 20.0
+        # 相向端口各自占一半净距，避免两段固定出桩互相越过。
+        # 保留端口和锚向，只缩短两者之间实际放不下的直线段。
+        gaps = {('right', 'left'): bx - ax, ('left', 'right'): ax - bx,
+                ('down', 'up'): by - ay, ('up', 'down'): ay - by}
+        gap = gaps.get((aa, ba))
+        if gap is not None and gap > 0:
+            S = min(S, gap / 2.0)
         stub = {'left': (-S, 0), 'right': (S, 0), 'up': (0, -S), 'down': (0, S)}
         a1 = (ax + stub[aa][0], ay + stub[aa][1])
         b1 = (bx + stub[ba][0], by + stub[ba][1])
@@ -470,14 +516,22 @@ class Sheet(object):
 
         # 代价权重:穿元件 > 与已画线重叠 > 与文字重叠 > 交叉 > 长度 > 拐点。
         # 前三项是会导致误读的缺陷,必须压过"线短拐点少"的观感偏好。
+        # 剩余项均非负；部分分数已不小于最佳总分时可提前淘汰。
+        # 候选顺序和严格更优(<)保持不变，因此并列时仍选最早候选。
         best, bad = None, None
         for c in cands:
             pts = self.dedup([(ax, ay)] + c + [(bx, by)])
-            if len(pts) < 2:
+            if len(pts) < 2 or self.backtracks(pts):
                 continue
             h = self.hits(pts, obs, skip_ends=True)
+            if bad is not None and h * 10000 >= bad:
+                continue
             ov = self.overlap(pts, self.drawn) + self.overlap(pts, self.buslines)
+            if bad is not None and h * 10000 + ov * 3000 >= bad:
+                continue
             tx = self.hits(pts, self.textboxes, skip_ends=False, tol=0.0)
+            if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                continue
             cr = self.crossings(pts, self.drawn)
             length = sum(abs(pts[k + 1][0] - pts[k][0]) + abs(pts[k + 1][1] - pts[k][1])
                          for k in range(len(pts) - 1))
@@ -485,6 +539,8 @@ class Sheet(object):
                      + cr * 120 + length + len(pts) * 5)
             if bad is None or score < bad:
                 bad, best = score, pts
+        if best is None:
+            raise ValueError('未找到无反向折返的正交路线: %s -> %s' % (a, b))
         for k in range(len(best) - 1):
             self.drawn.append((best[k], best[k + 1]))
         return best
@@ -496,32 +552,15 @@ class Sheet(object):
         return '<polyline class="%s" points="%s"/>' % (cls, d)
 
     def find_crossings(self, junc, polys):
-        """列出需要跨线桥的非连通交叉点。
+        """Plan nonconnected crossings from input networks before bridge splits.
 
-        约定:**水平线跨越竖直线**。水平线在交叉处断开并以半圆弧跨过,
-        竖直线保持连续。这与"被跨线连续"的读图习惯一致。
+        The junc argument remains for existing callers; circles cannot authorize
+        connectivity. This geometry-only path is also used by candidate scoring.
         """
-        jset = {(round(x, 1), round(y, 1)) for (x, y) in junc}
-        allseg = []
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                allseg.append((pts[k], pts[k + 1]))
-        vs = [(a, b) for (a, b) in allseg if abs(b[0] - a[0]) < 0.6]
-        out = set()
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                a, b = pts[k], pts[k + 1]
-                if abs(b[1] - a[1]) >= 0.6:
-                    continue
-                y = a[1]
-                lo, hi = sorted((a[0], b[0]))
-                for (va, vb) in vs:
-                    x = va[0]
-                    vlo, vhi = sorted((va[1], vb[1]))
-                    if lo + 1 < x < hi - 1 and vlo + 1 < y < vhi - 1:
-                        if (round(x, 1), round(y, 1)) not in jset:
-                            out.add((round(x, 1), round(y, 1), _c))
-        return sorted(out)
+        events = renderer_events(polys,self.poly_anchors,declared_topology(self.i,self.cat))
+        line_types = dict(zip(self.poly_anchors,(lt for lt,_ in polys)))
+        return [(*e['position'],line_types[e['horizontal_anchors'][0]])
+                for e in events if e['kind']=='crossing']
 
     @staticmethod
     def split_h(pts, cross, R=5.0):
@@ -535,6 +574,7 @@ class Sheet(object):
 
         改法:只在跨越线自身的几何上开口,不擦任何像素。竖线完好。
         """
+        pts = merge_collinear(pts)
         cs = {(x, y) for (x, y, _lt) in cross}
         runs, cur = [], [pts[0]]
         for k in range(len(pts) - 1):
@@ -571,25 +611,46 @@ class Sheet(object):
         """预算文字包围盒。必须在 wire() 之前调用,否则走线器不知道
         哪里有字,画完才发现压住标签(校核项 V12)。"""
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
+        used = endpoint_usage(self.i, self.types, self.L['nodes'])['used']
         for inst, nd in self.L['nodes'].items():
             if nd.get('_name_slot'):
                 continue    # 名字已画在框内名槽,不占框外避让包围盒
-            lab = self.L['labels'].get(inst, inst)
-            pos = self.L['label_pos'].get(inst, 'below')
+            lab = (self.L.get('labels') or {}).get(inst, inst)
+            pos = (self.L.get('label_pos') or {}).get(inst, 'below')
             fs = FS.get(pos, 11.0)
             lines = lab.split('\n')
             wid = max(sum(fs if ord(c) > 0x2E80 else fs * 0.55 for c in ln)
                       for ln in lines)
-            cx = nd['x'] + nd['w'] / 2.0
+            # rot90/270 落位后占位盒宽高互换(CDF-001 实例教训:用未旋转的
+            # 声明宽锚定 right 标签,文字落进旋转后的符号墨迹内 28.5px)。
+            rot = int(nd.get('rot', 0)) % 360
+            w_eff, h_eff = ((nd['h'], nd['w']) if rot in (90, 270)
+                            else (nd['w'], nd['h']))
+            cx = nd['x'] + w_eff / 2.0
             lift = self.L.get('label_lift', {}).get(inst, 0)
             drop = self.L.get('label_drop', {}).get(inst, 0)
             if pos == 'below':
-                y0 = nd['y'] + nd['h'] + 16 + drop - fs
+                y0 = nd['y'] + h_eff + 16 + drop - fs
             elif pos == 'above':
                 y0 = nd['y'] - 8 - 13 * (len(lines) - 1) - lift - fs
             else:
                 y0 = nd['y'] + 16 - fs
-            x0 = (nd['x'] + nd['w'] + 12) if pos == 'right' else (cx - wid / 2.0)
+            x0 = (nd['x'] + w_eff + 12) if pos == 'right' else (cx - wid / 2.0)
+            if pos == 'below' and rot in (90, 270):
+                # Keep the user's below slot, but leave a vertical port channel
+                # through it. Only a derived anchor moves, never input geometry.
+                ports = [self.abs[tuple(token.split('.', 1))] for token in used
+                         if token.startswith(inst + '.')]
+                columns = [px for px, py, direction in ports
+                           if direction == 'down' and py <= y0+fs+13*(len(lines)-1)+4]
+                if any(x0-10 <= px <= x0+wid+10 for px in columns):
+                    choices = [px-wid-10 for px in columns] + [px+10 for px in columns]
+                    choices = [x for x in choices if abs(x-x0) <= w_eff and x < nd['x']+w_eff and x+wid > nd['x']
+                               and all(px <= x-10+1e-6 or px >= x+wid+10-1e-6 for px in columns)]
+                    if choices:
+                        shifted = min(choices, key=lambda x: abs(x-x0))
+                        self.label_offsets[inst] = shifted-x0
+                        x0 = shifted
             self.textboxes.append((x0 - 2, y0 - 2, x0 + wid + 2,
                                    y0 + fs + 13 * (len(lines) - 1) + 4))
         for eid, e in self.L.get('externs', {}).items():
@@ -597,16 +658,31 @@ class Sheet(object):
             fs = 10.0
             wid = max(sum(fs if ord(c) > 0x2E80 else fs * 0.55 for c in ln)
                       for ln in lines)
-            dx = -10 if e['anchor'] == 'right' else 10
+            dx = -20 if e['anchor'] == 'right' else 20
             x0 = (e['x'] + dx - wid) if e['anchor'] == 'right' else (e['x'] + dx)
             self.textboxes.append((x0 - 2, e['y'] - fs, x0 + wid + 2,
                                    e['y'] + 4 + 13 * (len(lines) - 1)))
         for key in ('legend', 'title_block'):
             r = self.L.get(key)
             if r:
-                sh = self.L.get('canvas_shift_x', 0)
-                self.textboxes.append((r['x'] - sh, r['y'],
-                                       r['x'] + r['w'] - sh, r['y'] + r['h']))
+                self.textboxes.append((r['x'], r['y'],
+                                       r['x'] + r['w'], r['y'] + r['h']))
+
+    def bus_stub(self, x, y, anchor):
+        # A rotated terminal can face a label in the inter-component gap.
+        # Stay within that free gap before turning; never draw the lead through
+        # text and hope that a later detour repairs it. Retain B4's 8 px
+        # minimum; any remaining label conflict stays visible to validation.
+        length = 18.0
+        horizontal = anchor in ('left', 'right')
+        sign = 1 if anchor in ('right', 'down') else -1
+        origin, cross = (x, y) if horizontal else (y, x)
+        for x0, y0, x1, y1 in self.textboxes:
+            lo, hi, c0, c1 = (x0, x1, y0, y1) if horizontal else (y0, y1, x0, x1)
+            distance = (lo-origin) if sign > 0 else (origin-hi)
+            if c0 <= cross <= c1 and 0 < distance < 2*length:
+                length = max(8.0, min(length, distance / 2))
+        return (x+sign*length, y) if horizontal else (x, y+sign*length)
 
     # ---------- paths 编译 ----------
     def wire(self):
@@ -619,6 +695,26 @@ class Sheet(object):
             for k in range(nseg):
                 a, b = p[k], p[k + 1]
                 nets.append((a, b, pi, k, nseg, path_lt))
+
+        # Reserve unambiguous straight bus branches before routing their peers.
+        # Otherwise an early detour may cut a later branch (or the completed bus).
+        reserved = []
+        bus_levels = {}
+        for a, b, pi, pk, _, _ in nets:
+            ab, bb = a.startswith('@'), b.startswith('@')
+            if ab == bb:
+                continue
+            bus = (a if ab else b)[1:]
+            other = b if ab else a
+            x, y, anchor = self.port(other, 'in' if ab else 'out')
+            m = self.bus_stub(x, y, anchor)
+            pts = self.dedup([(x, y), m, (self.L['buses'][bus]['x'], m[1])])
+            bus_levels.setdefault(bus, []).append(m[1])
+            if not self.backtracks(pts) and not self.hits(pts[1:], self.obstacles()):
+                reserved.append(((pi, pk), list(zip(pts, pts[1:]))))
+        future_buses = [((self.L['buses'][bus]['x'], min(ys)),
+                         (self.L['buses'][bus]['x'], max(ys)))
+                        for bus, ys in bus_levels.items()]
 
         for a, b, pi, path_k, path_nseg, path_lt in nets:
             ab, bb = a.startswith('@'), b.startswith('@')
@@ -641,17 +737,19 @@ class Sheet(object):
                 self.mark_port_lt(other, want, lt)
                 # 从元件端口正交接到母线
                 S = 18.0
-                stub = {'left': (-S, 0), 'right': (S, 0), 'up': (0, -S), 'down': (0, S)}[oa]
-                m = (ox + stub[0], oy + stub[1])
+                m = self.bus_stub(ox, oy, oa)
                 # 元件到母线也要避障:早先直接横拉,穿过了中间的滤本体。
                 cands = [[m, (bx, m[1])]]
                 for ly in self.L.get('lanes', []):
+                    # 先纵后横再纵:只有"直接横拉"一种候选时,自用户回油
+                    # 曾横穿中间的回油滤本体(校核项 V2)。
                     cands.append([m, (m[0], ly), (bx, ly), (bx, m[1])])
-                # 经水平走廊再上/下到母线接入高度。
-                # 只有"直接横拉"和"先纵后横"两种候选时,自用户回油横穿
-                # 了中间的回油滤本体(校核项 V2)。
+                # 经水平走廊直接并入母线(走廊高度即接入高度):母线因其他
+                # 支路延伸覆盖走廊高度后,"先到接入高度、末段沿母线纵走"的
+                # 候选会与母线本体共线重叠(V13;2026-09-07 实例:CDF 出油
+                # 并入 @RET 后母线上延覆盖 lane 100,@RET<-油箱 线中招)。
                 for ly in self.L.get('lanes', []):
-                    cands.append([m, (m[0], ly), (bx, ly), (bx, m[1])])
+                    cands.append([m, (m[0], ly), (bx, ly)])
                 for cx2 in self.L.get('vlanes', []):
                     if abs(cx2 - bx) < 1:
                         continue        # 竖廊与母线同 x 时会沿母线纵走
@@ -659,35 +757,69 @@ class Sheet(object):
                         cands.append([m, (cx2, m[1]), (cx2, ly),
                                       (bx, ly), (bx, m[1])])
                 obs = self.obstacles()
+                # A bus has no terminal body: its final horizontal segment must
+                # also clear the source. Extend the attachment height around
+                # the actual rotated footprint, without changing any port.
+                direct = self.dedup([(ox, oy), m, (bx, m[1])])
+                recovery = bool(self.hits(direct[1:], obs) or self.backtracks(direct))
+                anticipated = [segment for key, segments in reserved
+                               if key != (pi, path_k) for segment in segments] + future_buses
+                existing_count = len(cands)
+                if recovery:
+                    # Finite obstacle-edge heights, including neighboring bodies
+                    # and label clearance, not just the source's two edges.
+                    heights = [y for box in obs for y in (box[1]-S, box[3]+S)]
+                    heights += [y for box in self.textboxes for y in (box[1]-8, box[3]+8)]
+                    for ly in dict.fromkeys(heights):
+                        if 0 < ly < self.L['canvas']['height']:
+                            cands.append([m, (m[0], ly), (bx, ly)])
                 best, bad = None, None
-                for c in cands:
+                for candidate_index, c in enumerate(cands):
+                    if (recovery and candidate_index == existing_count and bad is not None
+                            and bad[:4] == (0, 0, 0, 0)):
+                        break  # a valid existing route keeps its original geometry
                     cp = self.dedup([(ox, oy)] + c)
-                    if len(cp) < 2:
+                    if len(cp) < 2 or self.backtracks(cp):
                         continue
-                    h = self.hits(cp, obs, skip_ends=True)
+                    h = self.hits(cp[1:], obs, tol=0.0 if recovery else 4.0)
                     # 本支路自己要接的这条母线不算(末段必然贴在它上面),
                     # 但其他母线要算。
                     # 全部母线都算,包括自己要接的这条:支路只应**横向**
                     # 抵达母线,不应沿母线纵走。沿母线走 480 单位在图上
                     # 与母线本体完全重合(校核项 V13)。
+                    if not recovery and bad is not None and h * 10000 >= bad:
+                        continue
                     ov = (self.overlap(cp, self.drawn)
                           + self.overlap(cp, self.buslines))
-                    tx = self.hits(cp, self.textboxes, tol=0.0)
-                    cr = self.crossings(cp, self.drawn)
+                    if not recovery and bad is not None and h * 10000 + ov * 3000 >= bad:
+                        continue
+                    tx = self.hits(cp, self.textboxes, tol=-8.0 if recovery else 0.0)
+                    if not recovery and bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                        continue
+                    cr = self.crossings(cp, self.drawn + (anticipated if recovery else []))
                     ln = sum(abs(cp[i + 1][0] - cp[i][0]) + abs(cp[i + 1][1] - cp[i][1])
                              for i in range(len(cp) - 1))
                     sc = (h * 10000 + ov * 3000 + tx * 900
                           + cr * 120 + ln + len(cp) * 5)
+                    if recovery:
+                        # In a repair, never exchange hard geometry/topology for
+                        # shorter routes or fewer bends. Preserve ordinary cost
+                        # ordering for all unaffected direct connections.
+                        sc = (h, ov, cr, tx, ln + len(cp)*5)
                     if bad is None or sc < bad:
                         bad, best = sc, cp
+                if best is None:
+                    raise ValueError('未找到无反向折返的母线接入路线: %s -> @%s' % (other, bus))
                 pts = best
                 for q in range(len(pts) - 1):
                     self.drawn.append((pts[q], pts[q + 1]))
                 self.polys.append((lt, pts))
+                self.poly_anchors.append('paths[%d][%d->%d]' % (pi, path_k, path_k + 1))
                 if lt == 'suction':
                     self.suction_runs.append((pts, path_k == 0,
                                               path_k == path_nseg - 1))
-                bus_hits.setdefault(bus, []).append((m[1], lt))
+                # 接入高度按实际终点(走廊直接并入时=走廊高度,否则=支路自身高度)
+                bus_hits.setdefault(bus, []).append((pts[-1][1], lt))
                 continue
 
             aw, bw = 'out', 'in'
@@ -714,6 +846,7 @@ class Sheet(object):
             # 油箱本体而不去找下方走廊(校核项 V2 反复报同一处)。
             rp = self.route(pa, pb, exclude=(), lanes=self.L.get('lanes', []))
             self.polys.append((lt, rp))
+            self.poly_anchors.append('paths[%d][%d->%d]' % (pi, path_k, path_k + 1))
             if lt == 'suction':
                 self.suction_runs.append((rp, path_k == 0,
                                           path_k == path_nseg - 1))
@@ -727,6 +860,7 @@ class Sheet(object):
             ys = sorted(h[0] for h in hits)
             lt = hits[0][1]
             self.polys.append((lt, [(bx, ys[0]), (bx, ys[-1])]))
+            self.poly_anchors.append('buses.' + bus)
             for y, _ in hits:
                 # 只有母线内部接入点才是三通。两端是拐角,不是节点。
                 # 早先版本在此加了 len(hits)>2 的条件,导致蓄压器和压力滤的
@@ -744,7 +878,7 @@ class Sheet(object):
         线型归 sense(1.0 T)。起自 sensor 端口锚点方向,末端直接进 at 端口。
         """
         juncs = []
-        for t in self.i.get('taps') or []:
+        for ti, t in enumerate(self.i.get('taps') or []):
             stok, atok = t['sensor'], t['at']
             sinst, spid = stok.split('.', 1)
             ainst, apid = atok.split('.', 1)
@@ -754,7 +888,10 @@ class Sheet(object):
             pb = (pb3[0], pb3[1])
             aa = self.abs[(sinst, spid)][2]
             ab = self.abs[(ainst, apid)][2]
-            self.port_lt[(sinst, spid)] = 'sense'
+            # Both declared tap ends carry the branch. Keep an already established
+            # main-network classification; incompatible visible networks remain a validator error.
+            self.port_lt.setdefault((sinst, spid), 'sense')
+            self.port_lt.setdefault((ainst, apid), 'sense')
             S = 18.0
             stub = {'left': (-S, 0), 'right': (S, 0),
                     'up': (0, -S), 'down': (0, S)}[aa]
@@ -784,8 +921,14 @@ class Sheet(object):
                 if len(pts) < 2:
                     continue
                 h = self.hits(pts, obs, skip_ends=True)
+                if bad is not None and h * 10000 >= bad:
+                    continue
                 ov = self.overlap(pts, self.drawn)
+                if bad is not None and h * 10000 + ov * 3000 >= bad:
+                    continue
                 tx = self.hits(pts, self.textboxes, tol=0.0)
+                if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
+                    continue
                 cr = self.crossings(pts, self.drawn)
                 ln = sum(abs(pts[k + 1][0] - pts[k][0])
                          + abs(pts[k + 1][1] - pts[k][1])
@@ -798,6 +941,7 @@ class Sheet(object):
             for k in range(len(best) - 1):
                 self.drawn.append((best[k], best[k + 1]))
             self.polys.append(('sense', best))
+            self.poly_anchors.append('taps[%d]' % ti)
         return juncs
 
     # ---------- 分组虚线框(技术规范 10.7) ----------
@@ -819,48 +963,27 @@ class Sheet(object):
                 continue
             gap = self.L.get('group_label_gap', 8)
             out.append(
-                '<rect class="grp" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>'
+                '<rect class="grp" data-group="%s" x="%.1f" y="%.1f" width="%.1f" height="%.1f"/>'
                 '<text class="grp-lbl" x="%.1f" y="%.1f">%s</text>' % (
-                    box[0] - pad, box[1] - pad,
+                    self.esc(g['id']), box[0] - pad, box[1] - pad,
                     box[2] - box[0] + 2 * pad, box[3] - box[1] + 2 * pad,
                     box[0] - pad, box[1] - pad - gap, self.esc(g['label'])))
         return out
 
     # ---------- 悬空端口检测 ----------
     def dangling(self):
-        """列出布局中已绘制但未被任何 path 使用的端口。
+        """列出布局中已绘制但未被 paths/taps 使用的目录端口。
 
         原理图最坏的失效模式是悄悄画一个没接线的口:读图人会以为它接好了。
         故凡未接线的端口一律标红圈并计数,不允许静默。
         """
-        used = set()
-        for p in self.i['paths']:
-            for k, tok in enumerate(p):
-                if tok.startswith('@'):
-                    continue
-                inst = tok.split('.')[0]
-                if inst not in self.i['parts']:
-                    continue
-                if '.' in tok:
-                    used.add((inst, tok.split('.', 1)[1]))
-                else:
-                    mp = self.types[self.i['parts'][inst]]['main_path']
-                    if mp:
-                        used.add((inst, mp['in']))
-                        used.add((inst, mp['out']))
-        # taps 已接的端口不悬空:sensor 端口由支路本身使用,at 端口归被测件。
-        for t in self.i.get('taps') or []:
-            sinst, spid = t['sensor'].split('.', 1)
-            used.add((sinst, spid))
-            ainst, apid = t['at'].split('.', 1)
-            if ainst in self.i['parts']:
-                used.add((ainst, apid))
-        marks, names = [], []
-        for (inst, pid), (x, y, _a) in sorted(self.abs.items()):
-            if (inst, pid) in used:
-                continue
-            marks.append('<circle class="dang" cx="%.1f" cy="%.1f" r="5"/>' % (x, y))
-            names.append('%s.%s' % (inst, pid))
+        inventory = endpoint_usage(self.i, self.types, self.L['nodes'])
+        marks, names = [], inventory['dangling']
+        for endpoint in names:
+            inst, pid = endpoint.split('.', 1)
+            x, y, _a = self.abs[(inst, pid)]
+            marks.append('<circle class="dang" data-port="%s" cx="%.1f" cy="%.1f" r="5"/>'
+                         % (endpoint, x, y))
         return marks, names
 
     def esc(self, s):
@@ -871,30 +994,36 @@ class Sheet(object):
         for inst, nd in self.L['nodes'].items():
             if nd.get('_name_slot'):
                 continue    # 用户框:名字在框内名槽,不再画框外标签
-            lab = self.L['labels'].get(inst, inst)
-            pos = self.L['label_pos'].get(inst, 'below')
-            cx = nd['x'] + nd['w'] / 2.0
+            lab = (self.L.get('labels') or {}).get(inst, inst)
+            pos = (self.L.get('label_pos') or {}).get(inst, 'below')
+            # 与 build_textboxes 同一口径:rot90/270 落位后占位盒宽高互换,
+            # 标签锚定用有效宽高,否则文字落进旋转后的符号墨迹(CDF-001 实例)。
+            rot = int(nd.get('rot', 0)) % 360
+            w_eff, h_eff = ((nd['h'], nd['w']) if rot in (90, 270)
+                            else (nd['w'], nd['h']))
+            cx = nd['x'] + w_eff / 2.0
             lines = lab.split('\n')
             # 分组虚线框会占据元件上方 pad+gap,故框内元件的 above 标签
             # 必须让位到框外,否则与分组标签重叠(渲染已证实)。
             lift = self.L.get('label_lift', {}).get(inst, 0)
             drop = self.L.get('label_drop', {}).get(inst, 0)
             if pos == 'below':
-                y0, anch, cx2 = nd['y'] + nd['h'] + 16 + drop, 'middle', cx
+                y0, anch, cx2 = nd['y'] + h_eff + 16 + drop, 'middle', cx
             elif pos == 'above':
                 y0, anch, cx2 = nd['y'] - 8 - 13 * (len(lines) - 1) - lift, 'middle', cx
             else:
-                y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + nd['w'] + 12
+                y0, anch, cx2 = nd['y'] + 16, 'start', nd['x'] + w_eff + 12
+            cx2 += self.label_offsets.get(inst, 0)
             for k, ln in enumerate(lines):
-                out.append('<text class="lbl" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
-                           % (cx2, y0 + 13 * k, anch, self.esc(ln)))
+                out.append('<text class="lbl" data-label-for="%s" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
+                           % (inst, cx2, y0 + 13 * k, anch, self.esc(ln)))
         for eid, e in self.L['externs'].items():
             lines = e['label'].split('\n')
             anch = 'end' if e['anchor'] == 'right' else 'start'
-            dx = -10 if e['anchor'] == 'right' else 10
+            dx = -20 if e['anchor'] == 'right' else 20
             for k, ln in enumerate(lines):
-                out.append('<text class="ext" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
-                           % (e['x'] + dx, e['y'] + 4 + 13 * k, anch, self.esc(ln)))
+                out.append('<text class="ext" data-label-for="@%s" x="%.1f" y="%.1f" text-anchor="%s">%s</text>'
+                           % (eid, e['x'] + dx, e['y'] + 4 + 13 * k, anch, self.esc(ln)))
         return out
 
     def symbols(self):
@@ -902,12 +1031,18 @@ class Sheet(object):
         for inst, (markup, vb, ports, nd) in self.sym.items():
             k, vx, vy = nd['_k'], nd['_vx'], nd['_vy']
             W, H, rot = nd['_W'], nd['_H'], nd['_rot']
-            # 先落位,再旋转,最后缩放并归零 viewBox 原点。
-            # 旋转后的补偿平移使符号仍占据 (x,y) 起始的正矩形。
+            axis = nd.get('_mirror')
+            # 先落位,再旋转,镜像段插在 rotate 之后、scale(k) 之前
+            # (应用序=归零缩放盒内先镜像,再旋转平移),最后缩放并归零
+            # viewBox 原点。无镜像插入空串,既有输出逐字节不变。
+            # 旋转后的补偿平移使符号仍占据 (x,y) 起始的正矩形;
+            # 镜像把盒映射回自身,补偿表不必改。
             comp = {0: (0, 0), 90: (H, 0), 180: (W, H), 270: (0, W)}[rot]
-            tf = ('translate(%g,%g) translate(%g,%g) rotate(%d) scale(%g) '
-                  'translate(%g,%g)' % (nd['x'], nd['y'], comp[0], comp[1],
-                                        rot, k, -vx, -vy))
+            segment = mirror_svg_transform(W, H, axis)
+            tf = ('translate(%g,%g) translate(%g,%g) rotate(%d) %s%sscale(%g) '
+                  'translate(%g,%g)'
+                  % (nd['x'], nd['y'], comp[0], comp[1], rot,
+                     segment, ' ' if segment else '', k, -vx, -vy))
             # 先归一本体线宽,再把端口引线改判为管线宽。顺序不能反:
             # norm_stroke 会给带 stroke-width 的父 <g> 挂上 sym-outline,
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
@@ -915,6 +1050,14 @@ class Sheet(object):
             mk = self.portlines(mk, ports, inst)
             if nd.get('_name_slot'):
                 mk = self.fill_name_slot(mk, inst)
+            # Nonvisual source-port markers survive embedding. Metadata cannot
+            # become false body ink/lead anchors in geometric or pixel checks.
+            mk += '\n' + '\n'.join(
+                '<metadata data-node="%s" data-port="%s.%s" data-port-id="%s" '
+                'id="port-%s-%s" data-input-anchor="parts.%s.ports.%s" '
+                'data-x="%g" data-y="%g" data-anchor-direction="%s"/>'
+                % (inst, inst, pid, pid, inst, pid, inst, pid, point[0], point[1], point[2])
+                for pid, point in sorted(ports.items()))
             # 按 1/k 补偿符号自身的落位缩放:线宽经 scale(k) 后正好
             # 还原为标准值。用 CSS 变量传递,由实例 g 上的内联 style
             # 覆盖——不能写成实例 g 的 stroke-width 属性,那会被后代
@@ -922,8 +1065,12 @@ class Sheet(object):
             # 补偿静默失效。
             comp = ('' if abs(k - 1.0) < 1e-9
                     else ' style="--kc:%.6f"' % (1.0 / k))
-            out.append('<g id="inst-%s" transform="%s"%s>\n%s\n</g>'
-                       % (inst, tf, comp, mk))
+            # 获准镜像的实例记录 data-mirror 与其 layout 输入锚,供追溯
+            # 与校核读取;非镜像 markup 保持原样(不加属性)。
+            mirror_attr = (' data-mirror="%s" data-mirror-input-anchor="nodes.%s.mirror"'
+                           % (axis, inst)) if axis else ''
+            out.append('<g id="inst-%s" data-node="%s" data-input-anchor="parts.%s"%s transform="%s"%s>\n%s\n</g>'
+                       % (inst, inst, inst, mirror_attr, tf, comp, mk))
         return out
 
     @staticmethod
@@ -940,37 +1087,45 @@ class Sheet(object):
         """把符号内部的"端口引线"改判为管线线宽。
 
         判据是几何,不是文件位置:一端落在某个端口红点上、另一端落在
-        本体上的 <line>,就是这个端口的引线——它走油,故按所在管网的
-        压力等级取宽(3.0/1.0 T),不按组件本体 1.5 T。
-        识别不到所属管网(悬空端口、非液压口如 FSOV.command)时不改,
-        保持本体线宽——因为那里确实没有管线。
+        本体上的 line/path/polyline,就是这个端口的外接引线。按已声明相接
+        管网取宽(3.0/1.0 T),包含 sense 气侧/测量支路,不按组件本体 1.5 T。
+        识别不到所属管网(悬空端口、未建模命令口)时不改,保持本体线宽。
         """
-        px = {}
-        for pid, (x, y, _a, _r, med) in ports.items():
-            if med != 'hydraulic':
-                continue          # 电、气信号口不是管线
+        root = ET.fromstring('<g>' + markup + '</g>')
+        leads, _unchecked = source_leads(root, ports)
+        for lead in leads:
+            pid = lead['port']
             lt = self.port_lt.get((inst, pid))
-            if lt:
-                px[(round(x, 1), round(y, 1))] = lt
-
-        def sub(m):
-            tag = m.group(0)
-            g = {k: float(v) for k, v in
-                 re.findall(r'\b(x1|y1|x2|y2)="([-\d.]+)"', tag)}
-            if len(g) < 4:
-                return tag
-            e = [(round(g['x1'], 1), round(g['y1'], 1)),
-                 (round(g['x2'], 1), round(g['y2'], 1))]
-            hit = [px[p] for p in e if p in px]
-            if len(hit) != 1:
-                return tag        # 两端都是端口或都不是,不是引线
-            tag = re.sub(r'\s*stroke-width="[^"]*"', '', tag)
-            if 'class="' in tag:
-                return re.sub(r'class="([^"]*)"',
-                              r'class="\1 pl-%s"' % hit[0], tag)
-            return tag[:-2].rstrip() + ' class="pl-%s"/>' % hit[0]
-
-        return re.sub(r'<line [^>]*/>', sub, markup)
+            if not lt:
+                continue
+            el = lead['element']
+            el.attrib.pop('stroke-width', None)
+            classes = el.get('class', '').split()
+            classes.append('pl-' + lt)
+            el.set('class', ' '.join(classes))
+            el.set('data-interface-port', pid)
+            # Compensate source-local nesting as well as the instance scale.
+            a, b = lead['local_segments'][0]
+            scale = perpendicular_scale(lead['matrix'], (b[0]-a[0], b[1]-a[1]))
+            if abs(scale-1) > 1e-8:
+                el.set('style', el.get('style', '') + ';--lead-scale:%.9g' % (1/scale))
+        # Internal source groups may scale body ink (for example PRV check
+        # mechanisms use 0.9). Compensate only stroke width, retaining fill/dashes.
+        for el,matrix in walk(root):
+            tag=el.tag.rsplit('}',1)[-1]
+            if tag not in ('line','path','polyline','polygon','rect','circle','ellipse') or el.get('data-interface-port'):
+                continue
+            if el.get('stroke','').lower() in ('white','#fff','#ffffff'):continue
+            try:
+                factors=[perpendicular_scale(matrix,(b[0]-a[0],b[1]-a[1])) for a,b in segments(tag,el.attrib)]
+                if not factors:raise ValueError('Primitive body requires transform-scale compensation')
+            except ValueError:
+                a,b,c,d,_,_=matrix
+                factors=[math.hypot(a,b)] if abs(a*a+b*b-c*c-d*d)<1e-7 and abs(a*c+b*d)<1e-7 else []
+            if factors and min(factors)>0 and max(factors)-min(factors)<1e-7 and abs(factors[0]-1)>1e-8:
+                el.set('class',el.get('class','')+' sym-body-width')
+                el.set('style',el.get('style','')+';--body-scale:%.9g'%(1/factors[0]))
+        return ''.join(ET.tostring(el, encoding='unicode') for el in root)
 
     def fill_name_slot(self, markup, inst):
         """把用户框符号的名槽文本替换为实例标签(hydraulic_user)。
@@ -979,7 +1134,7 @@ class Sheet(object):
         写入。槽位 x/y 从符号自带属性读,不在此硬编码几何;多行标签以
         单行基线为中心上下展开(行距 13,与图纸标签一致)。
         """
-        lines = [ln for ln in self.L['labels'].get(inst, inst).split('\n') if ln]
+        lines = [ln for ln in (self.L.get('labels') or {}).get(inst, inst).split('\n') if ln]
         if not lines:
             return markup
 
@@ -1019,6 +1174,9 @@ class Sheet(object):
             tag = re.sub(r'\s*stroke-width="[^"]*"', '', tag)
             if 'class="' in tag:
                 return re.sub(r'class="([^"]*)"', r'class="\1 sym-outline"', tag)
+            # 自闭合标签的 class 须插在斜杠前,否则产出 `/ class=..>` 非良构
+            if tag.rstrip().endswith('/>'):
+                return tag.rstrip()[:-2].rstrip() + ' class="sym-outline"/>'
             return tag[:-1].rstrip() + ' class="sym-outline">'
         return re.sub(r'<(?!/)[^>]*>', sub, markup)
 
@@ -1034,7 +1192,7 @@ class Sheet(object):
                 d = 'M%.1f %.1f L%.1f %.1f L%.1f %.1f Z' % (
                     e['x'] + 12, e['y'] - 8, e['x'], e['y'], e['x'] + 12, e['y'] + 8)
             fill = '#ffffff' if k in ('outlet', 'inlet') else '#e8e8e8'
-            out.append('<path class="ext-mark" d="%s" fill="%s"/>' % (d, fill))
+            out.append('<path id="extern-%s" data-extern="%s" data-input-anchor="extern.%s" class="ext-mark" d="%s" fill="%s"/>' % (eid, eid, eid, d, fill))
         return out
 
 
@@ -1065,6 +1223,8 @@ def css(T):
   .ext  { font-size: 10px; fill: #333; }
   .grp  { fill: none; stroke: #000; stroke-width: %(gb).2f;
           stroke-dasharray: 8 5; }
+  .enc { fill: none; stroke: #000; stroke-width: %(sy).2f; stroke-dasharray: 8 5; }
+  .enc-lbl { font-size: 10.5px; fill: #000; }
   .grp-lbl { font-size: 10.5px; fill: #000; }
   .ext-mark { stroke: #000; stroke-width: %(lo).2f; }
   polyline { fill: none; stroke: #000;
@@ -1095,17 +1255,22 @@ def css(T):
      4/8/10px,引线恒为 4px)。改为在实例上按 1/k 补偿,
      线宽随图缩放,同时不受符号自身缩放影响。 */
   :root { --kc: 1; }
-  .sym-outline { stroke-width: calc(%(sy).2f * var(--kc)); }
+  /* fill:none 必须图纸级补回:read_symbol 只嵌形状不嵌符号内样式表,
+     缺了它 SVG 默认 fill=black,凡描边符号(油箱壳体等)整只糊成黑块。 */
+  .sym-outline { fill: none; stroke: currentColor;
+                 stroke-width: calc(%(sy).2f * var(--kc)); }
+  .sym-body-width { stroke-width: calc(%(sy).2f * var(--kc) * var(--body-scale, 1)); }
 
-  /* 符号内部的端口引线。它走油,故随管网压力等级,不随组件本体。
-     判据是"是否走油",而非"画在哪个文件里"。
-     选择器带 line 提高特异性,压过父 g 元素继承来的 sym-outline。
+  /* 符号外接引线随相接管网等级,包含气侧 sense 支路。
+     按已声明连接判断,不以介质排除整类已连接端口。
+     端口类直接作用于各类引线图元,覆盖继承的 sym-outline 线宽。
      注:style 内容未包 CDATA,注释里不可出现尖括号,会破坏 XML。 */
-  line.pl-pressure   { stroke-width: calc(%(hi).2f * var(--kc)); }
-  line.pl-return     { stroke-width: calc(%(lo).2f * var(--kc)); }
-  line.pl-suction    { stroke-width: calc(%(lo).2f * var(--kc)); }
-  line.pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc)); }
-""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': 1.5 * T}
+  .pl-pressure   { stroke-width: calc(%(hi).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-return     { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-suction    { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-sense      { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+  .pl-case_drain { stroke-width: calc(%(lo).2f * var(--kc) * var(--lead-scale, 1)); }
+""" % {'hi': hi, 'lo': lo, 'sy': sy, 'gb': T}
 
 
 def legend(L, T):
@@ -1217,14 +1382,13 @@ def title_block(L, intent, nnet, dnames, catalog=None):
             elif st == 'draft' and typ not in draft:
                 draft.append(typ)
     row2 = ('部件 %d   |   网络 %d   |   气侧支路 %d   |   未知项 %d   |   悬空端口 %d: %s   | '
-            'provisional: %s   | draft: %s'
             % (len(intent['parts']), nnet, len(intent.get('taps') or []),
-               len(intent['unknown']), len(dnames),
-               ' '.join(dnames) if dnames else '无',
-               ' '.join(prov) if prov else '—',
-               ' '.join(draft) if draft else '—'))
-    out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 21, row1))
-    out.append('<text class="tb-t" x="%.1f" y="%.1f">%s</text>' % (x + 10, y + 40, row2))
+               len(intent['unknown']), len(dnames), ' '.join(dnames) if dnames else '无'))
+    row3 = 'provisional: %s   | draft: %s' % (' '.join(prov) if prov else '—',
+                                            ' '.join(draft) if draft else '—')
+    for index,row in enumerate((row1,row2,row3)):
+        out.append('<text class="tb-t" id="title-row-%d" x="%.1f" y="%.1f">%s</text>'
+                   % (index+1,x+10,y+h/2+4+(index-1)*14.4,row))
     return out
 
 
@@ -1243,14 +1407,34 @@ def main(argv=None):
     with io.open(catalog_path, encoding='utf-8') as f:
         catalog = json.load(f)
     # 预检器钩子（#4/#8）：parse 后、布局前强制断言；ERROR 则报齐并退出，布局一行不执行。
-    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read())
+    # 模板门禁（#22）：intent 同目录唯一 *受控模板.yaml 即启用三向对账+签认分级。
+    _tplp = preflight.default_template_path(src)
+    _tpl = preflight.load_yaml_text(_tplp)[0] if _tplp else None
+    rep = preflight.preflight(intent, catalog, io.open(src, encoding='utf-8').read(),
+                              template=_tpl)
     if not rep['ok']:
         preflight.emit_preflight_failure(rep)
         sys.exit(1)
     with io.open(os.path.join(workdir, '1#系统.layout.json'), encoding='utf-8') as f:
         layout = json.load(f)
+    try:
+        drawable_bounds(layout)
+    except ValueError as error:
+        sys.exit(str(error))
+    types = {c['component_type']: c for c in catalog['components']}
+    contract_issues = symbol_contract(intent, types, layout['nodes'], workdir, cat_dir)
+    # 镜像许可审计与符号端口契约同出口:违法即 contract 级硬失败(#63)。
+    mirror_issues, _mirror_axes = mirror_contract(
+        intent, types, layout['nodes'], workdir, cat_dir)
+    contract_issues.extend(mirror_issues)
+    if contract_issues:
+        sys.exit(write_contract_failure(workdir, endpoint_usage(intent, types, layout['nodes']),
+                                        contract_issues, intent.get('unknown') or []))
     s = Sheet(intent, layout, catalog, cat_dir=cat_dir, workdir=workdir)
-    s.place()
+    try:
+        s.place()
+    except ValueError as error:
+        sys.exit(str(error))
     s.build_textboxes()
     _segs, junc, bus, polys = s.wire()
 
@@ -1263,11 +1447,28 @@ def main(argv=None):
 
     # 先求交叉,再把跨越线打断,最后出图元。顺序不能反:
     # 打断后的折线不能再用来求交叉(断口处已无线段)。
-    cross = s.find_crossings(junc, s.polys)
-    segs = []
-    for lt, pts in s.polys:
-        for run in s.split_h(pts, cross):
-            segs.append(s.polyline(run, lt))
+    crossing_events = renderer_events(s.polys, s.poly_anchors, declared_topology(intent,catalog))
+    junction_events = [e for e in crossing_events if e['kind']=='junction']
+    junc = [tuple(e['position']) for e in junction_events]
+    cross = s.find_crossings(junc,s.polys)
+    segs, fragments = [], []
+    for index, ((lt, pts), anchor) in enumerate(zip(s.polys, s.poly_anchors)):
+        for part, run in enumerate(s.split_h(pts, cross)):
+            sid = 'wire-%d-%d' % (index, part)
+            attr = 'data-bus' if anchor.startswith('buses.') else 'data-edge'
+            value = '@' + anchor[6:] if attr == 'data-bus' else anchor
+            segs.append(s.polyline(run, lt).replace('/>',
+                ' id="%s" %s="%s" data-input-anchor="%s"/>' % (sid, attr, value, anchor)))
+            fragments.append({'id': sid, 'anchor': anchor, 'kind': 'run'})
+    arcs = []
+    for index, ((x, y, lt), markup) in enumerate(zip(cross, s.bridge_arcs(cross))):
+        anchors = [anchor for (line_type, pts), anchor in zip(s.polys, s.poly_anchors)
+                   if line_type == lt and any(abs(a[1] - y) < .1 and abs(b[1] - y) < .1
+                   and min(a[0], b[0]) < x < max(a[0], b[0]) for a, b in zip(pts, pts[1:]))]
+        anchor = anchors[0] if len(anchors) == 1 else ''
+        sid = 'bridge-%d' % index
+        arcs.append(markup.replace('<path ', '<path id="%s" data-edge="%s" data-input-anchor="%s" ' % (sid, anchor, anchor)))
+        fragments.append({'id': sid, 'anchor': anchor, 'kind': 'bridge'})
 
     # 吸油线型:连续 1.0 T 基线 + 周期性五斜杠组。
     # 不能用 stroke-dasharray——参考图中的基线是连续的,斜杠是独立标记。
@@ -1276,8 +1477,8 @@ def main(argv=None):
     for key in ('legend', 'title_block'):
         q = layout.get(key)
         if q:
-            blocked.append((q['x'] - layout.get('canvas_shift_x', 0), q['y'],
-                            q['x'] + q['w'] - layout.get('canvas_shift_x', 0),
+            blocked.append((q['x'], q['y'],
+                            q['x'] + q['w'],
                             q['y'] + q['h']))
     blocked += [(x - 9, y - 9, x + 9, y + 9) for x, y in junc]
     blocked += [(x - 11, y - 11, x + 11, y + 11) for x, y, _lt in cross]
@@ -1328,9 +1529,7 @@ def main(argv=None):
     T = layout.get('style', {}).get('base_line_width_T', 1.2)
     P.append('<style>%s</style>' % css(T))
     P.append('<rect x="0" y="0" width="%d" height="%d" fill="#ffffff"/>' % (W, H))
-    # 左侧边界标记的说明文字向左伸出约 110px(anchor=end),
-    # 若 extern.x=60 则文字被裁在画布外。整体右移让位。
-    SHIFT = layout.get('canvas_shift_x', 0)
+    # All drawing and panel coordinates already use root SVG units.
     P.append('<text class="banner" x="%d" y="26">CONCEPT - NOT FOR DESIGN RELEASE</text>' % 40)
     P.append('<text class="lbl" x="%d" y="44">1# 液压系统原理图  '
              '(由 %s 生成,临时/草稿符号按图签披露,不可用于工程放行)</text>'
@@ -1340,14 +1539,15 @@ def main(argv=None):
     body.append('<g id="groups">%s</g>' % '\n'.join(s.groups()))
     body.append('<g id="lines">%s</g>' % '\n'.join(segs))
     body.append('<g id="suction-markers">%s</g>' % '\n'.join(smarks))
-    body.append('<g id="bridges">%s</g>' % '\n'.join(s.bridge_arcs(cross)))
+    body.append('<g id="bridges">%s</g>' % '\n'.join(arcs))
     body.append('<g id="junctions">%s</g>' % '\n'.join(
-        '<circle class="jn" cx="%.1f" cy="%.1f" r="3"/>' % j for j in junc))
+        '<circle class="jn" cx="%.1f" cy="%.1f" r="3" id="junction-%d" data-edges="%s"/>'
+        % (*e['position'],index,' '.join(e['input_anchors'])) for index,e in enumerate(junction_events)))
     body.append('<g id="externs">%s</g>' % '\n'.join(s.externs_marks()))
     body.append('<g id="symbols">%s</g>' % '\n'.join(s.symbols()))
     body.append('<g id="dangling">%s</g>' % '\n'.join(dmarks))
     body.append('<g id="labels">%s</g>' % '\n'.join(s.texts()))
-    P.append('<g id="sheet" transform="translate(%d,0)">%s</g>' % (SHIFT, '\n'.join(body)))
+    P.append('<g id="sheet">%s</g>' % '\n'.join(body))
     P.append('<g id="legend">%s</g>' % '\n'.join(legend(layout, T)))
     nnet = sum(len(p) - 1 for p in intent['paths'])
     P.append('<g id="title">%s</g>' % '\n'.join(title_block(layout, intent, nnet, dnames, catalog)))
@@ -1356,7 +1556,19 @@ def main(argv=None):
     outp = os.path.join(workdir, '1#系统原理图.svg')
     with io.open(outp, 'w', encoding='utf-8') as f:
         f.write('\n'.join(P))
+    from assembly_checks import render_enclosures
+    from endpoint_usage import resolve_symbol
+    render_enclosures(outp, intent, layout,
+                      lambda ref: resolve_symbol(ref, workdir, cat_dir),
+                      mirror_axes=s.mirror_axes())
+    write_manifest(workdir, intent, catalog, fragments)
     print('wrote', outp)
+    mirrors = s.mirror_axes()
+    if mirrors:
+        # 追溯披露:镜像是许可登记下的绘图操作,不改变端口身份,
+        # 也不提升 provisional/draft 成熟度(图签仍按 symbol_status 披露)。
+        print('mirror: %s (逐组件镜像许可登记;端口身份不变,不提升成熟度)'
+              % ' '.join('%s=%s' % (i, a) for i, a in sorted(mirrors.items())))
     print('nets=%d  segments=%d  junctions=%d  buses=%s'
           % (nnet, len(segs), len(junc), {k: len(v) for k, v in bus.items()}))
     for w in s.warn:

@@ -49,6 +49,7 @@
 │       ├── examples/                     # 正例 / 负例（含期望报告）/ 预检放行样例
 │       └── fixtures/                     # selftest 金样基准
 ├── 1#系统原理图/                          # 1# 系统端到端实证工作区（intent/layout/SVG/校验报告）
+├── editor-proto/                         # #60/#58/#59 拖拽写回闭环原型（无导出；#63 起含镜像操作面，见 research/glm-followup-20261012/mirror-editor.md）
 ├── docs/规格与需求.md                     # spec + PRD 合一评审稿（现状快照，非规范源）
 ├── issues/                               # wayfinder 决策票（本地镜像）
 ├── research/                             # spec 素材
@@ -62,8 +63,12 @@
 ```bash
 pip install ruamel.yaml jsonschema
 
-# 1) 出图能力回归（金样逐字节 + 闸门沙箱 + 负正例），应 PASS 3/3
+# 1) skill 自包含回归（A–F），不依赖外层项目/编辑器目录
 python .agents/skills/hydraulic-schematic/scripts/selftest.py
+
+# 1b) 本仓库集成回归（编辑器 HTTP、活动项目油箱/蓄压器、独立 skill 包）
+# 此项不包含在上面的 skill 自检中；在仓库内另行执行并单独记录结果。
+python -m unittest discover -s tests/repository -v
 
 # 2) 符号库结构校验（L1 合法 XML / L2 端口组唯一 / L3 catalog↔symbol 交叉）
 python .agents/skills/hydraulic-schematic/scripts/check_library.py

@@ -1,0 +1,100 @@
+{
+  "frozen_head": "ff212000df32c8f7ef3c281f004a0904cf29f6c9",
+  "unviewed_items": 17,
+  "before": {
+    "delivery": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "READBACK_ITEMS"
+      ]
+    },
+    "local": {
+      "status": "current",
+      "complete": false,
+      "review_status": "pending",
+      "review_binding": "1a6e4be89bf2264895aac407a3465ce0d06184ed172b2f4518db362fbff4b1a1",
+      "review_counts": {
+        "confirmed": 0,
+        "questioned": 0,
+        "unviewed": 17
+      },
+      "object_count": 17,
+      "crop_count": 8,
+      "unavailable": [],
+      "manifest": "readback-manifest.json",
+      "html": "readback.html"
+    }
+  },
+  "after_deleting_only_manifest": {
+    "delivery": {
+      "ready": true,
+      "status": "ready",
+      "blocking_checks": []
+    },
+    "local": {
+      "status": "not_generated",
+      "complete": false,
+      "required": false
+    }
+  },
+  "after_revalidation": {
+    "delivery": {
+      "ready": false,
+      "status": "incomplete",
+      "blocking_checks": [
+        "PERCEPTUAL"
+      ]
+    },
+    "local": {
+      "status": "not_generated",
+      "complete": false,
+      "required": false
+    },
+    "coverage_ids": [
+      "V1",
+      "V2",
+      "V3",
+      "V4",
+      "V5",
+      "V6",
+      "V7",
+      "V8",
+      "V9",
+      "V10",
+      "V11",
+      "V12",
+      "V13",
+      "V14",
+      "V15",
+      "V16",
+      "V17",
+      "V18",
+      "V19",
+      "B6.avoid_corridor",
+      "B7",
+      "B1",
+      "B2",
+      "B3",
+      "B4",
+      "B5",
+      "B6.group_padding",
+      "PNG",
+      "PERCEPTUAL"
+    ]
+  },
+  "fixture_note": "Whole-sheet confirmation was simulated only in this isolated regression fixture; no local review was recorded.",
+  "after_copied_revalidation": {
+    "delivery": {
+      "ready": true,
+      "status": "ready",
+      "blocking_checks": []
+    },
+    "local": {
+      "status": "not_generated",
+      "complete": false,
+      "required": false
+    },
+    "perceptual": "confirmed"
+  }
+}

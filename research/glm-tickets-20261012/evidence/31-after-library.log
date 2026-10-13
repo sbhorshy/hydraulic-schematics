@@ -1,0 +1,93 @@
+
+[PASS ] accumulator.svg  <- 可正式出图
+
+[WARN ] air-charging-valve.svg
+   ! C11 非正式出图件 (status=draft, source-ref=REDRAWN_FROM:Air-Charging Valve for Accumulator.svg)
+
+[WARN ] bootstrap-type-reservoir.svg
+   ! C11 非正式出图件 (status=draft, source-ref=缺)
+
+[WARN ] check-valve-spring.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=Drawing2.dxf)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] check-valve.svg
+   ! C11 非正式出图件 (status=None, source-ref=缺)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] edp-provisional-stroke.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=NONE_NO_STANDARD_PAGE_SUPPLIED)
+
+[WARN ] emp-provisional-stroke.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=TRACED_FROM:Electric motor-driven variable-displacement pump.svg)
+
+[WARN ] filter-line-shutoff-dp-return-bypass.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=CONSTRUCTED:filter-line-shutoff-dp.svg v4.3 + check-valve-spring.svg x0.5 rot90)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] filter-line-shutoff-dp.svg
+   ! C11 非正式出图件 (status=None, source-ref=PENDING_STANDARD_ID:clause-6.1.6)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] filter-line-shutoff-stroke.svg
+   ! C11 非正式出图件 (status=None, source-ref=PENDING_STANDARD_ID:clause-6.1.6)
+   ! C3 data-component-type=filter_line_shutoff 不在目录中
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[PASS ] firewall-shutoff-valve.svg  <- 可正式出图
+
+[ERROR] fsov-provisional-stroke.svg
+   x C4 目录声明的端口在 SVG 中缺失: main_lower
+   x C4 目录声明的端口在 SVG 中缺失: main_upper
+   x C5 SVG 存在目录未声明的端口: command
+   x C5 SVG 存在目录未声明的端口: inlet
+   x C5 SVG 存在目录未声明的端口: outlet
+   ! C11 非正式出图件 (status=provisional, source-ref=NONE_NO_STANDARD_PAGE_SUPPLIED)
+   ! C4 目录 svg_element_id=port-main-upper 在 SVG 中不存在
+   ! C4 目录 svg_element_id=port-main-lower 在 SVG 中不存在
+
+[WARN ] hydraulic-user.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=NONE_NO_STANDARD_PAGE_SUPPLIED)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] pressure-gauge.svg
+   ! C11 非正式出图件 (status=draft, source-ref=REDRAWN_FROM:Pressure Gauge.svg)
+
+[WARN ] pressure-switch.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=root/Pressure Switch.svg potrace traced original, 4.0 px per unit measured)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] pressure-transducer.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=root/Pressure Transducer.svg potrace traced original, 4.0 px per unit measured)
+   ! C3 data-component-type=pressure_transducer 不在目录中
+
+[WARN ] priority-valve.svg
+   ! C11 非正式出图件 (status=draft, source-ref=REDRAWN_FROM:已标注/priority-valve-stroke.svg)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] quick-disconnect-coupling-disconnected.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=root/Quick Disconnect Coupling_disconnected.svg potrace traced original, 4.0 px per unit measured)
+   ! C3 data-component-type=quick_disconnect_coupling 不在目录中
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[ERROR] quick-disconnect-coupling.svg
+   x C9 width 带单位 "mm":pt/px 混用会使端口与图形分离
+   x C9 height 带单位 "mm":pt/px 混用会使端口与图形分离
+   x C3 缺 data-component-type
+   x C8 data-symbol-form=None,须为 stroke_geometry
+   x C4 缺 connection-points 组
+   ! C11 非正式出图件 (status=None, source-ref=缺)
+
+[WARN ] relief-valve.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=NONE_NO_STANDARD_PAGE_SUPPLIED)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] temperature-switch.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=root/Temperature Switch.svg potrace traced original, 4.0 px per unit measured)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+[WARN ] temperature-transducer.svg
+   ! C11 非正式出图件 (status=provisional, source-ref=root/Temperature Transducer.svg potrace traced original, 4.0 px per unit measured)
+   ! C12 注释含未确认项,须在引用它的 L0 文件 unknown 中登记
+
+---- 22 个文件, 2 个有 ERROR, 2 个可正式出图 ----

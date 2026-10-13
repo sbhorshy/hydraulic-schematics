@@ -1,0 +1,137 @@
+{
+  "run_id": "team-dc97746c8a834c14809bc0032e641edb",
+  "base": "0cc5e1cc8d1a78188bbcb9bb7c1ffd6b006dfb63",
+  "integration_head": "38f890f580123fc9448d1443fe0249afc0e472e7",
+  "expected_model": "GLM-5.3-Flash",
+  "tasks": {
+    "server-bounds": {
+      "state": "integrated",
+      "candidate": "839e85337b418d49cefe6be357e20db1a1178ed3",
+      "trial_commit": "057bfc6237d23028e763a72e95056cbb27ed8382",
+      "validation": {
+        "status": "passed",
+        "tests": [
+          {
+            "id": "editor-tests",
+            "status": "passed",
+            "exit_code": 0,
+            "seconds": 72.71543677400041,
+            "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/checks/10b56069a037496d902acf6911eb3164/test-0.log",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests/repository",
+              "-p",
+              "test_editor_*.py",
+              "-v"
+            ]
+          }
+        ],
+        "executor": "WSL controller; explicit argv; no shell=True",
+        "source_digest": "d6ed734ff0e14a8852c0ef7db98b70b56e60267fa708aad09324778653e9ea75",
+        "commit": "839e85337b418d49cefe6be357e20db1a1178ed3",
+        "source_unchanged": true,
+        "finished_at": "2026-10-13T02:59:36.780002+00:00"
+      },
+      "integration_validation": {
+        "status": "passed",
+        "tests": [
+          {
+            "id": "editor-regressions",
+            "status": "passed",
+            "exit_code": 0,
+            "seconds": 75.24209514999984,
+            "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/checks/800bc3c0d1a6486582745ec50ac8250d/test-0.log",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests/repository",
+              "-p",
+              "test_editor_*.py",
+              "-v"
+            ]
+          }
+        ],
+        "executor": "WSL controller; explicit argv; no shell=True",
+        "source_digest": "d6ed734ff0e14a8852c0ef7db98b70b56e60267fa708aad09324778653e9ea75",
+        "commit": "057bfc6237d23028e763a72e95056cbb27ed8382",
+        "source_unchanged": true,
+        "finished_at": "2026-10-13T03:04:27.924118+00:00"
+      }
+    },
+    "frontend-bounds": {
+      "state": "integrated",
+      "candidate": "f05a025f22d94c78283e52b876834d288587b6bc",
+      "trial_commit": "38f890f580123fc9448d1443fe0249afc0e472e7",
+      "validation": {
+        "status": "passed",
+        "tests": [
+          {
+            "id": "editor-tests",
+            "status": "passed",
+            "exit_code": 0,
+            "seconds": 71.95157714199922,
+            "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/checks/e80b97b709a44876b6c8cfce89f6e2a2/test-0.log",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests/repository",
+              "-p",
+              "test_editor_*.py",
+              "-v"
+            ]
+          }
+        ],
+        "executor": "WSL controller; explicit argv; no shell=True",
+        "source_digest": "fc1fa3bfb71ebac3bf54869e31758d75e6e2a7fd04f087cdb8d03c7349cdf8b5",
+        "commit": "f05a025f22d94c78283e52b876834d288587b6bc",
+        "source_unchanged": true,
+        "finished_at": "2026-10-13T03:37:45.728465+00:00"
+      },
+      "integration_validation": {
+        "status": "passed",
+        "tests": [
+          {
+            "id": "editor-regressions",
+            "status": "passed",
+            "exit_code": 0,
+            "seconds": 71.84365956399961,
+            "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/checks/2f464c14a3a84d3e8849907ac461e894/test-0.log",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests/repository",
+              "-p",
+              "test_editor_*.py",
+              "-v"
+            ]
+          }
+        ],
+        "executor": "WSL controller; explicit argv; no shell=True",
+        "source_digest": "fc1fa3bfb71ebac3bf54869e31758d75e6e2a7fd04f087cdb8d03c7349cdf8b5",
+        "commit": "38f890f580123fc9448d1443fe0249afc0e472e7",
+        "source_unchanged": true,
+        "finished_at": "2026-10-13T03:43:09.045830+00:00"
+      }
+    }
+  },
+  "counts": {
+    "server-bounds-validation": 31,
+    "server-bounds-integration_validation": 31,
+    "frontend-bounds-validation": 35,
+    "frontend-bounds-integration_validation": 35
+  },
+  "external_agent_usage": "unknown"
+}

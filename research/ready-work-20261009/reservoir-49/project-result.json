@@ -1,0 +1,355 @@
+{
+  "driver_exit": 1,
+  "fail_count": 13,
+  "warn_count": 9,
+  "checks": [
+    {
+      "id": "V3",
+      "result": "fail",
+      "detail": "管线折返形成越界线头: ln-sense (1404.0, 89.5) -> (1422.0, 89.5) -> (1240.0, 89.5)",
+      "component": "ACV-001",
+      "port": "accumulator_gas",
+      "anchor": "taps[0]",
+      "position": [
+        1422.0,
+        89.5
+      ],
+      "direction": [
+        1.0,
+        0.0
+      ],
+      "distance": 0.0,
+      "kind": "foldback",
+      "pipe_index": 45,
+      "segment": [
+        [
+          1404.0,
+          89.5
+        ],
+        [
+          1422.0,
+          89.5
+        ],
+        [
+          1240.0,
+          89.5
+        ]
+      ]
+    },
+    {
+      "id": "V2",
+      "result": "fail",
+      "detail": "管线穿越 ACV-001 本体 133.80 单位,段 (1422.0, 89.5)->(1240.0, 89.5)",
+      "component": "ACV-001",
+      "port": "accumulator_gas",
+      "anchor": "taps[0]",
+      "position": [
+        1331.0,
+        89.5
+      ],
+      "direction": [
+        1.0,
+        0.0
+      ],
+      "distance": 0.0,
+      "kind": "body_crossing",
+      "obstacle": "ACV-001",
+      "pipe_index": 45,
+      "segment": [
+        [
+          1422.0,
+          89.5
+        ],
+        [
+          1240.0,
+          89.5
+        ]
+      ],
+      "penetration": 133.80000000000018
+    },
+    {
+      "id": "V13",
+      "result": "fail",
+      "detail": "管线自身折返形成越界线头: ln-sense (1374.0, 89.5) -> (1392.0, 89.5) -> (1210.0, 89.5)"
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Actual endpoints disagree with input paths[2][0->1]: ['@CASE', '@PRESS', 'EDP-001.pressure_out'] (unattached [])",
+      "kind": "additional_or_wrong_connection",
+      "anchor": "paths[2][0->1]",
+      "expected_endpoints": [
+        "EDP-001.pressure_out",
+        "@PRESS"
+      ],
+      "actual_endpoints": [
+        "@CASE",
+        "@PRESS",
+        "EDP-001.pressure_out"
+      ],
+      "positions": [
+        [
+          650.0,
+          330.0
+        ],
+        [
+          910.0,
+          330.0
+        ]
+      ],
+      "svg_ids": [
+        "wire-3-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Actual endpoints disagree with input paths[3][0->1]: ['@CASE', '@PRESS', 'EMP-001.pressure_out'] (unattached [])",
+      "kind": "additional_or_wrong_connection",
+      "anchor": "paths[3][0->1]",
+      "expected_endpoints": [
+        "EMP-001.pressure_out",
+        "@PRESS"
+      ],
+      "actual_endpoints": [
+        "@CASE",
+        "@PRESS",
+        "EMP-001.pressure_out"
+      ],
+      "positions": [
+        [
+          650.0,
+          650.0
+        ],
+        [
+          910.0,
+          650.0
+        ]
+      ],
+      "svg_ids": [
+        "wire-4-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Actual endpoints disagree with input taps[0]: ['ACC-001.gas_port', 'ACV-001.accumulator_gas', 'ACV-001.charge_port'] (unattached [(1422.0, 89.5)])",
+      "kind": "additional_or_wrong_connection",
+      "anchor": "taps[0]",
+      "expected_endpoints": [
+        "ACV-001.accumulator_gas",
+        "ACC-001.gas_port"
+      ],
+      "actual_endpoints": [
+        "ACC-001.gas_port",
+        "ACV-001.accumulator_gas",
+        "ACV-001.charge_port"
+      ],
+      "positions": [
+        [
+          1240.0,
+          190.0
+        ],
+        [
+          1422.0,
+          89.5
+        ]
+      ],
+      "svg_ids": [
+        "wire-44-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Repeated visible segment within taps[0]",
+      "kind": "duplicate_connection_geometry",
+      "anchor": "taps[0]",
+      "svg_ids": [
+        "wire-44-0"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Visible geometry joins separate input networks: @CASE, @PRESS, CDF-001.inlet, EDP-001.case_drain, EDP-001.pressure_out, EMP-001.case_drain, EMP-001.pressure_out, PF-001.inlet, PRV-002.inlet",
+      "kind": "wrong_network_join",
+      "anchor": "paths[15][0->1]",
+      "endpoints": [
+        "@CASE",
+        "@PRESS",
+        "CDF-001.inlet",
+        "EDP-001.case_drain",
+        "EDP-001.pressure_out",
+        "EMP-001.case_drain",
+        "EMP-001.pressure_out",
+        "PF-001.inlet",
+        "PRV-002.inlet"
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "buses.PRESS",
+        "paths[15][0->1]",
+        "paths[29][0->1]",
+        "paths[2][0->1]",
+        "paths[30][0->1]",
+        "paths[31][0->1]",
+        "paths[3][0->1]",
+        "paths[4][0->1]"
+      ]
+    },
+    {
+      "id": "V10",
+      "result": "fail",
+      "detail": "Visible geometry joins separate input networks: ACC-001.gas_port, ACV-001.accumulator_gas, ACV-001.charge_port, PG-001.pressure_sense",
+      "kind": "wrong_network_join",
+      "anchor": "taps[0]",
+      "endpoints": [
+        "ACC-001.gas_port",
+        "ACV-001.accumulator_gas",
+        "ACV-001.charge_port",
+        "PG-001.pressure_sense"
+      ],
+      "input_anchors": [
+        "taps[0]",
+        "taps[1]"
+      ]
+    },
+    {
+      "id": "V14",
+      "result": "fail",
+      "detail": "Distinct input networks touch at a terminal/T; a marker cannot legalize this connection",
+      "kind": "false_connection",
+      "position": [
+        650.0,
+        330.0
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "paths[2][0->1]"
+      ],
+      "networks": [
+        "@CASE",
+        "@PRESS"
+      ]
+    },
+    {
+      "id": "V14",
+      "result": "fail",
+      "detail": "Distinct input networks touch at a terminal/T; a marker cannot legalize this connection",
+      "kind": "false_connection",
+      "position": [
+        650.0,
+        650.0
+      ],
+      "input_anchors": [
+        "buses.CASE",
+        "paths[3][0->1]"
+      ],
+      "networks": [
+        "@CASE",
+        "@PRESS"
+      ]
+    },
+    {
+      "id": "V14",
+      "result": "fail",
+      "detail": "Distinct input networks touch at a terminal/T; a marker cannot legalize this connection",
+      "kind": "false_connection",
+      "position": [
+        1252.0,
+        89.5
+      ],
+      "input_anchors": [
+        "taps[0]",
+        "taps[1]"
+      ],
+      "networks": [
+        "ACC-001.gas_port",
+        "ACV-001.charge_port"
+      ]
+    },
+    {
+      "id": "V19",
+      "result": "fail",
+      "detail": "构图预算 B1：交叉 1 处 > 0，须改道消除"
+    }
+  ],
+  "stages": [
+    {
+      "stage": "setup",
+      "status": "completed",
+      "elapsed_s": 2.46041
+    },
+    {
+      "stage": "preflight",
+      "status": "completed",
+      "elapsed_s": 0.215806
+    },
+    {
+      "stage": "local_readback",
+      "status": "completed",
+      "object_count": 134,
+      "crop_count": 62,
+      "elapsed_s": 3.557824
+    }
+  ],
+  "round_stages": [
+    [
+      {
+        "stage": "layout",
+        "status": "completed",
+        "elapsed_s": 0.000323
+      },
+      {
+        "stage": "render",
+        "status": "completed",
+        "elapsed_s": 0.366218
+      },
+      {
+        "stage": "readback",
+        "status": "completed",
+        "elapsed_s": 1.018458
+      },
+      {
+        "stage": "validate",
+        "status": "completed",
+        "elapsed_s": 3.690574
+      }
+    ]
+  ],
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "V2",
+      "V3",
+      "V4",
+      "V10",
+      "V13",
+      "V14",
+      "V19",
+      "B1",
+      "PERCEPTUAL",
+      "READBACK_ITEMS"
+    ]
+  },
+  "canonical_asset_sha256": "516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444",
+  "project_asset_sha256": "516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444",
+  "byte_identical": true,
+  "source_asset_binding": [
+    {
+      "source": "/mnt/d/file/comac/组件库/.scratch/ready-work/issue-49/1#系统原理图/symbols/bootstrap-type-reservoir.svg",
+      "destination": "symbols/seed-516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444/bootstrap-type-reservoir.svg",
+      "sha256": "516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444"
+    }
+  ],
+  "artifact_sha256": {
+    "1#系统原理图.svg": "d3dfe4c3c5c0b7a606d4705dd46c6a1a2a7ad829e0a269eb76f5b9561e2382c3",
+    "sheet-readback.png": "86c4652f34c1e1e235c8f0255930de0cf5ab46ea58fbc25cb583b3af35b00bb5",
+    "validation-report.json": "1dfade953a8f2145ac447610d487df16769d590c1728d29c0b9dba150d294976",
+    "convergence-report.json": "3a25be6c2f1ed451c06115382e173ab6bc9062badd687c1f9d8c1da2efa273e2"
+  },
+  "full_artifacts": ".scratch/ready-work/issue-49-evidence/project-final",
+  "tested_code_head": "d5143010a22e81a646d67c2eb66b7fa833760f52"
+}

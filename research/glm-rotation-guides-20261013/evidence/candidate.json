@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "tests": [
+    {
+      "id": "editor-tests",
+      "status": "passed",
+      "exit_code": 0,
+      "seconds": 78.02477802499925,
+      "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-6f47b7def90849adadb16da23fd54725/checks/ad95f283abab426dafc87d6163eec7a9/test-0.log",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/repository",
+        "-p",
+        "test_editor_*.py",
+        "-v"
+      ]
+    }
+  ],
+  "executor": "WSL controller; explicit argv; no shell=True",
+  "source_digest": "a152e50551426b54d7340f0c34e9255d7674d0857a048320bcd3b7662796eea3",
+  "commit": "2f6c6df4163aba1a3ef5fe923b0c50f4451fb7a8",
+  "source_unchanged": true,
+  "finished_at": "2026-10-13T06:11:18.225257+00:00"
+}

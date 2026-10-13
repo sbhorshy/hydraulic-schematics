@@ -1,0 +1,494 @@
+{
+  "audit_head": "e9110386b963d88b47f5d2fccff47a52661fbc83",
+  "source_capture": "f3a00952fd5d13fffe85db4740c00fd064d60918",
+  "selftest_proof_head": "a903a04b8a86530c505f7de6108eeb46f09c4fa3",
+  "skill_file_count": 94,
+  "skill_files": [
+    {
+      "path": ".agents/skills/hydraulic-schematic/SKILL.md",
+      "sha256": "c75f549b184707fa4067bff9d98be3eefa350d08adec4c61a5f00b0f95be6859",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/agents/openai.yaml",
+      "sha256": "7a66173b082e7ffc67d9058eae0ffbf16824c468e0ed8b2efab3725f6b25f450",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/_template.svg",
+      "sha256": "d0e7b0347dff873b8d996900df9087ec9b2d944f29e3e40d4cc30a43404605eb",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/accumulator.svg",
+      "sha256": "79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/air-charging-valve.svg",
+      "sha256": "6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/bootstrap-type-reservoir.svg",
+      "sha256": "516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/check-valve-spring.svg",
+      "sha256": "e5c2f0bc44f0a88bdf68f52bccdcf62079368c11fe9c5deb34783f4833d819da",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/check-valve.svg",
+      "sha256": "25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/component-catalog.json",
+      "sha256": "19c31680272f93eb9564dcffff03d31972eb1196dc255e1adc4f24ab883dd664",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/edp-provisional-stroke.svg",
+      "sha256": "c65046221c863ebb68bc449b0c14622451ff32698738895670651cfe639e66fb",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/emp-provisional-stroke.svg",
+      "sha256": "abd66309a9f86fb68c1095796fef516b799ce5eb78205854cd1add3b8ac7756b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-dp-return-bypass.svg",
+      "sha256": "45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/filter-line-shutoff-stroke.svg",
+      "sha256": "dfa03b9ad0c817412c75c0da507b50516ab5666b129c22f462d62fa9b3eb8f0d",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/firewall-shutoff-valve.svg",
+      "sha256": "4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/fsov-provisional-stroke.svg",
+      "sha256": "322d57396abc5479a6842f7f2f952dc6632a0321c3b4f0c2f25af7e1e373f61b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/pressure-gauge.svg",
+      "sha256": "8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/pressure-switch.svg",
+      "sha256": "7702cdc9ebe5d1b7c7350cb3412cbe7737469f60f92b6caf5a78dc737688921f",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/pressure-transducer.svg",
+      "sha256": "8d51ec9ca68d62173b0d3a9d451da3f91378e9b5d385806ddc327b57452753c5",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/quick-disconnect-coupling.svg",
+      "sha256": "d4212e4153a5c823bb6d2494d13f17791b810ea8af684689b28292e005f7d088",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/relief-valve.svg",
+      "sha256": "4fe15dc5d7d3fc6da0d96f99abda4f0f660427fdba2e6508486b0953a8e93bf5",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/temperature-switch.svg",
+      "sha256": "985616e02184732b2a992001190cb4ea3f4f899d4a5e430a9b1770aafb90e35e",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/component-library/temperature-transducer.svg",
+      "sha256": "fb18279bf9c038fb15570ff439649a012d5a6517d439c1e400cb825d0cd8a3cc",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/contracts/l0-input-contract.schema.json",
+      "sha256": "2b28e49cdf964e0dbe54eb0ec4f907b32ac8facd9181c53b3680698a18f9c45f",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/1#系统.layout.json",
+      "sha256": "c9f3de4ab89a8524cb491f222984feafe98a82dfb15f80a161a65970d024e43e",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/aircraft_hydraulic_system.sysml",
+      "sha256": "966ce52609d22624f7a20eaf8e0bb8d01719c7dc07d9fff1115ca75b5090a64f",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/change-scope-global.json",
+      "sha256": "acee516bb13a9cc20e68ad4394437502cbee8d7cda03f76fc0c56155ec7ad8b7",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/change-scope-local.json",
+      "sha256": "f549273c0bba7c13bf0f4162546a2a00d516123c8f2d55853a5dc953f510df18",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/negative-group-in-path.expected-report.json",
+      "sha256": "d86b3df70f549edfae6f582006aa0147b0f147cfb5a8bb3bcaf4ce27cff06b43",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/negative-group-in-path.intent.yaml",
+      "sha256": "ee71716e478ce1f3e80341ae9b128ef6baeb8c465ca96616de1d62b3973dd179",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/negative-mixed-violations.intent.yaml",
+      "sha256": "71908e567c602cc316b2a151b1d062e6250d2e7fd2d3f264546a4e7a85607bec",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/negative-sensing-in-path.expected-report.json",
+      "sha256": "aeb5c17f2dc9af8bffc4c87a1be024ac5ef3180994cb52b8b5c47fa27d0e9662",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/negative-sensing-in-path.intent.yaml",
+      "sha256": "8fed2b1b0e0363d209941fe8175403d916df6c3b4b21f69cf947dce908deb3ad",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/positive-preflight-cleared.intent.yaml",
+      "sha256": "dea02d930bf5cb08cd769d59ec49933fbbdcdfd790955932b6a2a70d2bac9424",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/examples/system-1.intent.yaml",
+      "sha256": "aea34550f11d727b3ee330421238f79f326cb6a3610b3afc7e7acfba6ab2134a",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-current/1#系统.intent.yaml",
+      "sha256": "6922e0d3c898be4325aeca9d65d020ddd78f7f4c28206478b4cc072dcb609798",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-current/1#系统.layout.json",
+      "sha256": "c8eace20b197f31ac862c2bff634068147fd43c1def79546bd37ab1d8f553428",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-current/README.md",
+      "sha256": "dba2ab34920fe8bed463bf8c85041f52e5f3a209533c76f49afbabb334f42828",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-small-seed/1#系统.intent.yaml",
+      "sha256": "8a1022cfa12598b2c624b25427a5821515dbfaa035edfbcba2fc27867e4c1ec2",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-small-seed/1#系统.layout.json",
+      "sha256": "51c5dd7cf40516b1c93feed41092f6e2d08fff7a241437b9fae3c63af149f1b0",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/l0-small-seed/README.md",
+      "sha256": "fcd9e0ed48c67838b09a2c4b4758f17ccb7173a71f68e3687e1ed8e62d133a3d",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/sysml-render/aircraft_hydraulic_system_schematic.golden.svg",
+      "sha256": "c24e20fd99bb77a40079303fdcb67fbef85d9d9babb2772016fe6baace39c9e3",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/assets/fixtures/sysml-render/aircraft_hydraulic_system_topology.golden.md",
+      "sha256": "b32b71435e9886f621e24210c728cb2a4204f5766d8f0d7eb436de8973e9c175",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/references/rendering-rules.md",
+      "sha256": "8d2d04ce871d4071f65b35559e3de4999fb20841e5b531f78b903fafc8ad3a59",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/references/symbol-library.md",
+      "sha256": "e96178af72539b2eddde798f36db7bad94cf1a8ccb8fc1a1b492b5b63c5e63fa",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/references/validation.md",
+      "sha256": "044dac4e6cb9652b6ee066b1586f9232614df187a8c97dc6a77066452f50fc37",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/browser_evidence.py",
+      "sha256": "2ce7420c086d4321aac60b370c67fba3f91c2ab9afebbbcab0fcdacd4d526177",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/check_library.py",
+      "sha256": "3a88ad7489dc0c98f73f2688ea43b9899c5d4a691b82c149dd972b4f0b36d90e",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/endpoint_checks.py",
+      "sha256": "026626582f56f3666aaaa3bd18ad9e6a6db87ade133bc53d6590fb9a83f86bae",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/endpoint_usage.py",
+      "sha256": "5465594a19fe8caddbf96e56e85c8b40da9e24e56264dbb57ac9af33cfd874e2",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/junction_semantics.py",
+      "sha256": "4ac584dc6ce94fea7a3c798df6da8cea96dd619c912555c896a9c2b11d0fb82a",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/layout_clearance.py",
+      "sha256": "138b56e238149709bec3f569228fb3cf0098da745738b0ce4dba24e486a7c333",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/layout_engine.py",
+      "sha256": "e2692a11d48bbbacd6a2187f9bc3a2fcf21a6c553fae791cdb1a3b07a676d9c6",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/lead_geometry.py",
+      "sha256": "9c21ddd18d2f0d10fdaf86c24f8e245580d002a377b12374b53a3f1b5b623b95",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/preflight.py",
+      "sha256": "40d245f7d3568c7a6a83f19aaa9db3ff1cf024430fc8a5909f67e1bf70bfdd69",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/proofreading_evidence.py",
+      "sha256": "3c5a3cbb2ae1a9d98926530bc57eea1caebd3bba433c7f2c161ad2bf653db21c",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/proto_optimize.py",
+      "sha256": "cea44eb19af3edcec0cdd7e6f520dcf2984c725e392e9e514142963e1f4c026d",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/rasterize_sheet.py",
+      "sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/readback_review.py",
+      "sha256": "527b675a8cffe638dcebbecc99ff007ae0d0e80c9404275318c75bb34066e410",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/render_aircraft_schematic.py",
+      "sha256": "8b58a8ed1949c0dcf8c7e438e3287af56400db17cb7eed5ab52998e9455478f8",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/render_l0_sheet.py",
+      "sha256": "8f119f1cd19478b72b6b2b57f54cccf92ce6504ea77d65c00b3f9078d74535f5",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/selftest.py",
+      "sha256": "e97f162bc7f659062c7d19d611f959fe05186aff511940fcbe932cbdca96d5ed",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/sheet_diff.py",
+      "sha256": "5b0ef008ca4b31908a0de0d6948fd2240afb646286b71c20780a2ec411eaf507",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/sheet_geometry.py",
+      "sha256": "c63326f6ff69b08c1c73f21da1d6e64e401de482eee92ff5d0f49581de894cd8",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/sheet_version.py",
+      "sha256": "1375b746bfafc4d6be569b69714bd8d084102e0cf569e186235d28dfccc9282b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/stroke_checks.py",
+      "sha256": "dedf5fe3c7499afc7ee643121321626b85d696bf9f7a803b17f37b22669f673b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/svg_paint.py",
+      "sha256": "0754f8dd08c103c4d0dde44582c6530aa2363859c2cd42e8f075379f529c27bb",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_dangling_ports.py",
+      "sha256": "7c8c93d8b8d9dd6e010fba47890fbd6874b226c2fb10fb4d57ba5f90862e2445",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_display_widths.py",
+      "sha256": "dca523c646ad76f162c9b85208c0d0ab470ca4e3e06d0a19cde03a1f366d72e6",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_driver.py",
+      "sha256": "53e4dae076f524bcacb8f8c8b7bd4cee031070938a5a280b7ac72df0fecb269b",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_entrypoints.py",
+      "sha256": "e1f2cd174c140c6dbdaeb0685dec1ea19238c04cee1d58785d8d65c4c3066b5c",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_junction_semantics.py",
+      "sha256": "403183c9397d282cc2f6df6af422e899308a2bd8626677905b301837e2be55a7",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_layout_clearance.py",
+      "sha256": "eb511137c373b94f66e76ff62499bc26bbd67848be2d0fc433b2d05d6fabce63",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_optimizer_budget.py",
+      "sha256": "5c4b19802f51c9e75b754ac3ef67c009216cff8f958f8f1af98906b04fb26611",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_paint_evidence.py",
+      "sha256": "40ec4a415cdb4125858db1472f2c6d689f3f94e754ba0b8738e5fadace85cefe",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_port_geometry.py",
+      "sha256": "81ca896347495116d146b63518bfd8859137b13f1b2a2488c37a3e66fbf91eca",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_priority_valve_leads.py",
+      "sha256": "ed042d3899f5c3ef4d2338a5ed47fa8ff6509fe0f56e5730460bacd587dca810",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_proofreading_evidence.py",
+      "sha256": "f4b2f14687f1a792399e5284e1c55315edbfd4b42023f1af37e0bfba7d85ca83",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_rasterize_sheet.py",
+      "sha256": "6a4fb2b0edf444333f8a016c51119e7831446ea06039e6a2f99a0bd0c34516af",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_readback_review.py",
+      "sha256": "e63bf9aeddfe4cd14bf5868d3048fecebc3842481c50794d0c09021b85878950",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_route_pruning.py",
+      "sha256": "08ce639d0878bdb4b4f1c77a5f2c162f33436231294c6ead07b0346e211e7d60",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_route_terminals.py",
+      "sha256": "13ce971d28178776be967f5c1f5e3f68a972046f690e281005708ac9679647b7",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_sheet_diff.py",
+      "sha256": "93fd5d1b3d599b54cdfb5cc4f72d44d9042ee8bbfcda050f033e585733c85aed",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_suction_markers.py",
+      "sha256": "69309335d90f36f9c6fd7f0965421591ba6e2729985ab75d5d6d98addc2df49d",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_text_display.py",
+      "sha256": "3781083e8e94f7b749f7deed0c618b9989feb726b8cf9823deee3f228aac9ccd",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/test_topology_reconciliation.py",
+      "sha256": "8f75206200314aae1e258b80c04b9c76cf4389476bd5cfe33b1a1f2b74ace714",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/text_checks.py",
+      "sha256": "df753b918739c2c2281c1028d844a2cfda27dfe7ff920b08c94b8a15ab59c174",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/topology_confirm.py",
+      "sha256": "9877ed821510f258c49bd322018bfbb5f428883eb538f95cf3d0dfd04b087c1a",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/topology_reconciliation.py",
+      "sha256": "f6a6f649c406980231067d8a771a43e35d5b1b5a41bbae2f213054bccc592962",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/validate_driver.py",
+      "sha256": "31bdd141a12072a63ef0945cbfd6100acfd1cf48b39f9fbb4eefbb116b4b2084",
+      "same_as_full_selftest": true
+    },
+    {
+      "path": ".agents/skills/hydraulic-schematic/scripts/validate_sheet.py",
+      "sha256": "764d0356aefc0e786dc6a5aa5497e0d838f2140615d229692727fa4eafa76ecf",
+      "same_as_full_selftest": true
+    }
+  ],
+  "snapshot_file_count": 44,
+  "snapshot_hashes_verified": true,
+  "environment": {
+    "python": "3.10.12 (main, Aug 31 2026, 10:18:17) [GCC 11.4.0]",
+    "executable": "/usr/bin/python",
+    "platform": "Linux-5.15.133.1-microsoft-standard-WSL2+-x86_64-with-glibc2.35",
+    "packages": {
+      "ruamel.yaml": "0.19.1",
+      "jsonschema": "4.26.0",
+      "kiwisolver": "1.3.2",
+      "Pillow": "10.1.0",
+      "numpy": "1.24.3"
+    },
+    "prior_environment_comparison": "Prior proof records /usr/bin/python only; dependency/browser/OS versions were not captured, so environmental equivalence is unproven.",
+    "google-chrome": "Google Chrome 148.0.7778.167"
+  }
+}

@@ -1,0 +1,162 @@
+# -*- coding: utf-8 -*-
+"""check_library.py —— 组件库结构校验器（#20 单源化后的快照闸门继任者）。
+
+裁决（#20，2026-09-01）：skill 库 = 唯一规范源，sync_snapshot 的
+「规范源→快照」镜像流退役。原闸门的核心价值——油箱事件的端口回退
+检测——由本工具以单源方式承接：
+
+  L1  每个 *.svg 必须是合法 XML（解析失败即 fail，不静默跳过）。
+  L2  必须含 <g id="connection-points"> 且至少 1 个 data-port-id，
+      组内 id 唯一；全文件元素 id 不得重复（渲染器按实例改名符号内
+      id，文件内重 id 会撞成整图重复，V1 硬 fail——油箱 separator-
+      lower 教训）。已知方言缺口走白名单（每项必须带理由与跟踪票，
+      白名单不是赦免是挂账）。
+  L3  catalog 交叉校验（#21 起默认硬档）：symbol.asset 能解析到库内文件
+      → catalog 声明的端口 id 必须全部存在于符号端口组；解析不到 → 硬失败。
+      --lenient-catalog 可临时降宽容档（解析不到/缺端口只报 INFO）。
+
+CLI:
+    python check_library.py                      # 校验自带库（L3 硬档）
+    python check_library.py --lib DIR --catalog PATH   # 沙箱/测试
+    python check_library.py --lenient-catalog    # L3 临时降宽容档
+退出码: 0 过 / 1 fail。
+"""
+import argparse
+import glob
+import json
+import os
+import sys
+import xml.etree.ElementTree as ET
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+SKILL = os.path.dirname(HERE)
+LIB = os.path.join(SKILL, 'assets', 'component-library')
+
+# 已知方言缺口白名单：name -> (理由, 跟踪票)。新增缺口必须登记到此，
+# 无名 white-walk 会被 L2 拦下——白名单是挂账不是赦免。
+WHITELIST = {
+    'quick-disconnect-coupling.svg': (
+        '连接位变体：无端口组，待重绘补齐；断开位侧别语义已工程确认'
+        '（2026-09-07，右=机侧座端 aircraft_side / 左=地面接口 ground_side，'
+        'unknown: quick-disconnect-port-redraw-pending）', '#22'),
+}
+
+
+def read_symbol_ports(path):
+    """返回 (解析成功?, 端口组存在?, {pid: 1}, 错误信息)。"""
+    try:
+        root = ET.parse(path).getroot()
+    except ET.ParseError as e:
+        return False, False, {}, 'XML 解析失败: %s' % e
+    cps = [g for g in root.iter() if g.get('id') == 'connection-points']
+    if not cps:
+        return True, False, {}, None
+    ports = {}
+    for c in cps[0]:
+        pid = c.get('data-port-id')
+        if not pid:
+            continue
+        ports[pid] = 1
+    return True, True, ports, None
+
+
+def duplicate_ids(path):
+    """全文件元素 id 重复清单（无重复返回空表）。"""
+    import collections
+    root = ET.parse(path).getroot()
+    ids = [e.get('id') for e in root.iter() if e.get('id')]
+    return [i for i, c in collections.Counter(ids).items() if c > 1]
+
+
+def resolve_asset(asset, lib):
+    """catalog 的 symbol.asset 解析到库内文件的路径；解析不到返回 None。"""
+    if not asset:
+        return None
+    base = os.path.basename(asset.replace('\\', '/'))
+    p = os.path.join(lib, base)
+    return p if os.path.isfile(p) else None
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    ap.add_argument('--lib', default=LIB, help='库目录（默认 skill 自带）')
+    ap.add_argument('--catalog', default=None,
+                    help='catalog 路径（默认 <lib>/component-catalog.json）')
+    ap.add_argument('--strict-catalog', dest='strict_catalog', action='store_true',
+                    default=True, help='L3 catalog 交叉校验硬失败（#21 起默认）')
+    ap.add_argument('--lenient-catalog', dest='strict_catalog', action='store_false',
+                    help='L3 临时降宽容档：解析不到/缺端口只报 INFO')
+    a = ap.parse_args(argv)
+
+    cat_path = a.catalog or os.path.join(a.lib, 'component-catalog.json')
+    fails, infos = [], []
+
+    # ---- L1/L2 端口 lint ----
+    svgs = sorted(glob.glob(os.path.join(a.lib, '*.svg')))
+    if not svgs:
+        fails.append('库内无 SVG：%s' % a.lib)
+    port_index = {}
+    for p in svgs:
+        name = os.path.basename(p)
+        ok, has_cp, ports, err = read_symbol_ports(p)
+        if not ok:
+            fails.append('L1 %s %s' % (name, err))
+            continue
+        if not has_cp:
+            if name in WHITELIST:
+                why, ref = WHITELIST[name]
+                infos.append('L2 豁免 %s —— %s（%s）' % (name, why, ref))
+            else:
+                fails.append('L2 %s 无 connection-points 端口组'
+                             '（白名单外，登记 WHITELIST 或修符号）' % name)
+            continue
+        port_index[name] = ports
+        dup = len(ports) != len(set(ports))
+        if dup or not ports:
+            fails.append('L2 %s 端口组异常（空或 id 重复）' % name)
+        dups = duplicate_ids(p)
+        if dups:
+            fails.append('L2 %s 全文件元素 id 重复: %s'
+                         '（渲染器按实例改名后会在整图撞车，V1 硬 fail）'
+                         % (name, dups))
+
+    # ---- L3 catalog 交叉校验 ----
+    if os.path.isfile(cat_path):
+        with open(cat_path, encoding='utf-8') as f:
+            cat = json.load(f)
+        for c in cat.get('components', []):
+            asset = (c.get('symbol') or {}).get('asset')
+            target = resolve_asset(asset, a.lib)
+            if target is None:
+                msg = ('L3 %s 的 symbol.asset 解析不到库内文件: %s'
+                       % (c.get('component_type'), asset))
+                (fails if a.strict_catalog else infos).append(
+                    msg + ('' if a.strict_catalog else '（INFO：#21 回登记清单）'))
+                continue
+            sym_ports = port_index.get(os.path.basename(target))
+            if sym_ports is None:
+                continue                     # 符号无端口组，L2 已裁决
+            missing = [q['id'] for q in c.get('ports', [])
+                       if q['id'] not in sym_ports]
+            if missing:
+                msg = ('L3 %s catalog 声明端口不在符号端口组: %s'
+                       % (c.get('component_type'), sorted(missing)))
+                (fails if a.strict_catalog else infos).append(msg)
+    else:
+        fails.append('catalog 不存在: %s' % cat_path)
+
+    # ---- 出口 ----
+    print('== check_library ==')
+    print('库: %s（SVG %d，端口组 %d，白名单 %d）'
+          % (a.lib, len(svgs), len(port_index), len(WHITELIST)))
+    for m in infos:
+        print(' INFO', m)
+    for m in fails:
+        print(' FAIL', m)
+    print('结论: %s（INFO %d / FAIL %d）'
+          % ('通过' if not fails else '不通过', len(infos), len(fails)))
+    return 1 if fails else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

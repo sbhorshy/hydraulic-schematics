@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "tests": [
+    {
+      "id": "editor-regressions",
+      "status": "passed",
+      "exit_code": 0,
+      "seconds": 71.84365956399961,
+      "log": "/mnt/c/Users/24270/zcode-bridge/.teams/team-dc97746c8a834c14809bc0032e641edb/checks/2f464c14a3a84d3e8849907ac461e894/test-0.log",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests/repository",
+        "-p",
+        "test_editor_*.py",
+        "-v"
+      ]
+    }
+  ],
+  "executor": "WSL controller; explicit argv; no shell=True",
+  "source_digest": "fc1fa3bfb71ebac3bf54869e31758d75e6e2a7fd04f087cdb8d03c7349cdf8b5",
+  "commit": "38f890f580123fc9448d1443fe0249afc0e472e7",
+  "source_unchanged": true,
+  "finished_at": "2026-10-13T03:43:09.045830+00:00"
+}

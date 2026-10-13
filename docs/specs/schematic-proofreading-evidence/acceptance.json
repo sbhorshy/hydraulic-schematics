@@ -1,0 +1,295 @@
+{
+  "runtime_commit": "a903a04b8a86530c505f7de6108eeb46f09c4fa3",
+  "review_commit": "ff212000df32c8f7ef3c281f004a0904cf29f6c9",
+  "selftest": {
+    "head": "a903a04b8a86530c505f7de6108eeb46f09c4fa3",
+    "exit": 0,
+    "elapsed_s": 810.524,
+    "head_unchanged": true,
+    "command": [
+      "/usr/bin/python",
+      ".agents/skills/hydraulic-schematic/scripts/selftest.py"
+    ],
+    "log": "/tmp/schematic-proofreading-0k_e9ik0/final-selftest.log"
+  },
+  "runs": [
+    {
+      "fixture": "l0-small-seed",
+      "wall_s": 4.144,
+      "driver_exit": 4,
+      "standalone_exit": 0,
+      "parity": true,
+      "coverage": [
+        {
+          "id": "V1",
+          "status": "pass"
+        },
+        {
+          "id": "V2",
+          "status": "pass"
+        },
+        {
+          "id": "V3",
+          "status": "pass"
+        },
+        {
+          "id": "V4",
+          "status": "pass"
+        },
+        {
+          "id": "V5",
+          "status": "warn"
+        },
+        {
+          "id": "V6",
+          "status": "pass"
+        },
+        {
+          "id": "V7",
+          "status": "pass"
+        },
+        {
+          "id": "V8",
+          "status": "pass"
+        },
+        {
+          "id": "V9",
+          "status": "warn"
+        },
+        {
+          "id": "V10",
+          "status": "pass"
+        },
+        {
+          "id": "V11",
+          "status": "pass"
+        },
+        {
+          "id": "V12",
+          "status": "pass"
+        },
+        {
+          "id": "V13",
+          "status": "pass"
+        },
+        {
+          "id": "V14",
+          "status": "pass"
+        },
+        {
+          "id": "V15",
+          "status": "pass"
+        },
+        {
+          "id": "V16",
+          "status": "pass"
+        },
+        {
+          "id": "V17",
+          "status": "pass"
+        },
+        {
+          "id": "V18",
+          "status": "pass"
+        },
+        {
+          "id": "V19",
+          "status": "warn"
+        },
+        {
+          "id": "B6.avoid_corridor",
+          "status": "pass"
+        },
+        {
+          "id": "B7",
+          "status": "warn"
+        },
+        {
+          "id": "B1",
+          "status": "pass"
+        },
+        {
+          "id": "B2",
+          "status": "pass"
+        },
+        {
+          "id": "B3",
+          "status": "pass"
+        },
+        {
+          "id": "B4",
+          "status": "pass"
+        },
+        {
+          "id": "B5",
+          "status": "pass"
+        },
+        {
+          "id": "B6.group_padding",
+          "status": "not_applicable"
+        },
+        {
+          "id": "PNG",
+          "status": "pass"
+        },
+        {
+          "id": "PERCEPTUAL",
+          "status": "not_checked"
+        },
+        {
+          "id": "READBACK_ITEMS",
+          "status": "not_checked"
+        }
+      ]
+    },
+    {
+      "fixture": "l0-current",
+      "wall_s": 7.232,
+      "driver_exit": 1,
+      "standalone_exit": 1,
+      "parity": true,
+      "coverage": [
+        {
+          "id": "V1",
+          "status": "pass"
+        },
+        {
+          "id": "V2",
+          "status": "fail"
+        },
+        {
+          "id": "V3",
+          "status": "fail"
+        },
+        {
+          "id": "V4",
+          "status": "not_checked"
+        },
+        {
+          "id": "V5",
+          "status": "warn"
+        },
+        {
+          "id": "V6",
+          "status": "pass"
+        },
+        {
+          "id": "V7",
+          "status": "pass"
+        },
+        {
+          "id": "V8",
+          "status": "pass"
+        },
+        {
+          "id": "V9",
+          "status": "warn"
+        },
+        {
+          "id": "V10",
+          "status": "fail"
+        },
+        {
+          "id": "V11",
+          "status": "pass"
+        },
+        {
+          "id": "V12",
+          "status": "pass"
+        },
+        {
+          "id": "V13",
+          "status": "fail"
+        },
+        {
+          "id": "V14",
+          "status": "fail"
+        },
+        {
+          "id": "V15",
+          "status": "pass"
+        },
+        {
+          "id": "V16",
+          "status": "pass"
+        },
+        {
+          "id": "V17",
+          "status": "pass"
+        },
+        {
+          "id": "V18",
+          "status": "pass"
+        },
+        {
+          "id": "V19",
+          "status": "fail"
+        },
+        {
+          "id": "B6.avoid_corridor",
+          "status": "warn"
+        },
+        {
+          "id": "B7",
+          "status": "warn"
+        },
+        {
+          "id": "B1",
+          "status": "fail"
+        },
+        {
+          "id": "B2",
+          "status": "pass"
+        },
+        {
+          "id": "B3",
+          "status": "pass"
+        },
+        {
+          "id": "B4",
+          "status": "pass"
+        },
+        {
+          "id": "B5",
+          "status": "warn"
+        },
+        {
+          "id": "B6.group_padding",
+          "status": "not_applicable"
+        },
+        {
+          "id": "PNG",
+          "status": "pass"
+        },
+        {
+          "id": "PERCEPTUAL",
+          "status": "not_checked"
+        },
+        {
+          "id": "READBACK_ITEMS",
+          "status": "not_checked"
+        }
+      ]
+    }
+  ],
+  "actual_root_readback": {
+    "small": {
+      "objects": 17,
+      "crops": 8,
+      "confirmed": 17,
+      "whole": "confirmed",
+      "kept_driver_exit": 0,
+      "delivery_ready": true
+    },
+    "current": {
+      "objects": 134,
+      "crops": 62,
+      "confirmed": 11,
+      "questioned": 4,
+      "unviewed": 119,
+      "whole": "questioned",
+      "failures": 13,
+      "delivery_ready": false
+    }
+  }
+}

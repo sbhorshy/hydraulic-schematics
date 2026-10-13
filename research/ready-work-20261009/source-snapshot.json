@@ -1,0 +1,269 @@
+{
+  "previous_batch": "f93bd98c93dc8e496d88af8c3edb69fa5e1de740",
+  "files": [
+    {
+      "path": "1#系统原理图/1#系统.intent.yaml",
+      "sha256": "8e160fd7251429f55dcb3a9cef9978cffb0d6c04306dced56459bd819a8117ae",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/1#系统.layout.json",
+      "sha256": "891d004205b040e205492f0e2f86027575eb9db37fe90c29cbb36a15612b09dc",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/1#系统.sysml",
+      "sha256": "c860ef71f6825d4d78d5abf822e1f2b9b5871dea595460ba8c12dc83956bda70",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/1#系统_topology.md",
+      "sha256": "c84d41bbb52aa1831be9a3427cf2199e37ae679d1d291fdaa26a828e4b474a96",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/1#系统原理图.svg",
+      "sha256": "26c0ed59c4ee318ccf4b1e5eb3b6be7c736bb0c597852d1e370c8068a1281074",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/auto_space.py",
+      "sha256": "ed28602794e90e8b72f94c27369da7c7efd4abcbf3c245b5497cd77d85d51fdf",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/case_drain_filter.intent.yaml",
+      "sha256": "44027b4d23a0ac242ab31d023e81a9a56ef1fcf71e154c86d4ab86ff35fbf83a",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/case_drain_filter.layout.json",
+      "sha256": "ea0dbb6c3ff0158393477425a4f4b5e88619c7e370bc06d58c15221dc6011091",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/case_drain_filter_topology.md",
+      "sha256": "f554959716338620184eecd0b15b2776013497741ecda63a1d6eb2fb25f27904",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/case_drain_filter装配图.svg",
+      "sha256": "929b05da47bdfcd46ef3f37f75d6ef0476ac07dac0c65d7fc0bb13c6684d84bf",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/preflight.py",
+      "sha256": "105c3febb7c8971ca28dd3e09bd4ef7829f7dc2fc0c3db27700ccfd928073ebd",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/render_l0_sheet.py",
+      "sha256": "b29129d750d8dc7fa6f20a5358d1489e16f199732cea88eda1564043179adef1",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/sheet-readback.png",
+      "sha256": "efa2e72f40a41f3c4375354e424e517c7fa31d14844bf950f5714e48edb8a28d",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/validate_sheet.py",
+      "sha256": "4b8f9574d9b4ee3bce0a49b8b818ce442b9606129a851dcda5b0207960d2e01d",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/CDF-001装配图/validation-report.json",
+      "sha256": "c816306313e2427c8a96e7eea13a36288a454effd141d213b7a045805029c385",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/build_catalog.py",
+      "sha256": "db9944ba1b0ab2885cc5d18f29725ea5ede7063af9837c15887ce26d0d3b42c2",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/check_proportions.py",
+      "sha256": "5acc66f95a4d8bc7679a0ffb95d22731f7e45eebfe6c50c0c0d5295eb3391f76",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/check_symbol.py",
+      "sha256": "6e5d4d75f4d83d8b424eba577a94bab585aba367fd9a1581a82b22b0426fbf27",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/component-catalog.json",
+      "sha256": "c0ff111dd944608cefc1b140f3d0da2833a6ab58a286c23f0dd5fc9aef24a884",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/render.py",
+      "sha256": "c0146814c64fc6db9fabb930d30d8ab356da49a950c296d0f128b2714c4f17c1",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/sheet-readback.png",
+      "sha256": "6f256b978d7f51d4f2a64aa3f2ab8bfbb2bbdeb177463c20b1c12f2b55843b73",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/skill-chain-e2e/1#系统.layout.json",
+      "sha256": "dcb6cb80c73c613c6cc8a3b1cadd69783fbe784f708a375c762a10baf9fd1c43",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/accumulator.svg",
+      "sha256": "79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/air-charging-valve.svg",
+      "sha256": "6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/check-valve.svg",
+      "sha256": "25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/edp-provisional-stroke.svg",
+      "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/emp-provisional-stroke.svg",
+      "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/filter-line-shutoff-dp-return-bypass.svg",
+      "sha256": "45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/firewall-shutoff-valve.svg",
+      "sha256": "4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/fsov-provisional-stroke.svg",
+      "sha256": "322d57396abc5479a6842f7f2f952dc6632a0321c3b4f0c2f25af7e1e373f61b",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/pressure-gauge.svg",
+      "sha256": "8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/symbols/reservoir-bootstrap-annotated.svg",
+      "sha256": "90c774d83ab8c1b4c2fb4c39fe9e48b8f75a9fa108007f64d84d9638c2211de0",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/sysml_lsp_check.py",
+      "sha256": "303737b8f489958e76fba5f3f81786066ff4f19acf7588a823287fee936542a1",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/validate_sheet.py",
+      "sha256": "9a6b98f238dfcddf322f82995ebf514724459ef58a113a708e44064c2d4eb9be",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "1#系统原理图/validation-report.json",
+      "sha256": "a0509f6133f4ea6ad467fc92240501c43eb38920c1a8a63149de4ed74deabbae",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "CONTEXT.md",
+      "sha256": "5a0723945909964f49432b15d38ef957733e18f1480fc4783543a2bc6b1c739a",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "docs/规格与需求.md",
+      "sha256": "2cd2e5af87989268e00e63cb76f8657a748e650198f9203c62ba8d91f7bab1d1",
+      "different_from_previous_batch": false,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "editor-proto/index.html",
+      "sha256": "e3b6ad98fce3997713b02b34eb4aa994904bd18e57e2240fdee12e67b9a251a1",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "editor-proto/server.py",
+      "sha256": "7e23849e585f7bc61326c90122136da4a3e2d444d1055940da1b56c29519f67b",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    },
+    {
+      "path": "research/assembly-enclosure-standard.md",
+      "sha256": "c45cf98edc66d8546321539b09c0fab3eeb9d2ef378e41351457f211c17f65f8",
+      "different_from_previous_batch": true,
+      "kind": "historical_working_source_or_output"
+    }
+  ]
+}

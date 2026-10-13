@@ -1,0 +1,674 @@
+{
+  "claim": "No planar routing realizes these same cyclic port orders and three internally disjoint common-network paths.",
+  "scope": "Current 23-part project; abstract K2,3 is planar, its signed fixed rotation system is not.",
+  "input_sha256": {
+    "1#系统.intent.yaml": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888",
+    "1#系统.layout.json": "4bd8180f9ad9e6c2d72429cf0afe8a50df2521c952b24793a61680011494aecc",
+    "component-catalog.json": "07e08a5f67c81967c5fa2691f706346a13fab9ae6f2d8d980db83b5ebb3bc928"
+  },
+  "input_paths": [
+    {
+      "anchor": "paths[0]",
+      "path": [
+        "TANK-001.suction_out",
+        "EMP-001.suction"
+      ]
+    },
+    {
+      "anchor": "paths[1]",
+      "path": [
+        "TANK-001.suction_out",
+        "FSOV-001",
+        "EDP-001.suction"
+      ]
+    },
+    {
+      "anchor": "paths[2]",
+      "path": [
+        "EDP-001.pressure_out",
+        "@PRESS"
+      ]
+    },
+    {
+      "anchor": "paths[3]",
+      "path": [
+        "EMP-001.pressure_out",
+        "@PRESS"
+      ]
+    },
+    {
+      "anchor": "paths[29]",
+      "path": [
+        "EDP-001.case_drain",
+        "@CASE"
+      ]
+    },
+    {
+      "anchor": "paths[30]",
+      "path": [
+        "EMP-001.case_drain",
+        "@CASE"
+      ]
+    }
+  ],
+  "degree_two_suction_component": {
+    "instance": "FSOV-001",
+    "main_path": {
+      "in": "main_upper",
+      "out": "main_lower"
+    }
+  },
+  "symbols": {
+    "EDP-001": {
+      "asset": "1#系统原理图/symbols/edp-provisional-stroke.svg",
+      "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b",
+      "viewBox": [
+        0.0,
+        0.0,
+        80.0,
+        80.0
+      ],
+      "ports": {
+        "suction": {
+          "cx": "0",
+          "cy": "40",
+          "data-anchor-direction": "left"
+        },
+        "pressure_out": {
+          "cx": "80",
+          "cy": "40",
+          "data-anchor-direction": "right"
+        },
+        "case_drain": {
+          "cx": "40",
+          "cy": "80",
+          "data-anchor-direction": "down"
+        }
+      },
+      "clockwise_network_order": [
+        "CASE",
+        "SUCTION",
+        "PRESSURE"
+      ]
+    },
+    "EMP-001": {
+      "asset": "1#系统原理图/symbols/emp-provisional-stroke.svg",
+      "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34",
+      "viewBox": [
+        0.0,
+        0.0,
+        80.0,
+        80.0
+      ],
+      "ports": {
+        "suction": {
+          "cx": "0",
+          "cy": "40",
+          "data-anchor-direction": "left"
+        },
+        "pressure_out": {
+          "cx": "80",
+          "cy": "40",
+          "data-anchor-direction": "right"
+        },
+        "case_drain": {
+          "cx": "40",
+          "cy": "80",
+          "data-anchor-direction": "down"
+        }
+      },
+      "clockwise_network_order": [
+        "CASE",
+        "SUCTION",
+        "PRESSURE"
+      ]
+    }
+  },
+  "allowed_rotation_combinations": [
+    {
+      "rotations": {
+        "EDP-001": 0,
+        "EMP-001": 0
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 0,
+        "EMP-001": 90
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 0,
+        "EMP-001": 180
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 0,
+        "EMP-001": 270
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 90,
+        "EMP-001": 0
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 90,
+        "EMP-001": 90
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 90,
+        "EMP-001": 180
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 90,
+        "EMP-001": 270
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 180,
+        "EMP-001": 0
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 180,
+        "EMP-001": 90
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 180,
+        "EMP-001": 180
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 180,
+        "EMP-001": 270
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 270,
+        "EMP-001": 0
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 270,
+        "EMP-001": 90
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 270,
+        "EMP-001": 180
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    },
+    {
+      "rotations": {
+        "EDP-001": 270,
+        "EMP-001": 270
+      },
+      "cyclic_orders": {
+        "EDP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ],
+        "EMP-001": [
+          "CASE",
+          "SUCTION",
+          "PRESSURE"
+        ]
+      },
+      "face_walks": [
+        [
+          "EDP-001:CASE",
+          "EMP-001:SUCTION",
+          "EDP-001:PRESSURE",
+          "EMP-001:CASE",
+          "EDP-001:SUCTION",
+          "EMP-001:PRESSURE"
+        ]
+      ],
+      "vertices": 2,
+      "edges": 3,
+      "faces": 1,
+      "euler_characteristic": 0,
+      "planar_required_faces": 3
+    }
+  ],
+  "independent_networkx": {
+    "version": "3.3",
+    "abstract_graph_planar": true,
+    "fixed_rotation_planar": false,
+    "error": "Bad embedding. The graph does not match Euler's formula"
+  },
+  "orientation_reversal_control": {
+    "allowed": false,
+    "reason": "Counterfactual only; mirror/port identity changes are forbidden.",
+    "faces": 3,
+    "euler_characteristic": 2,
+    "independent_networkx": {
+      "version": "3.3",
+      "abstract_graph_planar": true,
+      "fixed_rotation_planar": true
+    }
+  }
+}

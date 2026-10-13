@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/schematic-proofreading-0k_e9ik0/integration/.agents/skills/hydraulic-schematic/scripts/validate_sheet.py", line 725, in <module>
+    sys.exit(main())
+  File "/tmp/schematic-proofreading-0k_e9ik0/integration/.agents/skills/hydraulic-schematic/scripts/validate_sheet.py", line 476, in main
+    topology = reconcile_topology(root, geometry, intent, cat, L, browser_evidence=browser)
+  File "/tmp/schematic-proofreading-0k_e9ik0/integration/.agents/skills/hydraulic-schematic/scripts/topology_reconciliation.py", line 199, in reconcile_topology
+    if el is not None and not visible(el):
+  File "/tmp/schematic-proofreading-0k_e9ik0/integration/.agents/skills/hydraulic-schematic/scripts/topology_reconciliation.py", line 110, in visible
+    and float(style.get('stroke-opacity','1')) > 0 and float(style.get('stroke-width','1').replace('px','')) > 0)
+ValueError: could not convert string to float: '0.2%'
