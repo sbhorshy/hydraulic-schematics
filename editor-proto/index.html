@@ -383,8 +383,9 @@ function guideCands(d) {
   const cands = { v: [], h: [] };
   Object.entries(layoutIndex || {}).forEach(([oid, o]) => {
     if (oid === d.id || o.x == null) return;
-    cands.v.push(o.x, o.x + o.w / 2, o.x + o.w);
-    cands.h.push(o.y, o.y + o.h / 2, o.y + o.h);
+    const [ow, oh] = drawableSize(o); // 目标占位：rot 90/270 交换，与夹取/选中框同式
+    cands.v.push(o.x, o.x + ow / 2, o.x + ow);
+    cands.h.push(o.y, o.y + oh / 2, o.y + oh);
   });
   return cands;
 }
@@ -410,9 +411,10 @@ function drawHints(d) { // 拖拽中参考线只作提示、不改位移（实�
   clearGuides(d.svg);
   if (!document.getElementById('alignOn').checked) return;
   const cands = guideCands(d);
+  const [ew, eh] = drawableSize(d.nd); // 被拖占位与目标候选同式（rot 90/270 交换）
   const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
-  const bv = axisBest(cands.v, [d.nd.x + d.dx, d.nd.x + d.dx + d.nd.w / 2, d.nd.x + d.dx + d.nd.w]);
-  const bh = axisBest(cands.h, [d.nd.y + d.dy, d.nd.y + d.dy + d.nd.h / 2, d.nd.y + d.dy + d.nd.h]);
+  const bv = axisBest(cands.v, [d.nd.x + d.dx, d.nd.x + d.dx + ew / 2, d.nd.x + d.dx + ew]);
+  const bh = axisBest(cands.h, [d.nd.y + d.dy, d.nd.y + d.dy + eh / 2, d.nd.y + d.dy + eh]);
   if (bv) drawGuide(d.svg, bv.c, 0, bv.c, H);
   if (bh) drawGuide(d.svg, 0, bh.c, Wd, bh.c);
 }
@@ -434,8 +436,9 @@ async function onUp(ev) {
   let nx = d.nd.x + d.dx, ny = d.nd.y + d.dy;
   if (document.getElementById('alignOn').checked) {
     const cands = guideCands(d);
-    const bv = axisBest(cands.v, [nx, nx + d.nd.w / 2, nx + d.nd.w]);
-    const bh = axisBest(cands.h, [ny, ny + d.nd.h / 2, ny + d.nd.h]);
+    const [ew, eh] = drawableSize(d.nd); // 吸附边/中心按旋转后占位（与提示线同式）
+    const bv = axisBest(cands.v, [nx, nx + ew / 2, nx + ew]);
+    const bh = axisBest(cands.h, [ny, ny + eh / 2, ny + eh]);
     if (bv) nx += bv.off;
     if (bh) ny += bh.off;
     const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
@@ -561,10 +564,11 @@ function drawSel() {
   const nd = (layoutIndex || {})[selectedId] || {};
   if (nd.x == null) return;
   $('selRot').textContent = nd.rot || 0;
+  const [ew, eh] = drawableSize(nd); // 声明占位=旋转后框：rot 90/270 宽高互换、0/180 不变、mirror 不再翻转
   const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   r.setAttribute('x', nd.x); r.setAttribute('y', nd.y);
-  r.setAttribute('width', nd.w); r.setAttribute('height', nd.h);
-  r.setAttribute('class', 'proto-sel'); // 声明占位框（rot 90/270 时墨迹宽高互换，以链产物为准）
+  r.setAttribute('width', ew); r.setAttribute('height', eh);
+  r.setAttribute('class', 'proto-sel');
   guidesLayer(svg).appendChild(r);
 }
 
