@@ -70,6 +70,7 @@
 const $ = id => document.getElementById(id);
 const stage = $('stage');
 let layoutIndex = null;   // {id:{x,y,w,h,rot?}} —— 对齐参考线/夹取/选中用（GET /api/layout）
+let drawableBounds = null; // [xmin,ymin,xmax,ymax] drawable 契约；null=无有效契约，拖拽禁用（不猜 canvas）
 let origTransform = null; // 拖拽中的 inst 原始 transform
 let drag = null;
 let selectedId = null;    // 原地点击选中的节点（旋转作用对象）
@@ -277,15 +278,33 @@ function decorate() { // 新帧 DOM 装饰（实例监听器 + 命中垫）；�
   buildHitLayer();
 }
 
+function parseDrawableBounds(raw) {
+  // drawable 契约合法形：[xmin,ymin,xmax,ymax] 四个有限数且 xmin<xmax、ymin<ymax。
+  // GET /api/layout 只核验 drawable 矩形/margin 声明本身，不核验节点占位；占位
+  // 放不下由服务端 apply_delta 写盘前另行拒绝。这里只核对传输面最小形态，
+  // 任一不满足返回 null——拖拽统一禁用，不猜 canvas。
+  if (!Array.isArray(raw) || raw.length !== 4) return null;
+  const b = [];
+  for (const v of raw) {
+    if (typeof v !== 'number' || !isFinite(v)) return null;
+    b.push(v);
+  }
+  return b[0] < b[2] && b[1] < b[3] ? b : null;
+}
+
 async function refreshLayout() {
   // 权威布局刷新（可 await）：发起即置 layoutIndex=null——在途/失败期间
   // 节点状态未知，镜像/旋转/拖动不得基于猜测（none/rot0）发起。读到
   // 有效 nodes 才恢复 layoutIndex 并刷新选中框/rot/连线提示。
+  // drawable_bounds 同步置空：无有限合法契约期间拖拽禁用（镜像/旋转
+  // 不受影响，服务端夹取仍是权威兜底）。
   layoutIndex = null;
+  drawableBounds = null;
   try {
     const l = await api('/api/layout');
     if (!l || !l.nodes) return false;
     layoutIndex = l.nodes;
+    drawableBounds = parseDrawableBounds(l.drawable_bounds);
     window.__canvas = l.canvas || {};
     window.__conns = l.conns || {};
     if (selectedId && layoutIndex[selectedId]) { drawSel(); select(selectedId); }
@@ -321,6 +340,7 @@ function drawGuide(svg, x1, y1, x2, y2) {
 function startDrag(ev, g) {
   if (ev.button !== 0) return;
   if (busy) return; // 闭环在途：不接受新拖拽（位移无处提交，只会留失配定格）
+  if (!drawableBounds) return; // 无有效 drawable 契约（刷新在途/失败/非法）：拖拽禁用，不猜 canvas
   const id = g.id.replace(/^inst-/, '');
   const nd = layoutIndex ? layoutIndex[id] : null;
   if (!nd) return; // 权威节点状态未知（刷新在途/失败）：不接受拖拽
@@ -369,10 +389,21 @@ function guideCands(d) {
   return cands;
 }
 
-function clampDelta(d) { // 画布夹取（始终生效，与吸附无关）
-  const nd = d.nd, W = window.__canvas || {};
-  if (nd.w) d.dx = Math.min(Math.max(d.dx, -nd.x), Math.max((W.width || 1e6) - nd.w - nd.x, 0));
-  if (nd.h) d.dy = Math.min(Math.max(d.dy, -nd.y), Math.max((W.height || 1e6) - nd.h - nd.y, 0));
+function drawableSize(nd) { // 旋转后占位宽高：rot 90/270 互换（与服务端 apply_delta 同式）
+  return (nd.rot || 0) % 180 ? [nd.h || 0, nd.w || 0] : [nd.w || 0, nd.h || 0];
+}
+
+function drawableDeltaClamp(nd, dx, dy) { // 位移域夹取：落点恒在 [xmin,xmax-ew]×[ymin,ymax-eh]（右缘 margin 已在契约内不二次扣）
+  if (!drawableBounds) return [dx, dy]; // 契约未知（startDrag 已禁拖，理论不可达）：不夹取也不猜
+  const [xmin, ymin, xmax, ymax] = drawableBounds;
+  const [ew, eh] = drawableSize(nd);
+  return [Math.min(Math.max(dx, xmin - nd.x), xmax - ew - nd.x),
+          Math.min(Math.max(dy, ymin - nd.y), ymax - eh - nd.y)];
+}
+
+function clampDelta(d) { // drawable 夹取（始终生效，与吸附无关；拖动中与松手同一公式）
+  const c = drawableDeltaClamp(d.nd, d.dx, d.dy);
+  d.dx = c[0]; d.dy = c[1];
 }
 
 function drawHints(d) { // 拖拽中参考线只作提示、不改位移（实时改位移=抖动根源）
@@ -413,11 +444,14 @@ async function onUp(ev) {
   }
   const grid = parseInt($('gridSize').value, 10) || 0;
   if (grid > 1) { nx = Math.round(nx / grid) * grid; ny = Math.round(ny / grid) * grid; }
+  // 提交值=吸附结果取整 0.1 后再夹取一次：边界非栅格对齐、或对齐/取整把
+  // 右/下缘推出 drawable 时，边界优先于栅格，绝不提交越界位移——服务端
+  // apply_delta 同式夹取，所见即所提交。
+  const dv = drawableDeltaClamp(d.nd,
+    Math.round((nx - d.nd.x) * 10) / 10, Math.round((ny - d.nd.y) * 10) / 10);
   let res;
   try {
-    res = await postDelta({ node: d.id,
-      dx: Math.round((nx - d.nd.x) * 10) / 10,
-      dy: Math.round((ny - d.nd.y) * 10) / 10 });
+    res = await postDelta({ node: d.id, dx: dv[0], dy: dv[1] });
   } catch (e) { // 网络层异常（连接拒绝等）：回弹+提示；超时路径在 postDelta 内按未知态刷新
     d.g.setAttribute('transform', origTransform);
     clearGuides(d.svg);
