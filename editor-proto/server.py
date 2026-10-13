@@ -24,6 +24,12 @@
   layout.mirror=False 表示不镜像（与此前 renderer 兼容），普通移动/旋转
   放行且原样保留该字段；存量 0/True/容器仍是值域外声明，整事务拒绝，
   绝不静默当 none 或借写盘 pop 洗白。
+- #60 原型缺口（服务端 drawable 夹取）：手调夹取从 canvas 收紧为显式
+  drawable 契约（layout_contract.drawable_bounds 单源，xmin,ymin,xmax,ymax；
+  旋转按占位宽高交换口径，右缘 margin 已在契约内不二次扣）；坏契约、
+  非有限位移/存量坐标、无效或放不下的占位尺寸在写盘前整事务拒绝（字节
+  不动）。GET /api/layout 披露 drawable_bounds 数组，契约坏档（含顶层
+  非对象）HTTP 400，组装异常（intent 坏档等）JSON 500。
 
 用法：
     python editor-proto/server.py [--workdir "1#系统原理图"] [--port 8763]
@@ -48,6 +54,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SCRIPTS = os.path.abspath(os.path.join(HERE, '..', '.agents', 'skills', 'hydraulic-schematic', 'scripts'))
 sys.path.insert(0, SCRIPTS)
 from endpoint_usage import mirror_contract
+from layout_contract import drawable_bounds
+from layout_contract import number as contract_number
 from proofreading_evidence import verify_report
 from render_l0_sheet import load_yaml  # canonical ruamel YAML 1.2：许可闸与渲染同一解析口径
 
@@ -179,7 +187,10 @@ def _mirror_permission_issues(workdir, proposed_nodes, selected=None):
 def apply_delta(workdir, node, dx, dy, rot=None, mirror=None):
     """闭环：读 layout → 直改坐标/旋转/镜像（服务端为权威，含夹取）→ revision_log → 渲染 → 校核。
 
-    rot 为绝对新值（0/90/180/270，渲染器同款校验）；夹取按旋转后占位宽高（墨迹口径）。
+    rot 为绝对新值（0/90/180/270，渲染器同款校验）；夹取按显式 drawable
+    契约 drawable_bounds(layout)（xmin,ymin,xmax,ymax）与旋转后占位宽高
+    （墨迹口径），右缘 margin 已在契约内，不得二次扣；坏契约、非有限
+    位移/存量坐标、无效或放不下的占位尺寸，写盘前整事务拒绝（字节不动）。
     mirror 为绝对请求 'none'/'x'/'y'，None（键缺省）=保持当前姿态；False/0/True/
     容器在函数入口按类型拒绝；已有 layout.mirror=False 是规范单源 check_mirror
     允许的"不镜像"（与此前 renderer 兼容），普通移动/旋转放行且原样保留该字段，
@@ -218,11 +229,37 @@ def apply_delta(workdir, node, dx, dy, rot=None, mirror=None):
         if new_rot not in (0, 90, 180, 270):
             return {'ok': False, 'stage': 'delta',
                     'error': 'rot=%s 不在允许的 0/90/180/270' % rot}
-    canvas = layout.get('canvas') or {}
-    w, h = nd.get('w', 0), nd.get('h', 0)
+    # 夹取按显式 drawable 契约（layout_contract.drawable_bounds 单源，
+    # 返回 xmin,ymin,xmax,ymax）：右缘 margin 已含在 drawable 内，不得
+    # 二次扣；坏契约、非有限位移/存量坐标、无效或旋转后放不下的占位
+    # 尺寸，写盘前整事务拒绝（字节不动），不静默回退 canvas 夹取。
+    try:
+        xmin, ymin, xmax, ymax = drawable_bounds(layout)
+    except ValueError as error:
+        return {'ok': False, 'stage': 'delta',
+                'error': 'drawable 契约无效：%s' % error}
+    try:
+        contract_number(dx, 'delta.dx')
+        contract_number(dy, 'delta.dy')
+        contract_number(nd.get('x', 0), 'node.x')
+        contract_number(nd.get('y', 0), 'node.y')
+        w = contract_number(nd.get('w', 0), 'node.w')
+        h = contract_number(nd.get('h', 0), 'node.h')
+    except ValueError as error:
+        return {'ok': False, 'stage': 'delta',
+                'error': '非有限/非法数值，整事务拒绝：%s' % error}
+    if w <= 0 or h <= 0:
+        return {'ok': False, 'stage': 'delta',
+                'error': '节点 %s 占位尺寸无效：w=%g h=%g（须为正的有限数）'
+                         % (node, w, h)}
     ew, eh = (h, w) if new_rot % 180 else (w, h)
-    nx = min(max(ox + dx, 0), max(canvas.get('width', 10**6) - ew, 0))
-    ny = min(max(oy + dy, 0), max(canvas.get('height', 10**6) - eh, 0))
+    if ew > xmax - xmin or eh > ymax - ymin:
+        return {'ok': False, 'stage': 'delta',
+                'error': '节点 %s 占位 %g×%g（rot %d°）在 drawable %g×%g 内'
+                         '放不下，写盘前拒绝'
+                         % (node, ew, eh, new_rot, xmax - xmin, ymax - ymin)}
+    nx = min(max(ox + dx, xmin), xmax - ew)
+    ny = min(max(oy + dy, ymin), ymax - eh)
     moved = nx != ox or ny != oy
     if not moved and new_rot == orot and not mirror_changed:
         return {'ok': False, 'stage': 'delta', 'error': '零位移'}
@@ -393,11 +430,35 @@ class Handler(BaseHTTPRequestHandler):
         elif self.path == '/api/layout':
             try:
                 layout = _load(self.workdir, '1#系统.layout.json')
-                self._json({'nodes': layout.get('nodes') or {},
-                            'canvas': layout.get('canvas') or {},
-                            'conns': _connection_counts(self.workdir)})
             except Exception as e:
                 self._json({'error': str(e)}, 500)
+                return
+            if not isinstance(layout, dict):
+                # 顶层非对象（null/数组/标量）会让 drawable_bounds 的首个
+                # 成员测试抛 TypeError 并断开 socket：同属契约坏档，回
+                # 400 JSON。
+                self._json({'error': 'layout 顶层必须是 JSON 对象，实际 %s'
+                                     % type(layout).__name__}, 400)
+                return
+            try:
+                bounds = list(drawable_bounds(layout))
+            except ValueError as e:
+                # 契约坏档（缺 drawable/margin/坐标声明）是数据问题，
+                # 回 400 而非 500；读档失败仍走上面的 500。
+                self._json({'error': str(e)}, 400)
+                return
+            try:
+                conns = _connection_counts(self.workdir)
+            except Exception as e:
+                # intent 坏档（如内容为 null → load_yaml 返回 None）等
+                # 组装异常：回 JSON 500 结构化错误，不发明空表伪装成功，
+                # 也不让异常冒出 do_GET 断连。
+                self._json({'error': str(e)}, 500)
+                return
+            self._json({'nodes': layout.get('nodes') or {},
+                        'canvas': layout.get('canvas') or {},
+                        'drawable_bounds': bounds,
+                        'conns': conns})
         else:
             self._json({'error': 'not found（编辑器无导出端点，#59）'}, 404)
 
