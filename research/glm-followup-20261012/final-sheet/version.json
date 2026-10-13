@@ -1,0 +1,278 @@
+{
+  "schema": "frozen-sheet-v1",
+  "artifact_fingerprint": "1792dd0dea36484567c6fe1c36c6790ab40245d79f86f1e45d7b579a54006939",
+  "validation_fingerprint": "3e9bf2ee70efc6139fb52d585bb4993dd43f9ee582a1ae69e73dc690f1871f9c",
+  "report_sha256": "e771b26c53005124afa6a8cb63a56a26d67d8aa1e29b3cc9aebe9546813f5993",
+  "files": {
+    "input": {
+      "path": "artifacts/48aed2374cea5f3b-1#系统.intent.yaml",
+      "sha256": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888"
+    },
+    "layout": {
+      "path": "artifacts/29c18bbcf4dbb2b8-1#系统.layout.json",
+      "sha256": "09224e4a769a1bc8800f8bfd742eca31be1a72df8367e6f47764ace470c00223"
+    },
+    "svg": {
+      "path": "1#系统原理图.svg",
+      "sha256": "e7f9d30d85a3bec24f9ff5d402be2e5eeb02e553e3ef9181baac5cf9ce1dbab9"
+    },
+    "png": {
+      "path": "sheet-readback.png",
+      "sha256": "116bf1bc534b0b8815830a9d713bc526a0852a990223f6922ef518e22e9ad6eb"
+    },
+    "topology_manifest": {
+      "path": "artifacts/3c503e90539c2358-1#系统原理图-topology.json",
+      "sha256": "7b9a7a73134e737de6c052f4d81cd4866bc182be30e0cebbe7bffe727f7c437a"
+    },
+    "topology_manifest_markdown": {
+      "path": "artifacts/c687175fa3a6a58b-1#系统原理图-topology.md",
+      "sha256": "dd6c544abc3d8bb57e7f19423f688dbabc25f8bfd135c391dfd4aee9aee167c0"
+    },
+    "png_provenance": {
+      "path": "sheet-readback.png.evidence.json",
+      "sha256": "4f0f0cf11e1db70d9c79947613b8a048c2b7995abeb97c1e6a9cc72437d1219d"
+    },
+    "browser_evidence": {
+      "path": "artifacts/5335d1a476d62e03-browser-evidence.json",
+      "sha256": "ed1a2fcefc3d87095d546b3a32ec6623130e001a97df88aca83a9bf67f478aed"
+    },
+    "catalog": {
+      "path": "artifacts/12ea5e22b2603f39-component-catalog.json",
+      "sha256": "1e468539a3df33acc7e0f6343a9dd719da2fb68c8ebbedd7a59a9206e804f559"
+    },
+    "symbol:ACC-001": {
+      "path": "artifacts/e06e30a1b6b57fa9-accumulator.svg",
+      "sha256": "79f752fc217400b9d3e65dbdf3979aab2c2944f2ca76d57309754026e3c843e6"
+    },
+    "symbol:ACV-001": {
+      "path": "artifacts/c088df3c326aa116-air-charging-valve.svg",
+      "sha256": "6e4189e69c08123b2ccde13ceaaec958eeb906f8a28c493cae3420e4a0f80b9b"
+    },
+    "symbol:CDF-001": {
+      "path": "artifacts/77d5843051b737a9-filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+    },
+    "symbol:CV-002": {
+      "path": "artifacts/bb8eeddfe6914ff0-check-valve.svg",
+      "sha256": "25eaf4c6b5170429872b9310b465111750f0de6e33793b8bfd524488f240c92b"
+    },
+    "symbol:EDP-001": {
+      "path": "artifacts/23a0aaeeaeaa29a9-edp-provisional-stroke.svg",
+      "sha256": "134414e3efa5adfc73e55ed39c30bae9433c1e7767b502e9b789860f5512c07b"
+    },
+    "symbol:EMP-001": {
+      "path": "artifacts/da810ba5cf88b8a0-emp-provisional-stroke.svg",
+      "sha256": "e12e5fb728ce2763ab1071c80639d155460e858b70b5ed674c1e7d8e61670e34"
+    },
+    "symbol:FSOV-001": {
+      "path": "artifacts/5ae31d5367744847-firewall-shutoff-valve.svg",
+      "sha256": "4ee96f91a5fe87354577f40813577f50abe2d7e62d5620e4475760f692f3cb5f"
+    },
+    "symbol:PF-001": {
+      "path": "artifacts/2cba67ed410ecd8b-filter-line-shutoff-dp.svg",
+      "sha256": "ff35d7db0b17f99fcd509b32f103aee158ea0eb2d5099d883492f22a6da0f9ea"
+    },
+    "symbol:PG-001": {
+      "path": "artifacts/b760f0b9f50b103a-pressure-gauge.svg",
+      "sha256": "8ead439d3a7b18805467832ab0ad4dfa32827ffae65ac27b5f094a77d642919d"
+    },
+    "symbol:PRV-001": {
+      "path": "artifacts/a12e7629067ffa79-priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+    },
+    "symbol:PRV-002": {
+      "path": "artifacts/049e1756815ac749-priority-valve.svg",
+      "sha256": "57a6ff501b52f71ccbc48188bff91f69769051d6ccb25f1d4123bec623ecb3d7"
+    },
+    "symbol:QDP-001": {
+      "path": "artifacts/e7834d7b49273e55-quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+    },
+    "symbol:QDR-001": {
+      "path": "artifacts/28bb974cb2c4d575-quick-disconnect-coupling-disconnected.svg",
+      "sha256": "f7e42b835a79fa6ab826557e9703e998d744126fd72addceba37e9a5ef9848f1"
+    },
+    "symbol:RF-001": {
+      "path": "artifacts/faec53d8ac2225c5-filter-line-shutoff-dp-return-bypass.svg",
+      "sha256": "45797c08114c86d65c5e345002cbf97c98e65f57969b77e27bfdfdc26cf9d491"
+    },
+    "symbol:TANK-001": {
+      "path": "artifacts/4d37e999459526d3-bootstrap-type-reservoir.svg",
+      "sha256": "516f64ccba53407af46ce7ba537fbbc60a243bb3d9e03c636126cc331dd9b444"
+    },
+    "symbol:USER-001": {
+      "path": "artifacts/5d5d960e1759225c-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-002": {
+      "path": "artifacts/41560a42360e5610-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-003": {
+      "path": "artifacts/ab12f0c9369af966-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-004": {
+      "path": "artifacts/d5d566c2a9039deb-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-005": {
+      "path": "artifacts/6246d99b2f9a3311-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-006": {
+      "path": "artifacts/9b4607d3d2f3d25e-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-007": {
+      "path": "artifacts/cefe6468404d70b1-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "symbol:USER-008": {
+      "path": "artifacts/2fc19a6ed0ca8b5c-hydraulic-user.svg",
+      "sha256": "ec3a9ca2d0a915546915e547738c6daa5526a5658b261dfd016e402d4ff54481"
+    },
+    "tool:assembly_checks.py": {
+      "path": "tools/assembly_checks.py",
+      "sha256": "114794cb1223a46c13e14cd5c651b6a6ee5d336274897a0e82bd57b1efdd9caf"
+    },
+    "tool:assembly_layout.py": {
+      "path": "tools/assembly_layout.py",
+      "sha256": "cdc9cb52c2158c6af6e8772173d5891823ef02e6dd71b46754816131f874e3b3"
+    },
+    "tool:bridge_allowance.py": {
+      "path": "tools/bridge_allowance.py",
+      "sha256": "0dcef16e828e73e705500450661004c38e4d6144a3fa78a39281caa8fd137826"
+    },
+    "tool:browser_evidence.py": {
+      "path": "tools/browser_evidence.py",
+      "sha256": "c726ffec717a66d1af3445c363a9a19e750c68be2c06f015812b4b65e40fad9c"
+    },
+    "tool:check_library.py": {
+      "path": "tools/check_library.py",
+      "sha256": "3a88ad7489dc0c98f73f2688ea43b9899c5d4a691b82c149dd972b4f0b36d90e"
+    },
+    "tool:check_symbol.py": {
+      "path": "tools/check_symbol.py",
+      "sha256": "0a9ac9ff94f4ce896a27e62b260e0a4099c11879656739b0d490e0705846ab3c"
+    },
+    "tool:endpoint_checks.py": {
+      "path": "tools/endpoint_checks.py",
+      "sha256": "026626582f56f3666aaaa3bd18ad9e6a6db87ade133bc53d6590fb9a83f86bae"
+    },
+    "tool:endpoint_usage.py": {
+      "path": "tools/endpoint_usage.py",
+      "sha256": "cbb5a37d470f457ec723d1cd92afb66df152ed5b7b44449e1cf8bbd2b49a116c"
+    },
+    "tool:junction_semantics.py": {
+      "path": "tools/junction_semantics.py",
+      "sha256": "4ac584dc6ce94fea7a3c798df6da8cea96dd619c912555c896a9c2b11d0fb82a"
+    },
+    "tool:layout_clearance.py": {
+      "path": "tools/layout_clearance.py",
+      "sha256": "e358d1af3f9108d1dde7a77f0db0cf5c176c1353361d1f9b61966695032b223e"
+    },
+    "tool:layout_contract.py": {
+      "path": "tools/layout_contract.py",
+      "sha256": "13c8422c6c5c1635615d3ef79e18744f47378cab1d03d2d7d9bd58ace4de6ddd"
+    },
+    "tool:layout_engine.py": {
+      "path": "tools/layout_engine.py",
+      "sha256": "75f01b44c6c74750f9b36758457043bc284b937ee0c39251f98acab70220f2bf"
+    },
+    "tool:lead_geometry.py": {
+      "path": "tools/lead_geometry.py",
+      "sha256": "9c21ddd18d2f0d10fdaf86c24f8e245580d002a377b12374b53a3f1b5b623b95"
+    },
+    "tool:migrate_layout.py": {
+      "path": "tools/migrate_layout.py",
+      "sha256": "5d7b25f6178f09d675df854f338291d8d102c363a05a103b3c2849ebbc2b2886"
+    },
+    "tool:mirror_policy.py": {
+      "path": "tools/mirror_policy.py",
+      "sha256": "24eef1b5e7f855d572f829c6d649eaec76df77a71e764f87a0b5360043a58a2d"
+    },
+    "tool:preflight.py": {
+      "path": "tools/preflight.py",
+      "sha256": "6f7f81f59729469358095802483cc927e3004ed9921749e727ec1970963397da"
+    },
+    "tool:proofreading_evidence.py": {
+      "path": "tools/proofreading_evidence.py",
+      "sha256": "ad4cf4bc9ad0fabd4e98ae5bdeea15652c7dc8b7089cdd951b618b0de18e9419"
+    },
+    "tool:proto_optimize.py": {
+      "path": "tools/proto_optimize.py",
+      "sha256": "dc56abeeb8818a1c000f3000dd3a482c64e84d0a32d048cfea95517f8f21c064"
+    },
+    "tool:rasterize_sheet.py": {
+      "path": "tools/rasterize_sheet.py",
+      "sha256": "f62002a7f81ca4d59636c7b57e16513281f2fcbbe0ac7e5353132a8096bf030f"
+    },
+    "tool:readback_review.py": {
+      "path": "tools/readback_review.py",
+      "sha256": "8982c1e114b96b0b71c2ecf2de5d97013d79d4f323851b62438b5f8280b7cce9"
+    },
+    "tool:render_aircraft_schematic.py": {
+      "path": "tools/render_aircraft_schematic.py",
+      "sha256": "8b58a8ed1949c0dcf8c7e438e3287af56400db17cb7eed5ab52998e9455478f8"
+    },
+    "tool:render_l0_sheet.py": {
+      "path": "tools/render_l0_sheet.py",
+      "sha256": "9da830dcf6528058068177c9af7fae9315b7e57f2a03daff5cc1420a95740510"
+    },
+    "tool:sheet_diff.py": {
+      "path": "tools/sheet_diff.py",
+      "sha256": "5b0ef008ca4b31908a0de0d6948fd2240afb646286b71c20780a2ec411eaf507"
+    },
+    "tool:sheet_geometry.py": {
+      "path": "tools/sheet_geometry.py",
+      "sha256": "22b77adc3a716670e3ab5c34725a069f1bc914754f7af0d3fbdfa30070d4f252"
+    },
+    "tool:sheet_version.py": {
+      "path": "tools/sheet_version.py",
+      "sha256": "1375b746bfafc4d6be569b69714bd8d084102e0cf569e186235d28dfccc9282b"
+    },
+    "tool:stroke_checks.py": {
+      "path": "tools/stroke_checks.py",
+      "sha256": "dedf5fe3c7499afc7ee643121321626b85d696bf9f7a803b17f37b22669f673b"
+    },
+    "tool:svg_paint.py": {
+      "path": "tools/svg_paint.py",
+      "sha256": "0754f8dd08c103c4d0dde44582c6530aa2363859c2cd42e8f075379f529c27bb"
+    },
+    "tool:text_checks.py": {
+      "path": "tools/text_checks.py",
+      "sha256": "df753b918739c2c2281c1028d844a2cfda27dfe7ff920b08c94b8a15ab59c174"
+    },
+    "tool:topology_confirm.py": {
+      "path": "tools/topology_confirm.py",
+      "sha256": "9877ed821510f258c49bd322018bfbb5f428883eb538f95cf3d0dfd04b087c1a"
+    },
+    "tool:topology_reconciliation.py": {
+      "path": "tools/topology_reconciliation.py",
+      "sha256": "297a1c8fcec7d16e25dc0be6b0040d352f736e2977c67cbdf591158d9b38fe7b"
+    },
+    "tool:validate_driver.py": {
+      "path": "tools/validate_driver.py",
+      "sha256": "4d033f117779a08cefa5215a6d5c9dbba37f1c6ddbf0c95d4078453b6056d4d9"
+    },
+    "tool:validate_sheet.py": {
+      "path": "tools/validate_sheet.py",
+      "sha256": "8de19c1552fef37debbc3914dd01744f636a28d66f58ad5756ee44330b49d72a"
+    }
+  },
+  "versions": {
+    "python": "3.10.12",
+    "font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+    "Pillow": "10.1.0",
+    "numpy": "1.24.3",
+    "ruamel.yaml": "0.19.1",
+    "jsonschema": "4.26.0",
+    "kiwisolver": "1.3.2",
+    "rasterizer": "Google Chrome 148.0.7778.167"
+  },
+  "source": "/mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/integration/1#系统原理图",
+  "installed_font_environment": "e34346ba4a581b5fcd17cc0ed59cedfd72e1d9b2262d36a86d3127cf9a01f509",
+  "font_resources": [],
+  "integrity": "8e4febc6ce07a529cc589fa192918012fab9bf617dd10a7ffbe4844a7afcfaa8"
+}

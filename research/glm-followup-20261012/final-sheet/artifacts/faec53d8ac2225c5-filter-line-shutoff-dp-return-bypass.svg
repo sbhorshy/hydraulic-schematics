@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 194"
+     width="100" height="194"
+     data-component-type="filter_line_shutoff_dp_return_bypass"
+     data-symbol-version="1.1"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="CONSTRUCTED:filter-line-shutoff-dp.svg v4.3 + check-valve-spring.svg x0.5 rot90">
+
+  <!-- 回油滤组件 = 油滤本体(线端关断+压差指示) + 弹簧单向阀旁通。
+       2026-09-07 用户口径:回油滤 RF-001 为组件,滤芯堵塞压差顶开旁通阀继续回油;
+       与壳体回油滤 CDF-001(本体+单向阀串联)是两个东西。
+
+       v1.1 本体随 filter-line-shutoff-dp.svg v4.3 重定基:本体几何原样
+       全拷贝(v4.3 两端导管版),画布 80 宽 -> 100 宽,旁通阀与支路随之
+       右移 +10,画布 80x194 -> 100x194;端口仍落在 (0,114)/(100,114)。
+       v1.0 初版(本体 v4.2 + 旁通,画布 80x194)。
+
+       构成(全部复用受控符号几何,不新造机构):
+         本体  filter-line-shutoff-dp.svg v4.3 原样全拷贝,
+               液压中心线 Y=114、端口 (0,114)/(100,114) 与本体件一致,
+               布局占位由 100x158 增至 100x194(增量全在下方旁通回路);
+         旁通  check-valve-spring.svg(竖直带弹簧单向阀) x0.5 等比缩放
+               并旋转 90 度横置,流向自左向右(与主路同向):
+                 座 V  顶点 (39,176) 在入口侧,臂端 (53,162)/(53,190)(臂半宽 14,
+                       与本体关断 X 半宽 14 同量级);
+                 阀球  圆心 (51.3,176) r8.35(球嵌入 V 口,球右缘 59.65 略过臂面,
+                       同源件"球嵌于锥座口"构型);
+                 弹簧  四段折线绕轴线包拢,轴线 y=176,节距 5.625,
+                       振幅 ±8.9/±9.85(源件 x0.5),首点 (57,167.1) 起于球缘,
+                       末点 (79.5,167.1);
+                 引线  出口段 (59,176)-(100,176) 止于球缘前 0.65(源件同纪律);
+       支路  旁通自主体的入/出口(即两端口点)引出:左 (0,114)-(0,176) 下行,
+             右 (100,176)-(100,114) 上行,与 SysML「装配端口分接 body 与 cv」
+             一一对应;分叉点即端口点,符号内部无三通。
+
+       画布 0 0 100 194(内容 y 4..190,四边留约 4)。
+       *** 液压中心线 Y=114,不是画布几何中心 ***
+       布局器必须按 port 实测坐标接线,不得假定各符号中心线一致。
+
+       *** 不新增任何端口 ***
+       组件对外仍为 inlet / outlet 两个液压端口(port role=return 沿用本体件);
+       旁通阀与本体滤芯的内部关系只记拓扑,不出第二对端口。
+
+       未确认项(引用本符号的 L0 文件须在 unknown 登记):
+         无标准页依据,由两个 provisional/annotated 受控符号构造(status=provisional);
+         弹簧单向阀开启设定值与允许流向(左->右,与主路同向)为判断,待工程确认;
+         旁通支路"端口处分叉、符号内无三通"为绘图抽象,实件分叉位置待图纸核对。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- ===== 油滤本体(filter-line-shutoff-dp.svg v4.3 原样) ===== -->
+    <!-- 压差指示器(附件,x1.75) -->
+    <circle id="dp-indicator-ball" cx="50" cy="25" r="21"/>
+    <line id="dp-indicator-x-1" x1="36" y1="11" x2="64" y2="39"/>
+    <line id="dp-indicator-x-2" x1="64" y1="11" x2="36" y2="39"/>
+    <line id="dp-indicator-tube-l" x1="33.5" y1="38.4" x2="33.5" y2="90.5"/>
+    <line id="dp-indicator-tube-r" x1="66.5" y1="38.4" x2="66.5" y2="90.5"/>
+
+    <!-- 滤体(菱形本体,恰 80x80) -->
+    <path id="filter-housing" d="M10 114 L50 74 L90 114 L50 154 Z"/>
+
+    <!-- line shutoff 特征(绕 (50,114) 等比 x1.75) -->
+    <circle id="shutoff-ring" cx="50" cy="114" r="28"/>
+    <circle id="shutoff-ball-l" cx="30.5" cy="114" r="8"/>
+    <circle id="shutoff-ball-r" cx="62" cy="114" r="8"/>
+    <line id="shutoff-x-1" x1="36" y1="100" x2="64" y2="128"/>
+    <line id="shutoff-x-2" x1="36" y1="128" x2="64" y2="100"/>
+    <line id="shutoff-centerline" x1="50" y1="76" x2="50" y2="152" stroke-dasharray="5"/>
+
+    <!-- 两端导管(v4.3) -->
+    <line id="port-lead-l" x1="0" y1="114" x2="10" y2="114"/>
+    <line id="port-lead-r" x1="90" y1="114" x2="100" y2="114"/>
+
+    <!-- ===== 弹簧单向阀旁通(check-valve-spring.svg x0.5 rot90,流向左->右) ===== -->
+    <!-- 支路:自端口点下行/上行,与本体出入油并联 -->
+    <path id="bypass-branch-l" d="M0 114 L0 176 L39 176"/>
+    <path id="bypass-branch-r" d="M100 176 L100 114"/>
+    <!-- 出口段引线:自球缘前 0.65 至右支路(源件同纪律) -->
+    <line id="bypass-lead-out" x1="59" y1="176" x2="100" y2="176"/>
+    <!-- 阀座:V 形,顶点 (39,176) 在入口侧,口开向出口 -->
+    <path id="bypass-valve-seat" d="M53 162 L39 176 L53 190"/>
+    <!-- 阀球 -->
+    <circle id="bypass-valve-ball" cx="51.3" cy="176" r="8.35"/>
+    <!-- 整定弹簧:四段折线绕轴线 y=176 -->
+    <polyline id="bypass-valve-spring" points="57,167.1 62.6,185.9 68.3,167.2 73.9,185.9 79.5,167.1"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-inlet" cx="0" cy="114" r="2"
+            data-port-id="inlet" data-medium="hydraulic"
+            data-port-role="return" data-flow-capability="in"
+            data-anchor-direction="left"/>
+    <circle id="port-outlet" cx="100" cy="114" r="2"
+            data-port-id="outlet" data-medium="hydraulic"
+            data-port-role="return" data-flow-capability="out"
+            data-anchor-direction="right"/>
+  </g>
+</svg>
