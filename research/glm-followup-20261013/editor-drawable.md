@@ -30,7 +30,7 @@
   边界非栅格倍数（或对齐/取整把右/下缘推出 drawable）时边界优先于栅格，不提交越界位移。
 - 未动：busy/镜像/旋转保护、postDelta 闭环与未知态处理、参考线/选中框绘制。
 
-## 测试（控制端尚未执行，本记录不声称通过）
+## 测试（实现阶段记录；最终验收见 acceptance.md）
 
 `tests/repository/test_editor_drag_frontend.py`：从 index.html 提取 `<script>` 在 Node vm
 上下文原样执行（最小 DOM stub + fetch stub：`/api/sheet` 挂起、`/api/delta` 只记录请求体
@@ -51,7 +51,7 @@ node 不在 PATH 时整类 skip。4 场景：
 ## 已知边界 / 未做
 
 - 测试由控制端执行后才算数；本记录与实现说明不构成"已通过"。
-- 真实 Chrome 拖动手感回归由 root 负责（未做）。
+- 真实 Chrome 自动交互回归由 root 完成（见 acceptance.md）；主观手感仍待用户反馈。
 - 对齐参考线/吸附候选/选中框仍按未交换的 w/h 绘制（既有行为，不在本轮口径）。
 - 提交位移取整 0.1 后再夹取：整数/定点坐标下精确；极端非定点边界值会失去栅格对齐
   （边界优先，不越界），与服务端权威夹取一致。
@@ -66,3 +66,5 @@ node 不在 PATH 时整类 skip。4 场景：
   harness 失败）；断言未削弱/删除/跳过。同轮修正注释口径：GET /api/layout 只
   核验 drawable 矩形/margin 声明，节点占位可放下由 apply_delta 写盘前另行拒绝。
   前端场景逻辑在本轮修复前从未实际执行，通过与否待控制端重跑。
+
+最终控制端复测、独立浏览器审核及范围限制见 [Codex 验收记录](acceptance.md)。

@@ -1,0 +1,11 @@
+{
+  "action": "revise",
+  "task_id": "server-bounds",
+  "candidate_commit": "1129545288a27fa2fe775ac271cdb2cb0762cd27",
+  "reviewer": "Codex-independent-review",
+  "summary": "Clamp implementation and 12 new behavioral cases reviewed. Independent real HTTP probes exposed regressions in GET /api/layout error handling; fix only these bounded findings plus any actual check failure. Read/Edit/Write only, no shell. Do not re-explore repository; test_entrypoints helper is .agents/skills/hydraulic-schematic/scripts/test_entrypoints.py.",
+  "findings": [
+    "P2 GET /api/layout: layout JSON null triggers TypeError at drawable_bounds first membership test and drops socket (RemoteDisconnected), whereas bad contracts must return HTTP400 JSON. Reject non-dict layout before calling the contract; add HTTP regression for JSON null/list/scalar with unchanged bytes.",
+    "P2 GET /api/layout: moving _connection_counts outside its old try/except loses JSON500 error response. Repro valid current layout + intent file content null: _connection_counts gets None and throws AttributeError, client gets RemoteDisconnected. Preserve JSON error handling around response assembly (do not turn unknown facts into invented successful conns). Add real HTTP regression proving structured error, no write. Fixed candidate probe evidence /mnt/d/file/comac/组件库/.scratch/glm-followup-20261012/server-get-review.json. These are tiny changes in server.py plus two tests; retain all existing assertions and assets."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "name": "extreme right/bottom drag persisted through real pipeline",
+      "pass": true
+    },
+    {
+      "name": "post-snap node lands on drawable right/bottom, not canvas",
+      "pass": true
+    },
+    {
+      "name": "frontend sends already bounded delta",
+      "pass": true
+    },
+    {
+      "name": "nonzero drawable left/top maintained after grid snapping",
+      "pass": true
+    },
+    {
+      "name": "drag preserves rotation and registered mirror",
+      "pass": true
+    },
+    {
+      "name": "no uncaught browser errors",
+      "pass": true
+    }
+  ],
+  "browser_errors": []
+}

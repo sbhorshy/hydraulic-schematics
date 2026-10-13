@@ -1,0 +1,11 @@
+{
+  "action": "revise",
+  "task_id": "frontend-bounds",
+  "candidate_commit": "4468d6cac60ecb6e9fef60ab9ed77bc3c50b2c8c",
+  "reviewer": "Codex-independent-review",
+  "summary": "35 tests ran: 31 server/legacy PASS, all 4 new Node cases fail at harness syntax before executing production logic. Independent in-memory diagnostic replacing only the missing arrow executes all four scenarios with expected values; candidate remains unchanged and must pass real controller rerun. Tiny fix only; no repository exploration needed. Read/Edit/Write (read-only Glob/Grep allowed if genuinely needed), no Bash.",
+  "findings": [
+    "P1 tests/repository/test_editor_drag_frontend.py HARNESS_JS fetchStub: new Promise(() {}) is invalid JS. Correct to new Promise(() => {}). Do not weaken/delete/skip assertions. Controller runs existing declared suite; do not claim tests passed yourself.",
+    "P3 documentation accuracy: index.html parseDrawableBounds comment and research/glm-followup-20261013/editor-drawable.md currently say server drawable_bounds guarantees node occupancy fits. GET validates only rectangle/margin; apply_delta separately rejects oversized nodes. Correct this description only, no new behavior or scope. Preserve stated legacy alignment-guide limitation."
+  ]
+}

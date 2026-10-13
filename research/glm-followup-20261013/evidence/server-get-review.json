@@ -1,0 +1,15 @@
+{
+  "commit": "1129545288a27fa2fe775ac271cdb2cb0762cd27",
+  "cases": [
+    {
+      "case": "null-layout",
+      "error": "RemoteDisconnected",
+      "detail": "Remote end closed connection without response"
+    },
+    {
+      "case": "valid-contract-invalid-intent",
+      "error": "RemoteDisconnected",
+      "detail": "Remote end closed connection without response"
+    }
+  ]
+}

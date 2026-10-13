@@ -1,0 +1,15 @@
+{
+  "commit": "839e85337b418d49cefe6be357e20db1a1178ed3",
+  "cases": [
+    {
+      "case": "null-layout",
+      "http": 400,
+      "body": "{\"error\": \"layout 顶层必须是 JSON 对象，实际 NoneType\"}"
+    },
+    {
+      "case": "valid-contract-invalid-intent",
+      "http": 500,
+      "body": "{\"error\": \"'NoneType' object has no attribute 'get'\"}"
+    }
+  ]
+}
