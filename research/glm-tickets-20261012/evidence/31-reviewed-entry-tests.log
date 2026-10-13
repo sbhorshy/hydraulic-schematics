@@ -1,9 +1,0 @@
-test_project_entry_default_scan_hits_skill_library_red_baseline (test_symbol_gate_entry.SymbolGateEntry) ... ok
-test_project_entry_passes_explicit_symbol_from_any_cwd (test_symbol_gate_entry.SymbolGateEntry) ... ok
-test_project_entry_warns_without_certifying_pending_check_valve (test_symbol_gate_entry.SymbolGateEntry) ... ok
-test_relocated_entry_resolves_skill_by_relative_layout (test_symbol_gate_entry.SymbolGateEntry) ... ok
-
-----------------------------------------------------------------------
-Ran 4 tests in 2.138s
-
-OK

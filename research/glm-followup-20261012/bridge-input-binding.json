@@ -1,7 +1,0 @@
-{
-  "intent_path": "1#系统原理图/1#系统.intent.yaml",
-  "raw_sha256": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888",
-  "policy_id": "current-1-verified-single-bridge-20261012",
-  "maximum_verified_bridges": 1,
-  "source": "explicit user answer 2026-10-12"
-}

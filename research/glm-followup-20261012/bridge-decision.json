@@ -1,8 +1,0 @@
-{
-  "issue": 23,
-  "decision": "当前 1# 允许最多 1 处经验证跳线，其余交叉仍禁止",
-  "scope": "current 1# intent only",
-  "raw_crossings_preserved": true,
-  "other_sheets_default": 0,
-  "other_budgets_unchanged": true
-}

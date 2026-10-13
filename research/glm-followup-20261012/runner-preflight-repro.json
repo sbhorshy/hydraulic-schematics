@@ -1,6 +1,0 @@
-{
-  "exit_code": 2,
-  "old_report_exists": false,
-  "old_report_preserved": false,
-  "stderr": "selftest-runner: 输出路径预检失败（未启动任何测试进程）: [Errno 17] File exists: '/tmp/runner-review-preserve-thegnyj8/report.json'\n用法: python selftest_runner.py [--jobs N(默认1,允许1..4)] [--suite-timeout 秒(默认600,单套件测试进程保护上限,非构图预算)] [--log-dir 新目录] [--merged-log 新文件] [--report 新文件] suite [suite ...]\n"
-}
