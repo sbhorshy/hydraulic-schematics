@@ -65,9 +65,10 @@ python -m unittest discover -s tests/repository -p "test_editor_*.py" -v
 → Ran 40 tests in 142.514s ... OK
 ```
 
-控制器 WSL 口径 `python3 -m unittest discover ...` 在本机 WSL 无 node，
-Node vm 行为测试按既有约定整类 skip（skip ≠ 通过）；权威结果以上述
-主机实测为准。改动仅限前端脚本与前端测试，服务端不受影响。
+执行器通过其默认 WSL 调用环境观察到 Node 不在 PATH；该环境不等同于
+Codex 控制端。Codex 后续在固定候选及独立集成版本上实跑 WSL 测试，
+均为 40 项通过、无跳过。最终验收以 [控制端记录](acceptance.md) 及其
+绑定提交的报告为准，执行器自测不替代独立验证。
 
 ## 剩余范围（不在本次声称完成）
 
