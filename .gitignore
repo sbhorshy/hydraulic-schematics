@@ -6,14 +6,15 @@
 **/_edge_readback_profile/
 browser-profile/
 
-# 各层级运行产物：回读证据/清单/审查记录/报告/整图栅格，任意目录深度均忽略
-**/browser-evidence.json
-**/readback-manifest.json
-**/readback-items-review.json
-**/perceptual-review.json
-**/sheet-readback.png*
-**/validation-report.json*
-**/readback/
+# 1# 系统项目内各层级的运行产物：回读证据/清单/审查记录/报告/整图栅格
+# （覆盖 skill-chain-e2e、CDF 子目录；不用全仓规则，避免误吞 skill/测试同名 fixture）
+1#系统原理图/**/browser-evidence.json
+1#系统原理图/**/readback-manifest.json
+1#系统原理图/**/readback-items-review.json
+1#系统原理图/**/perceptual-review.json
+1#系统原理图/**/sheet-readback.png*
+1#系统原理图/**/validation-report.json*
+1#系统原理图/**/readback/
 
 # 1# 系统项目范围内的运行产物：渲染/回读/报告/追溯清单。
 # 只在项目目录根部匹配；symbols/ 符号库、intent/layout/catalog/组件JSON 等输入不受影响。

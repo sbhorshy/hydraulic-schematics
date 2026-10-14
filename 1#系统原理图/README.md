@@ -5,29 +5,29 @@
 ## 全新检出生成链（SVG → PNG → validate）
 
 ```bash
-WORK=.artifacts/one-system
-mkdir -p "$WORK"
+mkdir -p .artifacts
+WORK=$(mktemp -d "$PWD/.artifacts/one-system.XXXXXX")
 cp 1#系统原理图/1#系统.intent.yaml 1#系统原理图/1#系统.layout.json \
    1#系统原理图/1#系统组件.json 1#系统原理图/component-catalog.json "$WORK/"
 cp -r 1#系统原理图/symbols "$WORK/symbols"
 
-python .agents/skills/hydraulic-schematic/scripts/render_l0_sheet.py "$WORK"
-python .agents/skills/hydraulic-schematic/scripts/rasterize_sheet.py \
+python3 .agents/skills/hydraulic-schematic/scripts/render_l0_sheet.py "$WORK"
+python3 .agents/skills/hydraulic-schematic/scripts/rasterize_sheet.py \
   "$WORK/1#系统原理图.svg" -o "$WORK/sheet-readback.png"
-python .agents/skills/hydraulic-schematic/scripts/validate_sheet.py "$WORK"
+python3 .agents/skills/hydraulic-schematic/scripts/validate_sheet.py "$WORK"
 ```
 
 诊断/收敛驱动器（自动产出回读 PNG 与 validation-report）：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
+python3 .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
   --intent '1#系统原理图/1#系统.intent.yaml' \
   --catalog '1#系统原理图/component-catalog.json' \
   --layout-seed '1#系统原理图/1#系统.layout.json' \
   --workdir .artifacts/one-system-driver
 ```
 
-编辑器原型：`python editor-proto/server.py --workdir "1#系统原理图" --port 8763`（自测请先复制沙箱工作目录）。
+编辑器原型：`python3 editor-proto/server.py --workdir "$WORK" --port 8763`（沿用上一步的输出目录，在同一个终端运行）。
 
 ## 当前状态与边界
 

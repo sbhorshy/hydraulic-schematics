@@ -4,7 +4,7 @@ main 只保留维护所需源码/测试/输入/说明；运行产物与历史批
 不在 main 留副本。
 
 - **归档标签**：[`archive-main-before-cleanup-20261013`](https://github.com/sbhorshy/hydraulic-schematics/tree/archive-main-before-cleanup-20261013)
-  （提交 `e9cc0fc`，2026-10-13 清理前 main 的完整快照，只增不改）。
+  （提交 `e9cc0fc4afe406c0c5fed845aaeb86870748ab96`，2026-10-13 清理前 main 的完整快照，只增不改）。
 - **取回方式**：`git worktree add --detach ../hydraulic-archive archive-main-before-cleanup-20261013`
   到独立工作区；或直接浏览标签内文件。归档不是工作分支，不要在其上开发。
 

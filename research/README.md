@@ -9,9 +9,11 @@
   `references/validation.md` 引用其结论。
 
 其余历史批次（glm-followup-20261012 其余部分、glm-followup-20261013、
-glm-rotation-guides-20261013、glm-tickets-20261012、ready-work-20261009、
-spec-materials.md）已随 2026-10-13 清理移至归档标签
+glm-rotation-guides-20261013、glm-tickets-20261012、ready-work-20261009）
+已随 2026-10-13 清理移至归档标签
 `archive-main-before-cleanup-20261013`，索引见 [docs/archive.md](../docs/archive.md)。
+原 `research/spec-materials.md` 同批删除但**不在该归档标签内**；其历史内容
+以 [issue #26](https://github.com/sbhorshy/hydraulic-schematics/issues/26) 为准。
 
 新的调研/验收材料放被忽略的 `.artifacts/` 或仓库外工作区，不要在本目录新增
 批次子目录；确有长期价值的依据按 `docs/agents/repository-content.md` 的规则
