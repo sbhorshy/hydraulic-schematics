@@ -40,7 +40,7 @@ class AccumulatorBranch(unittest.TestCase):
             # The six unaffected CASE/PRESS/B1 baseline failures may remain;
             # moving the branch must not introduce body/text/bridge failures.
             self.assertLessEqual(report['fail_count'], 6, report['checks'])
-            baseline=json.loads((PROJECT.parent/'research/ready-work-20261009/reservoir-49/project-result.json').read_text())['checks']
+            baseline=json.loads((PROJECT.parent/'tests/fixtures/accumulator-baseline.json').read_text())['checks']
             def signature(check):
                 keys=('id','kind','component','port','anchor','input_anchors','obstacle',
                       'expected_endpoints','actual_endpoints','networks','text')

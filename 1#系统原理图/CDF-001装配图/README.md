@@ -11,4 +11,7 @@ python .agents/skills/hydraulic-schematic/scripts/validate_driver.py \
 
 如需保持旧布局，改用 `--layout-seed` 明确传入本目录布局，实际校核红项须披露，不能拿旧 PNG 代替新证据。本目录 render_l0_sheet.py、validate_sheet.py、auto_space.py 已在文件 I/O 前 fail-closed，避免以旧双坐标算法读写迁移后的输入。
 
-已有 SVG/PNG/topology/report 是 f3a00952 捕获的历史实证，未重写、未升格。历史脚本实现在该提交中保留；复现实验应导出整套历史输入、脚本与资产到独立目录，不混用活动 seed。
+历史 SVG/PNG/topology/report（`f3a00952` 捕获的实证）已随 main 清理移至归档标签
+`archive-main-before-cleanup-20261013`（索引见 [docs/archive.md](../../docs/archive.md)）；
+历史脚本实现在该提交中保留。复现实验应导出整套历史输入、脚本与资产到独立目录，
+不混用活动 seed，不拿旧 PNG 代替新证据。

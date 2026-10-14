@@ -1,16 +1,60 @@
-# 浏览器回读用的临时 profile（12M+，非资产）
-已标注/1#系统原理图/_edge_readback_profile/
+# 任务/构建工作区：运行日志、验收截图、逐文件清单等本地工作文件不入 main
+.scratch/
+.artifacts/
 
-# 符号重绘测量工作区：对比截图/测量输出留本地，不入库（脚本样板与正式资产除外）
-prototype-precheck/**/*.png
-prototype-precheck/**/*.txt
-prototype-precheck/envelope-survey/
-1#系统原理图/judge-*.png
-archive
+# 浏览器回读用的临时 profile（12M+，非资产）
+**/_edge_readback_profile/
+browser-profile/
+
+# 1# 系统项目内各层级的运行产物：回读证据/清单/审查记录/报告/整图栅格
+# （覆盖 skill-chain-e2e、CDF 子目录；不用全仓规则，避免误吞 skill/测试同名 fixture）
+1#系统原理图/**/browser-evidence.json
+1#系统原理图/**/readback-manifest.json
+1#系统原理图/**/readback-items-review.json
+1#系统原理图/**/perceptual-review.json
+1#系统原理图/**/sheet-readback.png*
+1#系统原理图/**/validation-report.json*
+1#系统原理图/**/readback/
+
+# 1# 系统项目范围内的运行产物：渲染/回读/报告/追溯清单。
+# 只在项目目录根部匹配；symbols/ 符号库、intent/layout/catalog/组件JSON 等输入不受影响。
+1#系统原理图/*.svg
+1#系统原理图/*.png
+1#系统原理图/*.png.evidence.json
+1#系统原理图/*topology*.json
+1#系统原理图/*topology*.md
+1#系统原理图/validation-report.json*
+1#系统原理图/browser-evidence.json
+1#系统原理图/perceptual-review.json
+1#系统原理图/readback-manifest.json
+1#系统原理图/readback-items-review.json
+1#系统原理图/readback.html
+1#系统原理图/readback/
+1#系统原理图/skill-chain-e2e/*.svg
+1#系统原理图/skill-chain-e2e/*.png
+1#系统原理图/skill-chain-e2e/validation-report.json
+1#系统原理图/CDF-001装配图/*.svg
+1#系统原理图/CDF-001装配图/*.png
+1#系统原理图/CDF-001装配图/*topology*.md
+1#系统原理图/CDF-001装配图/validation-report.json
+
+# 归档本地副本与历史批次证据目录：归档标签留存，不在 main 重生（已跟踪的 3 份
+# 必要依据 research/assembly-enclosure-standard.md 与 whole-graph-planarity.* 不受影响；
+# glm 目录用 /* 而非整目录忽略，以便下方例外重新包含已跟踪依据）
+archive/
+1#系统原理图/proto/
+research/glm-*/*
+!research/glm-followup-20261012/whole-graph-planarity.md
+!research/glm-followup-20261012/whole-graph-planarity.json
+research/ready-work-*/
+issues/
+prototype-precheck/
+docs/specs/*-evidence/
 
 # Python
 __pycache__/
 *.py[cod]
+.venv/
 
 # 系统杂项
 .DS_Store

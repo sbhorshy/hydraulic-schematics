@@ -1,8 +1,0 @@
-{
-  "schema": "sheet-perceptual-review-v1",
-  "reviewer": "Codex-independent-review",
-  "decision": "confirmed",
-  "note": "Viewed current full sheet and all 62 local crops; one continuous bridge is visibly separated, priority leads and FSOV route terminate correctly. B6/B7 warnings retained, concept only; no maturity upgrade.",
-  "artifact_fingerprint": "1792dd0dea36484567c6fe1c36c6790ab40245d79f86f1e45d7b579a54006939",
-  "validation_fingerprint": "3e9bf2ee70efc6139fb52d585bb4993dd43f9ee582a1ae69e73dc690f1871f9c"
-}

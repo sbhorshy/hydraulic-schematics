@@ -8,7 +8,9 @@
 python -m unittest discover -s tests/repository -v
 ```
 
-这组测试需要仓库中的 `editor-proto/`、`1#系统原理图/` 和研究基线证据。它们不随 skill 分发，不是 skill `selftest.py` 的隐藏依赖，也不被独立技能的成功结果包含。运行缺少依赖时须失败，不能用自动 skip 冒充覆盖通过。
+这组测试需要仓库中的 `editor-proto/`、`1#系统原理图/` 和 `tests/fixtures/`（历史回归
+oracle，来源见其 README）。它们不随 skill 分发，不是 skill `selftest.py` 的隐藏依赖，
+也不被独立技能的成功结果包含。运行缺少依赖时须失败，不能用自动 skip 冒充覆盖通过。
 
 独立 skill 的完整回归入口保持为：
 
