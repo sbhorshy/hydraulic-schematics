@@ -1,6 +1,6 @@
 # ZCode 取消、续接与上下文缓存的能力边界
 
-研究票：[hydraulic-schematics #78](https://github.com/sbhorshy/hydraulic-schematics/issues/78)，地图 [#76](https://github.com/sbhorshy/hydraulic-schematics/issues/76)。读取日期：2026-10-14。方法：当前安装包与 bridge 静态源码、一手官方文档；没有调用模型、读取或导出原始会话、凭据和私有推理。本文描述数据类型及控制语义，不包含会话内容。
+研究票：[恢复能力边界：ZCode 取消、续接与上下文缓存能保留什么？](https://github.com/sbhorshy/hydraulic-schematics/issues/78)，地图 [zcode-bridge：减少超时重做与 token 消耗的决策地图](https://github.com/sbhorshy/hydraulic-schematics/issues/76)。读取日期：2026-10-14。方法：当前安装包与 bridge 静态源码、一手官方文档；没有调用模型、读取或导出原始会话、凭据和私有推理。本文描述数据类型及控制语义，不包含会话内容。
 
 **结论：现有 resume 能重建已持久化的会话历史，不能证明能从被截断的模型生成位置继续。当前 bridge 取消采用强制进程树终止；ZCode 内部已有请求停止接口，但尚未由 bridge 接入和验收。上下文缓存减少重复输入处理，不是语义或执行检查点。**
 
