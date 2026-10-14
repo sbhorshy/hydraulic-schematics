@@ -6,6 +6,15 @@
 **/_edge_readback_profile/
 browser-profile/
 
+# 各层级运行产物：回读证据/清单/审查记录/报告/整图栅格，任意目录深度均忽略
+**/browser-evidence.json
+**/readback-manifest.json
+**/readback-items-review.json
+**/perceptual-review.json
+**/sheet-readback.png*
+**/validation-report.json*
+**/readback/
+
 # 1# 系统项目范围内的运行产物：渲染/回读/报告/追溯清单。
 # 只在项目目录根部匹配；symbols/ 符号库、intent/layout/catalog/组件JSON 等输入不受影响。
 1#系统原理图/*.svg
@@ -28,9 +37,14 @@ browser-profile/
 1#系统原理图/CDF-001装配图/*topology*.md
 1#系统原理图/CDF-001装配图/validation-report.json
 
-# 历史批次证据目录与本地票镜像：归档标签留存，不在 main 重生（已跟踪的 3 份
-# 必要依据 research/assembly-enclosure-standard.md 与 whole-graph-planarity.* 不受影响）
-research/glm-*/
+# 归档本地副本与历史批次证据目录：归档标签留存，不在 main 重生（已跟踪的 3 份
+# 必要依据 research/assembly-enclosure-standard.md 与 whole-graph-planarity.* 不受影响；
+# glm 目录用 /* 而非整目录忽略，以便下方例外重新包含已跟踪依据）
+archive/
+1#系统原理图/proto/
+research/glm-*/*
+!research/glm-followup-20261012/whole-graph-planarity.md
+!research/glm-followup-20261012/whole-graph-planarity.json
 research/ready-work-*/
 issues/
 prototype-precheck/
@@ -39,6 +53,7 @@ docs/specs/*-evidence/
 # Python
 __pycache__/
 *.py[cod]
+.venv/
 
 # 系统杂项
 .DS_Store
