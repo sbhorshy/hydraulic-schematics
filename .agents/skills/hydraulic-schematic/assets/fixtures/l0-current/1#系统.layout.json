@@ -14,7 +14,7 @@
   "externs": {},
   "nodes": {
     "TANK-001": {
-      "x": 90.0,
+      "x": 60,
       "y": 276,
       "symbol": "symbols/bootstrap-type-reservoir.svg",
       "w": 218,
@@ -205,7 +205,7 @@
     },
     "CASE": {
       "kind": "v",
-      "x": 650.0
+      "x": 700
     }
   },
   "labels": {
@@ -247,7 +247,7 @@
     "ACV-001": "above",
     "PG-001": "above",
     "QDP-001": "below",
-    "QDR-001": "below"
+    "QDR-001": "above"
   },
   "label_drop": {
     "TANK-001": 100,
@@ -297,6 +297,8 @@
   },
   "edge_margin": 30.0,
   "revision_log": [
-    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30"
+    "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30",
+    "#88 hard-routing fixture: tank x 90→60 and CASE x 650→700 provide B6 clearance; topology unchanged.",
+    "#88 rotation fixture: QDR label above leaves RF upward port unobstructed at 90/270 degrees."
   ]
 }

@@ -128,6 +128,7 @@ class PortGeometryCLI(unittest.TestCase):
         for rotation, position, direction, box in cases:
             with self.subTest(rotation=rotation):
                 layout['nodes']['PF-001'].update(w=160, h=80, rot=rotation)
+                layout['label_pos']['PF-001']='right' if rotation in (90,270) else 'above'
                 layout_path.write_text(json.dumps(layout))
                 self.render()
                 report = self.validate()

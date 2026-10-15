@@ -267,6 +267,8 @@ class LayoutClearanceCLI(unittest.TestCase):
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
         layout['nodes']['PF-001'].update(x=850,y=490)
         layout['legend'].update(x=950,y=490)
+        # The panel must not contain the external pipe terminal.
+        layout['externs']['USR-001']['y']=850
         path.write_text(json.dumps(layout));self.render()
         self.assertFalse([c for c in self.validate()['checks'] if c['id']=='V7' and
                           (c.get('component')=='PF-001' or '元件 PF-001' in c['detail'])])

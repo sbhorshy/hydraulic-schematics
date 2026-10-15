@@ -106,7 +106,7 @@ class TextDisplay(unittest.TestCase):
         original=self.svg.read_text()
         for baseline,near in ((318,False),(325,True)):
             root=ET.fromstring(original)
-            self.probe_text(root,baseline)
+            self.probe_text(root,baseline,x="750")  # Away from the relocated CASE bus.
             self.save(root)
             report=self.validate()
             hits=[c for c in report['checks'] if c.get('element')=='probe-text' and c.get('budget_id')=='B7']

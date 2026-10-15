@@ -14,6 +14,8 @@ from layout_contract import drawable_bounds
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure, mirror_contract
 from mirror_policy import check_mirror, mirror_point, mirror_anchor, mirror_svg_transform
 
+import route_obstacles as RO
+
 import preflight  # 同目录 L0 输入预检器（规范源与 skill 快照同名同源）
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -462,12 +464,11 @@ class Sheet(object):
                 return True
         return False
 
-    def route(self, a, b, exclude=(), lanes=()):
-        """正交走线,择优避开元件本体。
+    def route(self, a, b, exclude=(), lanes=(), anchor="route", lt="pressure"):
+        """先淘汰违反元件/标签净空的路线，再对合法正交候选择优。
 
-        先按锚点出线,再在若干候选走廊中选穿越障碍最少者。
-        早先版本只生成一条路径,壳体回油与主回油因此横穿油箱、
-        泵与滤的本体(校核项 V2 抓到 9 处)。
+        exclude 保留调用兼容性，但不再豁免任何整件。只有实际端口沿
+        锚向的连续首/末段可进入自身足迹；邻件和文字没有端口豁免。
         """
         ax, ay, aa = a
         bx, by, ba = b
@@ -482,7 +483,8 @@ class Sheet(object):
         stub = {'left': (-S, 0), 'right': (S, 0), 'up': (0, -S), 'down': (0, S)}
         a1 = (ax + stub[aa][0], ay + stub[aa][1])
         b1 = (bx + stub[ba][0], by + stub[ba][1])
-        obs = self.obstacles(exclude)
+        terminals = RO.terminals_for(self, a, b)
+        rejected = []
 
         cands = []
         # 直连**仅在共线时**允许。
@@ -517,33 +519,41 @@ class Sheet(object):
                     cands.append([a1, (cx, a1[1]), (cx, ly),
                                   (cx2, ly), (cx2, b1[1]), b1])
 
-        # 代价权重:穿元件 > 与已画线重叠 > 与文字重叠 > 交叉 > 长度 > 拐点。
-        # 前三项是会导致误读的缺陷,必须压过"线短拐点少"的观感偏好。
-        # 剩余项均非负；部分分数已不小于最佳总分时可提前淘汰。
-        # 候选顺序和严格更优(<)保持不变，因此并列时仍选最早候选。
-        best, bad = None, None
-        for c in cands:
-            pts = self.dedup([(ax, ay)] + c + [(bx, by)])
-            if len(pts) < 2 or self.backtracks(pts):
-                continue
-            h = self.hits(pts, obs, skip_ends=True)
-            if bad is not None and h * 10000 >= bad:
-                continue
-            ov = self.overlap(pts, self.drawn) + self.overlap(pts, self.buslines)
-            if bad is not None and h * 10000 + ov * 3000 >= bad:
-                continue
-            tx = self.hits(pts, self.textboxes, skip_ends=False, tol=0.0)
-            if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
-                continue
-            cr = self.crossings(pts, self.drawn)
-            length = sum(abs(pts[k + 1][0] - pts[k][0]) + abs(pts[k + 1][1] - pts[k][1])
-                         for k in range(len(pts) - 1))
-            score = (h * 10000 + ov * 3000 + tx * 900
-                     + cr * 120 + length + len(pts) * 5)
-            if bad is None or score < bad:
-                bad, best = score, pts
+        def choose(candidates):
+            best, bad = None, None
+            for c in candidates:
+                pts = self.dedup([(ax, ay)] + c + [(bx, by)])
+                if len(pts) < 2 or self.backtracks(pts):
+                    continue
+                hits = RO.collisions(self, pts, lt, terminals)
+                if hits:
+                    rejected.extend(hits)
+                    continue
+                ov = self.overlap(pts, self.drawn) + self.overlap(pts, self.buslines)
+                cr = self.crossings(pts, self.drawn)
+                length = sum(abs(p[0]-q[0])+abs(p[1]-q[1]) for p,q in zip(pts,pts[1:]))
+                score = ov*3000 + cr*120 + length + len(pts)*5
+                if bad is None or score < bad:
+                    bad, best = score, pts
+            return best
+        best = choose(cands)
         if best is None:
-            raise ValueError('未找到无反向折返的正交路线: %s -> %s' % (a, b))
+            # Existing legal routes keep their preference. Repair only when every
+            # original candidate violates a hard envelope or endpoint direction.
+            a1, b1 = RO.escape_point(self, a, lt), RO.escape_point(self, b, lt)
+            xs, ys = RO.edge_lanes(self, lt)
+            fallback = [[a1, (x,a1[1]), (x,b1[1]), b1] for x in xs]
+            fallback += [[a1, (a1[0],y), (b1[0],y), b1] for y in ys]
+            best = choose(fallback)
+            if best is None:
+                def corners():
+                    for x in xs:
+                        for y in ys:
+                            yield [a1,(x,a1[1]),(x,y),(b1[0],y),b1]
+                            yield [a1,(a1[0],y),(x,y),(x,b1[1]),b1]
+                best = choose(corners())
+        if best is None:
+            raise RO.failure(anchor, rejected)
         for k in range(len(best) - 1):
             self.drawn.append((best[k], best[k + 1]))
         return best
@@ -613,6 +623,8 @@ class Sheet(object):
     def build_textboxes(self):
         """预算文字包围盒。必须在 wire() 之前调用,否则走线器不知道
         哪里有字,画完才发现压住标签(校核项 V12)。"""
+        self.textboxes = []
+        self.textbox_ids = []
         FS = {'below': 11.0, 'above': 11.0, 'right': 11.0}
         used = endpoint_usage(self.i, self.types, self.L['nodes'])['used']
         for inst, nd in self.L['nodes'].items():
@@ -654,6 +666,7 @@ class Sheet(object):
                         shifted = min(choices, key=lambda x: abs(x-x0))
                         self.label_offsets[inst] = shifted-x0
                         x0 = shifted
+            self.textbox_ids.append('label.' + inst)
             self.textboxes.append((x0 - 2, y0 - 2, x0 + wid + 2,
                                    y0 + fs + 13 * (len(lines) - 1) + 4))
         for eid, e in self.L.get('externs', {}).items():
@@ -663,11 +676,13 @@ class Sheet(object):
                       for ln in lines)
             dx = -20 if e['anchor'] == 'right' else 20
             x0 = (e['x'] + dx - wid) if e['anchor'] == 'right' else (e['x'] + dx)
+            self.textbox_ids.append('extern-label.' + eid)
             self.textboxes.append((x0 - 2, e['y'] - fs, x0 + wid + 2,
                                    e['y'] + 4 + 13 * (len(lines) - 1)))
         for key in ('legend', 'title_block'):
             r = self.L.get(key)
             if r:
+                self.textbox_ids.append(key)
                 self.textboxes.append((r['x'], r['y'],
                                        r['x'] + r['w'], r['y'] + r['h']))
 
@@ -714,7 +729,7 @@ class Sheet(object):
             m = self.bus_stub(x, y, anchor)
             pts = self.dedup([(x, y), m, (self.L['buses'][bus]['x'], m[1])])
             bus_levels.setdefault(bus, []).append(m[1])
-            if not self.backtracks(pts) and not self.hits(pts[1:], self.obstacles()):
+            if not self.backtracks(pts) and not RO.collisions(self, pts, terminals=RO.terminals_for(self, (x,y,anchor))):
                 reserved.append(((pi, pk), list(zip(pts, pts[1:]))))
         future_buses = [((self.L['buses'][bus]['x'], min(ys)),
                          (self.L['buses'][bus]['x'], max(ys)))
@@ -741,7 +756,10 @@ class Sheet(object):
                 self.mark_port_lt(other, want, lt)
                 # 从元件端口正交接到母线
                 S = 18.0
-                m = self.bus_stub(ox, oy, oa)
+                m = RO.escape_point(self, (ox,oy,oa), lt, 18.0)
+                terminals = RO.terminals_for(self, (ox,oy,oa))
+                rejected = []
+                edge_anchor = 'paths[%d][%d->%d]' % (pi,path_k,path_k+1)
                 # 元件到母线也要避障:早先直接横拉,穿过了中间的滤本体。
                 cands = [[m, (bx, m[1])]]
                 for ly in self.L.get('lanes', []):
@@ -765,15 +783,16 @@ class Sheet(object):
                 # also clear the source. Extend the attachment height around
                 # the actual rotated footprint, without changing any port.
                 direct = self.dedup([(ox, oy), m, (bx, m[1])])
-                recovery = bool(self.hits(direct[1:], obs) or self.backtracks(direct))
+                levels = [y for y,_ in bus_hits.get(bus,[])] + [direct[-1][1]]
+                recovery = bool(RO.collisions(self, direct, lt, terminals) or self.backtracks(direct)
+                                or RO.collisions(self, [(bx,min(levels)),(bx,max(levels))],lt))
                 anticipated = [segment for key, segments in reserved
                                if key != (pi, path_k) for segment in segments] + future_buses
                 existing_count = len(cands)
                 if recovery:
                     # Finite obstacle-edge heights, including neighboring bodies
                     # and label clearance, not just the source's two edges.
-                    heights = [y for box in obs for y in (box[1]-S, box[3]+S)]
-                    heights += [y for box in self.textboxes for y in (box[1]-8, box[3]+8)]
+                    _xs, heights = RO.edge_lanes(self, lt)
                     for ly in dict.fromkeys(heights):
                         if 0 < ly < self.L['canvas']['height']:
                             cands.append([m, (m[0], ly), (bx, ly)])
@@ -785,7 +804,14 @@ class Sheet(object):
                     cp = self.dedup([(ox, oy)] + c)
                     if len(cp) < 2 or self.backtracks(cp):
                         continue
-                    h = self.hits(cp[1:], obs, tol=0.0 if recovery else 4.0)
+                    hard_hits = RO.collisions(self, cp, lt, terminals)
+                    previous = [y for y, _ in bus_hits.get(bus, [])] + [cp[-1][1]]
+                    trunk = [(bx, min(previous)), (bx, max(previous))]
+                    hard_hits += RO.collisions(self, trunk, lt)
+                    if hard_hits:
+                        rejected.extend(hard_hits)
+                        continue
+                    h = 0.0
                     # 本支路自己要接的这条母线不算(末段必然贴在它上面),
                     # 但其他母线要算。
                     # 全部母线都算,包括自己要接的这条:支路只应**横向**
@@ -813,7 +839,7 @@ class Sheet(object):
                     if bad is None or sc < bad:
                         bad, best = sc, cp
                 if best is None:
-                    raise ValueError('未找到无反向折返的母线接入路线: %s -> @%s' % (other, bus))
+                    raise RO.failure(edge_anchor + ' -> buses.' + bus, rejected)
                 pts = best
                 for q in range(len(pts) - 1):
                     self.drawn.append((pts[q], pts[q + 1]))
@@ -841,14 +867,9 @@ class Sheet(object):
                 lt = 'pressure'
             self.mark_port_lt(a, aw, lt)
             self.mark_port_lt(b, bw, lt)
-            # 两端所属元件不算障碍(线本就要接到它们身上)。
-            # 同一条 path 内的相邻元件也要排除:泵.case_drain -> CDF -> 油箱
-            # 是一条 path,其首段自泵下方引出时会途经 CDF 的占位框,
-            # 但那正是它要去的地方,不是穿越。
-            # 只排除本段两端的元件。早先把整条 path 的成员都排除,
-            # 导致"CDF -> 油箱"这一段把油箱也当成非障碍,于是直接横穿
-            # 油箱本体而不去找下方走廊(校核项 V2 反复报同一处)。
-            rp = self.route(pa, pb, exclude=(), lanes=self.L.get('lanes', []))
+            # 端口例外由实际端点和锚向绑定，源/目标仍是中间段障碍。
+            rp = self.route(pa, pb, lanes=self.L.get('lanes', []),
+                            anchor='paths[%d][%d->%d]' % (pi,path_k,path_k+1), lt=lt)
             self.polys.append((lt, rp))
             self.poly_anchors.append('paths[%d][%d->%d]' % (pi, path_k, path_k + 1))
             if lt == 'suction':
@@ -863,6 +884,7 @@ class Sheet(object):
             bx = self.L['buses'][bus]['x']
             ys = sorted(h[0] for h in hits)
             lt = hits[0][1]
+            RO.assert_legal(self, [(bx,ys[0]),(bx,ys[-1])], 'buses.'+bus, lt)
             self.polys.append((lt, [(bx, ys[0]), (bx, ys[-1])]))
             self.poly_anchors.append('buses.' + bus)
             for y, _ in hits:
@@ -896,54 +918,8 @@ class Sheet(object):
             # main-network classification; incompatible visible networks remain a validator error.
             self.port_lt.setdefault((sinst, spid), 'sense')
             self.port_lt.setdefault((ainst, apid), 'sense')
-            S = 18.0
-            stub = {'left': (-S, 0), 'right': (S, 0),
-                    'up': (0, -S), 'down': (0, S)}[aa]
-            a1 = (pa[0] + stub[0], pa[1] + stub[1])
-            stubb = {'left': (-S, 0), 'right': (S, 0),
-                     'up': (0, -S), 'down': (0, S)}[ab]
-            # 终点也按锚向先出桩:最后一段必沿端口锚向进入,逆着锚向
-            # 从元件体内反向出线的候选从形状上就不存在了。早先终点不带
-            # 锚向桩,且两端元件盒都被排除出障碍,穿本体逆锚的候选反而
-            # 以最短胜出(V2:感温线横穿充气活门本体)。
-            b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
-            cands = []
-            if abs(a1[0] - b1[0]) < 1e-9 or abs(a1[1] - b1[1]) < 1e-9:
-                cands.append([a1, b1])
-            # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
-            # 先纵后横的形状不会倒折回端口正上方,排前。
-            cands.append([a1, (b1[0], a1[1]), b1])
-            cands.append([a1, (a1[0], b1[1]), b1])
-            # 评分段自 a1 起算(端口桩只有 18px 且向外,B5≥40 保证桩不碰
-            # 邻盒),障碍全量不豁免:回折穿传感器本体的候选由此拿到应有
-            # 的代价。早先两端元件盒都豁免,穿本体逆锚的候选反而以最短
-            # 胜出(V2:感温线横穿充气活门本体)。
-            obs = self.obstacles()
-            best, bad = None, None
-            for c in cands:
-                pts = self.dedup(c + [pb])
-                if len(pts) < 2:
-                    continue
-                h = self.hits(pts, obs, skip_ends=True)
-                if bad is not None and h * 10000 >= bad:
-                    continue
-                ov = self.overlap(pts, self.drawn)
-                if bad is not None and h * 10000 + ov * 3000 >= bad:
-                    continue
-                tx = self.hits(pts, self.textboxes, tol=0.0)
-                if bad is not None and h * 10000 + ov * 3000 + tx * 900 >= bad:
-                    continue
-                cr = self.crossings(pts, self.drawn)
-                ln = sum(abs(pts[k + 1][0] - pts[k][0])
-                         + abs(pts[k + 1][1] - pts[k][1])
-                         for k in range(len(pts) - 1))
-                sc = (h * 10000 + ov * 3000 + tx * 900
-                      + cr * 120 + ln + len(pts) * 5)
-                if bad is None or sc < bad:
-                    bad, best = sc, pts
-            best = self.dedup([pa] + best)      # 绘制/追溯补回端口桩
-            for k in range(len(best) - 1):
-                self.drawn.append((best[k], best[k + 1]))
+            best = self.route(pa3, pb3, lanes=self.L.get('lanes', []),
+                              anchor='taps[%d]' % ti, lt='sense')
             self.polys.append(('sense', best))
             self.poly_anchors.append('taps[%d]' % ti)
         return juncs
@@ -1415,6 +1391,12 @@ def main(argv=None):
     # 工作目录不再需要 symbols/ 拷贝(单源化,#21)。
     a = list(sys.argv[1:] if argv is None else argv)
     workdir = a[0] if a else HERE
+    for name in ('1#系统原理图.svg', '1#系统原理图-topology.json',
+                 '1#系统原理图-topology.md', 'validation-report.json',
+                 'validation-report.json.sha256', 'routing-error.json'):
+        artifact = os.path.join(workdir, name)
+        if os.path.isfile(artifact) or os.path.islink(artifact):
+            os.unlink(artifact)
     src = os.path.join(workdir, '1#系统.intent.yaml')
     intent = load_yaml(src)
     catalog_path = os.path.join(workdir, 'component-catalog.json')
@@ -1453,14 +1435,25 @@ def main(argv=None):
     except ValueError as error:
         sys.exit(str(error))
     s.build_textboxes()
-    _segs, junc, bus, polys = s.wire()
+    try:
+        _segs, junc, bus, polys = s.wire()
 
-    # taps 气侧支路:在 path 折线之后追加,一并求交叉/避让。
-    path_polys = list(s.polys)
-    npath_polys = len(path_polys)
-    tap_junc = s.wire_taps()
-    tap_polys = s.polys[npath_polys:]
-    junc = junc + tap_junc
+        # taps 气侧支路:在 path 折线之后追加,一并求交叉/避让。
+        path_polys = list(s.polys)
+        npath_polys = len(path_polys)
+        tap_junc = s.wire_taps()
+        tap_polys = s.polys[npath_polys:]
+        junc = junc + tap_junc
+
+    except RO.RoutingError as error:
+        for name in ('sheet-readback.png','sheet-readback.png.evidence.json',
+                     'readback.html','readback-manifest.json','browser-evidence.json'):
+            artifact=os.path.join(workdir,name)
+            if os.path.isfile(artifact) or os.path.islink(artifact):
+                os.unlink(artifact)
+        with io.open(os.path.join(workdir, 'routing-error.json'), 'w', encoding='utf-8') as output:
+            json.dump(error.report, output, ensure_ascii=False, indent=2)
+        raise SystemExit(str(error))
 
     # 先求交叉,再把跨越线打断,最后出图元。顺序不能反:
     # 打断后的折线不能再用来求交叉(断口处已无线段)。

@@ -294,6 +294,7 @@ class SheetDiffCLI(unittest.TestCase):
         layout = self.work / '1#系统.layout.json'
         data = json.loads(layout.read_text())
         data['nodes']['PF-001']['rot'] = 90
+        data['label_pos']['PF-001'] = 'right'  # Keep the label off the rotated inlet.
         layout.write_text(json.dumps(data))
         self.run_cli(self.work / 'render_l0_sheet.py')
         self.refresh(expected=None)

@@ -75,7 +75,7 @@ LAYOUT_NAME = '1#系统.layout.json'
 SVG_NAME = '1#系统原理图.svg'
 READBACK = 'sheet-readback.png'
 
-SCRIPTS = ['layout_contract.py', 'migrate_layout.py', 'assembly_layout.py', 'assembly_checks.py', 'preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
+SCRIPTS = ['route_obstacles.py', 'layout_contract.py', 'migrate_layout.py', 'assembly_layout.py', 'assembly_checks.py', 'preflight.py', 'render_l0_sheet.py', 'validate_sheet.py', 'proofreading_evidence.py', 'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
            'layout_engine.py', 'proto_optimize.py', 'topology_confirm.py',
            'rasterize_sheet.py', 'endpoint_usage.py', 'sheet_geometry.py', 'mirror_policy.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
            'bridge_allowance.py',
@@ -285,7 +285,7 @@ def load_yaml(path):
 
 # ---------- 驱动主流程 ----------
 
-GENERATED = ('readback.html','readback-manifest.json',LAYOUT_NAME, SVG_NAME, READBACK, '1#系统原理图-topology.json', '1#系统原理图-topology.md', 'validation-report.json',
+GENERATED = ('routing-error.json', 'readback.html','readback-manifest.json',LAYOUT_NAME, SVG_NAME, READBACK, '1#系统原理图-topology.json', '1#系统原理图-topology.md', 'validation-report.json',
              READBACK + '.evidence.json', 'validation-report.json.sha256',
              'convergence-report.json', 'layout-guard-report.json', 'ref.layout.json')
 MANAGED_FILES = '.driver-managed-files.json'
@@ -449,6 +449,9 @@ def render_round(wd, use_seed, p3_armed, ref_path, readback_w,
     with stage(stages, 'render'):
         rc, out, err = run([PY, 'render_l0_sheet.py', '.'], wd)
         if rc != 0 or not Path(wd, SVG_NAME).is_file():
+            diagnostic = Path(wd, 'routing-error.json')
+            if diagnostic.is_file():
+                step['routing_error'] = json.loads(diagnostic.read_text(encoding='utf-8'))
             raise RuntimeError('render_l0_sheet 失败 rc=%s\n%s\n%s' % (rc, out, err))
         step['rendered'] = SVG_NAME
     with stage(stages, 'readback') as timing:

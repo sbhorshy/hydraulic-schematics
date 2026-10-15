@@ -19,7 +19,7 @@ class UnintendedCyclesCLI(unittest.TestCase):
         self.intent['parts'].update({n:'pressure_gauge' for n in ('GA-001','GB-001','GC-001')})
         self.intent['taps']=[{'sensor':'GA-001.pressure_sense','at':'GB-001.pressure_sense'},
                              {'sensor':'GA-001.pressure_sense','at':'GC-001.pressure_sense'}]
-        path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
+        path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text());layout.setdefault('label_pos',{}).update({'GA-001':'right','GB-001':'right','GC-001':'below'})
         layout['canvas'].update(width=2000,height=1500)
         layout['drawable'].update(width=1970,height=1500)
         for name,x,y,rot in [('GA-001',1300,200,0),('GB-001',1501,500,180),('GC-001',1732,235,90)]:

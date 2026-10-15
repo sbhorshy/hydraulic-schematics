@@ -20,7 +20,7 @@ class UprightTextCLI(unittest.TestCase):
         self.layout=self.work/'1#系统.layout.json';l=json.loads(self.layout.read_text())
         l['canvas'].update(width=1800,height=1400);l['drawable'].update(width=1770,height=1400)
         l['nodes']['FSOV-TEST']={'x':1100,'y':700,'w':362.304,'h':204.0034,'rot':270,'symbol':'symbols/firewall-shutoff-valve.svg'}
-        l['labels']['FSOV-TEST']='FSOV';l['label_pos']['FSOV-TEST']='above'
+        l['labels']['FSOV-TEST']='FSOV';l['label_pos']['FSOV-TEST']='right'
         self.layout.write_text(json.dumps(l));self.svg=self.work/'1#系统原理图.svg'
         self.symbol=self.work/'symbols/firewall-shutoff-valve.svg'
 
