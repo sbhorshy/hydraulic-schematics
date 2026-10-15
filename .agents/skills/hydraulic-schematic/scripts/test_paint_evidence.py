@@ -67,13 +67,16 @@ class PaintEvidenceCLI(unittest.TestCase):
         dial=next(e for e in root.iter() if e.get('id')=='PG-001__dial')
         dial.set('style','stroke:rgba(30,120,255,0)!important;fill:none!important')
         self.save(root);report=self.measure()
-        self.assertEqual(self.coverage(report,'V16'),'not_checked')
+        # The browser measured an actual absence, not an unknown contact.
+        self.assertEqual(self.coverage(report,'V16'),'fail')
         browser=json.loads((self.work/'browser-evidence.json').read_text())
         dial=next(e for e in browser['elements'] if e['id']=='PG-001__dial')
         lead=next(e for e in browser['elements'] if e['id']=='PG-001__pressure-sense-line')
         self.assertFalse(any(dial['key'] in contacts for contacts in lead['endpoint_contacts']))
-        self.assertTrue(any('PG-001'==u.get('component') and 'body contact' in u['reason']
-                            for e in report['evidence'] if e['id']=='V16' for u in e['unchecked']))
+        self.assertTrue(any(c['id']=='V16' and c['result']=='fail'
+                            and 'PG-001.pressure_sense' in c['detail']
+                            and 'no visible independent body contact' in c['detail']
+                            for c in report['checks']))
 
     def test_supported_visible_color_passes_and_paint_servers_remain_unchecked(self):
         original=self.svg.read_text()
