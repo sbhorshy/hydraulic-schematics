@@ -1,0 +1,120 @@
+{
+  "catalog_revision": "0.7-draft",
+  "components": [
+    {
+      "component_type": "engine_driven_pump",
+      "display_name": "发动机驱动泵",
+      "connection_role": "inline",
+      "mirror_safe": true,
+      "symbol": {
+        "asset": "edp-provisional-stroke.svg",
+        "symbol_status": "provisional",
+        "note": "临时描边符号(provisional),待标准页确认后重绘。"
+      },
+      "ports": [
+        {
+          "id": "suction",
+          "svg_element_id": "port-suction",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "pressure_out",
+          "svg_element_id": "port-pressure-out",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        },
+        {
+          "id": "case_drain",
+          "svg_element_id": "port-case-drain",
+          "medium": "hydraulic",
+          "role": "case_drain",
+          "flow_capability": "out",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "drive_shaft",
+          "svg_element_id": "port-drive-shaft",
+          "medium": "mechanical",
+          "role": "shaft",
+          "flow_capability": "none",
+          "anchor_direction": "up"
+        }
+      ],
+      "main_path": null,
+      "main_path_note": "三个液压端口,进出不唯一。paths 中必须写显式端口。",
+      "layout": {
+        "allowed_rotations_deg": [
+          0,
+          90,
+          180,
+          270
+        ],
+        "allow_mirror": true
+      },
+      "mirror_registration": {
+        "axes": [
+          "x",
+          "y"
+        ],
+        "asset_sha256": "c65046221c863ebb68bc449b0c14622451ff32698738895670651cfe639e66fb",
+        "ports_sha256": "678bb3e4ba438225032b874721f1850175a5d8950eaed6cc18c39f7ada46a7df",
+        "note": "#63 条件解禁登记(2026-10-12,规范源 catalog):依据用户签认的逐组件镜像许可政策与源事实核验(登记清单与原始字节差异见 research/glm-followup-20261012/mirror-registration.md)——符号无内部文字,整体反射后泵压力三角仍指向 pressure_out,四端口 id/role/medium/flow_capability 身份保留(drive_shaft 机械口不得冒充 case_drain 溢流口)。登记是政策许可记录,不是逐组件工程签认,symbol_status 维持 provisional 不因镜像提升;asset_sha256/ports_sha256 绑定当前符号字节与端口契约,任一变更登记即失效,须按新状态重新登记。"
+      }
+    },
+    {
+      "component_type": "bootstrap_reservoir",
+      "description": "带液位计的自增压液压油箱",
+      "connection_role": "terminal",
+      "main_path": {
+        "in": "return_in",
+        "out": "suction_out"
+      },
+      "ports": [
+        {
+          "id": "bootstrap_pressure_in",
+          "svg_element_id": "port-bootstrap-pressure-in",
+          "medium": "hydraulic",
+          "role": "pressure",
+          "flow_capability": "in",
+          "anchor_direction": "down"
+        },
+        {
+          "id": "suction_out",
+          "svg_element_id": "port-suction-out",
+          "medium": "hydraulic",
+          "role": "suction",
+          "flow_capability": "out",
+          "anchor_direction": "right"
+        },
+        {
+          "id": "return_in",
+          "svg_element_id": "port-return-in",
+          "medium": "hydraulic",
+          "role": "return",
+          "flow_capability": "in",
+          "anchor_direction": "left"
+        },
+        {
+          "id": "body_sense_tap",
+          "svg_element_id": "port-body-sense-tap",
+          "medium": "hydraulic",
+          "role": "measurement",
+          "flow_capability": "none",
+          "anchor_direction": "down",
+          "kind": "body_tap",
+          "role_note": "本体感测口(2026-09-07 签认 B 类):箱壁安装座,测油箱本体油液;仅供 taps 本体锚挂接传感件,不得串入 paths。"
+        }
+      ],
+      "symbol": {
+        "asset": "bootstrap-type-reservoir.svg",
+        "symbol_status": "draft",
+        "note": "开放描边重画(draft);#21 转正标准端口组(方言 port-anchors 冒充 connection-points 即 TANK-001.suction_out 崩溃根源),活塞/弹簧/液位计仍 unknown。0.6-draft 增本体感测口 body_sense_tap(签认 B 类),后续油箱图统一用本符号。"
+      }
+    }
+  ]
+}

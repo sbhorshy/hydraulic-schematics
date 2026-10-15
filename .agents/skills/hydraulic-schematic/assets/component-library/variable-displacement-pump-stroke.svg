@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156 176"
+     width="156" height="176"
+     data-component-type="engine_driven_pump"
+     data-symbol-version="1.4"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="provisional"
+     data-symbol-source-ref="../../../../../outputs/pump-symbol/reference.png">
+
+  <title>泵（用户参考图左右镜像）</title>
+  <desc>圆形泵体、向下排出三角、斜向变量箭头、左侧驱动轴与旋转箭头、顶部引线及内部向下箭头。</desc>
+  <!-- 依据: ../../../../../outputs/pump-symbol/reference.png，原图 83×94 px；主体按约 2 SVG 单位/px
+       重绘，圆心 (78,94)、半径 42，基准描边 2。图元均为独立可编辑几何。
+       为满足端口落在 viewBox 边界的约定，右上引线沿原方向延长至右边界，
+       底部引线延长至下边界；泵体保持朝向，右侧驱动附件以圆心为轴镜像至左侧；画布向左扩展 28 单位。
+       未确认项: 无标准页编号；顶部暂标 suction、右上暂标 case_drain、
+       左侧暂标 drive_shaft、下方暂标 pressure_out，端口角色尚待工程核对。
+       圆内向下箭头按图复现；顶部斜线已按用户编辑删除，不额外推断控制机构。
+       本件按用户 2026-10-15 指令替代 EDP，已登记为 engine_driven_pump；状态维持 provisional。
+       connection-points 默认隐藏，编辑器可去掉 visibility 属性显示红色锚点。 -->
+
+  <g id="symbol" fill="none" stroke="#000000" stroke-width="2"
+     stroke-linecap="round" stroke-linejoin="round">
+    <!-- 圆形泵体 -->
+    <circle id="pump-body" cx="78" cy="94" r="42"/>
+
+    <!-- 顶部吸油引线 -->
+    <line id="suction-stub" x1="78" y1="0" x2="78" y2="52"/>
+
+    <!-- 右上引线，延至画布边界以提供连接点 -->
+    <line id="case-drain-stub" x1="156" y1="16" x2="107.698" y2="64.302"/>
+
+    <!-- 驱动轴以泵体圆心为轴镜像至左侧 -->
+    <path id="drive-shaft" d="M 37.202 84 H 0 V 94 V 104 H 37.202"/>
+
+    <!-- 旋转弧与实心箭头随驱动轴镜像至泵体左侧 -->
+    <path id="shaft-rotation-arc" d="M 2 64 C 28 78 28 106 12 119"/>
+    <polygon id="shaft-rotation-arrow" points="0,126 12,108 20,116" fill="#000000" stroke="none"/>
+
+    <!-- 下方排出引线与指向圆周的实心泵三角 -->
+    <line id="pressure-out-stub" x1="78" y1="136" x2="78" y2="176"/>
+    <polygon id="pump-outlet-triangle" points="88,118 68,118 78,136" fill="#000000" stroke="none"/>
+
+    <!-- 左上至右下的变量调节箭头 -->
+    <line id="displacement-shaft" x1="34" y1="52" x2="116" y2="134"/>
+    <polygon id="displacement-arrow" points="128,146 118,126 108,136" fill="#000000" stroke="none"/>
+
+    <!-- 圆内向下箭头 -->
+    <line id="internal-arrow-shaft" x1="52" y1="78" x2="52" y2="100"/>
+    <polygon id="internal-arrow-head" points="57,96 47,96 52,110" fill="#000000" stroke="none"/>
+  </g>
+
+  <g id="connection-points" fill="#ff0000" visibility="hidden">
+    <circle id="port-suction" cx="78" cy="0" r="2"
+            data-port-id="suction" data-medium="hydraulic"
+            data-port-role="suction" data-flow-capability="in"
+            data-anchor-direction="up"/>
+    <circle id="port-pressure-out" cx="78" cy="176" r="2"
+            data-port-id="pressure_out" data-medium="hydraulic"
+            data-port-role="pressure" data-flow-capability="out"
+            data-anchor-direction="down"/>
+    <circle id="port-case-drain" cx="156" cy="16" r="2"
+            data-port-id="case_drain" data-medium="hydraulic"
+            data-port-role="case_drain" data-flow-capability="out"
+            data-anchor-direction="right"/>
+    <circle id="port-drive-shaft" cx="0" cy="94" r="2"
+            data-port-id="drive_shaft" data-medium="mechanical"
+            data-port-role="shaft" data-flow-capability="none"
+            data-anchor-direction="left"/>
+  </g>
+</svg>

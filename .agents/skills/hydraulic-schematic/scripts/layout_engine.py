@@ -21,7 +21,8 @@
       [--guard-report OUT.json] [--param KEY=VAL ...]
 
 REF_LAYOUT 仅取 labels/label_pos/label_drop 等展示文案（标签文字不是坐标决策），
-坐标一概不从参照布局读取。--param 供改参传播实验（如 ROW_PITCH=420）。
+坐标一概不从参照布局读取。R17 装配分支另外继承实际 symbol/rot，尺寸仍从 SVG 实读。
+--param 供改参传播实验（如 ROW_PITCH=420 / ASSEMBLY_GAP_CAP=80）。
 """
 import copy
 import io
@@ -33,9 +34,13 @@ from kiwisolver import Solver, Variable, UnsatisfiableConstraint
 from kiwisolver import strength as _st
 strong = _st.strong
 from ruamel.yaml import YAML
+from layout_contract import make_contract, drawable_bounds, pipe_half_width
 
 # ---------- 规则参数表 P：布局语言的全部自由度 ----------
 P = dict(
+    ASSEMBLY_START_X=320, ASSEMBLY_RUN_Y=300,
+    ASSEMBLY_STUB_IN=170, ASSEMBLY_STUB_OUT=110,
+    ASSEMBLY_GAP_CAP=80, ASSEMBLY_TEXT_CLEAR=6,
     TANK_X=60,                 # R1 油箱置左
     COL_GAP=90,                # R2 列间距(吸油阀列与泵列)
     BUS_GAP=262,               # R3 压力汇流母线离泵列右缘——取值使 @PRESS≈880:
@@ -76,29 +81,34 @@ P = dict(
     EDGE_PAD=12,               # R11 竖廊离列缘
     BUS_NO_RIDE=20,            # 守门: 盒缘离母线最小距离(禁骑母线)
     BOX_GAP=40,                # 守门: B5 盒距
-    CANVAS_W=1680, CANVAS_H=1390, SHIFT=30,
+    CANVAS_W=1680, CANVAS_H=1390, EDGE_MARGIN=30,
     LEGEND=dict(x=380, y=1020, w=540, h=290),   # 让位回油收集走廊
     TITLE=dict(x=40, y=1330, w=1600, h=56),
 )
 
 # 符号足迹表(符号库事实,非布局决策;rot 由挂装规则输出)。
 # 第 4 位 port_dy = 主端口在布局单位下的纵向偏移(None=80x80 系,中线即走线高度)。
-# 这是符号库事实:滤的进出口在 84/112、优先阀在 63x(140/324)≈27.2,
+# 这是符号库事实:滤的进出口在 114/158、优先阀在 63x(140/324)≈27.2,
 # 串联件须按端口对齐走线高度,按中心对齐会产出台阶(第 6 轮目视验收教训)。
 FOOTPRINT = {
-    'bootstrap_reservoir': (218, 564, 'symbols/bootstrap-type-reservoir.svg', None),
-    'firewall_shutoff_valve': (80, 80, 'symbols/fsov-provisional-stroke.svg', None),
-    'engine_driven_pump': (80, 80, 'symbols/edp-provisional-stroke.svg', None),
+    'bootstrap_reservoir': (218, 218 * 218 / 564, 'symbols/bootstrap-type-reservoir.svg', None),
+    # FSOV v1.8(2026-09-30 用户澄清「是方框60*60,不是整个」):方框两格各 60×60
+    # (总框 120×60),画布=墨迹紧贴 362.304x204.0034,渲染缩放率恒 1;
+    # 不守 80 基准,装配件框随内容(同 priority-valve,用户 60 定制)。
+    'firewall_shutoff_valve': (362.304, 204.003, 'symbols/firewall-shutoff-valve.svg', None),
+    'engine_driven_pump': (80, 80 * 176 / 156, 'symbols/variable-displacement-pump-stroke.svg', None),
     'electric_motor_driven_pump': (80, 80, 'symbols/emp-provisional-stroke.svg', None),
-    'filter_line_shutoff_dp': (80, 112, 'symbols/filter-line-shutoff-dp.svg', 84.0),
-    'filter_line_shutoff_dp_case_drain': (60, 80, 'symbols/filter-line-shutoff-dp.svg', None),
-    'filter_line_shutoff_dp_return': (80, 112, 'symbols/filter-line-shutoff-dp.svg', None),
+    'filter_line_shutoff_dp': (100, 158, 'symbols/filter-line-shutoff-dp.svg', 114.0),
+    # case-drain 与 dp 同符号同尺寸 100x158(2026-09-29 用户定:0.75 缩小无依据)。
+    'filter_line_shutoff_dp_case_drain': (100, 158, 'symbols/filter-line-shutoff-dp.svg', None),
+    'filter_line_shutoff_dp_return': (100, 158, 'symbols/filter-line-shutoff-dp.svg', None),
+    'filter_line_shutoff_dp_return_bypass': (100, 194, 'symbols/filter-line-shutoff-dp-return-bypass.svg', 114.0),
     'priority_valve': (140, 78, 'symbols/priority-valve.svg', 27.2),
     'hydro_pneumatic_accumulator': (60, 100, 'symbols/accumulator.svg', None),
     'air_charging_valve': (134, 57, 'symbols/air-charging-valve.svg', None),
     'pressure_gauge': (63, 67, 'symbols/pressure-gauge.svg', None),
-    'quick_disconnect_coupling_disconnected': (160, 68, 'symbols/quick-disconnect-coupling-disconnected.svg', None),
-    'quick_disconnect_coupling_disconnected_return': (160, 68, 'symbols/quick-disconnect-coupling-disconnected.svg', None),
+    'quick_disconnect_coupling_disconnected': (160, 67.61, 'symbols/quick-disconnect-coupling-disconnected.svg', None),
+    'quick_disconnect_coupling_disconnected_return': (160, 67.61, 'symbols/quick-disconnect-coupling-disconnected.svg', None),
     'hydraulic_user': (120, 60, 'symbols/hydraulic-user.svg', None),
     # ---- 以下为 #22 沉淀补全（catalog 0.4-draft 其余 8 类型，符号库事实 ----
     # ---- 取自各自符号 viewBox 与 connection-points；sensing_only 件不入  ----
@@ -107,10 +117,16 @@ FOOTPRINT = {
     'return_filter': (80, 80, 'symbols/filter-line-shutoff-stroke.svg', None),
     'case_drain_filter': (80, 80, 'symbols/filter-line-shutoff-stroke.svg', None),
     'check_valve': (80, 80, 'symbols/check-valve.svg', None),
+    'check_valve_refuel': (80, 80, 'symbols/check-valve.svg', None),
     'relief_valve': (168, 246, 'symbols/relief-valve.svg', 0.0),
     'pressure_switch': (190, 89, 'symbols/pressure-switch.svg', None),
     'temperature_switch': (148, 89, 'symbols/temperature-switch.svg', None),
     'temperature_transducer': (148, 89, 'symbols/temperature-transducer.svg', None),
+    # ---- #45 登记(2026-10-12):check_valve_spring 足迹按符号库实读 ----
+    # ---- (viewBox "-48 0 96 142";竖直变体,主端口 inlet 在下缘 y=142)。 ----
+    # ---- 接通位 QD(符号无端口组)与 eco_bottle(无符号/无目录)事实 ----
+    # ---- 不足,暂不登记;待工程澄清补齐端口/符号事实后再入表。      ----
+    'check_valve_spring': (96, 142, 'symbols/check-valve-spring.svg', 142.0),
 }
 
 
@@ -124,6 +140,13 @@ def load_yaml(p):
 
 def port_roles(cat, parts):
     types = {c['component_type']: c for c in cat['components']}
+    unsupported = ['%s (%s): %s' % (inst, typ,
+                   '类型未登记到 catalog' if typ not in types else '类型无足迹登记')
+                   for inst, typ in parts.items()
+                   if typ not in types or typ not in FOOTPRINT]
+    if unsupported:
+        raise SystemExit('规则引擎: 不支持的元件类型;请补全目录/布局能力或提供显式布局:\n  '
+                         + '\n  '.join(unsupported))
     out = {}
     for inst, t in parts.items():
         out[inst] = {p['id']: p['role'] for p in types[t]['ports']}
@@ -169,13 +192,32 @@ def classify_bus(role_set):
 
 
 # ---------- Stage 1: 规则引擎 ----------
-def rules(intent, cat, params, ref=None):
+def rules(intent, cat, params, ref=None, *, source_dir=None, catalog_dir=None):
     """intent -> (layout, structure)。structure 供守门层生成 REQUIRED。"""
+    if intent.get('assemblies'):
+        from assembly_layout import rules as assembly_rules
+        return assembly_rules(intent, cat, params, ref, source_dir, catalog_dir)
     P = params
     roles, _types = port_roles(cat, intent['parts'])
     chains, single, buses = analyze(intent, roles)
     parts = intent['parts']
     structure = dict(rows={}, stacks={})
+    # 参照布局只覆写已给出的文案；无参照/部分参照时保留实例名，
+    # 不推断未在 intent 中声明的设备名称。
+    labels = {inst: inst for inst in parts}
+    labels.update({inst: label for inst, label in ((ref or {}).get('labels') or {}).items()
+                   if inst in parts})
+    # #63: R1–R16 的节点由 put() 从零重建(只写 x/y/w/h/rot),参照里的
+    # mirror 会被静默丢掉——那等于悄悄撤掉用户手调的左右/上下主口互换。
+    # 与 R17 同口径显式拒绝(fail-closed):要么直接以该参照布局为种子
+    # 渲染(不再过引擎),要么移除镜像声明;不得无声清除。
+    for inst, ref_node in ((ref or {}).get('nodes') or {}).items():
+        requested = ref_node.get('mirror') if isinstance(ref_node, dict) else None
+        if requested not in (None, False, 'none'):
+            raise SystemExit(
+                '规则引擎 R1–R16: 参照节点 %s 声明 mirror=%r;规则布局不自动'
+                '镜像,也不得静默丢弃镜像手调(那会换掉左右/上下主口)——'
+                '请以该布局为显式种子直接渲染,或移除镜像声明' % (inst, requested))
 
     # ---- 识别(按连接形态与端口 role,不认实例名)----
     tank = next(i for i, r in roles.items()
@@ -294,7 +336,7 @@ def rules(intent, cat, params, ref=None):
             for m in mids:
                 w, h = FOOTPRINT[parts[m]][:2]
                 mx = bx + gap_a
-                # 端口对齐走线高度:按中心摆放时,滤(端口在84/112)与优先阀
+                # 端口对齐走线高度:按中心摆放时,滤(端口在114/158)与优先阀
                 # (63x140/324)的接口会偏离泵出油口线,主压路出现台阶
                 # (目视验收缺陷)。port_dy 是符号库事实,见 FOOTPRINT 注。
                 pdy = FOOTPRINT[parts[m]][3]
@@ -371,6 +413,8 @@ def rules(intent, cat, params, ref=None):
         if inst in nodes or inst in users or inst == tank \
                 or inst in intent.get('extern', {}):
             continue
+        if parts[inst] == 'check_valve_refuel':
+            continue        # R15 只接受单向阀出口接回油母线的已声明支路。
         bname = bus_tok[1:]
         if classify_bus(buses[bname]) == 'return':
             put(inst, buses_out[bname]['x'] + P['RET_OFFSET'], P['ROW_QDR'],
@@ -419,8 +463,33 @@ def rules(intent, cat, params, ref=None):
             m = mids[0]
             put(m, P['TANK_X'] + 360, P['ROW_CASE'], rot=270, row='case')
 
+    # ---- R15 集中加油单向阀叶支路:出口接回油母线 ----
+    # 只定位 intent 已声明的出口连接；入口仍可按 unknown 留空。
+    # 放在收集行、所属回油母线左侧，避免套用地面接头右置规则越出画布。
+    for a, b in single:
+        inst, _, pid = a.partition('.')
+        if parts.get(inst) != 'check_valve_refuel' or inst in nodes:
+            continue
+        if not b.startswith('@') or bus_kind(b) != 'return':
+            continue
+        if pid and pid != _types[parts[inst]]['main_path']['out']:
+            continue
+        width = FOOTPRINT[parts[inst]][0]
+        floor = max([nodes[i]['y'] for i in structure['rows'].get('collect', [])]
+                    or [P['ROW_QDR'] + P['RF_DROP']])
+        column_bottom = max([nodes[i]['y'] + nodes[i]['h']
+                             for i in structure['stacks'].get('user_col', [])]
+                            or [floor - P['BOX_GAP']])
+        put(inst, buses_out[b[1:]]['x'] - width - P['USER_RETURN_PAD'],
+            max(floor, column_bottom + P['BOX_GAP']), rot=180, row='refuel')
+
     # ---- R10 气侧 taps:传感链自蓄压器向上/向右堆叠 ----
+    # 只接气侧锚(at 口 medium=pneumatic,如蓄压器 gas_port/充气口);
+    # 液压锚 taps(油箱本体口 body_tap)归 R16,网络锚液压口无人布点
+    # 走"未布元件"fail-closed。
     if intent.get('taps'):
+        pmed = {i: {q['id']: q['medium'] for q in _types[t]['ports']}
+                for i, t in parts.items()}
         acc_inst = next((i for i in nodes
                          if 'gas_port' in roles.get(i, {})
                          and nodes[i]['y'] < P['ROW_MAIN']), None)
@@ -431,6 +500,9 @@ def rules(intent, cat, params, ref=None):
             prev = acc_inst
             for t in intent['taps']:
                 sinst = t['sensor'].split('.')[0]
+                _ai, _sep, apid = str(t.get('at') or '').partition('.')
+                if pmed.get(_ai, {}).get(apid) != 'pneumatic':
+                    continue
                 if sinst in nodes or sinst in users:
                     continue
                 w, h = FOOTPRINT[parts[sinst]][:2]
@@ -457,6 +529,31 @@ def rules(intent, cat, params, ref=None):
                         for u in users:
                             nodes[u]['y'] += shift
 
+    # ---- R16 油箱本体感测链:本体口 taps 沿油箱正下方左对齐堆叠 ----
+    # 本体感测口(role=measurement/kind=body_tap/flow=none)锚在箱壁,测的是
+    # 油箱本体油液而非管路网络,传感件经 taps 本体锚挂接(2026-09-07 签认
+    # B 类),不入 paths。网络锚 taps(at 为流口、挂被测网络)不归本规则,
+    # 维持 R10 气侧口径;其传感件仍无人布点,按"未布元件"fail-closed。
+    if intent.get('taps'):
+        tank_roles = roles.get(tank, {})
+        # 油箱下方先让出标签区再叠 B5:标签区高 = 16 偏移 + 行数×13 +
+        # 参照布局的 label_drop(如 1# 油箱下沉 100),无参照按两行兜底。
+        # 不让位时传感件盒压住"自增压油箱"标签文字(沙箱图检实测)。
+        _lbl = labels[tank]
+        _drop = ((ref or {}).get('label_drop') or {}).get(tank, 0)
+        y = (nodes[tank]['y'] + nodes[tank]['h'] + 16
+             + 13 * len(_lbl.split('\n')) + _drop + P['BOX_GAP'])
+        for t in intent['taps']:
+            atok = str(t.get('at') or '')
+            ainst, _, apid = atok.partition('.')
+            sinst = str(t.get('sensor') or '').partition('.')[0]
+            if (ainst != tank or apid not in tank_roles
+                    or tank_roles[apid] != 'measurement' or sinst in nodes):
+                continue
+            sw, sh = FOOTPRINT[parts[sinst]][:2]
+            put(sinst, P['TANK_X'], y, rot=0, stack='tank_sense')
+            y += sh + P['BOX_GAP']
+
     # ---- R11 走廊 ----
     vlanes = [P['VLANE_WEST'],
               tank_right + P['EDGE_PAD']]           # 西缘竖廊 + 吸油上行竖廊
@@ -475,12 +572,14 @@ def rules(intent, cat, params, ref=None):
         layout_version='layout-engine-1.0',
         source_l0=os.path.basename(intent['source'] if 'source' in intent else '')
         or '',
-        note='方案乙:R1–R14 规则定行位 + kiwi 守门微调(#18);全部坐标由'
+        note='方案乙:R1–R16 规则定行位 + kiwi 守门微调(#18);全部坐标由'
              '参数表+intent 拓扑推导,零手工坐标。',
         canvas=dict(width=P['CANVAS_W'], height=P['CANVAS_H']),
-        canvas_shift_x=P['SHIFT'],
+        **make_contract(P['CANVAS_W'], P['CANVAS_H'], P['EDGE_MARGIN']),
         style=dict(base_line_width_T=1.2, symbol_stroke_width=2, suction_marker_S=8),
         externs=externs, nodes=nodes, buses=buses_out,
+        labels=labels,
+        boundary_terminals=[[e['x'],e['y']] for e in externs.values()],
         lanes=[P['LANE_TOP']], vlanes=vlanes,
         group_padding=20, group_label_gap=10,
         legend=P['LEGEND'], title_block=P['TITLE'],
@@ -493,7 +592,7 @@ def rules(intent, cat, params, ref=None):
 
     # 展示文案(标签/图例文字)取自参照布局——文案不是坐标决策。
     if ref:
-        for key in ('labels', 'label_pos', 'label_drop'):
+        for key in ('label_pos', 'label_drop'):
             if key in ref:
                 layout[key] = {k: v for k, v in ref[key].items() if k in nodes}
         for k in externs:
@@ -502,7 +601,7 @@ def rules(intent, cat, params, ref=None):
 
     missing = set(parts) - set(nodes)
     if missing:
-        raise SystemExit('规则引擎: 未布元件 %s——intent 形态超出 R1–R14 覆盖'
+        raise SystemExit('规则引擎: 未布元件 %s——intent 形态超出 R1–R16 覆盖'
                          % sorted(missing))
     return layout, structure
 
@@ -515,7 +614,12 @@ def guard(layout, structure, params):
     又能在规则点回答"哪条、违了多少"。规则解已一致时漂移为零(零漂移性质);
     有违例时求解器在强锚点拉力下做最小位移微调,报告列出挪了谁。
     """
+    if structure.get('assembly_row'):
+        from assembly_layout import guard as assembly_guard
+        return assembly_guard(layout, structure, params)
     P = params
+    left, top, right, bottom = drawable_bounds(layout)
+    paint_pad = pipe_half_width(layout)
     nodes = layout['nodes']
     bx = {b: float(v['x']) for b, v in layout['buses'].items()}
     s = Solver()
@@ -561,17 +665,19 @@ def guard(layout, structure, params):
     EPS = 1e-6
 
     # -- REQUIRED 1: 画布与图例回避(净空只对 x-压住图例的盒声明)--
-    LG0, LG1 = P['LEGEND']['x'], P['LEGEND']['x'] + P['LEGEND']['w']
+    LG0, LG1 = layout['legend']['x'], layout['legend']['x'] + layout['legend']['w']
     for inst in nodes:
         vx, vy = V[inst]
-        req('canvas.left[%s]' % inst, vx >= 60, x0(inst) >= 60 - EPS)
-        req('canvas.right[%s]' % inst, vx + w(inst) <= P['CANVAS_W'] - 30,
-            x1(inst) <= P['CANVAS_W'] - 30 + EPS)
-        req('canvas.top[%s]' % inst, vy >= 60, y0(inst) >= 60 - EPS)
+        req('canvas.left[%s]' % inst, vx >= max(left + paint_pad, 60), x0(inst) >= max(left + paint_pad, 60) - EPS)
+        req('canvas.right[%s]' % inst, vx + w(inst) <= right - paint_pad,
+            x1(inst) <= right - paint_pad + EPS)
+        req('canvas.top[%s]' % inst, vy >= max(top + paint_pad, 60), y0(inst) >= max(top + paint_pad, 60) - EPS)
+        req('canvas.bottom[%s]' % inst, vy + h(inst) <= bottom - paint_pad,
+            y1(inst) <= bottom - paint_pad + EPS)
         if x0(inst) < LG1 and LG0 < x1(inst):
             req('legend.clear[%s]' % inst,
-                vy + h(inst) <= P['LEGEND']['y'] - 10,
-                y1(inst) <= P['LEGEND']['y'] - 10 + EPS)
+                vy + h(inst) <= layout['legend']['y'] - 10,
+                y1(inst) <= layout['legend']['y'] - 10 + EPS)
 
     # -- REQUIRED 2: 元件禁骑母线(侧别取规则解观察侧;近邻 300 内才声明)--
     for inst in nodes:
@@ -639,13 +745,12 @@ def guard(layout, structure, params):
         req('bus-order[%s<%s]' % (a, b), B[a] + P['BUS_NO_RIDE'] <= B[b],
             bx[a] + P['BUS_NO_RIDE'] <= bx[b] + EPS)
 
-    # -- REQUIRED 6: 母线画布界。viewBox 固定 canvas 宽而内容整体 +SHIFT,
-    # 母线可用右缘 = CANVAS_W - SHIFT;越界即被裁出图面(目视验收缺陷)。
+    # -- REQUIRED 6: explicit drawable bounds include the painted line radius.
     for b in B:
         req('canvas.right[bus:%s]' % b,
-            B[b] <= P['CANVAS_W'] - P['SHIFT'],
-            bx[b] <= P['CANVAS_W'] - P['SHIFT'] + EPS)
-        req('canvas.left[bus:%s]' % b, B[b] >= 60, bx[b] >= 60 - EPS)
+            B[b] <= right - paint_pad,
+            bx[b] <= right - paint_pad + EPS)
+        req('canvas.left[bus:%s]' % b, B[b] >= max(left + paint_pad, 60), bx[b] >= max(left + paint_pad, 60) - EPS)
 
     # ---- 规则点违例评估 → 求解 → 漂移报告 ----
     violations_at_rule = [tag for tag, ok in checks if not ok]
@@ -685,6 +790,7 @@ def main(argv):
     intent_p, cat_p, ref_p = argv[1], argv[2], argv[3]
     out_p, guard_p, opt_kicks = None, None, None
     params = dict(P)
+    budgets = {}
     ref = None
     i = 4
     while i < len(argv):
@@ -699,6 +805,13 @@ def main(argv):
             params[k] = (json.loads(v) if v.startswith('{')
                          else int(v) if v.lstrip('-').isdigit() else float(v))
             i += 2
+        elif argv[i] in ('--max-evals', '--max-steps', '--max-seconds', '--polish-steps'):
+            key = argv[i][2:].replace('-', '_')
+            try:
+                budgets[key] = float(take(i)) if key == 'max_seconds' else int(take(i))
+            except (ValueError, IndexError):
+                raise SystemExit('无效的寻优预算: %s' % argv[i])
+            i += 2
         elif argv[i] == '--optimize':
             opt_kicks = True
             i += 1
@@ -710,8 +823,17 @@ def main(argv):
     intent = load_yaml(intent_p)
     with io.open(cat_p, encoding='utf-8') as f:
         cat = json.load(f)
-    layout, structure = rules(intent, cat, params, ref)
+    if intent.get('assemblies'):
+        # A rejected assembly request cannot leave an older layout looking current.
+        for path in (out_p, guard_p):
+            if path and os.path.isfile(path):
+                os.unlink(path)
+    layout, structure = rules(intent, cat, params, ref,
+                              source_dir=os.path.dirname(os.path.abspath(ref_p if ref_p != '-' else intent_p)),
+                              catalog_dir=os.path.dirname(os.path.abspath(cat_p)))
     layout, report = guard(layout, structure, params)
+    if opt_kicks is not None and structure.get('assembly_row'):
+        raise SystemExit('装配单行 R17 使用确定性规则，不支持系统级 --optimize；请使用参数或显式布局。')
     if opt_kicks is not None:
         # ---- 阶段 3:寻优叠加层(#19 正式并入)----
         # 规则+守门之后,以 B1–B5+硬缺陷(V2/V13)为能量做邻域微调
@@ -719,18 +841,31 @@ def main(argv):
         # 注意:阶段 3 的输出由校核链(validate)仲裁,守门零漂移只对
         # 阶段 2 的规则解成立——寻优位移是有意为之的 licensed drift。
         import proto_optimize
+        limits = dict(max_evals=proto_optimize.MAX_EVALS,
+                      max_steps=proto_optimize.MAX_STEPS,
+                      max_seconds=proto_optimize.MAX_SECONDS,
+                      polish_steps=proto_optimize.POLISH_STEPS)
+        limits.update(budgets)
+        try:
+            proto_optimize.validate_budgets(**limits)
+        except ValueError as exc:
+            raise SystemExit(str(exc))
         bp0 = proto_optimize.bpanel(copy.deepcopy(layout), intent, cat)
+        proto_optimize.NO_REGRESSION.clear()
         proto_optimize.NO_REGRESSION.update(
             b1=bp0['b1'], b2tot=bp0['b2tot'], b2max=bp0['b2max'],
             b4=bp0['b4'], b5=bp0['b5'])
         opt_log = []
         layout, bp, _e = proto_optimize.climb(layout, intent, cat,
-                                              opt_log, 'stage3')
+                                              opt_log, 'stage3',
+                                              initial_bp=bp0, **limits)
+        report['optimization'] = opt_log[-1]
+        layout['optimization'] = opt_log[-1]
         layout['note'] = layout.get('note', '') + (
             ';阶段3 寻优叠加层 %d 步(B3 %.3f,违限 %d)'
-            % (len(opt_log) - 1, bp['b3'], proto_optimize.violations(bp)))
+            % (opt_log[-1]['steps'], bp['b3'], proto_optimize.violations(bp)))
         print('optimize: %d 步, B3=%.3f, 违限=%d'
-              % (len(opt_log) - 1, bp['b3'], proto_optimize.violations(bp)))
+              % (opt_log[-1]['steps'], bp['b3'], proto_optimize.violations(bp)))
     with io.open(out_p, 'w', encoding='utf-8') as f:
         json.dump(layout, f, ensure_ascii=False, indent=2)
     if guard_p:

@@ -4,55 +4,51 @@
 不看图,只算几何。产出 validation-report.json,每项判定附坐标或 ID,
 供感知校核环节(PNG 回读)之前的门禁使用。
 
-用法: python3 validate_sheet.py
+用法: python3 validate_sheet.py [工作目录]
 退出码 1 表示 validation: failed。
 """
+from endpoint_usage import (endpoint_usage, check_disclosure, check_marker_display, symbol_contract,
+                            write_contract_failure, resolve_symbol, mirror_contract)
+from mirror_policy import mirror_point, mirror_anchor
+
 import io
 import json
 import math
 import os
 import re
 import sys
+import time
+from sheet_geometry import load_geometry
+from topology_reconciliation import reconcile_topology, infer_suction_network
+from junction_semantics import check_junctions, TOLERANCE as JUNCTION_TOLERANCE
+from bridge_allowance import check_bridge_policy
+from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
+from endpoint_checks import check_endpoints, check_bodies
 from xml.etree import ElementTree as ET
 import xml.etree.ElementTree as ET
+from browser_evidence import collect
+from text_checks import check_text
+from stroke_checks import check_widths
+from proofreading_evidence import assess_png, enrich_report, resolve_catalog, write_report
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# 用法:validate_sheet.py [工作目录]。缺省=脚本就地(传统复制纪律);
-# 工作目录口径与 render_l0_sheet.py 一致,符号经 catalog 锚定到 skill 库(#21)。
-WORKDIR = os.path.abspath(sys.argv[1]) if len(sys.argv) > 1 else HERE
-SKILL_CATALOG = os.path.normpath(
-    os.path.join(HERE, '..', 'assets', 'component-library', 'component-catalog.json'))
-SHEET = os.path.join(WORKDIR, '1#系统原理图.svg')
-LAYOUT = os.path.join(WORKDIR, '1#系统.layout.json')
-INTENT = os.path.join(WORKDIR, '1#系统.intent.yaml')
-if os.path.isfile(os.path.join(WORKDIR, 'component-catalog.json')):
-    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
-elif os.path.isfile(SKILL_CATALOG):
-    CATALOG = SKILL_CATALOG
-else:
-    CATALOG = os.path.join(WORKDIR, 'component-catalog.json')
-CAT_DIR = os.path.dirname(CATALOG)
-
-
-def _resolve_symbol(ref):
-    """布局符号引用 → 实际路径:工作目录相对 → catalog 同目录 → 脚本 HERE。"""
-    for p in (os.path.normpath(os.path.join(WORKDIR, ref)),
-              os.path.join(CAT_DIR, os.path.basename(ref.replace('\\', '/'))),
-              os.path.normpath(os.path.join(HERE, ref))):
-        if os.path.isfile(p):
-            return p
-    return os.path.normpath(os.path.join(WORKDIR, ref))
+SHEET = os.path.join(HERE, '1#系统原理图.svg')
+LAYOUT = os.path.join(HERE, '1#系统.layout.json')
+INTENT = os.path.join(HERE, '1#系统.intent.yaml')
+CATALOG = os.path.join(HERE, 'component-catalog.json')
 NS = 'http://www.w3.org/2000/svg'
 
 # ---------- 构图预算（B1–B7）----------
 # 与 .agents/skills/hydraulic-schematic/references/rendering-rules.md
 # 『数值构图预算（concept 档 v1）』表同源，改动须两处同步。
-# 定位是"预算披露 + 超限告警"：除交叉（B1，恒为 0）硬 fail 外，
+# 定位是"预算披露 + 超限告警"：除交叉（B1，默认恒为 0，仅 #23 登记政策
+# 按内容绑定的 intent 放行"最多 N 处经验证跳线"）硬 fail 外，
 # 其余超限记 WARN（V19）。composition_budget 状态口径：
 #   pass=达标 / over=超限走告警通道 / exempt=表注豁免或存量披露 / fail=B1 专用失败通道。
 BUDGET = {
     'B1': {'metric': '线线交叉', 'budget': 0,
-           'note': '恒为 0，无桥接豁免——难避免优先改道'},
+           'note': '默认恒为 0；仅 bridge_allowance.py 登记政策内容绑定的'
+                   'intent 放行最多 N 处经验证跳线（#23）'},
     'B2': {'metric': '折返次数', 'budget_max_single': 3, 'budget_total': 40},
     'B3': {'metric': '绕行比（路线长÷直角曼哈顿距）', 'budget': 1.5,
            'budget_boundary': 4.0,
@@ -65,7 +61,7 @@ BUDGET = {
 }
 # 边界端子：图幅边缘外部接口。前两个来自 layout.externs（用户供/回油），
 # 第三个是油箱侧通道端子，坐标见 1# 图追溯清单披露的边界走廊终点。
-BOUNDARY_TERMINALS = [(1480.0, 300.0), (1480.0, 700.0), (60.0, 514.4)]
+
 # 存量披露：1# 系统图为历史版本（rendering-rules 预算表注¹），
 # 两条油箱侧通道线单条折返 4、绕行比 ≈1.6/≈4.0 超预算，
 # 按"下版改图收敛或显式披露"处理，记 exempt，不作为新出图先例。
@@ -99,6 +95,10 @@ def load_yaml(p):
         return y.load(f)
 
 
+def symbol_path(ref):
+    return resolve_symbol(ref, HERE, os.path.dirname(CATALOG))
+
+
 def seg_rect_hit(p0, p1, rect, tol=2.0):
     """线段是否穿越矩形内部(仅正交段)。返回穿越长度。"""
     x0, y0 = p0
@@ -120,13 +120,39 @@ def seg_rect_hit(p0, p1, rect, tol=2.0):
     return 0.0
 
 
-def main():
+def main(argv=None):
+    global HERE, SHEET, LAYOUT, INTENT, CATALOG
+    args = list(sys.argv[1:] if argv is None else argv)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    HERE = os.path.abspath(args[0]) if args else script_dir
+    SHEET = os.path.join(HERE, '1#系统原理图.svg')
+    LAYOUT = os.path.join(HERE, '1#系统.layout.json')
+    INTENT = os.path.join(HERE, '1#系统.intent.yaml')
+    CATALOG = str(resolve_catalog(HERE, tool_dir=script_dir))
+    # A failed or interrupted run must not leave the last successful report current.
+    for name in ('validation-report.json', 'validation-report.json.sha256'):
+        path = os.path.join(HERE, name)
+        if os.path.isfile(path):
+            os.unlink(path)
     F, W, ev = [], [], []          # fail, warn, evidence
     intent = load_yaml(INTENT)
     L = json.load(io.open(LAYOUT, encoding='utf-8'))
     cat = json.load(io.open(CATALOG, encoding='utf-8'))
     T = {c['component_type']: c for c in cat['components']}
-    SHIFT = L.get('canvas_shift_x', 0)
+    inventory = endpoint_usage(intent, T, L['nodes'])
+    contract_issues = symbol_contract(intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
+    # #63 镜像许可与符号端口契约同出口硬失败(concept 亦不豁免);
+    # 通过审计的逐实例许可轴随后交给几何读取做获准反射的姿态校验。
+    mirror_issues, mirror_axes = mirror_contract(
+        intent, T, L['nodes'], HERE, os.path.dirname(CATALOG))
+    contract_issues.extend(mirror_issues)
+    if contract_issues:
+        return write_contract_failure(HERE, inventory, contract_issues, intent.get('unknown') or [])
+    from layout_contract import drawable_bounds
+    try:
+        drawable = drawable_bounds(L)
+    except ValueError as error:
+        sys.exit(str(error))
     CW, CH = L['canvas']['width'], L['canvas']['height']
 
     # ---------- V1 SVG 可解析 + id 唯一 ----------
@@ -134,30 +160,55 @@ def main():
     try:
         root = ET.fromstring(raw.encode('utf-8'))
     except Exception as e:
-        print(json.dumps({'validation': 'failed',
-                          'checks': [{'id': 'V1', 'result': 'fail',
-                                      'detail': 'SVG 不可解析: %s' % e}]},
-                         ensure_ascii=False, indent=2))
+        rep = {'sheet': os.path.basename(SHEET), 'validation': 'failed',
+               'fail_count': 1, 'warn_count': 0, 'visual_review': 'pending',
+               'checks': [{'id': 'V1', 'result': 'fail', 'detail': 'SVG 不可解析: %s' % e}],
+               'evidence': [{'id': 'V%d' % i, 'coverage_status': 'not_checked',
+                             'coverage_detail': 'SVG parse failure prevented this check.'}
+                            for i in range(2, 20)]}
+        enrich_report(rep, HERE, catalog_path=CATALOG)
+        write_report(rep, os.path.join(HERE, 'validation-report.json'))
+        print(json.dumps(rep, ensure_ascii=False, indent=2))
         return 1
     ids = [e.get('id') for e in root.iter() if e.get('id')]
     dup = sorted({i for i in ids if ids.count(i) > 1})
     if dup:
         F.append(('V1', '整图存在重复 id: %s' % ' '.join(dup)))
 
+    measurement_started = time.monotonic()
+    browser = collect(SHEET)
+    timings = {'browser_evidence_s': round(time.monotonic()-measurement_started,6)}
+    geometry = load_geometry(root, L, symbol_path, mirror_axes)
+    endpoint_findings, endpoint_evidence = check_endpoints(geometry, intent, cat)
+    endpoint_findings.extend(check_bodies(geometry, endpoint_evidence['terminals']))
+    F.extend((c['id'], c['detail']) for c in endpoint_findings)
+    ev.append(endpoint_evidence)
+
     # ---------- 收集元件占位矩形 ----------
-    boxes = {}
+    ink_boxes = {}    # 旋转后实际墨迹矩形,仅 V2"穿越本体"使用
     ports = {}
     for inst, nd in L['nodes'].items():
-        boxes[inst] = (nd['x'], nd['y'], nd['x'] + nd['w'], nd['y'] + nd['h'])
         # 读端口绝对坐标,用于判定走线是否抵达端口(V2)。
-        p = _resolve_symbol(nd['symbol'])
+        p = symbol_path(nd['symbol'])
         _mk, vb, ps = read_symbol(p)
         vx, vy, vw, vh = vb
         k = min(nd['w'] / float(vw), nd['h'] / float(vh))
         sw, sh, rot = vw * k, vh * k, int(nd.get('rot', 0)) % 360
+        # 墨迹矩形与 render.py 落位一致(comp 补偿后仍占 (x,y) 起始正矩形),
+        # rot 90/270 时宽高互换。boxes 是未旋转的声明占位,判"本体"会用错:
+        # 走线从旋转符号旁经过时被误判穿越(1# 系统 CDF-001 rot=270 实例)。
+        ink_boxes[inst] = ((nd['x'], nd['y'], nd['x'] + sh, nd['y'] + sw)
+                           if rot in (90, 270)
+                           else (nd['x'], nd['y'], nd['x'] + sw, nd['y'] + sh))
         pabs = {}
+        axis = mirror_axes.get(inst)
         for pid, (px, py, anch, role, med) in ps.items():
             lx, ly = (px - vx) * k, (py - vy) * k
+            if axis:
+                # 与渲染器同口径(#63):归零缩放盒内先镜像再旋转平移,
+                # 避免 V13 等旧端口坐标循环与 load_geometry 两套口径。
+                lx, ly = mirror_point(lx, ly, sw, sh, axis)
+                anch = mirror_anchor(anch, axis)
             if rot == 90:
                 lx, ly = sh - ly, lx
             elif rot == 180:
@@ -172,59 +223,43 @@ def main():
     for m in re.finditer(r'<polyline class="(ln-[a-z_]+)" points="([^"]+)"', raw):
         pts = [tuple(float(v) for v in q.split(',')) for q in m.group(2).split()]
         polys.append((m.group(1), pts))
+    # 单条管线自身的短折返同样会留下线头，不能套用 V13 的短共线豁免。
     for cls, pts in polys:
-        for k in range(len(pts) - 1):
-            for inst, bx in boxes.items():
-                # 段端点落在框边界上时是接线,不是穿越。判距 <=3。
-                on_a = (abs(pts[k][0] - bx[0]) < 3 or abs(pts[k][0] - bx[2]) < 3
-                        or abs(pts[k][1] - bx[1]) < 3 or abs(pts[k][1] - bx[3]) < 3)
-                on_b = (abs(pts[k + 1][0] - bx[0]) < 3 or abs(pts[k + 1][0] - bx[2]) < 3
-                        or abs(pts[k + 1][1] - bx[1]) < 3 or abs(pts[k + 1][1] - bx[3]) < 3)
-                # 段的任何端点在此框的端口上时,穿越不计:那正是接线目标。
-                # 端口列表来自布局,坐标是旋转缩放后的绝对位置。
-                port_at = []
-                for pid, (px, py, anch, role, med) in ports.get(inst, {}).items():
-                    if abs(pts[k][0] - px) < 3 and abs(pts[k][1] - py) < 3:
-                        port_at.append(pid)
-                    if abs(pts[k + 1][0] - px) < 3 and abs(pts[k + 1][1] - py) < 3:
-                        port_at.append(pid)
-                if on_a or on_b or port_at:
-                    continue
-                hit = seg_rect_hit(pts[k], pts[k + 1], bx, tol=3.0)
-                if hit > 6.0:
-                    F.append(('V2', '管线穿越 %s 本体 %.0f 单位,段 %s->%s'
-                              % (inst, hit, pts[k], pts[k + 1])))
-    ev.append({'id': 'V2', 'polylines': len(polys),
-               'segments': sum(len(p) - 1 for _c, p in polys)})
+        for a, b, c in zip(pts, pts[1:], pts[2:]):
+            horizontal = max(a[1], b[1], c[1]) - min(a[1], b[1], c[1]) < 0.1
+            vertical = max(a[0], b[0], c[0]) - min(a[0], b[0], c[0]) < 0.1
+            if ((horizontal and (b[0] - a[0]) * (c[0] - b[0]) < -0.01)
+                    or (vertical and (b[1] - a[1]) * (c[1] - b[1]) < -0.01)):
+                F.append(('V13', '管线自身折返形成越界线头: %s %s -> %s -> %s'
+                          % (cls, a, b, c)))
+    ev.append({'id': 'V2', 'polylines': len(geometry['pipes']),
+               'segments': sum(len(p['points']) - 1 for p in geometry['pipes']),
+               'coverage_status': 'not_checked' if geometry['issues'] else 'pass',
+               'detail': 'Final SVG segments clipped against transformed symbol footprints',
+               'coordinate_system': geometry['coordinate_system'],
+               'interior_tolerance': endpoint_evidence['endpoint_tolerance']})
 
     # 三通点先收集,V14 需要它判断交叉是否为连通节点。
     jn = [(float(m.group(1)), float(m.group(2)))
           for m in re.finditer(
               r'<circle class="jn" cx="([\d.]+)" cy="([\d.]+)"', raw)]
 
-    # ---------- V12 管线与文字重合 ----------
-    # 文字包围盒按字号估算:CJK 字宽约等于字号,ASCII 约 0.55 倍。
-    texts = []
-    for m in re.finditer(
-            r'<text class="([a-z\-]+)"[^>]*?x="([\-\d.]+)" y="([\-\d.]+)"'
-            r'(?:[^>]*?text-anchor="(\w+)")?[^>]*>([^<]*)</text>', raw):
-        cls, tx, ty, anch, txt = (m.group(1), float(m.group(2)), float(m.group(3)),
-                                  m.group(4) or 'start', m.group(5))
-        if not txt.strip():
-            continue
-        fs = {'lbl': 11.0, 'ext': 10.0, 'grp-lbl': 10.5,
-              'lg-t': 10.5, 'tb-t': 11.0, 'banner': 15.0}.get(cls, 11.0)
-        wid = sum(fs if ord(ch) > 0x2E80 else fs * 0.55 for ch in txt)
-        x0 = {'start': tx, 'middle': tx - wid / 2, 'end': tx - wid}[anch]
-        texts.append((cls, txt, x0, ty - fs * 0.80, x0 + wid, ty + fs * 0.22))
-    for cls, txt, x0, y0, x1, y1 in texts:
-        for pcls, pts in polys:
-            for k in range(len(pts) - 1):
-                if seg_rect_hit(pts[k], pts[k + 1], (x0, y0, x1, y1), tol=0) > 3:
-                    F.append(('V12', '管线压住文字 "%s"(%s),段 %s->%s'
-                              % (txt.strip()[:22], cls, pts[k], pts[k + 1])))
-                    break
-    ev.append({'id': 'V12', 'texts': len(texts)})
+    # ---------- V12 / B7 actual rendered text ----------
+    text_browser = browser
+    png_evidence = assess_png(HERE)
+    if (png_evidence['status']=='pass' and
+            (browser.get('font_environment') is None or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('backend')!='chrome' or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('version')!=browser.get('renderer',{}).get('version') or
+             png_evidence.get('receipt',{}).get('renderer',{}).get('font_environment')!=browser.get('font_environment'))):
+        text_browser = {**browser, 'status':'not_checked',
+                        'reason':'Final PNG and measured glyphs lack matching renderer/font-version evidence.'}
+    text_started = time.monotonic()
+    text_findings, text_evidence, text_geometry = check_text(text_browser, geometry, BUDGET['B7']['budget'], L, intent, symbol_path)
+    timings['text_checks_s'] = round(time.monotonic()-text_started,6)
+    F.extend((c['id'], c['detail']) for c in text_findings if c['result']=='fail')
+    W.extend((c['id'], c['detail']) for c in text_findings if c['result']=='warn')
+    ev.extend(text_evidence)
 
     # ---------- V13 管线与管线共线重叠 ----------
     # 两段平行且同线、区间相交 = 图上看不出是两条管路,读图必然误判。
@@ -274,70 +309,44 @@ def main():
                       % (ov, a1, b1, a2, b2)))
     ev.append({'id': 'V13', 'segments': len(segs_all)})
 
-    # ---------- V14 非连通交叉须有跨线桥(规范 10.6.2) ----------
-    jset = {(round(x, 1), round(y, 1)) for (x, y) in jn}
-    cross = []
-    for i in range(len(segs_all)):
-        c1, a1, b1 = segs_all[i]
-        if abs(b1[1] - a1[1]) >= 0.6:
-            continue
-        y = a1[1]
-        x1lo, x1hi = sorted((a1[0], b1[0]))
-        for j in range(len(segs_all)):
-            c2, a2, b2 = segs_all[j]
-            if abs(b2[0] - a2[0]) >= 0.6:
-                continue
-            x = a2[0]
-            y2lo, y2hi = sorted((a2[1], b2[1]))
-            if x1lo + 1 < x < x1hi - 1 and y2lo + 1 < y < y2hi - 1:
-                if (round(x, 1), round(y, 1)) not in jset:
-                    cross.append((x, y))
-    # 跨线桥圆弧的圆心即交叉点,自 <path class="brg"> 的起点加半径求得。
-    brg = set()
-    for m in re.finditer(r'<path class="brg" d="M([\-\d.]+) ([\-\d.]+) '
-                         r'A([\d.]+)', raw):
-        bx0, by0, r0 = float(m.group(1)), float(m.group(2)), float(m.group(3))
-        brg.add((round(bx0 + r0, 1), round(by0, 1)))
-    nobridge = [(x, y) for (x, y) in sorted(set(cross))
-                if (round(x, 1), round(y, 1)) not in brg]
-    for (x, y) in nobridge:
-        F.append(('V14', '非连通交叉 (%.0f,%.0f) 无三通点也无跨线桥:'
-                         '读图无法判断是否连通' % (x, y)))
-    ev.append({'id': 'V14', 'crossings': len(set(cross)),
-               'bridged': len(brg), 'unbridged': len(nobridge)})
-
-    # ---------- V15 线宽必须来自标准,不得出现绝对 stroke-width ----------
-    # 企业标准只给三个值:高压 3.0 T、低压 1.0 T、组件本体 1.5 T。
-    # 符号文件里写死的 stroke-width="2" 实测等于 1.667 T,不来自任何依据,
-    # 且会随符号落位缩放而变(油箱曾按 scale 0.78 落位,本体实际按 1.56 绘制,
-    # 而旁边的泵是 2.0)。此项把线宽收口到图纸 CSS。
-    ALLOW_T = {'high': 3.0, 'low': 1.0, 'symbol': 1.5}
     baseT = float(L.get('style', {}).get('base_line_width_T', 1.0))
-    okw = {round(v * baseT, 2) for v in ALLOW_T.values()}
-    bad_w = []
-    for m in re.finditer(r'<[^>]*stroke-width="([\d.]+)"[^>]*>', raw):
-        tag, wv = m.group(0), round(float(m.group(1)), 2)
-        if 'stroke="#fff' in tag.lower() or 'stroke="#FFF' in tag:
-            continue          # 白色遮挡图元,非可见线条
-        if wv not in okw:
-            bad_w.append((wv, round(wv / baseT, 3)))
-    for wv, tv in sorted(set(bad_w)):
-        F.append(('V15', '绝对线宽 %.2f (= %.3f T) 不在标准三值内'
-                         '(3.0/1.0/1.5 T):线宽须由图纸 CSS 施加' % (wv, tv)))
-    # 禁用 non-scaling-stroke。它把线宽钉在设备像素上,整图按倍率出图时
-    # 管线随之变粗而带该属性的线纹丝不动:实测 1x/2x/3x 下管线 4/8/10px,
-    # 符号内引线恒为 4px——线宽是压力等级编码,放大出图就读错等级。
-    # 符号落位缩放要用 1/k 补偿(见 render.py 的 --kc),不能用它。
-    # 只数真正生效的声明,不数注释里提到它的文字(CSS 注释 /* */ 先剔除),
-    # 否则解释"为何禁用"的那段注释自己会触发本项。
-    nocmt = re.sub(r'/\*.*?\*/', '', raw, flags=re.S)
-    nocmt = re.sub(r'<!--.*?-->', '', nocmt, flags=re.S)
-    nss = len(re.findall(r'vector-effect\s*[:=]\s*"?\s*non-scaling-stroke', nocmt))
-    if nss:
-        F.append(('V15', '出现 %d 处 vector-effect:non-scaling-stroke:'
-                         '线宽将不随出图倍率变化,放大后与管线宽度失配' % nss))
-    ev.append({'id': 'V15', 'base_T': baseT, 'allowed_T': ALLOW_T,
-               'violations': len(set(bad_w)), 'non_scaling_stroke': nss})
+    width_failures, width_evidence = check_widths(SHEET, L, geometry, symbol_path, browser=browser)
+    F.extend(width_failures)
+    ev.extend(width_evidence)
+
+    suction_network = infer_suction_network(intent, cat)
+    suction_findings = []
+    def suction_fail(kind, detail, **where):
+        suction_findings.append(dict(id='V17',result='fail',kind=kind,detail=detail,**where))
+    for error in suction_network['errors']:
+        suction_fail('suction_semantics',error['detail'],endpoint=error['endpoint'])
+    wire_sources = {e.get('id'):e.get('data-edge') or e.get('data-input-anchor')
+                    for e in root.iter() if e.get('id')}
+    required_pipes = {p['svg_id']:p for p in geometry['pipes']
+                      if wire_sources.get(p['svg_id']) in suction_network['anchors']}
+    for svg_id,pipe in required_pipes.items():
+        if pipe['class']!='ln-suction':
+            suction_fail('suction_line_class','Declared suction chain is painted as '+pipe['class'],
+                         svg_id=svg_id,anchor=wire_sources[svg_id],position=pipe['points'][0])
+    measured_pipes=set()
+    for item in next(e for e in width_evidence if e['id']=='V15')['measurements']:
+        svg_id=item.get('element')
+        if svg_id in required_pipes and 'class' in item:
+            measured_pipes.add(svg_id)
+            if abs(item['effective_width']-baseT)>.02:
+                suction_fail('suction_line_width','Suction chain actual width %.3f != %.3f' % (item['effective_width'],baseT),
+                             svg_id=svg_id,anchor=wire_sources[svg_id],position=item['position'])
+        endpoint=str(item.get('component'))+'.'+str(item.get('port'))
+        if item.get('kind')=='external_lead' and endpoint in suction_network['ports']:
+            if abs(item['effective_width']-baseT)>.02:
+                suction_fail('suction_lead_width','Suction interface actual width %.3f != %.3f' % (item['effective_width'],baseT),
+                             component=item['component'],port=item['port'],position=item['position'])
+    F.extend((c['id'],c['detail']) for c in suction_findings)
+    ev.append({'id':'V17','coverage_status':'not_checked' if browser.get('status')!='pass' or set(required_pipes)-measured_pipes else 'pass',
+               'coverage_detail':'Input-derived suction chains compared with actual pipe and interface paint.',
+               'suction_anchors':sorted(suction_network['anchors']),
+               'suction_ports':sorted(suction_network['ports']),
+               'unmeasured_pipes':sorted(set(required_pipes)-measured_pipes)})
 
     # ---------- V17 吸油线 = 连续基线 + 周期性五斜杠组 ----------
     # 用户提供的标准图不是虚线:1.0 T 基线连续,其上周期性画五根斜杠。
@@ -357,20 +366,20 @@ def main():
         if len(q) != 5:
             F.append(('V17', '吸油斜杠组 %d 含 %d 根,标准要求完整 5 根' % (gi, len(q))))
         smarks.extend(q)
-    if not smgroups:
+    if not smgroups and any(p['class']=='ln-suction' for p in geometry['pipes']):
         F.append(('V17', '吸油线存在但未生成任何五斜杠组'))
 
     # 标记不得进入组件或文字。用斜杠包围盒与障碍矩形相交判定。
+    # 组件本体按旋转后墨迹盒判(boxes 是未旋转声明占位,rot 符号会误杀
+    # 墨迹旁的合法斜杠,与 V2 ink_boxes 同理)。
     mark_hits = []
     for m in smarks:
         x0, x1 = sorted((float(m.get('x1')), float(m.get('x2'))))
         y0, y1 = sorted((float(m.get('y1')), float(m.get('y2'))))
-        for inst, bx in boxes.items():
+        for inst, bx in ink_boxes.items():
             if not (x1 < bx[0] or x0 > bx[2] or y1 < bx[1] or y0 > bx[3]):
                 mark_hits.append('组件 %s' % inst)
-        for cls, txt, tx0, ty0, tx1, ty1 in texts:
-            if not (x1 < tx0 or x0 > tx1 or y1 < ty0 or y0 > ty1):
-                mark_hits.append('文字 %s' % txt.strip()[:16])
+
 
         # 流向箭头包围盒。斜杠不得切碎箭头。
         for ar in re.finditer(r'<path class="arw" d="([^"]+)"', raw):
@@ -393,6 +402,8 @@ def main():
             if any(not (x1 < e[0] or x0 > e[2] or y1 < e[1] or y0 > e[3])
                    for e in edges):
                 mark_hits.append('装配分组边界')
+    mark_hits.extend('文字 %s @%s' % (f['text'][:16], f['bbox']) for f in text_findings
+                     if f.get('obstacle_kind')=='suction_marker' and f['result']=='fail')
     for hit in sorted(set(mark_hits)):
         F.append(('V17', '吸油斜杠压住%s' % hit))
     Smark = float(L.get('style', {}).get('suction_marker_S', 8.0))
@@ -454,6 +465,8 @@ def main():
     if duplicate:
         F.append(('V17', '吸油斜杠存在 %d 个重复几何,会叠画变粗' % duplicate))
     ev.append({'id': 'V17', 'S': Smark,
+               'coverage_status': 'not_checked' if text_geometry['unchecked'] else 'pass',
+               'text_coordinate_system': 'root_svg_user_units',
                'slash_height': geom17['slash_height'],
                'slash_angle_deg': geom17['slash_angle_deg'],
                'intra_spacing': geom17['intra_spacing'],
@@ -475,372 +488,47 @@ def main():
     ev.append({'id': 'V18', 'pipeline_arrows': len(pipeline_arrows),
                'arrow_layers': len(arrow_layers)})
 
-    # ---------- V16 端口引线须随管网,台阶只许落在符号轮廓上 ----------
-    # 线宽即压力等级编码。端口引线(viewBox 边界到符号轮廓那一段)走油,
-    # 若按组件本体 1.5 T 绘制,接点处就出现假的压力等级突变:泵排油口上
-    # 3.6 变 1.8,字面读作压力降到回油以下。故引线须随所在管网。
-    #
-    # 采用方案 A:符号轮廓(菱形、圆、方框)一律 1.5 T,不随管网。
-    # 因为轮廓线宽是"这是什么零件"的编码,管线线宽是"这是什么压力"的编码,
-    # 两套编码不应互相覆盖。代价是引线与轮廓交接处保留一处台阶,
-    # 该台阶落在符号边界上,已在图例中声明不表示压力等级变化。
-    # 本项只保证:管线-引线接点无台阶(读作压力突变的那处),
-    # 且台阶不出现在符号边界以外的地方。
-    LW = {'pressure': 3.0 * baseT, 'return': 1.0 * baseT,
-          'suction': 1.0 * baseT, 'case_drain': 1.0 * baseT}
-    # 用真正的解析器遍历实例,不用正则。
-    # 早先版本用 <g id="inst-..">(.*?)\n</g> 抓实例体,非贪婪匹配在第一个
-    # 闭合标签就截断,带嵌套 g 的符号(油箱)只被扫到一部分——把油箱的
-    # pl- 类整个删掉,V16 仍报通过。校核器不能有这种盲区。
-    SVGNS = '{http://www.w3.org/2000/svg}'
-    troot = ET.fromstring(raw.encode('utf-8'))
-
-    def tf_of(el):
-        """返回该元素 transform 的 (a,b,c,d,e,f) 复合矩阵。"""
-        M = (1.0, 0.0, 0.0, 1.0, 0.0, 0.0)
-        for mm in re.finditer(r'(translate|rotate|scale)\(([^)]*)\)',
-                              el.get('transform') or ''):
-            v = [float(x) for x in re.split(r'[,\s]+', mm.group(2).strip()) if x]
-            if mm.group(1) == 'translate':
-                N = (1, 0, 0, 1, v[0], v[1] if len(v) > 1 else 0)
-            elif mm.group(1) == 'scale':
-                N = (v[0], 0, 0, v[1] if len(v) > 1 else v[0], 0, 0)
-            else:
-                r = math.radians(v[0])
-                N = (math.cos(r), math.sin(r), -math.sin(r), math.cos(r), 0, 0)
-            a, b, c, d, e, f = M
-            na, nb, nc, nd, ne, nf = N
-            M = (a * na + c * nb, b * na + d * nb,
-                 a * nc + c * nd, b * nc + d * nd,
-                 a * ne + c * nf + e, b * ne + d * nf + f)
-        return M
-
-    def comb(M, N):
-        a, b, c, d, e, f = M
-        na, nb, nc, nd, ne, nf = N
-        return (a * na + c * nb, b * na + d * nb,
-                a * nc + c * nd, b * nc + d * nd,
-                a * ne + c * nf + e, b * ne + d * nf + f)
-
-    pl_ends = []
-    outline = []      # (inst, 顶点) — 本体轮廓的顶点,含 path/circle/rect
-
-    def walk(el, M, inst, cls):
-        M = comb(M, tf_of(el))
-        cl = el.get('class') or cls
-        tg = el.tag.replace(SVGNS, '')
-        if '#fff' in (el.get('stroke') or '').lower():
-            return
-        a, b, c, d, e, f = M
-
-        def T(x, y):
-            return (a * x + c * y + e, b * x + d * y + f)
-        cm = re.search(r'pl-(\w+)', cl or '')
-        if tg == 'line':
-            for (x, y) in ((float(el.get('x1')), float(el.get('y1'))),
-                           (float(el.get('x2')), float(el.get('y2')))):
-                pl_ends.append((inst, T(x, y), cm.group(1) if cm else None))
-        elif tg in ('path', 'polygon', 'polyline') and not cm:
-            # 轮廓顶点。引线常接在菱形的左右顶点上(滤),故须纳入。
-            # path 的 A(圆弧)命令中含半径与标志位,不是坐标,须剔除,
-            # 否则会造出不存在的锚点(蓄压器壳体是两段 A 弧)。
-            dd = el.get('d') or el.get('points') or ''
-            dd = re.sub(r'[Aa][^A-Za-z]*', ' ', dd) if tg == 'path' else dd
-            for x, y in re.findall(r'([-\d.]+)[ ,]+([-\d.]+)', dd):
-                outline.append((inst, T(float(x), float(y))))
-            # 弧的端点仍是轮廓上的点:A 命令末尾两个数即终点。
-            for am in re.finditer(r'[Aa][\d.,\s-]*?([-\d.]+)[ ,]+([-\d.]+)(?=[ ,]*(?:[A-Za-z]|$))',
-                                  el.get('d') or ''):
-                outline.append((inst, T(float(am.group(1)), float(am.group(2)))))
-        elif tg == 'circle' and not cm:
-            cx, cy = float(el.get('cx')), float(el.get('cy'))
-            r = float(el.get('r'))
-            for dx, dy in ((-r, 0), (r, 0), (0, -r), (0, r)):
-                outline.append((inst, T(cx + dx, cy + dy)))
-        elif tg == 'rect' and not cm:
-            rx, ry = float(el.get('x')), float(el.get('y'))
-            rw, rh = float(el.get('width')), float(el.get('height'))
-            for px in (rx, rx + rw / 2.0, rx + rw):
-                for py in (ry, ry + rh / 2.0, ry + rh):
-                    outline.append((inst, T(px, py)))
-        for ch in el:
-            walk(ch, M, inst, cl)
-
-    # 从 <g id="sheet"> 起遍历,把它的 translate(SHIFT,0) 一并计入。
-    # 否则实例坐标整体偏 SHIFT,像素判定取错位置——蓄压器与油箱的引线
-    # 端点因此被误报为"落在空处",而实际墨迹在右侧 30 单位处。
-    def descend(el, M):
-        """M 为祖先累积矩阵,不含 el 自身——walk 会自行乘上 el 的 transform。"""
-        gid = el.get('id') or ''
-        if gid.startswith('inst-'):
-            walk(el, M, gid[5:], None)
-            return
-        M = comb(M, tf_of(el))
-        for ch in el:
-            if ch.tag == SVGNS + 'g':
-                descend(ch, M)
-
-    # 管段坐标(polys)取自 polyline 的原始 points,未含 sheet 的 SHIFT;
-    # 实例坐标经 descend 已含。二者必须在同一坐标系里比,否则整体错 SHIFT:
-    # FSOV 的 outlet 在整图 440,与之相接的管段 points 写的是 410,
-    # 早先版本因此把"引线正常相接"读成"管段端点落在阀体内部"。
-    # 统一到"未含 SHIFT"的图元坐标系,故此处从 sheet 的子层开始遍历。
-    sheet_g = None
-    for g in troot.iter(SVGNS + 'g'):
-        if (g.get('id') or '') == 'sheet':
-            sheet_g = g
-            break
-    for ch in (sheet_g if sheet_g is not None else troot):
-        if ch.tag == SVGNS + 'g':
-            descend(ch, (1.0, 0.0, 0.0, 1.0, 0.0, 0.0))
-    # 非液压口(电、气信号)的引线不参与:它不走油,本就该是本体线宽。
-    # FSOV 的 command 口引线恰有一条管段端点与之重合,若不排除会被
-    # 误报为"引线未改判"。判据是端口 data-medium,不是几何。
-    nonhyd = set()      # (inst, 整图 x, 整图 y)
-    for inst, nd in (L['nodes'] or {}).items():
-        sp = _resolve_symbol(nd['symbol'])
-        if not os.path.exists(sp):
-            continue
-        sroot = ET.parse(sp).getroot()
-        vbp = [float(v) for v in
-               re.split(r'[,\s]+', sroot.get('viewBox').strip())]
-        kk = min(nd['w'] / vbp[2], nd['h'] / vbp[3])
-        rr = int(nd.get('rot', 0)) % 360
-        WW, HH = vbp[2] * kk, vbp[3] * kk
-        for cg in sroot.iter(SVGNS + 'g'):
-            if cg.get('id') != 'connection-points':
-                continue
-            for c in cg:
-                if c.get('data-medium') == 'hydraulic':
-                    continue
-                lx = (float(c.get('cx')) - vbp[0]) * kk
-                ly = (float(c.get('cy')) - vbp[1]) * kk
-                if rr == 90:
-                    lx, ly = HH - ly, lx
-                elif rr == 180:
-                    lx, ly = WW - lx, HH - ly
-                elif rr == 270:
-                    lx, ly = ly, WW - lx
-                # 与图元坐标系一致:不含 SHIFT
-                nonhyd.add((inst, round(nd['x'] + lx, 1),
-                            round(nd['y'] + ly, 1)))
-
-    steps = []
-    for lt0, pts in polys:
-        lt = lt0[3:] if lt0.startswith('ln-') else lt0
-        for e in (pts[0], pts[-1]):
-            for inst, (sx, sy), cls in pl_ends:
-                if abs(sx - e[0]) < 2.5 and abs(sy - e[1]) < 2.5:
-                    if cls is None:
-                        # 只豁免"该端点确实落在某个非液压口上"的情形,
-                        # 不豁免整个组件——否则带电控口的阀会全体免检。
-                        if any(i2 == inst and abs(cx - sx) < 3.0
-                               and abs(cy - sy) < 3.0
-                               for i2, cx, cy in nonhyd):
-                            break
-                        steps.append((inst, lt, '引线未改判,按本体线宽 @(%.0f,%.0f)'
-                                      % (sx, sy)))
-                    elif abs(LW[cls] - LW[lt]) > 0.01:
-                        steps.append((inst, lt, '引线判为 %s @(%.0f,%.0f)'
-                                      % (cls, sx, sy)))
-                    break
-    for inst, lt, why in sorted(set(steps)):
-        F.append(('V16', '%s 的 %s 接点线宽不连续:%s——读作假的压力等级变化'
-                  % (inst, lt, why)))
-
-    # 方案 A 的前提:每段引线必须一端接管线、另一端接符号轮廓。
-    # 若某段引线两端都不落在轮廓上,台阶就出现在符号内部的空处,
-    # 图例那句"台阶位于符号边界"随之失真。此前 V16 未查这一条。
-    lead = [q for q in pl_ends if q[2]]
-    # 本体锚点 = 本体 line 的端点 + 轮廓(path/circle/rect)的顶点。
-    # 只看 line 端点是不够的:滤的引线接在菱形 path 的左右顶点上,
-    # 泵的排油引线接在箭头 path 上,都不是 line。
-    body = ([(i, p) for i, p, k in pl_ends if not k] + outline)
-    # 顶点匹配不足以判定"接上了本体":蓄压器的引线终点 (30,88) 落在壳体
-    # 圆弧的中途而非顶点上;油箱的轮廓是描摹填充,根本没有可取顶点的描边。
-    # 故顶点匹配失败时改判像素——PNG 上该点周围有无本体墨迹。
-    # 这是唯一能同时覆盖弧、填充与描边的判据。
-    png = os.path.join(WORKDIR, 'sheet-readback.png')
-    ink = None
-    if os.path.exists(png):
-        try:
-            from PIL import Image
-            import numpy as np
-            ink = np.asarray(Image.open(png).convert('L')) < 128
-        except ImportError:
-            pass
-
-    def has_ink(lx, ly, r=6):
-        """该点近旁是否有墨迹(排除引线自身所在的那一格)。
-
-        图元坐标不含 SHIFT,PNG 是渲染结果、含 SHIFT,故查像素时补上。
-        """
-        if ink is None:
-            return None
-        H2, W2 = ink.shape
-        x0, y0 = int(round(lx + SHIFT)), int(round(ly))
-        for dx in range(-r, r + 1):
-            for dy in range(-r, r + 1):
-                if abs(dx) + abs(dy) < 3:
-                    continue
-                x, y = x0 + dx, y0 + dy
-                if 0 <= x < W2 and 0 <= y < H2 and ink[y, x]:
-                    return True
-        return False
-
-    orphan, unchecked = set(), 0
-    for inst, (lx, ly), cls in lead:
-        anchored = any(i2 == inst and abs(bx - lx) < 2.5 and abs(by - ly) < 2.5
-                       for i2, (bx, by) in body)
-        onpipe = any(abs(p[0] - lx) < 2.5 and abs(p[1] - ly) < 2.5
-                     for _lt, pp in polys for p in (pp[0], pp[-1]))
-        if anchored or onpipe:
-            continue
-        px_ok = has_ink(lx, ly)
-        if px_ok is None:
-            unchecked += 1        # 无回读图,不能判定,不静默放过
-            continue
-        if not px_ok:
-            orphan.add((inst, cls, round(lx), round(ly)))
-    for inst, cls, ox, oy in sorted(orphan):
-        F.append(('V16', '%s 的 %s 引线端点 (%d,%d) 既不接管线也不接本体:'
-                         '台阶落在符号内部空处' % (inst, cls, ox, oy)))
-    if unchecked:
-        W.append(('V16', '%d 处引线端点无法用顶点判定,且缺回读 PNG '
-                         '(%s),未校核' % (unchecked, os.path.basename(png))))
-
-    ev.append({'id': 'V16', 'scheme': 'A: 轮廓 1.5T 不随管网',
-               'lead_ends': len(lead), 'steps': len(set(steps)),
-               'orphan_lead_ends': len(orphan)})
-
     # ---------- V11 管线必须正交 ----------
-    # 感知校核(PNG 回读)发现的缺陷:走线器把"直连"当候选,斜线因
-    # 长度最短、拐点最少而总是胜出。液压原理图的斜线会被读成软管。
-    for cls, pts in polys:
-        for k in range(len(pts) - 1):
-            (x0, y0), (x1, y1) = pts[k], pts[k + 1]
-            if abs(x1 - x0) > 0.6 and abs(y1 - y0) > 0.6:
-                F.append(('V11', '斜线段 (%.0f,%.0f)->(%.0f,%.0f),管线须正交'
-                          % (x0, y0, x1, y1)))
-
-    # ---------- V3 越过端口后折返(会被读作支路的线头) ----------
-    # 判据:折线首段或末段的方向与该端口锚点方向相反。
-    for cls, pts in polys:
-        if len(pts) < 3:
-            continue
-        for (a, b, tag) in ((pts[0], pts[1], '首'), (pts[-1], pts[-2], '末')):
-            d = (b[0] - a[0], b[1] - a[1])
-            if abs(d[0]) + abs(d[1]) < 0.5:
-                F.append(('V3', '%s段零长,端点重合于 %s' % (tag, a)))
-
-    # ---------- V4 三通实心点必须在母线内部 ----------
-    bus_x = {b['x'] for b in L['buses'].values()}
-    for (x, y) in jn:
-        if round(x, 1) not in {round(v, 1) for v in bus_x}:
-            W.append(('V4', '三通点 (%g,%g) 不在任何母线 x 上' % (x, y)))
-    ev.append({'id': 'V4', 'junctions': len(jn), 'bus_x': sorted(bus_x)})
+    # Endpoint quantization tolerance is not permission to draw a diagonal.
+    # Use the final, transformed root-SVG geometry; only floating noise is ignored.
+    orthogonal_findings = []
+    axis_epsilon = 1e-7
+    wire_sources = {e.get('id'): e.get('data-edge') or e.get('data-input-anchor')
+                    for e in root.iter() if e.get('id')}
+    for pipe in geometry['pipes']:
+        for a, b in zip(pipe['points'], pipe['points'][1:]):
+            dx, dy = abs(b[0]-a[0]), abs(b[1]-a[1])
+            if dx > axis_epsilon and dy > axis_epsilon:
+                detail = ('Nonorthogonal system pipe %s: %s -> %s; '
+                          'axis deltas=(%.9g, %.9g)'
+                          % (pipe.get('svg_id'), a, b, dx, dy))
+                orthogonal_findings.append({
+                    'id':'V11', 'result':'fail', 'kind':'nonorthogonal_pipe',
+                    'detail':detail, 'svg_id':pipe.get('svg_id'),
+                    'anchor':wire_sources.get(pipe.get('svg_id')),
+                    'segment':[a,b], 'position':a, 'axis_deltas':[dx,dy]})
+    F.extend((c['id'], c['detail']) for c in orthogonal_findings)
+    ev.append({'id':'V11', 'axis_epsilon':axis_epsilon,
+               'coverage_status':'not_checked' if geometry['issues'] else 'pass',
+               'coverage_detail':'Final root-SVG system segments checked for strict H/V alignment.'})
 
     # ---------- V5 悬空端口(不阻止出图,但必须披露) ----------
-    used = set()
-    for p in intent['paths']:
-        for tok in p:
-            if tok.startswith('@'):
-                continue
-            inst = tok.split('.')[0]
-            if inst not in intent['parts']:
-                continue
-            if '.' in tok:
-                used.add((inst, tok.split('.', 1)[1]))
-            else:
-                mp = T[intent['parts'][inst]].get('main_path')
-                if mp:
-                    used.add((inst, mp['in']))
-                    used.add((inst, mp['out']))
-    dang = []
-    for inst, ct in intent['parts'].items():
-        if inst not in L['nodes']:
-            continue
-        for q in T[ct]['ports']:
-            if (inst, q['id']) not in used:
-                dang.append('%s.%s' % (inst, q['id']))
+    dang = inventory['dangling']
     if dang:
         W.append(('V5', '悬空端口 %d 个,须在图签栏计数并标红: %s'
                   % (len(dang), ' '.join(sorted(dang)))))
-    ev.append({'id': 'V5', 'dangling': sorted(dang)})
-
-    # ---------- V6 内容越出画布(含 shift 后) ----------
-    xs, ys = [], []
-    for _c, pts in polys:
-        for (x, y) in pts:
-            xs.append(x + SHIFT)
-            ys.append(y)
-    for inst, (x0, y0, x1, y1) in boxes.items():
-        xs += [x0 + SHIFT, x1 + SHIFT]
-        ys += [y0, y1]
-    if xs:
-        if min(xs) < 0 or max(xs) > CW:
-            F.append(('V6', '图形 x 范围 %.0f..%.0f 越出画布宽 %d'
-                      % (min(xs), max(xs), CW)))
-        if min(ys) < 0 or max(ys) > CH:
-            F.append(('V6', '图形 y 范围 %.0f..%.0f 越出画布高 %d'
-                      % (min(ys), max(ys), CH)))
-    # 左侧边界说明文字向左伸出约 110,须在 shift 内
-    for eid, e in L.get('externs', {}).items():
-        if e['anchor'] == 'right' and e['x'] + SHIFT - 110 < 0:
-            W.append(('V6', '%s 的说明文字可能被左缘裁切(x=%g, shift=%g)'
-                      % (eid, e['x'], SHIFT)))
-    ev.append({'id': 'V6', 'canvas': [CW, CH], 'shift_x': SHIFT,
-               'content_x': [round(min(xs), 1), round(max(xs), 1)] if xs else None,
-               'content_y': [round(min(ys), 1), round(max(ys), 1)] if ys else None})
-
-    # ---------- V7 图例/图签栏遮挡 ----------
-    # 图例与图签栏互相重叠。二者都画在 sheet 组之外(不随 shift 平移),
-    # 早先只检查它们与元件、与管线,没检查它们**彼此**——于是图例底部
-    # 三行文字压在图签栏上,两层文字叠印,全都不可读。
-    lg, tb = L.get('legend'), L.get('title_block')
-    if lg and tb:
-        a = (lg['x'], lg['y'], lg['x'] + lg['w'], lg['y'] + lg['h'])
-        b = (tb['x'], tb['y'], tb['x'] + tb['w'], tb['y'] + tb['h'])
-        if not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3]):
-            F.append(('V7', '图例 y %g..%g 与图签栏 y %g..%g 重叠,文字叠印'
-                      % (a[1], a[3], b[1], b[3])))
-
-    for key in ('legend', 'title_block'):
-        r = L.get(key)
-        if not r:
-            continue
-        rect = (r['x'] - SHIFT, r['y'], r['x'] + r['w'] - SHIFT, r['y'] + r['h'])
-        for inst, bx in boxes.items():
-            if not (bx[2] < rect[0] or bx[0] > rect[2]
-                    or bx[3] < rect[1] or bx[1] > rect[3]):
-                F.append(('V7', '%s 与元件 %s 重叠' % (key, inst)))
-        for _c, pts in polys:
-            for k in range(len(pts) - 1):
-                if seg_rect_hit(pts[k], pts[k + 1], rect, tol=0) > 8:
-                    F.append(('V7', '%s 压住管线,段 %s->%s' % (key, pts[k], pts[k + 1])))
-                    break
-
-    # ---------- V8 分组框与标签 ----------
-    pad = L.get('group_padding', 14)
-    for g in intent.get('groups') or []:
-        mem = [m for m in g['members'] if m in boxes]
-        if not mem:
-            continue
-        gx0 = min(boxes[m][0] for m in mem) - pad
-        gy0 = min(boxes[m][1] for m in mem) - pad
-        gx1 = max(boxes[m][2] for m in mem) + pad
-        gy1 = max(boxes[m][3] for m in mem) + pad
-        for inst, bx in boxes.items():
-            if inst in mem:
-                continue
-            if not (bx[2] < gx0 or bx[0] > gx1 or bx[3] < gy0 or bx[1] > gy1):
-                F.append(('V8', '分组 %s 的虚线框圈进了非成员 %s' % (g['id'], inst)))
-    ev.append({'id': 'V8', 'groups': len(intent.get('groups') or [])})
+    drawing_issues = check_disclosure(root, inventory, geometry)
+    display_issues, display_evidence = check_marker_display(inventory, geometry, browser)
+    drawing_issues.extend(display_issues)
+    F.extend(('V5', item['detail']) for item in drawing_issues)
+    ev.append({'id': 'V5', **inventory, **display_evidence, 'drawing_issues': drawing_issues,
+               'marker_tolerance': 0.2, 'coordinate_system': geometry['coordinate_system'],
+               'contract_issues': contract_issues, 'unknown': intent.get('unknown') or []})
 
     # ---------- V9 符号就绪度 ----------
     notready = []
     for inst, nd in L['nodes'].items():
-        p = _resolve_symbol(nd['symbol'])
+        p = symbol_path(nd['symbol'])
         s = io.open(p, encoding='utf-8').read(4000)
         st = re.search(r'data-symbol-status="([^"]+)"', s)
         st = st.group(1) if st else 'none'
@@ -851,12 +539,29 @@ def main():
                   % (len(notready), ' '.join(sorted(notready)))))
     ev.append({'id': 'V9', 'not_annotated': sorted(notready)})
 
-    # ---------- V10 线型可推导 + 网络计数一致 ----------
-    nets = sum(len(p) - 1 for p in intent['paths'])
-    ev.append({'id': 'V10', 'l0_nets': nets, 'rendered_polylines': len(polys)})
-    if len(polys) < nets:
-        W.append(('V10', 'L0 声明 %d 条网络,图上只有 %d 条折线(母线合并所致须确认)'
-                  % (nets, len(polys))))
+    # ---------- V10 Independent visible connectivity and input traceability ----------
+    topology = reconcile_topology(root, geometry, intent, cat, L, browser_evidence=browser)
+    topology_findings = topology['findings']
+    F.extend((c['id'], c['detail']) for c in topology_findings)
+    ev.append({'id': 'V10', 'coverage_status': topology['coverage_status'],
+               'coverage_detail': ('Input edges reconciled against browser-visible SVG geometry and catalog ports'
+                                   if topology['coverage_status'] == 'pass' else
+                                   'Display/geometry reconciliation incomplete: ' + str(topology.get('display_evidence'))),
+               'expected_edges': len(topology['expected_edges']),
+               'actual_edges': len(topology['actual_edges']),
+               'endpoint_tolerance': 0.1})
+
+    junction_findings,junction_evidence = check_junctions(topology,browser)
+    F.extend((c['id'],c['detail']) for c in junction_findings)
+    ev.extend(junction_evidence)
+
+    bounds_findings, bounds_evidence = canvas_bounds(geometry,topology,browser,drawable)
+    F.extend((c['id'],c['detail']) for c in bounds_findings)
+    ev.append(bounds_evidence)
+    budget_runs = measure_runs(geometry, topology)
+    frame_findings, frame_evidence = frame_checks(geometry, topology, browser, intent, L, budget_runs, seg_rect_hit)
+    F.extend((c['id'],c['detail']) for c in frame_findings)
+    ev.extend(frame_evidence)
 
     # ---------- 构图预算面板（B1–B7，V19）----------
     # 折返数：方向变化次数，U 形回折(180°)也算一次（与
@@ -873,12 +578,11 @@ def main():
 
     def near_terminal(p):
         return any(abs(p[0] - t[0]) < 3 and abs(p[1] - t[1]) < 3
-                   for t in BOUNDARY_TERMINALS)
+                   for t in L.get('boundary_terminals', []))
 
     turn_total = 0
     turn_max = 0
     ratios = []
-    min_seg = 9e9
     for _c, pts in polys:
         turn_total += turns_of(pts)
         turn_max = max(turn_max, turns_of(pts))
@@ -887,47 +591,40 @@ def main():
                      for a, b in zip(pts, pts[1:]))
         if man > 0:
             ratios.append((length / man, pts))
-        for a, b in zip(pts, pts[1:]):
-            min_seg = min(min_seg, abs(a[0] - b[0]) + abs(a[1] - b[1]))
 
-    # B1 交叉：正交段几何交点，端点相接（T 型汇入/三通）不算。
-    # 预算恒为 0，不承认跨线桥豁免——有桥也是超预算，须改道。
-    b1_cross = []
-    for i in range(len(segs_all)):
-        _c1, a1, b1 = segs_all[i]
-        h1 = abs(b1[1] - a1[1]) < 0.6
-        for j in range(i + 1, len(segs_all)):
-            _c2, a2, b2 = segs_all[j]
-            h2 = abs(b2[1] - a2[1]) < 0.6
-            if h1 == h2:
-                continue
-            if h1:
-                x, y = a2[0], a1[1]
-            else:
-                x, y = a1[0], a2[1]
-            def on(p, s, e):
-                return (min(s[0], e[0]) - 0.5 <= x <= max(s[0], e[0]) + 0.5
-                        and min(s[1], e[1]) - 0.5 <= y <= max(s[1], e[1]) + 0.5)
-            if not (on((x, y), a1, b1) and on((x, y), a2, b2)):
-                continue
-            ends = {(round(q[0], 1), round(q[1], 1))
-                    for q in (segs_all[i][1], segs_all[i][2],
-                              segs_all[j][1], segs_all[j][2])}
-            if (round(x, 1), round(y, 1)) in ends:
-                continue
-            b1_cross.append((x, y))
+    # B1 默认保留零交叉政策（含真实跨线桥）。#23 定案(2026-10-12)：仅
+    # bridge_allowance 登记政策按 intent 内容 SHA-256 绑定放行"最多 N 处
+    # 经验证跳线"。放行不改变实测口径：measured 仍是真实交叉数；
+    # verified_bridges 逐点复用 V4/V14 浏览器几何证据（check_junctions
+    # 的 bridges 记录），此处不另造低保真替代。面对断点诊断缺桥，
+    # 不发明路线。
+    crossing_evidence = next(e for e in junction_evidence if e['id']=='V14')
+    crossing_events = [e for e in crossing_evidence.get('events',[]) if e['kind']=='crossing']
+    b1_cross = [tuple(e['position']) for e in crossing_events
+                if e.get('measurement_status')=='measured' and (e.get('visible_horizontal') or e.get('bridge_ids'))]
+    b1_unchecked = (crossing_evidence['coverage_status']=='not_checked' or
+                    any(not e.get('visible_horizontal') and not e.get('bridge_ids') for e in crossing_events))
+    # B1 放行的前提是 V4/V14 全部 findings 为空且覆盖 pass：假接点、
+    # 无桥、错归属、孤桥、直线压桥等任何失败都已在 findings 里，
+    # 不允许带着这些证据缺口按"经验证跳线"放行。
+    junction_clean = not [f for f in junction_findings if f['id'] in ('V4','V14')]
+    bridge_records = crossing_evidence.get('bridges',[])
+    def b1_verified(position):
+        arcs=[b for b in bridge_records
+              if math.dist(b['position'],position)<=JUNCTION_TOLERANCE]
+        return (len(arcs)==1 and bool(arcs[0].get('continuous'))
+                and bool(arcs[0].get('valid_owner'))
+                and not arcs[0].get('unchecked'))
+    try:
+        bridge_policy=check_bridge_policy(L,INTENT)
+        policy_error=None
+    except ValueError as error:
+        bridge_policy={'policy_id':None,'allowance':0}
+        policy_error=str(error)
 
-    # B5 节点盒净距：矩形间最小距离（轴向或对角，欧氏）。
-    b5_gap = None
-    bl = sorted(boxes.items())
-    for i in range(len(bl)):
-        for j in range(i + 1, len(bl)):
-            r1, r2 = bl[i][1], bl[j][1]
-            dx = max(r1[0] - r2[2], r2[0] - r1[2], 0.0)
-            dy = max(r1[1] - r2[3], r2[1] - r1[3], 0.0)
-            g = math.hypot(dx, dy)
-            if b5_gap is None or g < b5_gap:
-                b5_gap = g
+    # B5 uses the final transformed source footprints, including nested transforms.
+    b5_nearest = nearest_components(geometry)
+    b5_gap = b5_nearest['distance'] if b5_nearest else None
 
     items = []
     def add(bid, measured, status, detail=None):
@@ -938,14 +635,75 @@ def main():
         items.append(it)
         return it
 
-    # B1 交叉恒 0，硬 fail（唯一走 fail 通道的预算项）。
-    if b1_cross:
-        add('B1', len(set(b1_cross)), 'fail',
-            '非连通交叉 %d 处，预算恒为 0（含跨线桥也不豁免）' % len(set(b1_cross)))
-        F.append(('V19', '构图预算 B1：交叉 %d 处 > 0，须改道消除'
-                  % len(set(b1_cross))))
+    # B1 交叉默认恒 0 硬 fail（唯一走 fail 通道的预算项）；#23 登记政策
+    # 放行的口径：V4/V14 findings 全空且覆盖 pass、每个实际交叉有且仅有
+    # 一条连续、归属正确、非未校核的真桥，且交叉数 ≤ 登记 allowance。
+    # 第二个交叉即使同样验证通过也超出 allowance=1，仍 fail。默认路径
+    # （policy_id=None 且 allowance=0）的 F 诊断保持原始措辞；登记政策下
+    # 交叉数未超预算、仅因证据被拒时按"证据不完整"披露，真正数量超限
+    # 才说超出放行预算。
+    b1_positions=sorted(set(b1_cross))
+    b1_measured=len(b1_positions)
+    b1_verified_count=sum(1 for p in b1_positions if b1_verified(p))
+    v4_evidence = next(e for e in junction_evidence if e['id']=='V4')
+    # covered：V4 与 V14 覆盖都必须 pass（junction_semantics 的 unsupported
+    # marker 只记 V4 not_checked，V14 仍可 pass——只查 V14 会把带未知
+    # marker 的跳线称"经验证"）；findings 空、无未核交叉证据才放行。
+    covered=(junction_clean
+             and v4_evidence['coverage_status']=='pass'
+             and crossing_evidence['coverage_status']=='pass'
+             and not b1_unchecked)
+    # 披露单值：B1 item 与 V19 evidence 必须同口径（covered 才逐点报数，
+    # 否则整组 0），不允许一个出口 0、另一个出口还挂着未过滤计数。
+    b1_verified_disclosed=b1_verified_count if covered else 0
+    if policy_error:
+        add('B1',b1_measured,'fail',policy_error)
+        F.append(('V19','构图预算 B1：跳线许可解析失败（fail-closed，按'
+                  '未获准处理）：%s'%policy_error))
+    elif b1_measured:
+        if bridge_policy['policy_id'] is None and bridge_policy['allowance']==0:
+            # 未申请政策的默认零交叉硬失败：维持原始诊断措辞（兼容既有
+            # 基线）；measured 仍是真实交叉数，policy/allowance/
+            # verified_bridges 与 covered 披露口径均不变。
+            add('B1',b1_measured,'fail','交叉 %d 处 > 0，须改道消除'%b1_measured)
+            F.append(('V19','构图预算 B1：交叉 %d 处 > 0，须改道消除'%b1_measured))
+        elif (covered and b1_verified_count==b1_measured
+                and b1_measured<=bridge_policy['allowance']):
+            add('B1',b1_measured,'pass',
+                '经验证跳线 %d 处 ≤ 登记 %s 放行 %d 处（#23 定案；其余交叉仍禁止）'
+                %(b1_measured,bridge_policy['policy_id'],bridge_policy['allowance']))
+        else:
+            gaps=[]
+            if not junction_clean:gaps.append('V4/V14 存在失败')
+            if (v4_evidence['coverage_status']!='pass'
+                    or crossing_evidence['coverage_status']!='pass'
+                    or b1_unchecked):
+                gaps.append('交叉测量证据不完整')
+            if b1_verified_count<b1_measured:
+                gaps.append('经验证跳线仅 %d/%d 处'%(b1_verified_count,b1_measured))
+            if b1_measured>bridge_policy['allowance']:
+                gaps.append('交叉 %d 处 > 放行 %d 处'%(b1_measured,bridge_policy['allowance']))
+            detail='；'.join(gaps)
+            add('B1',b1_measured,'fail',detail)
+            if b1_measured>bridge_policy['allowance']:
+                F.append(('V19','构图预算 B1：交叉 %d 处超出放行预算 %d（%s）'
+                          '，须改道消除或按 #23 重新登记'
+                          %(b1_measured,bridge_policy['allowance'],detail)))
+            else:
+                F.append(('V19','构图预算 B1：交叉 %d 处在放行预算 %d 内，'
+                          '证据不完整不予放行（%s）'
+                          %(b1_measured,bridge_policy['allowance'],detail)))
     else:
-        add('B1', 0, 'pass')
+        add('B1', 0, 'not_measured' if b1_unchecked else 'pass',
+            'Crossing route/display evidence incomplete.' if b1_unchecked else None)
+    items[-1]['policy']=bridge_policy['policy_id']
+    items[-1]['allowance']=bridge_policy['allowance']
+    # verified_bridges 披露口径：逐点核实（continuous/valid_owner/非未核）
+    # 只是必要条件——V4/V14 任一 findings（虚线桥、假接点）或覆盖缺口
+    # 存在时，整组按 0 披露，不得一边 fail 一边报"已验证 1 处"误导为
+    # "桥本身没问题"。B1 item 与下方 V19 evidence 共用 b1_verified_disclosed，
+    # 所有出口同口径。measured 始终是真实交叉数，不因放行减少。
+    items[-1]['verified_bridges']=b1_verified_disclosed
 
     # B2 折返：单条 ≤3 且全图 ≤40。超限走 WARN；落在边界端子上的
     # 存量走线按表注¹披露为 exempt。
@@ -987,45 +745,101 @@ def main():
                'over_budget': ['%.3f' % r for r, _ in b3_over]},
         b3_status, b3_detail)
 
-    # B4 最短走线段 ≥8px。
-    if min_seg < BUDGET['B4']['budget']:
-        add('B4', round(min_seg, 1), 'over')
-        W.append(('V19', '构图预算 B4：最短走线段 %.1f < 8' % min_seg))
-    else:
-        add('B4', round(min_seg, 1), 'pass')
+    # B4 measures actual turns/interfaces, not arbitrary SVG storage cuts.
+    nearest_run = min(budget_runs,key=lambda r:r['length']) if budget_runs else None
+    min_seg = nearest_run['length'] if nearest_run else None
+    b4_over = min_seg is not None and min_seg < BUDGET['B4']['budget']
+    b4_status = ('not_measured' if topology['coverage_status']=='not_checked' else
+                 'over' if b4_over else 'pass' if nearest_run else 'not_applicable')
+    b4_item = add('B4', round(min_seg,1) if min_seg is not None else None,b4_status)
+    if b4_status=='not_measured':
+        b4_item['detail'] = 'Visible topology is incomplete; available runs are partial measurements.'
+    b4_item['runs'] = budget_runs
+    b4_item['nearest_run'] = nearest_run
+    if b4_over:
+        W.append(('V19','构图预算 B4：%s 最短走线段 %.1f < 8，差额 %.1f，位置 %s → %s'
+                  % (nearest_run['anchor'],min_seg,8-min_seg,nearest_run['start'],nearest_run['end'])))
 
     # B5 节点盒净距 ≥40px。
     if b5_gap is not None and b5_gap < BUDGET['B5']['budget']:
         add('B5', round(b5_gap, 1), 'over')
-        W.append(('V19', '构图预算 B5：节点盒最小净距 %.1f < 40' % b5_gap))
+        W.append(('V19', '构图预算 B5：%s 最小净距 %.1f < 40，差额 %.1f，位置 %s'
+                  % (' ↔ '.join(b5_nearest['components']), b5_gap,40-b5_gap,b5_nearest['positions'])))
     else:
         add('B5', round(b5_gap, 1) if b5_gap is not None else None, 'pass')
 
-    # B6 容器走廊：分组内边距取 layout.group_padding 实测；
-    # 避让走廊需逐段算走线与元件的间隙，v1 未测。
-    gp = L.get('group_padding')
+    if geometry['issues'] or topology.get('display_evidence',{}).get('unchecked'):
+        items[-1]['status'] = 'not_measured'
+        items[-1]['detail'] = 'Some final component footprints could not be measured; see geometry/display issues.'
+    if b5_nearest:
+        items[-1]['nearest'] = dict(b5_nearest, deficit=max(0.0,BUDGET['B5']['budget']-b5_gap))
+
+    # B6 pipe-to-footprint clearance; only an actual outward terminal run
+    # may occupy its own component's approach corridor.
+    corridors = measure_corridors(geometry, topology, budget_runs, BUDGET['B6']['budget_avoid_corridor'], browser)
+    corridor_gap = corridors['nearest']['distance'] if corridors['nearest'] else None
+    group_measurement = measure_groups(geometry, intent, browser, BUDGET['B6']['budget_group_padding'])
+    if intent.get('groups') and (geometry['issues'] or topology.get('display_evidence',{}).get('unchecked')):
+        group_measurement['status'] = 'not_checked'
+        group_measurement['unchecked'].extend(geometry['issues'] or topology['display_evidence']['unchecked'])
+    gp = group_measurement['nearest']['distance'] if group_measurement['nearest'] else None
+    b6_over = ((gp is not None and gp < BUDGET['B6']['budget_group_padding'])
+               or (corridor_gap is not None and corridor_gap < BUDGET['B6']['budget_avoid_corridor']))
+    b6_status = ('over' if b6_over else 'not_measured' if 'not_checked' in (group_measurement['status'],corridors['coverage_status']) else 'pass')
+    b6_item = add('B6', {'group_padding':gp,'avoid_corridor':corridor_gap},b6_status)
+    b6_item['nearest_group'] = group_measurement['nearest']
+    b6_item['group_padding_status'] = group_measurement['status']
+    b6_item['groups'] = group_measurement
+    b6_item['nearest_corridor'] = corridors['nearest']
+    b6_item['corridors'] = corridors
     if gp is not None and gp < BUDGET['B6']['budget_group_padding']:
-        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'over')
-        W.append(('V19', '构图预算 B6：分组内边距 %g < 14' % gp))
-    else:
-        add('B6', {'group_padding': gp, 'avoid_corridor': 'not_measured'}, 'pass',
-            '避让走廊 ≥12 未实现自动测量，v1 裁剪，目视/回读环节把关')
+        W.append(('V19','构图预算 B6：分组 %s 到 %s 内边距 %g < 14，差额 %g，位置 %s'
+                  % (group_measurement['nearest']['group'],group_measurement['nearest']['component'],gp,14-gp,group_measurement['nearest']['positions'])))
+    if corridors['violations']:
+        nearest = corridors['nearest']
+        W.append(('V19','构图预算 B6：%s 绕过 %s 的净距 %.1f < 12，差额 %.1f，位置 %s'
+                  % (nearest['anchor'],nearest['component'],nearest['distance'],nearest['deficit'],nearest['positions'])))
+    ev.append({'id':'B6.avoid_corridor','coverage_status':corridors['coverage_status'],
+               'coverage_detail':('Measured straight runs and visible semicircular bridges against transformed component footprints; only own outward terminal runs exempt.'
+                                  if corridors['coverage_status']!='not_checked' else
+                                  'Clearance measurement incomplete; see geometry/topology issues and unchecked objects.'),
+               'budget':BUDGET['B6']['budget_avoid_corridor'],**corridors})
+    b7 = text_geometry.get('budget_status', 'not_checked')
+    distances = [item['distance'] for item in text_geometry.get('clearance', [])]
+    add('B7', {'min_clearance': round(min(distances),3) if distances else None,
+               'no_obstacles_within_budget': not distances,
+               'violations': text_geometry.get('violations',0)},
+        'not_measured' if b7=='not_checked' else 'over' if b7 in ('warn','fail') else 'pass',
+        'Browser glyph ink bounds and actual SVG contours; intra-label line spacing is typography.')
     ev.append({'id': 'V19', 'crossings': len(set(b1_cross)),
+               'bridge_policy': bridge_policy['policy_id'],
+               'bridge_allowance': bridge_policy['allowance'],
+               'verified_bridges': b1_verified_disclosed,
                'turns_total': turn_total, 'turns_max_single': turn_max,
                'detour_max': round(max(r for r, _ in ratios), 3) if ratios else None,
-               'min_segment': round(min_seg, 1), 'box_gap_min': b5_gap})
+               'min_segment': round(min_seg, 1) if min_seg is not None else None, 'box_gap_min': b5_gap})
 
     ev.append({'id': 'composition_budget', 'source':
                'rendering-rules.md 数值构图预算（concept 档 v1）',
                'items': {it['id']: it['status'] for it in items},
-               'not_measured': ['B6.avoid_corridor', 'B7'],
-               'note': 'B7 标签净空 6px 未自动测量（需文本包围盒近似），'
-                       'V12 已覆盖压字重叠（0 净空）情形；B6 避让走廊同批裁剪。'})
+               'not_measured': (['B6.avoid_corridor'] if corridors['coverage_status']=='not_checked' else []) + (['B7'] if b7=='not_checked' else []),
+               'note': 'B4/B5/B6 使用实际走线与足迹，B7 使用实际浏览器字形及图元轮廓。'})
+
+    from assembly_checks import check_assemblies
+    assembly_findings, assembly_evidence = check_assemblies(intent, L, geometry, text_browser, topology, budget_runs)
+    F.extend((c['id'], c['detail']) for c in assembly_findings)
+    ev.extend(assembly_evidence)
 
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
+    for finding in suction_findings + orthogonal_findings + endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings + assembly_findings:
+        next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
+        'geometry': geometry,
+        'timings': timings,
+        'text_geometry': {**text_geometry, 'texts':[{k:v for k,v in t.items() if k not in ('row','quad_boxes')} for t in text_geometry['texts']]},
+        'topology': topology,
         'sheet': os.path.basename(SHEET),
         'validation': 'failed' if F else 'passed',
         'visual_review': 'pending',
@@ -1036,15 +850,13 @@ def main():
         'composition_budget': {
             'source': 'rendering-rules.md 数值构图预算（concept 档 v1）',
             'items': items,
-            'not_measured': ['B6.avoid_corridor（避让走廊 ≥12）', 'B7（标签净空 ≥6）'],
-            'note': 'B6 避让走廊与 B7 标签净空 v1 未实现自动测量'
-                    '（需文本包围盒近似与逐段间隙计算），V12 已覆盖压字重叠'
-                    '（0 净空）情形。除 B1 交叉硬 fail 外，超限走 V19 WARN。',
+            'not_measured': (['B6.avoid_corridor（部分几何未测）'] if corridors['coverage_status']=='not_checked' else []) + (['B7（标签净空 ≥6）'] if b7=='not_checked' else []),
+            'note': 'B4/B5/B6 使用实际走线与足迹，B7 使用实际字形及轮廓。净空不足记 V19 WARN，压字/裁切记 V12 FAIL。',
         },
     }
-    out = os.path.join(WORKDIR, 'validation-report.json')
-    io.open(out, 'w', encoding='utf-8').write(
-        json.dumps(rep, ensure_ascii=False, indent=2))
+    enrich_report(rep, HERE, catalog_path=CATALOG)
+    out = os.path.join(HERE, 'validation-report.json')
+    write_report(rep, out)
 
     print('validation: %s   (fail %d, warn %d)' % (rep['validation'], len(F), len(W)))
     for i, d in F:
@@ -1061,7 +873,7 @@ def main():
                  json.dumps(it['measured'], ensure_ascii=False),
                  json.dumps({k: v for k, v in BUDGET[it['id']].items()
                              if k.startswith('budget')}, ensure_ascii=False)))
-    print('  未测: B6.avoid_corridor, B7 标签净空（v1 裁剪，见报告注明）')
+    print('  未测: '+', '.join(rep['composition_budget']['not_measured']))
     return 1 if F else 0
 
 

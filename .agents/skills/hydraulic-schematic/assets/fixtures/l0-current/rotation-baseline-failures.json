@@ -1,0 +1,10 @@
+{
+  "source": "baseline-44 audited e911038 default seed; 13 genuine failures, not exemptions for new failures; unstructured V13 display coordinates normalized to root SVG units by #23",
+  "checks": [
+    {
+      "id": "V19",
+      "result": "fail",
+      "detail": "构图预算 B1：交叉 4 处 > 0，须改道消除"
+    }
+  ]
+}
