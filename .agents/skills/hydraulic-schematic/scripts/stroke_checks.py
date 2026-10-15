@@ -151,7 +151,9 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                       'kind':meta.get('data-port-kind','flow'), 'status':'missing'}
             if meta.get('data-port-kind') == 'body_tap':
                 contacts = []
-                uncertain = False
+                probe = next((p for p in browser.get('port_contacts',[])
+                              if p['port']==inst+'.'+pid and math.dist(p['position'],position)<=POSITION_TOLERANCE),None)
+                uncertain = probe is None
                 for row in rows:
                     if row.get('instance') != inst or row['tag'] not in ('line','path','polyline','polygon','rect','circle','ellipse'):
                         continue
@@ -162,17 +164,12 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                            for k in ('clip-path','mask','filter')):
                         uncertain=True
                         continue
-                    paint = _visible_stroke(row)
-                    if paint is None:
-                        uncertain = True
+                    if not row.get('visible'):
                         continue
-                    if not paint:
-                        continue
-                    outline = row.get('outline') or []
-                    for a,b in zip(outline,outline[1:]+outline[:1]):
-                        if math.dist(a,b)>1e-9 and _on_segment(position,a,b):
-                            contacts.append(row.get('id') or row['key'])
-                            break
+                    if probe is not None and row['key'] in probe['contacts']:
+                        contacts.append(row.get('id') or row['key'])
+                    elif _visible_stroke(row) is None or color_rgba(row['style'].get('fill','none')) is None:
+                        uncertain=True
                 if contacts:
                     record.update(status='measured',contacts=contacts)
                 elif uncertain:

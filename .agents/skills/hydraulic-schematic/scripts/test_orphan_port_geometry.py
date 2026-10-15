@@ -104,4 +104,31 @@ class OrphanPortCLI(unittest.TestCase):
         self.assertTrue(any(e.get('port')=='body_sense_tap' for e in evidence['unchecked']))
         self.assertEqual(next(c['status'] for c in report['coverage'] if c['id']=='V16'),'not_checked')
 
+    def body_shape(self,shape,position):
+        symbol=self.work/'symbols/bootstrap-type-reservoir.svg';tree=ET.parse(symbol);root=tree.getroot()
+        group=next(e for e in root.iter() if e.get('id')=='confirmed-shell')
+        for e in list(group):
+            if e.get('id')=='body-probe':group.remove(e)
+        ns='{http://www.w3.org/2000/svg}'
+        if shape=='rect':ET.SubElement(group,ns+'rect',{'id':'body-probe','x':'20','y':'100','width':'40','height':'40'})
+        else:ET.SubElement(group,ns+'polyline',{'id':'body-probe','points':'20,100 60,100 60,140'})
+        port=next(e for e in root.iter() if e.get('data-port-id')=='body_sense_tap')
+        port.set('cx',str(position[0]));port.set('cy',str(position[1]))
+        tree.write(symbol,encoding='utf-8',xml_declaration=True)
+        return self.run_sheet()
+
+    def test_direct_body_contact_uses_native_rectangle_and_polyline_ink(self):
+        for shape,position in [('rect',(20,120)),('polyline',(60,120))]:
+            with self.subTest(shape=shape):
+                report=self.body_shape(shape,position)
+                self.assertEqual(self.failures(report,'body_sense_tap'),[])
+                ev=next(e for e in report['evidence'] if e['id']=='V16')
+                record=next(r for r in ev['port_presence'] if r['port']=='body_sense_tap')
+                self.assertEqual(record['status'],'measured')
+                self.assertTrue(record['contacts'])
+
+    def test_virtual_polyline_chord_cannot_supply_body_contact(self):
+        report=self.body_shape('polyline',(40,120))
+        self.assertTrue(self.failures(report,'body_sense_tap'))
+
 if __name__=='__main__':unittest.main()
