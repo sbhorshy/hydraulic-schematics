@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>editor-proto · #60 拖拽写回闭环</title>
+<style>
+  :root { --bg:#f7f6f3; --ink:#1b1b18; --line:#8a8a82; --red:#c4442a; --amber:#8a5a00; --ok:#2b7649; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:13px/1.5 -apple-system,"Microsoft YaHei",system-ui,sans-serif; background:var(--bg); color:var(--ink); display:flex; height:100vh; }
+  #stage { flex:1; overflow:auto; padding:8px; position:relative; }
+  #stage svg { background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.15); max-width:100%; height:auto; }
+  #side { width:330px; border-left:1px solid var(--line); padding:10px 12px; overflow:auto; background:#fff; }
+  h1 { font-size:14px; margin:0 0 6px; }
+  .note { color:#5c5c55; font-size:11px; margin-bottom:8px; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; background:#999; }
+  .dot.ok { background:var(--ok); } .dot.bad { background:var(--red); }
+  .chips { margin:6px 0; }
+  .chip { display:inline-block; background:#f1f0ec; border-radius:3px; padding:1px 7px; margin:0 4px 4px 0; font-size:11px; }
+  .banner { background:#fdf3f1; color:var(--red); border:1px solid var(--red); border-radius:6px; padding:6px 8px; margin:8px 0; font-size:12px; white-space:pre-wrap; display:none; }
+  .issue { border-left:3px solid #ccc; padding:3px 6px; margin:4px 0; font-size:11px; cursor:pointer; word-break:break-all; }
+  .issue.red { border-color:var(--red); } .issue.yellow { border-color:var(--amber); } .issue.gray { border-color:#ccc; color:#5c5c55; }
+  pre#log { background:#f7f7f4; font-size:10px; padding:6px; white-space:pre-wrap; word-break:break-all; max-height:130px; overflow:auto; }
+  g[id^="inst-"] { cursor:grab; }
+  g.proto-drag { cursor:grabbing; }
+  g.proto-red { outline:none; }
+  .proto-bad { filter: drop-shadow(0 0 2px var(--red)); }
+  .proto-warn { filter: drop-shadow(0 0 2px var(--amber)); }
+  svg .proto-guide { stroke:#2f6fed; stroke-width:0.8; stroke-dasharray:6 4; pointer-events:none; }
+  svg .proto-sel { stroke:#2f6fed; stroke-width:1.2; fill:none; stroke-dasharray:5 3; pointer-events:none; }
+  #proto-hits rect { cursor: grab; }
+  #proto-hits rect:hover { fill: #2f6fed; fill-opacity: 0.06; }
+  body.proto-dragging, body.proto-dragging * { cursor: grabbing !important; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="side">
+  <h1>editor-proto · 最小原型</h1>
+  <div class="note">画布=标准链产物 · 编辑器无导出（#59） · 校验权威=validate_sheet（零重实现） · 撤销=git（#58）</div>
+  <div class="chips">
+    <label class="chip"><input type="checkbox" id="alignOn" checked> 对齐吸附</label>
+    <label class="chip">栅格
+      <select id="gridSize" style="border:none;background:transparent;font:inherit">
+        <option value="0">关</option><option value="2">2</option><option value="5">5</option>
+        <option value="10">10</option><option value="20">20</option>
+      </select>
+    </label>
+  </div>
+  <div id="selbox" style="display:none;margin:6px 0;padding:6px;background:#f1f0ec;border-radius:6px;font-size:12px">
+    选中 <b id="selId"></b> · rot <span id="selRot">0</span> · 镜像 <span id="selMirror">none</span> · 连线 <span id="selConns">?</span> 条
+    <button id="rotBtn" style="margin:0 4px">旋转 90°</button>
+    <button id="mirrorXBtn" style="margin:0 4px">左右镜像 (x)</button>
+    <button id="mirrorYBtn" style="margin:0 4px">上下镜像 (y)</button>
+    <button id="mirrorNoneBtn">还原 (none)</button>
+    <button id="deselBtn" style="margin-left:4px">取消</button>
+    <div id="selHint" class="note" style="display:none;color:#8a5a00"></div>
+    <div class="note">镜像=整符号翻转（端口 id/角色不变，仅位置与锚向随动）；未登记组件被服务器拒绝，画布不换帧。<br>
+    原地点击=选中 · R=旋转 · M=镜像（none→x→y→none 循环） · Esc=取消</div>
+  </div>
+  <div><span class="dot" id="dot"></span><span id="state">加载中…</span></div>
+  <div class="chips" id="latency"></div>
+  <div class="chip" id="ver">layout ?</div>
+  <div class="banner" id="banner"></div>
+  <div id="issues"></div>
+  <h1 style="margin-top:10px;font-size:12px">revision_log 尾部</h1>
+  <pre id="log"></pre>
+</div>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+let layoutIndex = null;   // {id:{x,y,w,h,rot?}} —— 对齐参考线/夹取/选中用（GET /api/layout）
+let drawableBounds = null; // [xmin,ymin,xmax,ymax] drawable 契约；null=无有效契约，拖拽禁用（不猜 canvas）
+let origTransform = null; // 拖拽中的 inst 原始 transform
+let drag = null;
+let selectedId = null;    // 原地点击选中的节点（旋转作用对象）
+let busy = false;         // 一次变更请求在途：忽略重复点击/按键/新拖拽
+
+const READ_TIMEOUT_MS = 5000;   // 轻量读取（GET /api/layout）：JSON 直读，重启窗口内失败要快速可见
+// GET /api/sheet 是重读取：SVG + 校验报告 + layout + verify_report 证据
+// 指纹核对（产物哈希比对），冷启动/挂载盘可超 5s（实录见
+// ../browser-race-before-retry/result.json：5s abort 产生未捕获 Promise，
+// 页面停在"加载中"）。单独放宽等待上限，不与轻量 /api/layout 共用 5s；
+// 超时/失败明确提示并保持禁用，不无声假加载，也不猜已保存/未保存。
+const SHEET_TIMEOUT_MS = 60000;
+// 变更请求（POST /api/delta）走完整 render+rasterize+validate 子进程链：
+// 服务端 _run 各阶段 timeout=300s（至多 3×300s），另有进程启动/IO 开销。
+// 客户端时限必须晚于服务端自身超时——"链路超时"由服务端以 JSON 如实
+// 回答，客户端不抢先 abort 进"未知是否已写盘"态（本机实链约 13s 起，
+// 挂载盘更慢；5s 放弃会在已写盘后留下旧帧）。
+const DELTA_TIMEOUT_MS = 300000 * 3 + 20000;
+
+function svgDoc(text){ // 剥 xml 声明后注入
+  return text.replace(/<\?xml[^?]*\?>\s*/, '');
+}
+
+async function api(path, opts, timeoutMs = READ_TIMEOUT_MS) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const r = await fetch(path, Object.assign({ signal: ctrl.signal }, opts));
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+
+function setBusy(on) { // 闭环期间禁用旋转/镜像按钮，拖拽与快捷键由 busy 标志忽略
+  ['rotBtn', 'mirrorXBtn', 'mirrorYBtn', 'mirrorNoneBtn']
+    .forEach(id => { $(id).disabled = on; });
+}
+
+function releaseBusy() { // 权威节点状态已到手：放行镜像/旋转/拖动
+  busy = false;
+  setBusy(false);
+}
+
+function holdForUnknownState(message) {
+  // 权威节点状态不可得（刷新失败/读取失败）：按钮保持禁用、busy 保持
+  // 置位拦截一切新操作（键盘路径由 layoutIndex=null 守卫静默忽略，
+  // 不覆盖提示）；明示"请刷新"，不声称回滚、不用未知状态生成新操作。
+  setBusy(true);
+  $('state').textContent = message;
+}
+
+function holdAfterRefreshFailure() {
+  // POST 已确认写盘（ok 或 stage=render），但权威布局读取失败：
+  // 操作保持停用直至获得有效状态；明示"已保存 + 请刷新"，不声称回滚。
+  const msg = '已保存，但状态刷新失败——为避免用未知状态继续操作，'
+            + '镜像/旋转/拖动已停用；请刷新页面查看当前盘面（不声称回滚）';
+  holdForUnknownState(msg);
+  const banner = $('banner');
+  banner.style.display = 'block';
+  banner.textContent = msg;
+}
+
+function stateText(d) { // 状态行分级：未写盘 / 已落盘未过 / 未知——不再一律"手调已落盘"
+  if (d.ok) {
+    return d.passed ? '完整校验及回读通过'
+                    : '已落盘：校核未全过（红=扣留无成品，git 可回退）';
+  }
+  if (d.stage === 'permission') return '镜像许可拒绝——本次未写盘';
+  if (d.stage === 'delta') return '请求被拒（值域/零位移）——本次未写盘';
+  if (d.stage === 'request') return '请求非法——本次未写盘';
+  if (d.stage === 'render') return '已落盘，渲染/链路失败（无成品，git 可回退）';
+  if (d.stage === 'server') return '服务端异常——落盘状态未知';
+  return d.error ? '结果未知：' + d.error : '结果未知';
+}
+
+async function refreshAfterUnknown() {
+  // 落盘状态未知：不声称回滚或未写盘，重读当前盘面（含权威布局刷新）。
+  // 返回是否拿到有效状态——读不到时由调用方停用操作并明示请刷新。
+  try {
+    const d = await api('/api/sheet', undefined, SHEET_TIMEOUT_MS);
+    if (d.ok) {
+      stage.innerHTML = svgDoc(d.svg);
+      decorate();
+      ghostOverlay(d.issues);
+      setSide(d);
+      return await refreshLayout();
+    }
+  } catch (e) { /* 读取同样失败：按调用方未知态处理 */ }
+  return false;
+}
+
+function setSide(d) {
+  const passed = !!d.passed;
+  $('dot').className = 'dot ' + (passed ? 'ok' : 'bad');
+  $('state').textContent = stateText(d);
+  const lat = d.latency;
+  $('latency').innerHTML = lat
+    ? ['render_ms', 'validate_ms', 'total_ms'].map((k, i) =>
+        lat[k] != null ? `<span class="chip">${['渲染', '校核', '合计'][i]} ${lat[k]} ms</span>` : '').join('')
+    : '';
+  const m = d.layout_meta || {};
+  if (m.version) $('ver').textContent = 'layout ' + m.version;
+  if (m.revision_log_tail) $('log').textContent = m.revision_log_tail.join('\n');
+  const err = d.error || d.render_stderr;
+  $('banner').style.display = err ? 'block' : 'none';
+  if (err) $('banner').textContent = (d.stage === 'render'
+      ? '已落盘，链路错误：\n' : '错误：\n') + err;
+  if (d.issues) {  // 拒绝响应没有新 issues 时不清空上一帧列表
+    const box = $('issues'); box.innerHTML = '';
+    d.issues.forEach(it => {
+      const div = document.createElement('div');
+      div.className = 'issue ' + it.sev;
+      div.textContent = `${it.id} [${it.result}] ${it.detail}`;
+      div.onclick = () => highlight(it.detail);
+      box.appendChild(div);
+    });
+  }
+}
+
+function showRejection(res) {
+  // 服务器写盘前拒绝（permission/delta/request）或请求被忽略（busy）：
+  // 如实显示 res.error，画布/红绿点/layout 版本与日志保持上一成功态，
+  // 不冒充任何落盘结果。server 异常归"状态未知"，不声称未写盘。
+  const unwritten = res.stage === 'permission' || res.stage === 'delta'
+                    || res.stage === 'request';
+  const heads = {
+    permission: '镜像被服务器拒绝（未写盘）：\n',
+    delta: '操作被服务器拒绝（未写盘）：\n',
+    request: '请求非法（未写盘）：\n',
+    busy: '上一请求仍在闭环中，已忽略本次操作',
+    server: '服务端异常（落盘状态未知）：\n',
+  };
+  const labels = {
+    permission: '镜像许可拒绝——本次未写盘',
+    delta: '请求被拒（值域/零位移）——本次未写盘',
+    request: '请求非法——本次未写盘',
+    busy: '上一请求仍在闭环中，已忽略本次操作',
+    server: '服务端异常——落盘状态未知',
+  };
+  const head = heads[res.stage] || '请求未完成：\n';
+  const detail = unwritten || res.stage === 'server'
+    ? (res.error || res.render_stderr || '') : '';
+  const banner = $('banner');
+  banner.style.display = 'block';
+  banner.textContent = detail ? head + detail : head;
+  if (labels[res.stage]) $('state').textContent = labels[res.stage];
+}
+
+function ghostOverlay(issues) { // 违规残影：只显示不判定（#59 2a）
+  document.querySelectorAll('.proto-bad,.proto-warn').forEach(g =>
+    g.classList.remove('proto-bad', 'proto-warn'));
+  const re = /\b([A-Z]{2,}[A-Z0-9]*-\d+)\b/g;
+  (issues || []).forEach(it => {
+    if (it.sev === 'gray') return;
+    let m; const seen = new Set();
+    while ((m = re.exec(it.detail))) {
+      const g = document.getElementById('inst-' + m[1]);
+      if (g && !seen.has(m[1])) { g.classList.add(it.sev === 'red' ? 'proto-bad' : 'proto-warn'); seen.add(m[1]); }
+    }
+  });
+}
+
+function highlight(detail) { // 侧栏条目点击 → 定位实例
+  const m = /\b([A-Z]{2,}[A-Z0-9]*-\d+)\b/.exec(detail || '');
+  if (!m) return;
+  const g = document.getElementById('inst-' + m[1]);
+  if (g) { g.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function buildHitLayer() { // 透明命中垫：描边镂空/小尺寸/被管线压住的图标也能点中（垫在顶层）
+  const svg = stage.querySelector('svg');
+  if (!svg) return;
+  const old = svg.querySelector('#proto-hits');
+  if (old) old.remove();
+  const layer = document.createElementNS(SVG_NS, 'g');
+  layer.id = 'proto-hits';
+  svg.appendChild(layer); // 最后追加=最顶层，命中优先于底下管线
+  const ctm = svg.getScreenCTM();
+  if (!ctm) return;
+  const inv = ctm.inverse();
+  const PAD = 3; // user units 外扩，照顾缩得很小的符号
+  document.querySelectorAll('g[id^="inst-"]').forEach(g => {
+    const rb = g.getBoundingClientRect();
+    if (rb.width < 2 && rb.height < 2) return;
+    const p1 = new DOMPoint(rb.left, rb.top).matrixTransform(inv);
+    const p2 = new DOMPoint(rb.right, rb.bottom).matrixTransform(inv);
+    const r = document.createElementNS(SVG_NS, 'rect');
+    r.setAttribute('x', Math.min(p1.x, p2.x) - PAD);
+    r.setAttribute('y', Math.min(p1.y, p2.y) - PAD);
+    r.setAttribute('width', Math.abs(p2.x - p1.x) + PAD * 2);
+    r.setAttribute('height', Math.abs(p2.y - p1.y) + PAD * 2);
+    r.setAttribute('fill', '#fff');
+    r.setAttribute('fill-opacity', '0');
+    r.setAttribute('pointer-events', 'all');
+    r.addEventListener('pointerdown', ev => startDrag(ev, g));
+    layer.appendChild(r);
+  });
+}
+
+function decorate() { // 新帧 DOM 装饰（实例监听器 + 命中垫）；布局刷新在 refreshLayout
+  document.querySelectorAll('g[id^="inst-"]').forEach(g => {
+    g.addEventListener('pointerdown', ev => startDrag(ev, g));
+  });
+  buildHitLayer();
+}
+
+function parseDrawableBounds(raw) {
+  // drawable 契约合法形：[xmin,ymin,xmax,ymax] 四个有限数且 xmin<xmax、ymin<ymax。
+  // GET /api/layout 只核验 drawable 矩形/margin 声明本身，不核验节点占位；占位
+  // 放不下由服务端 apply_delta 写盘前另行拒绝。这里只核对传输面最小形态，
+  // 任一不满足返回 null——拖拽统一禁用，不猜 canvas。
+  if (!Array.isArray(raw) || raw.length !== 4) return null;
+  const b = [];
+  for (const v of raw) {
+    if (typeof v !== 'number' || !isFinite(v)) return null;
+    b.push(v);
+  }
+  return b[0] < b[2] && b[1] < b[3] ? b : null;
+}
+
+async function refreshLayout() {
+  // 权威布局刷新（可 await）：发起即置 layoutIndex=null——在途/失败期间
+  // 节点状态未知，镜像/旋转/拖动不得基于猜测（none/rot0）发起。读到
+  // 有效 nodes 才恢复 layoutIndex 并刷新选中框/rot/连线提示。
+  // drawable_bounds 同步置空：无有限合法契约期间拖拽禁用（镜像/旋转
+  // 不受影响，服务端夹取仍是权威兜底）。
+  layoutIndex = null;
+  drawableBounds = null;
+  try {
+    const l = await api('/api/layout');
+    if (!l || !l.nodes) return false;
+    layoutIndex = l.nodes;
+    drawableBounds = parseDrawableBounds(l.drawable_bounds);
+    window.__canvas = l.canvas || {};
+    window.__conns = l.conns || {};
+    if (selectedId && layoutIndex[selectedId]) { drawSel(); select(selectedId); }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function guidesLayer(svg) {
+  let layer = svg.querySelector('#proto-guides');
+  if (!layer) {
+    layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    layer.id = 'proto-guides';
+    svg.appendChild(layer);
+  }
+  return layer;
+}
+
+function clearGuides(svg) {
+  const layer = svg.querySelector('#proto-guides');
+  if (layer) layer.innerHTML = '';
+}
+
+function drawGuide(svg, x1, y1, x2, y2) {
+  const ln = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  ln.setAttribute('x1', x1); ln.setAttribute('y1', y1);
+  ln.setAttribute('x2', x2); ln.setAttribute('y2', y2);
+  ln.setAttribute('class', 'proto-guide');
+  guidesLayer(svg).appendChild(ln);
+}
+
+function startDrag(ev, g) {
+  if (ev.button !== 0) return;
+  if (busy) return; // 闭环在途：不接受新拖拽（位移无处提交，只会留失配定格）
+  if (!drawableBounds) return; // 无有效 drawable 契约（刷新在途/失败/非法）：拖拽禁用，不猜 canvas
+  const id = g.id.replace(/^inst-/, '');
+  const nd = layoutIndex ? layoutIndex[id] : null;
+  if (!nd) return; // 权威节点状态未知（刷新在途/失败）：不接受拖拽
+  ev.preventDefault();
+  const svg = g.ownerSVGElement;
+  const ctm = svg.getScreenCTM().inverse();
+  const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm);
+  origTransform = g.getAttribute('transform');
+  drag = { g, svg, id, x0: pt.x, y0: pt.y, dx: 0, dy: 0, nd };
+  g.classList.add('proto-drag');
+  document.body.classList.add('proto-dragging');
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp, { once: true });
+  window.addEventListener('pointercancel', onUp, { once: true });
+}
+
+function onMove(ev) {
+  if (!drag) return;
+  const ctm = drag.svg.getScreenCTM().inverse();
+  const pt = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(ctm);
+  drag.rawdx = pt.x - drag.x0; drag.rawdy = pt.y - drag.y0;
+  drag.dx = drag.rawdx; drag.dy = drag.rawdy;
+  clampDelta(drag); // 夹取始终生效；对齐只在松手时一次定格
+  drag.g.setAttribute('transform', `translate(${drag.dx},${drag.dy}) ` + origTransform);
+  drawHints(drag);
+}
+
+const TH = 10; // 对齐吸附半径（user units）
+
+function axisBest(cands, edges) { // 每轴取最近候选（≤TH），返回 {c, off} 或 null
+  let best = null;
+  cands.forEach(c => edges.forEach(e => {
+    const dd = Math.abs(e - c);
+    if (dd <= TH && (!best || dd < best.dd)) best = { c, off: c - e, dd };
+  }));
+  return best;
+}
+
+function guideCands(d) {
+  const cands = { v: [], h: [] };
+  Object.entries(layoutIndex || {}).forEach(([oid, o]) => {
+    if (oid === d.id || o.x == null) return;
+    const [ow, oh] = drawableSize(o); // 目标占位：rot 90/270 交换，与夹取/选中框同式
+    cands.v.push(o.x, o.x + ow / 2, o.x + ow);
+    cands.h.push(o.y, o.y + oh / 2, o.y + oh);
+  });
+  return cands;
+}
+
+function drawableSize(nd) { // 旋转后占位宽高：rot 90/270 互换（与服务端 apply_delta 同式）
+  return (nd.rot || 0) % 180 ? [nd.h || 0, nd.w || 0] : [nd.w || 0, nd.h || 0];
+}
+
+function drawableDeltaClamp(nd, dx, dy) { // 位移域夹取：落点恒在 [xmin,xmax-ew]×[ymin,ymax-eh]（右缘 margin 已在契约内不二次扣）
+  if (!drawableBounds) return [dx, dy]; // 契约未知（startDrag 已禁拖，理论不可达）：不夹取也不猜
+  const [xmin, ymin, xmax, ymax] = drawableBounds;
+  const [ew, eh] = drawableSize(nd);
+  return [Math.min(Math.max(dx, xmin - nd.x), xmax - ew - nd.x),
+          Math.min(Math.max(dy, ymin - nd.y), ymax - eh - nd.y)];
+}
+
+function clampDelta(d) { // drawable 夹取（始终生效，与吸附无关；拖动中与松手同一公式）
+  const c = drawableDeltaClamp(d.nd, d.dx, d.dy);
+  d.dx = c[0]; d.dy = c[1];
+}
+
+function drawHints(d) { // 拖拽中参考线只作提示、不改位移（实时改位移=抖动根源）
+  clearGuides(d.svg);
+  if (!document.getElementById('alignOn').checked) return;
+  const cands = guideCands(d);
+  const [ew, eh] = drawableSize(d.nd); // 被拖占位与目标候选同式（rot 90/270 交换）
+  const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
+  const bv = axisBest(cands.v, [d.nd.x + d.dx, d.nd.x + d.dx + ew / 2, d.nd.x + d.dx + ew]);
+  const bh = axisBest(cands.h, [d.nd.y + d.dy, d.nd.y + d.dy + eh / 2, d.nd.y + d.dy + eh]);
+  if (bv) drawGuide(d.svg, bv.c, 0, bv.c, H);
+  if (bh) drawGuide(d.svg, 0, bh.c, Wd, bh.c);
+}
+
+async function onUp(ev) {
+  const d = drag; drag = null;
+  if (!d) return;
+  window.removeEventListener('pointermove', onMove);
+  d.g.classList.remove('proto-drag');
+  document.body.classList.remove('proto-dragging');
+  const dist = Math.abs(d.rawdx || 0) + Math.abs(d.rawdy || 0);
+  if (dist < 3) { // 原地点击=选中，位移归零
+    d.g.setAttribute('transform', origTransform);
+    clearGuides(d.svg);
+    select(d.id);
+    return;
+  }
+  // 落点一次性吸附：先对齐（每轴最近候选）后栅格——拖拽全程跟手零跳动
+  let nx = d.nd.x + d.dx, ny = d.nd.y + d.dy;
+  if (document.getElementById('alignOn').checked) {
+    const cands = guideCands(d);
+    const [ew, eh] = drawableSize(d.nd); // 吸附边/中心按旋转后占位（与提示线同式）
+    const bv = axisBest(cands.v, [nx, nx + ew / 2, nx + ew]);
+    const bh = axisBest(cands.h, [ny, ny + eh / 2, ny + eh]);
+    if (bv) nx += bv.off;
+    if (bh) ny += bh.off;
+    const H = (window.__canvas || {}).height || 1000, Wd = (window.__canvas || {}).width || 1400;
+    if (bv) drawGuide(d.svg, bv.c, 0, bv.c, H); // 参考线定格吸附结果，等换帧
+    if (bh) drawGuide(d.svg, 0, bh.c, Wd, bh.c);
+  }
+  const grid = parseInt($('gridSize').value, 10) || 0;
+  if (grid > 1) { nx = Math.round(nx / grid) * grid; ny = Math.round(ny / grid) * grid; }
+  // 提交值=吸附结果取整 0.1 后再夹取一次：边界非栅格对齐、或对齐/取整把
+  // 右/下缘推出 drawable 时，边界优先于栅格，绝不提交越界位移——服务端
+  // apply_delta 同式夹取，所见即所提交。
+  const dv = drawableDeltaClamp(d.nd,
+    Math.round((nx - d.nd.x) * 10) / 10, Math.round((ny - d.nd.y) * 10) / 10);
+  let res;
+  try {
+    res = await postDelta({ node: d.id, dx: dv[0], dy: dv[1] });
+  } catch (e) { // 网络层异常（连接拒绝等）：回弹+提示；超时路径在 postDelta 内按未知态刷新
+    d.g.setAttribute('transform', origTransform);
+    clearGuides(d.svg);
+    $('banner').style.display = 'block';
+    $('banner').textContent = '服务未响应——拖拽已回弹（落盘状态未知），稍候刷新页面重试';
+    return;
+  }
+  // 拖拽位保持不回弹，等链产物换帧；写盘前拒绝（或请求被忽略）才回弹。
+  // 超时/已落盘的失败由 postDelta 按当前盘面刷新或如实报告，此处不回弹
+  // 冒充"已回退"。
+  if (!res.ok && res.stage !== 'render' && res.stage !== 'timeout'
+      && d.g.isConnected) d.g.setAttribute('transform', origTransform);
+}
+
+async function postDelta(body) {
+  if (busy) { // 忽略重复提交（双击/连点/自动重复）：不打断在途闭环
+    const skipped = { ok: false, stage: 'busy' };
+    showRejection(skipped);
+    return skipped;
+  }
+  busy = true;
+  setBusy(true);
+  $('state').textContent = '闭环中：写回 → 渲染 → 校核 → 状态刷新…（整链可能需十余秒，请勿重复操作）';
+  let res;
+  try {
+    res = await api('/api/delta', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }, DELTA_TIMEOUT_MS);
+  } catch (e) {
+    // 超时/断连：不声称回滚或未写盘——按当前盘面刷新（读取失败则明示
+    // 未知并停用操作）。权威状态未知期间不得发起新的镜像/旋转/拖动。
+    layoutIndex = null;
+    const recovered = await refreshAfterUnknown();
+    const banner = $('banner');
+    banner.style.display = 'block';
+    banner.textContent = '请求超时或中断：是否已写盘未知（不声称回滚）——'
+                       + (recovered
+                          ? '画面已按当前盘面刷新。'
+                          : '画面刷新失败，状态未知——请刷新页面后重试。');
+    if (recovered) releaseBusy();
+    else holdForUnknownState('状态未知：上次变更请求无应答且读取失败——请刷新页面');
+    return { ok: false, stage: 'timeout' };
+  }
+  if (res.ok && res.svg) {
+    stage.innerHTML = svgDoc(res.svg);
+    decorate();
+    ghostOverlay(res.issues);
+    setSide(res);
+    // 权威 layout 刷新纳入同一闭环：busy/禁用覆盖 POST+刷新全过程，
+    // 刷新在途 layoutIndex=null（未知），完成后才放行镜像/旋转/拖动。
+    if (await refreshLayout()) releaseBusy();
+    else holdAfterRefreshFailure();
+  } else if (res.stage === 'render') {
+    // 写盘后渲染/链路失败：如实报告"已落盘、无成品"，无新帧；layout 已
+    // 写，旧 layoutIndex 过期，仍须重取权威节点状态再放行操作。
+    setSide(Object.assign({ passed: false }, res));
+    layoutIndex = null;
+    if (await refreshLayout()) releaseBusy();
+    else holdAfterRefreshFailure();
+  } else if (res.stage === 'server') {
+    // 服务端异常：落盘状态未知——画布/权威状态按当前盘面重读，
+    // 读不到则停用操作并明示请刷新。
+    showRejection(res);
+    layoutIndex = null;
+    if (await refreshAfterUnknown()) releaseBusy();
+    else holdForUnknownState('状态未知：服务端异常且读取失败——请刷新页面');
+  } else {
+    // permission/delta/request：写盘前拒绝，盘面与权威节点状态未变，
+    // 画布保持上一帧，可继续操作。
+    showRejection(res);
+    releaseBusy();
+  }
+  return res;
+}
+
+function authoritativeNode(id) {
+  // 权威节点状态：layoutIndex 未加载/刷新在途/刷新失败（null）或节点
+  // 不在其中时返回 null——绝不把缺失状态推测成 none/rot0。
+  return (layoutIndex && id && layoutIndex[id]) || null;
+}
+
+function select(id) { // 原地点击选中：虚线框 + 侧栏旋转/镜像控制（含连线/干涉提示）
+  selectedId = id;
+  $('selbox').style.display = 'block';
+  $('selId').textContent = id;
+  const nd = authoritativeNode(id);
+  $('selMirror').textContent = nd ? (nd.mirror || 'none') : '未知';
+  $('selRot').textContent = nd ? (nd.rot || 0) : '?';
+  const n = (window.__conns || {})[id] || 0;
+  $('selConns').textContent = n;
+  const hint = $('selHint');
+  if (n > 0) {
+    hint.style.display = 'block';
+    hint.textContent = '有连线：旋转/镜像后保持原端口语义，管线按新装位避让自身本体；其余干涉按本轮校核如实披露。';
+  } else {
+    hint.style.display = 'none';
+  }
+  drawSel();
+}
+
+function drawSel() {
+  const svg = stage.querySelector('svg');
+  if (!svg) return;
+  clearGuides(svg);
+  const nd = (layoutIndex || {})[selectedId] || {};
+  if (nd.x == null) return;
+  $('selRot').textContent = nd.rot || 0;
+  const [ew, eh] = drawableSize(nd); // 声明占位=旋转后框：rot 90/270 宽高互换、0/180 不变、mirror 不再翻转
+  const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  r.setAttribute('x', nd.x); r.setAttribute('y', nd.y);
+  r.setAttribute('width', ew); r.setAttribute('height', eh);
+  r.setAttribute('class', 'proto-sel');
+  guidesLayer(svg).appendChild(r);
+}
+
+function deselect() {
+  selectedId = null;
+  $('selbox').style.display = 'none';
+  const svg = stage.querySelector('svg');
+  if (svg) clearGuides(svg);
+}
+
+async function rotateSel() {
+  if (!selectedId) return;
+  const nd = authoritativeNode(selectedId);
+  if (!nd) return; // 状态未知：不发基于推测 rot0 的旋转
+  await postDelta({ node: selectedId, dx: 0, dy: 0,
+                    rot: ((nd.rot || 0) + 90) % 360 });
+}
+
+// 镜像：绝对请求 x/y/none（还原）。授权在服务端（mirror_policy 三道闸），
+// 本端不做本地"翻转假象"，拒绝时画布保持上一帧。
+async function mirrorSel(axis) {
+  if (!selectedId) return;
+  if (!authoritativeNode(selectedId)) return; // 状态未知：不发镜像
+  await postDelta({ node: selectedId, dx: 0, dy: 0, mirror: axis });
+}
+
+// M 键循环 none→x→y→none。焦点在输入框/下拉/contenteditable 内、按着任意
+// 修饰键（含 Shift）或键盘自动重复时不触发——守卫统一放在全局 keydown。
+// 上一轴只读权威 layoutIndex；状态未知（null/节点缺失）时静默不发，
+// 绝不把缺失推测成 none。
+function cycleMirror() {
+  if (!selectedId) return;
+  const nd = authoritativeNode(selectedId);
+  if (!nd) return;
+  const cur = nd.mirror;
+  const next = cur === 'x' ? 'y' : cur === 'y' ? 'none' : 'x';
+  mirrorSel(next);
+}
+
+$('rotBtn').onclick = rotateSel;
+$('mirrorXBtn').onclick = () => mirrorSel('x');
+$('mirrorYBtn').onclick = () => mirrorSel('y');
+$('mirrorNoneBtn').onclick = () => mirrorSel('none');
+$('deselBtn').onclick = deselect;
+window.addEventListener('keydown', ev => {
+  if (ev.repeat) return; // 自动重复不连发操作（busy 在 postDelta 再兜底）
+  if (ev.key === 'Escape') { deselect(); return; }
+  if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+  const el = document.activeElement;
+  if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'
+             || el.tagName === 'SELECT' || el.isContentEditable)) return;
+  if (/^(r|R)$/.test(ev.key)) rotateSel();
+  if (/^(m|M)$/.test(ev.key)) cycleMirror();
+});
+
+(async function init() {
+  let d;
+  try {
+    d = await api('/api/sheet', undefined, SHEET_TIMEOUT_MS);
+  } catch (e) {
+    // 初始读取超时/中断：明确提示并保持禁用，不无声假加载；初始加载
+    // 没有变更请求，不猜"已保存/未保存"。
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：初始图纸读取'
+        + (e && e.name === 'AbortError'
+           ? '超过等待上限 ' + SHEET_TIMEOUT_MS + 'ms'
+           : '中断（' + ((e && e.message) || e) + '）')
+        + '——请刷新页面重试';
+    setBusy(true);
+    return;
+  }
+  if (!d.ok) {
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：' + (d.error || '');
+    setBusy(true);
+    return;
+  }
+  stage.innerHTML = svgDoc(d.svg);
+  decorate();
+  ghostOverlay(d.issues);
+  setSide(d);
+  if (!await refreshLayout()) {
+    // 图纸已显示但权威节点状态不可得：镜像/旋转/拖动保持停用。
+    $('dot').className = 'dot bad';
+    $('state').textContent = '加载失败：权威布局状态读取失败'
+        + '——镜像/旋转/拖动保持停用，请刷新页面重试';
+    setBusy(true);
+  }
+})();
+</script>
+</body>
+</html>

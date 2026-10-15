@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "repo": "/mnt/d/your-project",
+  "base": "HEAD",
+  "expected_model": "GLM-5.3-Flash",
+  "max_writers": 1,
+  "max_repairs": 2,
+  "max_pending_reviews": 2,
+  "deadline_seconds": 14400,
+  "task_timeout": 3600,
+  "idle_timeout": 600,
+  "progress_warning": 120,
+  "progress_timeout": null,
+  "executor_token_limit": null,
+  "tasks": [
+    {
+      "id": "cli-fix",
+      "claim_key": "issue-123-cli-fix",
+      "depends_on": [],
+      "external_blocks": [],
+      "resources": [
+        "cli-behavior"
+      ],
+      "contract": {
+        "version": 1,
+        "tool_policy": "development",
+        "allow_subagents": true,
+        "prompt": "替换为已确认的行为变化、复现条件和验收要求。",
+        "allowed_files": [
+          "src/cli.py",
+          "tests/test_cli.py"
+        ],
+        "forbidden_files": [
+          "tests/baselines/**"
+        ],
+        "acceptance": "保留既有兼容行为；不要通过修改旧 baseline 消除失败。",
+        "tests": [
+          {
+            "id": "cli-tests",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-p",
+              "test_cli.py",
+              "-v"
+            ],
+            "timeout": 120
+          }
+        ],
+        "reasoning_effort": "high",
+        "first_delivery": {
+          "files": [
+            "src/cli.py"
+          ],
+          "test_ids": [
+            "cli-tests"
+          ],
+          "warning_seconds": 180,
+          "timeout_seconds": 300
+        }
+      }
+    },
+    {
+      "id": "docs-cleanup",
+      "claim_key": "docs-format-only",
+      "depends_on": [],
+      "resources": [],
+      "contract": {
+        "version": 1,
+        "prompt": "仅修正文档中已确认的排版问题，不改变功能说明和接口语义。",
+        "allowed_files": [
+          "docs/cli.md"
+        ],
+        "tests": []
+      }
+    }
+  ],
+  "integration_tests": [
+    {
+      "id": "repository-tests",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-v"
+      ],
+      "timeout": 600
+    }
+  ]
+}

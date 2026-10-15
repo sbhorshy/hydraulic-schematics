@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "repo": "/mnt/d/your-project",
+  "base": "HEAD",
+  "expected_model": "GLM-5.3-Flash",
+  "max_writers": 1,
+  "max_repairs": 2,
+  "task_timeout": 600,
+  "deadline_seconds": 3600,
+  "tasks": [
+    {
+      "id": "core-slice",
+      "depends_on": [],
+      "resources": [
+        "example-api"
+      ],
+      "contract": {
+        "version": 1,
+        "prompt": "填写一个最小可运行行为的具体输入输出。仅实现核心路径和一组明确的正反例，完成后返回；后续边界由下一任务处理。",
+        "allowed_files": [
+          "src/example.py",
+          "tests/test_example_core.py"
+        ],
+        "reasoning_effort": "high",
+        "tool_policy": "development",
+        "allow_subagents": false,
+        "tests": [
+          {
+            "id": "core",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-p",
+              "test_example_core.py",
+              "-v"
+            ],
+            "timeout": 60
+          }
+        ],
+        "first_delivery": {
+          "files": [
+            "src/example.py"
+          ],
+          "test_ids": [
+            "core"
+          ],
+          "warning_seconds": 180,
+          "timeout_seconds": 300
+        }
+      }
+    },
+    {
+      "id": "edge-cases",
+      "depends_on": [
+        "core-slice"
+      ],
+      "resources": [
+        "example-api"
+      ],
+      "contract": {
+        "version": 1,
+        "prompt": "基于已审核的核心阶段，填写本轮新增的明确边界行为及断言。保持前一阶段行为，完成本阶段后返回。",
+        "allowed_files": [
+          "src/example.py",
+          "tests/test_example_edges.py"
+        ],
+        "reasoning_effort": "high",
+        "tool_policy": "development",
+        "allow_subagents": false,
+        "tests": [
+          {
+            "id": "edges",
+            "argv": [
+              "python3",
+              "-m",
+              "unittest",
+              "discover",
+              "-s",
+              "tests",
+              "-p",
+              "test_example_edges.py",
+              "-v"
+            ],
+            "timeout": 60
+          }
+        ],
+        "first_delivery": {
+          "files": [
+            "src/example.py"
+          ],
+          "test_ids": [
+            "edges"
+          ],
+          "warning_seconds": 180,
+          "timeout_seconds": 300
+        }
+      }
+    }
+  ],
+  "integration_tests": []
+}

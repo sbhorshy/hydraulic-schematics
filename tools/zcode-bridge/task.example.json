@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "prompt": "修复指定模块的问题。保持已有行为和历史 baseline，完成后简述修改。",
+  "allowed_files": [
+    "src/example.py",
+    "tests/test_example.py"
+  ],
+  "forbidden_files": [
+    "tests/baselines/**"
+  ],
+  "acceptance": "原有行为兼容；控制端测试通过；修改范围符合清单。",
+  "requires_shell": false,
+  "tool_policy": "development",
+  "allow_subagents": true,
+  "tests": [
+    {
+      "id": "example-unit",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "tests.test_example",
+        "-v"
+      ],
+      "cwd": ".",
+      "timeout": 120
+    }
+  ],
+  "reasoning_effort": "high",
+  "first_delivery": {
+    "files": [
+      "src/example.py"
+    ],
+    "test_ids": [
+      "example-unit"
+    ],
+    "warning_seconds": 180,
+    "timeout_seconds": 300
+  }
+}

@@ -1,0 +1,5 @@
+.runs/
+.teams/
+.backups/
+__pycache__/
+tests/__pycache__/
