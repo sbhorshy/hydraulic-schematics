@@ -19,7 +19,7 @@ import re
 import sys
 import time
 from sheet_geometry import load_geometry
-from topology_reconciliation import reconcile_topology
+from topology_reconciliation import reconcile_topology, infer_suction_network
 from junction_semantics import check_junctions, TOLERANCE as JUNCTION_TOLERANCE
 from bridge_allowance import check_bridge_policy
 from layout_clearance import measure_runs, nearest_components, measure_corridors, measure_groups, canvas_bounds, frame_checks
@@ -314,6 +314,40 @@ def main(argv=None):
     F.extend(width_failures)
     ev.extend(width_evidence)
 
+    suction_network = infer_suction_network(intent, cat)
+    suction_findings = []
+    def suction_fail(kind, detail, **where):
+        suction_findings.append(dict(id='V17',result='fail',kind=kind,detail=detail,**where))
+    for error in suction_network['errors']:
+        suction_fail('suction_semantics',error['detail'],endpoint=error['endpoint'])
+    wire_sources = {e.get('id'):e.get('data-edge') or e.get('data-input-anchor')
+                    for e in root.iter() if e.get('id')}
+    required_pipes = {p['svg_id']:p for p in geometry['pipes']
+                      if wire_sources.get(p['svg_id']) in suction_network['anchors']}
+    for svg_id,pipe in required_pipes.items():
+        if pipe['class']!='ln-suction':
+            suction_fail('suction_line_class','Declared suction chain is painted as '+pipe['class'],
+                         svg_id=svg_id,anchor=wire_sources[svg_id],position=pipe['points'][0])
+    measured_pipes=set()
+    for item in next(e for e in width_evidence if e['id']=='V15')['measurements']:
+        svg_id=item.get('element')
+        if svg_id in required_pipes and 'class' in item:
+            measured_pipes.add(svg_id)
+            if abs(item['effective_width']-baseT)>.02:
+                suction_fail('suction_line_width','Suction chain actual width %.3f != %.3f' % (item['effective_width'],baseT),
+                             svg_id=svg_id,anchor=wire_sources[svg_id],position=item['position'])
+        endpoint=str(item.get('component'))+'.'+str(item.get('port'))
+        if item.get('kind')=='external_lead' and endpoint in suction_network['ports']:
+            if abs(item['effective_width']-baseT)>.02:
+                suction_fail('suction_lead_width','Suction interface actual width %.3f != %.3f' % (item['effective_width'],baseT),
+                             component=item['component'],port=item['port'],position=item['position'])
+    F.extend((c['id'],c['detail']) for c in suction_findings)
+    ev.append({'id':'V17','coverage_status':'not_checked' if browser.get('status')!='pass' or set(required_pipes)-measured_pipes else 'pass',
+               'coverage_detail':'Input-derived suction chains compared with actual pipe and interface paint.',
+               'suction_anchors':sorted(suction_network['anchors']),
+               'suction_ports':sorted(suction_network['ports']),
+               'unmeasured_pipes':sorted(set(required_pipes)-measured_pipes)})
+
     # ---------- V17 吸油线 = 连续基线 + 周期性五斜杠组 ----------
     # 用户提供的标准图不是虚线:1.0 T 基线连续,其上周期性画五根斜杠。
     # 曾误读为 stroke-dasharray,渲染成覆盖率 15% 的点线,语义与可读性都错。
@@ -455,14 +489,28 @@ def main(argv=None):
                'arrow_layers': len(arrow_layers)})
 
     # ---------- V11 管线必须正交 ----------
-    # 感知校核(PNG 回读)发现的缺陷:走线器把"直连"当候选,斜线因
-    # 长度最短、拐点最少而总是胜出。液压原理图的斜线会被读成软管。
-    for cls, pts in polys:
-        for k in range(len(pts) - 1):
-            (x0, y0), (x1, y1) = pts[k], pts[k + 1]
-            if abs(x1 - x0) > 0.6 and abs(y1 - y0) > 0.6:
-                F.append(('V11', '斜线段 (%.0f,%.0f)->(%.0f,%.0f),管线须正交'
-                          % (x0, y0, x1, y1)))
+    # Endpoint quantization tolerance is not permission to draw a diagonal.
+    # Use the final, transformed root-SVG geometry; only floating noise is ignored.
+    orthogonal_findings = []
+    axis_epsilon = 1e-7
+    wire_sources = {e.get('id'): e.get('data-edge') or e.get('data-input-anchor')
+                    for e in root.iter() if e.get('id')}
+    for pipe in geometry['pipes']:
+        for a, b in zip(pipe['points'], pipe['points'][1:]):
+            dx, dy = abs(b[0]-a[0]), abs(b[1]-a[1])
+            if dx > axis_epsilon and dy > axis_epsilon:
+                detail = ('Nonorthogonal system pipe %s: %s -> %s; '
+                          'axis deltas=(%.9g, %.9g)'
+                          % (pipe.get('svg_id'), a, b, dx, dy))
+                orthogonal_findings.append({
+                    'id':'V11', 'result':'fail', 'kind':'nonorthogonal_pipe',
+                    'detail':detail, 'svg_id':pipe.get('svg_id'),
+                    'anchor':wire_sources.get(pipe.get('svg_id')),
+                    'segment':[a,b], 'position':a, 'axis_deltas':[dx,dy]})
+    F.extend((c['id'], c['detail']) for c in orthogonal_findings)
+    ev.append({'id':'V11', 'axis_epsilon':axis_epsilon,
+               'coverage_status':'not_checked' if geometry['issues'] else 'pass',
+               'coverage_detail':'Final root-SVG system segments checked for strict H/V alignment.'})
 
     # ---------- V5 悬空端口(不阻止出图,但必须披露) ----------
     dang = inventory['dangling']
@@ -785,7 +833,7 @@ def main(argv=None):
     # ---------- 报告 ----------
     checks = ([{'id': i, 'result': 'fail', 'detail': d} for i, d in F]
               + [{'id': i, 'result': 'warn', 'detail': d} for i, d in W])
-    for finding in endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings + assembly_findings:
+    for finding in suction_findings + orthogonal_findings + endpoint_findings + topology_findings + junction_findings + bounds_findings + frame_findings + text_findings + assembly_findings:
         next(c for c in checks if c['id'] == finding['id'] and c['detail'] == finding['detail'] and 'kind' not in c).update(finding)
     rep = {
         'geometry': geometry,

@@ -6,10 +6,10 @@
 """
 import io, json, math, os, re, sys, xml.etree.ElementTree as ET
 
-from topology_reconciliation import write_manifest, declared_topology
+from topology_reconciliation import write_manifest, declared_topology, infer_suction_network
 from junction_semantics import renderer_events, merge_collinear
 from lead_geometry import source_leads, perpendicular_scale, segments
-from sheet_geometry import walk
+from sheet_geometry import walk, transform, multiply, upright_text_spec
 from layout_contract import drawable_bounds
 from endpoint_usage import endpoint_usage, symbol_contract, write_contract_failure, mirror_contract
 from mirror_policy import check_mirror, mirror_point, mirror_anchor, mirror_svg_transform
@@ -74,7 +74,7 @@ def read_symbol(path):
                     c.get('data-port-role'), c.get('data-medium'),
                 )
             continue
-        if tag in ('g', 'path', 'circle', 'line', 'rect', 'polyline', 'polygon'):
+        if tag in ('g', 'path', 'circle', 'line', 'rect', 'polyline', 'polygon', 'text'):
             body.append(ET.tostring(child, encoding='unicode'))
     markup = '\n'.join(body).replace('ns0:', '').replace(' xmlns:ns0="%s"' % NS, '')
     return markup, (vb[0], vb[1], vb[2], vb[3]), ports
@@ -198,6 +198,9 @@ class Sheet(object):
         self.i, self.L, self.cat = intent, layout, catalog
         self.cat_dir, self.workdir = cat_dir, workdir
         self.types = {c['component_type']: c for c in catalog['components']}
+        self.suction_network = infer_suction_network(intent, catalog)
+        if self.suction_network['errors']:
+            raise ValueError(self.suction_network['errors'])
         self.sym = {}      # inst -> (markup, wh, ports)
         self.abs = {}      # (inst, port) -> (x, y, anchor)
         # (inst, port) -> line_type。符号内部那段端口引线是走油的,
@@ -443,7 +446,7 @@ class Sheet(object):
     def dedup(pts):
         out = [pts[0]]
         for p in pts[1:]:
-            if abs(p[0] - out[-1][0]) > 0.3 or abs(p[1] - out[-1][1]) > 0.3:
+            if abs(p[0] - out[-1][0]) > 1e-9 or abs(p[1] - out[-1][1]) > 1e-9:
                 out.append(p)
         return out
 
@@ -486,7 +489,7 @@ class Sheet(object):
         # 早先版本无条件加入 [a1,b1]:它长度最短、拐点最少,评分必然最优,
         # 于是只要不撞元件就被选中,画出斜线。液压原理图必须正交,
         # 斜线在图上会被读成软管或示意连接。校核项 V11 现已拦住。
-        if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+        if abs(a1[0] - b1[0]) < 1e-9 or abs(a1[1] - b1[1]) < 1e-9:
             cands.append([a1, b1])
         # 单折:先横后纵 / 先纵后横
         cands.append([a1, (b1[0], a1[1]), b1])
@@ -694,7 +697,8 @@ class Sheet(object):
             path_lt = path_line_type(p)
             for k in range(nseg):
                 a, b = p[k], p[k + 1]
-                nets.append((a, b, pi, k, nseg, path_lt))
+                edge_lt = 'suction' if 'paths[%d][%d->%d]' % (pi,k,k+1) in self.suction_network['anchors'] else path_lt
+                nets.append((a, b, pi, k, nseg, edge_lt))
 
         # Reserve unambiguous straight bus branches before routing their peers.
         # Otherwise an early detour may cut a later branch (or the completed bus).
@@ -904,7 +908,7 @@ class Sheet(object):
             # 以最短胜出(V2:感温线横穿充气活门本体)。
             b1 = (pb[0] + stubb[0], pb[1] + stubb[1])
             cands = []
-            if abs(a1[0] - b1[0]) < 0.5 or abs(a1[1] - b1[1]) < 0.5:
+            if abs(a1[0] - b1[0]) < 1e-9 or abs(a1[1] - b1[1]) < 1e-9:
                 cands.append([a1, b1])
             # 先按 sensor 锚点出线,再一折进入 at 端口桩;两种折向择优。
             # 先纵后横的形状不会倒折回端口正上方,排前。
@@ -1048,6 +1052,19 @@ class Sheet(object):
             # 引线作为子元素继承之,故 pl-* 必须后加且在 CSS 中更具体。
             mk = self.norm_stroke(self.uniq(markup, inst))
             mk = self.portlines(mk, ports, inst)
+            # Keep declared identification text readable without rotating its body.
+            upright_root = ET.fromstring('<g>'+mk+'</g>')
+            for text, local_matrix in walk(upright_root):
+                if text.tag.rsplit('}',1)[-1]!='text' or text.get('data-keep-upright') in (None,'false'):
+                    continue
+                try:
+                    spec=upright_text_spec(text,multiply(transform(tf),local_matrix))
+                except (ValueError,TypeError) as error:
+                    text.set('data-upright-unchecked',str(error))
+                    continue
+                correction='matrix('+ ' '.join('%.12g'%v for v in spec['correction']) + ')'
+                text.set('transform',(text.get('transform','')+' '+correction).strip())
+            mk=''.join(ET.tostring(e,encoding='unicode') for e in upright_root)
             if nd.get('_name_slot'):
                 mk = self.fill_name_slot(mk, inst)
             # Nonvisual source-port markers survive embedding. Metadata cannot

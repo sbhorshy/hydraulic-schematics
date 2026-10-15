@@ -103,3 +103,10 @@ vb = [float(v) for v in root.get('viewBox').replace(',', ' ').split()]
 ### 油箱退役记录（2026-10-10，#49）
 
 活动工程统一选用本库 `bootstrap-type-reservoir.svg`（draft）；项目 symbols 下仅保留其逐字节受管副本。旧描摹油箱退出活动目录，历史 frozen 及已归档图纸属于版本化实证，不作为当前符号入口。符号重绘 campaign 早期符号待办由 4 减为 3；其余三件不在本票范围。本次更换不提高 draft 成熟度，也不代签内部机构未知项。
+
+## 正向内部标识声明
+
+对需保持可读方向的 text 使用 `data-keep-upright="true"`，并提供唯一 id。
+可用 `data-upright-pivot="x y"` 指定文本局部坐标中的枢轴；省略时用 text 的
+x/y 基线锚点。渲染仅补偿字形方向，枢轴、字体字号、本体和端口不动。
+false 或未声明沿用既有旋转行为；复杂文本与变换不支持时不得记为已校核。

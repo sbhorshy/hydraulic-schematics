@@ -214,22 +214,25 @@ class JunctionCLI(unittest.TestCase):
         self.assertTrue(any(c.get('kind')=='bridge_gap' for c in findings),findings)
 
     def test_real_four_way_junction_is_a_semantic_topology_vertex(self):
+        # Four leaves form a real four-way tree. The old three-terminal fixture
+        # rejoined two branches and accidentally introduced an undeclared ring.
         from ruamel.yaml import YAML
         yaml=YAML();path=self.work/'1#系统.intent.yaml';intent=yaml.load(path.read_text())
-        intent['extern']={'S':'inlet','A':'outlet','B':'outlet'}
-        intent['paths']=[['S','A'],['S','B']]
+        intent['extern']={'S':'inlet','A':'outlet','B':'outlet','C':'outlet'}
+        intent['paths']=[['S','A'],['S','B'],['S','C']]
         with path.open('w') as f:yaml.dump(intent,f)
         path=self.work/'1#系统.layout.json';layout=json.loads(path.read_text())
         layout['externs']={name:{'x':x,'y':y,'anchor':anchor,'label':name} for name,x,y,anchor in
-                           [('S',530,800,'right'),('A',1130,800,'left'),('B',930,900,'left')]}
+                           [('S',530,800,'right'),('A',1130,800,'left'),('B',930,900,'left'),('C',930,700,'left')]}
         path.write_text(json.dumps(layout));self.render()
         def cross(root):
             lines=next(e for e in root.iter() if e.get('id')=='lines')
             next(e for e in lines if e.get('data-edge')=='paths[0][0->1]').set('points','530,800 1130,800')
-            next(e for e in lines if e.get('data-edge')=='paths[1][0->1]').set('points','530,800 550,800 550,700 830,700 830,900 930,900')
+            next(e for e in lines if e.get('data-edge')=='paths[1][0->1]').set('points','530,800 830,800 830,900 930,900')
+            next(e for e in lines if e.get('data-edge')=='paths[2][0->1]').set('points','530,800 830,800 830,700 930,700')
             dots=next(e for e in root.iter() if e.get('id')=='junctions')
             dots.clear();dots.set('id','junctions')
-            for x,y in [(550,800),(830,800)]:
+            for x,y in [(830,800)]:
                 ET.SubElement(dots,'{http://www.w3.org/2000/svg}circle',{'class':'jn','cx':str(x),'cy':str(y),'r':'3'})
         self.edit(cross)
         report=self.validate()

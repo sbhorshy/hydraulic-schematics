@@ -53,7 +53,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
     ev15 = {'id':'V15', 'base_T':float(layout.get('style',{}).get('base_line_width_T',1)),
             'allowed_T':{'high':3.,'low':1.,'symbol':1.5}, 'measurements':[]}
     ev16 = {'id':'V16', 'scheme':'A: body/internal mechanisms retain 1.5T; external leads follow network',
-            'measurements':[], 'unchecked':[], 'position_tolerance':POSITION_TOLERANCE,
+            'measurements':[], 'port_presence':[], 'unchecked':[], 'position_tolerance':POSITION_TOLERANCE,
             'width_tolerance':WIDTH_TOLERANCE, 'browser_evidence':'browser-evidence.json'}
     failures = []
     if browser.get('status') != 'pass':
@@ -130,12 +130,60 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
     for inst,node in geometry['nodes'].items():
         source = ET.parse(resolve_symbol(node['symbol'])).getroot()
         source_ports = {}
+        source_port_meta = {}
         for el,matrix in walk(source):
             if el.get('data-port-id'):
                 source_ports[el.get('data-port-id')] = point(matrix,(float(el.get('cx')),float(el.get('cy'))))
+                source_port_meta[el.get('data-port-id')] = dict(el.attrib)
         leads,unsupported = source_leads(source,source_ports)
         ev16['unchecked'].extend(dict(component=inst,position=node['ports'].get(u.get('port'),{}).get('position'),**u)
                                  for u in unsupported)
+        # A metadata dot is not an external lead. Check every declared port,
+        # including those without any attached system pipe or inferred lead.
+        lead_ports = {lead['port'] for lead in leads}
+        unsupported_ports = {u.get('port') for u in unsupported}
+        for pid, port in node['ports'].items():
+            position = port['position']
+            if pid in lead_ports or pid in unsupported_ports:
+                continue
+            meta = source_port_meta.get(pid, {})
+            record = {'component':inst, 'port':pid, 'position':position,
+                      'kind':meta.get('data-port-kind','flow'), 'status':'missing'}
+            if meta.get('data-port-kind') == 'body_tap':
+                contacts = []
+                uncertain = False
+                for row in rows:
+                    if row.get('instance') != inst or row['tag'] not in ('line','path','polyline','polygon','rect','circle','ellipse'):
+                        continue
+                    if row['attrs'].get('data-port-id') or row['attrs'].get('data-port'):
+                        continue
+                    if any(style.get(k,'none')!='none' for style in
+                           [row['style']]+[a.get('effects',{}) for a in row.get('ancestors',[])]
+                           for k in ('clip-path','mask','filter')):
+                        uncertain=True
+                        continue
+                    paint = _visible_stroke(row)
+                    if paint is None:
+                        uncertain = True
+                        continue
+                    if not paint:
+                        continue
+                    outline = row.get('outline') or []
+                    for a,b in zip(outline,outline[1:]+outline[:1]):
+                        if math.dist(a,b)>1e-9 and _on_segment(position,a,b):
+                            contacts.append(row.get('id') or row['key'])
+                            break
+                if contacts:
+                    record.update(status='measured',contacts=contacts)
+                elif uncertain:
+                    record['status']='not_checked'
+                    ev16['unchecked'].append({'component':inst,'port':pid,'position':position,
+                                               'reason':'Body-tap paint cannot be measured'})
+                else:
+                    failures.append(('V16','%s.%s body_tap has no visible body contact @%s' % (inst,pid,position)))
+            else:
+                failures.append(('V16','%s.%s has no source-defined external lead; a port marker alone is not interface evidence @%s' % (inst,pid,position)))
+            ev16['port_presence'].append(record)
         for lead in leads:
             pid = lead['port']
             port = node['ports'].get(pid)
@@ -150,15 +198,14 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
             if any(u.get('component') == inst and u.get('port') == pid for u in ev16['unchecked']):
                 continue
             touching = [p for p in pipes if any(math.dist(q,position)<=POSITION_TOLERANCE for q in (p['a'],p['b']))]
-            if not touching:
-                continue  # an unconnected port has no network-width requirement (V3 owns missing connections)
             classes = {p['class'] for p in touching}
-            if len({RATIOS[c] for c in classes}) != 1:
+            if touching and len({RATIOS[c] for c in classes}) != 1:
                 failures.append(('V16','%s.%s incompatible network widths at %s' % (inst,pid,position)))
                 continue
-            expected = RATIOS[next(iter(classes))]*ev15['base_T']
+            expected = RATIOS[next(iter(classes))]*ev15['base_T'] if touching else None
             measurement = {'component':inst,'port':pid,'position':position,'class':sorted(classes),
-                           'boundary':[], 'expected_width':expected,'effective_width':None,'segments':[]}
+                           'boundary':[], 'expected_width':expected,'effective_width':None,'segments':[],
+                           'connected':bool(touching)}
             unchecked = False
             used_keys = set()
             for local_a,local_b in lead['segments']:
@@ -190,7 +237,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                     for item in seen:
                         row = item['row']
                         dashed=has_dash_gaps(row['style'].get('stroke-dasharray'))
-                        if dashed:
+                        if dashed and (touching or port.get('medium') in ('hydraulic','pneumatic')):
                             failures.append(('V16','%s.%s dashed external lead cannot provide continuous ink to the body boundary @%s' % (inst,pid,location)))
                         elif dashed is None:
                             ev16['unchecked'].append({'component':inst,'port':pid,'position':location,'reason':'Unresolved external lead dash lengths'})
@@ -209,7 +256,7 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                         if not any(abs(item['width']-value)<=WIDTH_TOLERANCE for value in standards):
                             failures.append(('V15','%s.%s effective external lead width %.3f is outside standard widths %s @%s' %
                                              (inst,pid,item['width'],[round(v,4) for v in standards],location)))
-                        if abs(item['width']-expected)>WIDTH_TOLERANCE:
+                        if expected is not None and abs(item['width']-expected)>WIDTH_TOLERANCE:
                             failures.append(('V16','%s.%s %s effective lead width %.3f != network %.3f @%s; width may change only at the defined body boundary' %
                                              (inst,pid,segment['element'],item['width'],expected,location)))
             if measurement['segments']:
@@ -233,9 +280,18 @@ def check_widths(svg_path, layout, geometry, resolve_symbol, browser=None):
                 if not contacts:
                     # Multi-subpath paths may terminate at their first subpath's start;
                     # browser endpoints are first/last, so lack of evidence stays explicit.
-                    ev16['unchecked'].append({'component':inst,'port':pid,'position':terminal,
-                                              'reason':'No independent browser body contact at the source-defined transition'})
-                    unchecked = True
+                    endpoints_measured = any(
+                        row.get('instance') == inst and row['key'] in used_keys
+                        and any(math.dist(endpoint,terminal)<=POSITION_TOLERANCE
+                                for endpoint in row.get('endpoints',[]))
+                        and len(row.get('endpoint_contacts',[])) == len(row.get('endpoints',[]))
+                        for row in rows)
+                    if endpoints_measured:
+                        failures.append(('V16','%s.%s external lead has no visible independent body contact @%s' % (inst,pid,terminal)))
+                    else:
+                        ev16['unchecked'].append({'component':inst,'port':pid,'position':terminal,
+                                                  'reason':'No independent browser body-contact measurement at the source-defined transition'})
+                        unchecked = True
             measurement['status'] = 'not_checked' if unchecked else 'measured'
             ev16['measurements'].append(measurement)
     # Painted bodies/internal mechanisms are a separate role from external leads.

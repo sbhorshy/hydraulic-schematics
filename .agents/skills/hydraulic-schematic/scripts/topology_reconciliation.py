@@ -445,7 +445,51 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
         contacts=sorted({terminal for v in component for terminal in labels[v]})
         indexes=sorted({i for v in component for _,i in graph[v]})
         anchors=sorted({atomic[i]['anchor'] for i in indexes if atomic[i]['anchor']})
-        networks.append({'terminals':contacts,'anchors':anchors,'segments':indexes})
+        # Subdivision and shared storage fragments must not create cycles.
+        # Compare physical union edges with the explicitly declared terminal net.
+        pairs = {tuple(sorted((atomic[i]['a'],atomic[i]['b']))) for i in indexes
+                 if atomic[i]['a'] != atomic[i]['b']}
+        actual_rank = len(pairs) - len(component) + 1
+        net_leaders = {leader(p) for p in contacts}
+        declared = [e for e in expected['edges']
+                    if leader(e['endpoints'][0]) in net_leaders]
+        declared_vertices = {p for e in declared for p in e['endpoints']}
+        expected_rank = len(declared) - len(declared_vertices) + len(net_leaders)
+        cycle_record = {'actual_rank':actual_rank, 'expected_rank':expected_rank,
+                        'status':'measured' if measured and not geometry['issues'] and not unchecked else 'not_checked'}
+        networks.append({'terminals':contacts,'anchors':anchors,'segments':indexes,
+                         'cycle_evidence':cycle_record})
+        if cycle_record['status'] == 'measured' and len(net_leaders) == 1 and actual_rank > expected_rank:
+            parent = {v:v for v in component}
+            tree = defaultdict(set)
+            def find_vertex(v):
+                while parent[v] != v:
+                    v = parent[v]
+                return v
+            loop = []
+            for u,v in sorted(pairs):
+                a,b = find_vertex(u),find_vertex(v)
+                if a != b:
+                    parent[a] = b
+                    tree[u].add(v);tree[v].add(u)
+                    continue
+                # Return an actual closed ring for local readback, not just a count.
+                todo = [u]; previous = {u:None}
+                while todo and v not in previous:
+                    current = todo.pop()
+                    for nxt in tree[current]:
+                        if nxt not in previous:
+                            previous[nxt]=current;todo.append(nxt)
+                path = [v]
+                while path[-1] != u:
+                    path.append(previous[path[-1]])
+                loop = [positions[n] for n in reversed(path)] + [positions[u]]
+                break
+            fail('unexpected_cycle', next((a for a in anchors if not a.startswith('buses.')), None),
+                 'Visible network adds undeclared cycles: actual %d > expected %d' % (actual_rank,expected_rank),
+                 input_anchors=anchors, positions=loop,
+                 expected_cycle_rank=expected_rank,actual_cycle_rank=actual_rank,
+                 svg_ids=sorted({atomic[i]['svg_id'] or '' for i in indexes}))
         if len({leader(p) for p in contacts}) > 1:
             fail('wrong_network_join', next((a for a in anchors if not a.startswith('buses.')), None),
                  'Visible geometry joins separate input networks: ' + ', '.join(contacts),
@@ -461,3 +505,50 @@ def reconcile_topology(root, geometry, intent, catalog, layout, browser_evidence
             'bridges':bridge_records,'networks':networks,'findings':findings,
             'display_evidence':{'status':browser_evidence['status'],'reason':browser_evidence.get('reason'),'unchecked':unchecked},
             'coverage_status':'pass' if measured and not geometry['issues'] and not unchecked else 'not_checked'}
+
+
+def infer_suction_network(intent, catalog):
+    """Input-only suction propagation through declared transparent main paths.
+
+    A pump has no inline main_path; a user with pressure/return roles is not
+    transparent. Reused same-role inline symbols acquire their circuit context.
+    """
+    from collections import defaultdict
+    if not intent.get('parts'):
+        return {'anchors':set(),'ports':set(),'errors':[]}
+    types = {c['component_type']:c for c in catalog['components']}
+    ports = {inst+'.'+p['id']:p for inst,typ in intent['parts'].items()
+             for p in types[typ]['ports']}
+    edges = [e for e in declared_topology(intent,catalog)['edges'] if e['kind']=='path']
+    graph = defaultdict(set)
+    def join(a,b):
+        graph[a].add(b);graph[b].add(a)
+    for e in edges:
+        join(*e['endpoints'])
+    transparent = set()
+    for inst,typ in intent['parts'].items():
+        component=types[typ];mp=component.get('main_path')
+        if component.get('connection_role')!='inline' or not mp:
+            continue
+        a,b=inst+'.'+mp['in'],inst+'.'+mp['out']
+        pa,pb=ports[a],ports[b]
+        if (pa.get('medium')==pb.get('medium')=='hydraulic'
+                and pa.get('role')==pb.get('role')
+                and pa.get('role') in ('suction','pressure','return','case_drain','work')):
+            join(a,b);transparent.update((a,b))
+    seeds={p for p,c in ports.items() if c.get('medium')=='hydraulic' and c.get('role')=='suction'}
+    seen=set(seeds);todo=list(seeds)
+    while todo:
+        for n in graph[todo.pop()]-seen:
+            seen.add(n);todo.append(n)
+    errors=[]
+    for p in seen:
+        meta=ports.get(p)
+        if (meta and p not in transparent and meta.get('role') in ('pressure','return','case_drain')
+                and meta.get('medium')=='hydraulic'):
+            errors.append({'endpoint':p,'role':meta['role'],
+                           'detail':'Suction network reaches an incompatible nontransparent terminal '+p})
+    anchors={e['anchor'] for e in edges if set(e['endpoints'])<=seen}
+    anchors.update('buses.'+p[1:] for p in seen if p.startswith('@'))
+    active_ports={p for e in edges if e['anchor'] in anchors for p in e['endpoints'] if p in ports}
+    return {'anchors':anchors,'ports':active_ports,'errors':errors}
