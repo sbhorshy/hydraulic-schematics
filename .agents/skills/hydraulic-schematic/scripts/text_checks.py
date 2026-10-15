@@ -5,7 +5,7 @@ import re
 import xml.etree.ElementTree as ET
 from layout_clearance import display_rectangle
 from lead_geometry import segments, perpendicular_scale
-from sheet_geometry import point
+from sheet_geometry import point, multiply, walk, upright_text_spec
 
 
 def _groups(row):
@@ -174,6 +174,57 @@ def required_text(rows,layout,intent,resolve_symbol,geometry):
     return issues,unchecked,blocked
 
 
+
+def check_upright_text(rows, geometry, resolve_symbol):
+    """Read source declarations, then measure actual browser glyph directions."""
+    findings,unchecked,records=[],[],[]
+    if resolve_symbol is None:return findings,unchecked,records
+    for inst,node in geometry.get('nodes',{}).items():
+        source=ET.parse(resolve_symbol(node['symbol'])).getroot()
+        for text,source_matrix in walk(source):
+            if text.tag.rsplit('}',1)[-1]!='text' or text.get('data-keep-upright') in (None,'false'):
+                continue
+            source_id=text.get('id');eid=inst+'__'+str(source_id)
+            try:
+                if not source_id:raise ValueError('Upright source text needs a unique id')
+                expected=multiply(node['matrix'],source_matrix)
+                spec=upright_text_spec(text,expected)
+            except (ValueError,TypeError) as error:
+                unchecked.append({'component':inst,'element':eid,'reason':str(error)})
+                continue
+            matches=[r for r in rows if r.get('instance')==inst and r.get('id')==eid and r['tag']=='text']
+            if len(matches)!=1:
+                findings.append({'id':'V12','result':'fail','kind':'upright_text_missing','component':inst,
+                                 'element':eid,'detail':'Declared upright text is missing or ambiguous: '+eid})
+                continue
+            row=matches[0]
+            if not row.get('visible') or row.get('ink_status')!='pass' or not row.get('ink_quads'):
+                unchecked.append({'component':inst,'element':eid,'reason':'Visible upright glyph direction is not measured'})
+                continue
+            angles=[];upright=True;determinants=[]
+            for q in row['ink_quads']:
+                ux,uy=q[1][0]-q[0][0],q[1][1]-q[0][1]
+                vx,vy=q[3][0]-q[0][0],q[3][1]-q[0][1]
+                angle=math.degrees(math.atan2(uy,ux));angles.append(angle)
+                determinant=ux*vy-uy*vx;determinants.append(determinant)
+                if ux<=0 or vy<=0 or determinant<=0 or abs(uy)>1e-5*math.hypot(ux,uy) or abs(vx)>1e-5*math.hypot(vx,vy):upright=False
+            expected_pivot=point(expected,spec['pivot']);actual_pivot=point(row['matrix'],spec['pivot'])
+            error=math.dist(expected_pivot,actual_pivot)
+            record={'component':inst,'element':eid,'text':row.get('text'),
+                    'position':actual_pivot,'expected_position':expected_pivot,'angles_deg':angles,
+                    'glyph_determinants':determinants,'pivot_error':error,
+                    'status':'pass' if upright and error<=.1 else 'fail'}
+            records.append(record)
+            if not upright:
+                findings.append({'id':'V12','result':'fail','kind':'upright_orientation','component':inst,
+                                 'element':eid,'text':row.get('text'),'position':actual_pivot,
+                                 'angles_deg':angles,'detail':'Declared upright text is rotated or mirrored: '+eid})
+            if error>.1:
+                findings.append({'id':'V12','result':'fail','kind':'upright_pivot','component':inst,
+                                 'element':eid,'position':actual_pivot,'expected_position':expected_pivot,
+                                 'distance':error,'detail':'Upright text moved from its source pivot: '+eid})
+    return findings,unchecked,records
+
 def check_text(browser, geometry, budget=6., layout=None, intent=None, resolve_symbol=None):
     findings,records,unchecked = [],[],[]
     if browser.get('status')!='pass':
@@ -182,6 +233,8 @@ def check_text(browser, geometry, budget=6., layout=None, intent=None, resolve_s
     rows=browser['elements']
     required_findings,required_unchecked,blocked=required_text(rows,layout,intent,resolve_symbol,geometry)
     findings.extend(required_findings);unchecked.extend(required_unchecked)
+    upright_findings,upright_unchecked,upright_records=check_upright_text(rows,geometry,resolve_symbol)
+    findings.extend(upright_findings);unchecked.extend(upright_unchecked)
     vx,vy,vw,vh=browser['viewbox']
     viewport=[vx,vy,vx+vw,vy+vh]
     panels={name:next((r for r in rows if r['tag']=='rect' and name in _groups(r)),None)
@@ -310,4 +363,4 @@ def check_text(browser, geometry, budget=6., layout=None, intent=None, resolve_s
          'coverage_detail':'Browser glyph ink bounds and containment checked.','unchecked':unchecked},
         {'id':'B7','coverage_status':b7_status,'coverage_detail':'Actual glyph-to-contour and text-to-text clearance measured.',
          'budget':budget,'violations':len(violations),'unchecked':unchecked,'outline_max_step':.25}]
-    return findings,ev,{'texts':records,'clearance':clearance,'budget_status':b7_status,'violations':len(violations),'unchecked':unchecked,'coordinate_system':'root_svg_user_units'}
+    return findings,ev,{'texts':records,'clearance':clearance,'budget_status':b7_status,'violations':len(violations),'unchecked':unchecked,'coordinate_system':'root_svg_user_units','upright_text':upright_records}

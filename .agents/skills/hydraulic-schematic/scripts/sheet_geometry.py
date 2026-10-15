@@ -333,3 +333,27 @@ def load_geometry(root, layout, resolve_symbol, mirror_axes=None):
         except (ValueError, TypeError) as error:
             result['issues'].append({'svg_id': el.get('id'), 'detail': str(error)})
     return result
+
+
+def upright_text_spec(element, matrix):
+    """Opt-in single-line text: preserve its declared pivot and uniform scale."""
+    if element.get('data-keep-upright') != 'true':
+        raise ValueError('data-keep-upright must be true or false')
+    if list(element) or any(abs(float(v))>1e-9 for v in element.get('rotate','0').replace(',',' ').split()):
+        raise ValueError('Upright text currently requires a single unrotated text run')
+    if re.search(r'(?:^|;)\s*(?:transform|writing-mode)\s*:',element.get('style','')):
+        raise ValueError('Source CSS text transform/writing mode requires additional evidence')
+    raw = element.get('data-upright-pivot')
+    pivot = list(map(float,raw.replace(',',' ').split())) if raw else [float(element.get('x','0')),float(element.get('y','0'))]
+    if len(pivot)!=2 or not all(math.isfinite(v) for v in pivot):
+        raise ValueError('Upright text pivot must be two finite source coordinates')
+    a,b,c,d,_,_=matrix
+    sx,sy=math.hypot(a,b),math.hypot(c,d)
+    if (not all(math.isfinite(v) for v in matrix) or sx<1e-9 or
+            abs(sx-sy)>1e-7*max(sx,sy) or abs(a*c+b*d)>1e-7*sx*sy):
+        raise ValueError('Upright text under singular/nonuniform/sheared transforms is not supported')
+    scale=(sx+sy)/2;det=a*d-b*c
+    ca,cb,cc,cd=d*scale/det,-b*scale/det,-c*scale/det,a*scale/det
+    x,y=pivot
+    correction=(ca,cb,cc,cd,x-ca*x-cc*y,y-cb*x-cd*y)
+    return {'pivot':pivot,'scale':scale,'correction':correction}

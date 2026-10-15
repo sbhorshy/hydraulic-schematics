@@ -72,7 +72,7 @@
     </g>
     <!-- 电动机 M -->
     <g id="motor-m">
-      <text id="motor-text" x="94.8494" y="105.5419" font-size="19.2003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">M</text>
+      <text id="motor-text" data-keep-upright="true" data-upright-pivot="94.8494 98.9232" x="94.8494" y="105.5419" font-size="19.2003" text-anchor="middle" font-family="Microsoft YaHei, Noto Sans CJK SC, sans-serif">M</text>
       <circle cx="94.8494" cy="98.9232" r="30.0006" id="motor-circle"/>
     </g>
     <!-- 主油路(增补):二位二通阀下油口 -> 单向阀下油口,正交走线,两处直角折弯 -->
