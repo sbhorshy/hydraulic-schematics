@@ -15,3 +15,10 @@ __pycache__/
 # 系统杂项
 .DS_Store
 Thumbs.db
+
+# 运行产物与草稿工作区：不入库（协作桥状态、日志、锁、临时集成副本）
+# 日志/锁只在 research/ 下忽略：docs/specs/*-evidence/ 的验收日志是证据，需入库
+.scratch/
+bridge-state/
+research/**/*.log
+research/**/*.lock

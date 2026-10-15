@@ -1,0 +1,46 @@
+[
+  {
+    "fixture": "l0-small-seed",
+    "changed_pixels": 0,
+    "max_channel_difference": 0,
+    "new_white_margin": true,
+    "root_pipes_ports_footprints_equal": true,
+    "fails": [
+      0,
+      0
+    ]
+  },
+  {
+    "fixture": "l0-current",
+    "changed_pixels": 37,
+    "max_channel_difference": 4,
+    "new_white_margin": true,
+    "root_pipes_ports_footprints_equal": true,
+    "fails": [
+      13,
+      13
+    ]
+  },
+  {
+    "fixture": "l0-assembly-seed",
+    "changed_pixels": 0,
+    "max_channel_difference": 0,
+    "new_white_margin": true,
+    "root_pipes_ports_footprints_equal": true,
+    "fails": [
+      0,
+      0
+    ]
+  },
+  {
+    "fixture": "l0-rotation",
+    "changed_pixels": 0,
+    "max_channel_difference": 0,
+    "new_white_margin": true,
+    "root_pipes_ports_footprints_equal": true,
+    "fails": [
+      0,
+      0
+    ]
+  }
+]

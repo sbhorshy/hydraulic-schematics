@@ -1,0 +1,1459 @@
+{
+  "schema_version": 1,
+  "nodes": [
+    {
+      "id": "TANK-001",
+      "anchor": "parts.TANK-001",
+      "type": "bootstrap_reservoir",
+      "svg_ids": [
+        "inst-TANK-001"
+      ]
+    },
+    {
+      "id": "FSOV-001",
+      "anchor": "parts.FSOV-001",
+      "type": "firewall_shutoff_valve",
+      "svg_ids": [
+        "inst-FSOV-001"
+      ]
+    },
+    {
+      "id": "EDP-001",
+      "anchor": "parts.EDP-001",
+      "type": "engine_driven_pump",
+      "svg_ids": [
+        "inst-EDP-001"
+      ]
+    },
+    {
+      "id": "EMP-001",
+      "anchor": "parts.EMP-001",
+      "type": "electric_motor_driven_pump",
+      "svg_ids": [
+        "inst-EMP-001"
+      ]
+    },
+    {
+      "id": "PF-001",
+      "anchor": "parts.PF-001",
+      "type": "filter_line_shutoff_dp",
+      "svg_ids": [
+        "inst-PF-001"
+      ]
+    },
+    {
+      "id": "CDF-001",
+      "anchor": "parts.CDF-001",
+      "type": "filter_line_shutoff_dp_case_drain",
+      "svg_ids": [
+        "inst-CDF-001"
+      ]
+    },
+    {
+      "id": "RF-001",
+      "anchor": "parts.RF-001",
+      "type": "filter_line_shutoff_dp_return_bypass",
+      "svg_ids": [
+        "inst-RF-001"
+      ]
+    },
+    {
+      "id": "PRV-001",
+      "anchor": "parts.PRV-001",
+      "type": "priority_valve",
+      "svg_ids": [
+        "inst-PRV-001"
+      ]
+    },
+    {
+      "id": "PRV-002",
+      "anchor": "parts.PRV-002",
+      "type": "priority_valve",
+      "svg_ids": [
+        "inst-PRV-002"
+      ]
+    },
+    {
+      "id": "ACC-001",
+      "anchor": "parts.ACC-001",
+      "type": "hydro_pneumatic_accumulator",
+      "svg_ids": [
+        "inst-ACC-001"
+      ]
+    },
+    {
+      "id": "ACV-001",
+      "anchor": "parts.ACV-001",
+      "type": "air_charging_valve",
+      "svg_ids": [
+        "inst-ACV-001"
+      ]
+    },
+    {
+      "id": "PG-001",
+      "anchor": "parts.PG-001",
+      "type": "pressure_gauge",
+      "svg_ids": [
+        "inst-PG-001"
+      ]
+    },
+    {
+      "id": "QDP-001",
+      "anchor": "parts.QDP-001",
+      "type": "quick_disconnect_coupling_disconnected",
+      "svg_ids": [
+        "inst-QDP-001"
+      ]
+    },
+    {
+      "id": "QDR-001",
+      "anchor": "parts.QDR-001",
+      "type": "quick_disconnect_coupling_disconnected_return",
+      "svg_ids": [
+        "inst-QDR-001"
+      ]
+    },
+    {
+      "id": "CV-002",
+      "anchor": "parts.CV-002",
+      "type": "check_valve_refuel",
+      "svg_ids": [
+        "inst-CV-002"
+      ]
+    },
+    {
+      "id": "USER-001",
+      "anchor": "parts.USER-001",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-001"
+      ]
+    },
+    {
+      "id": "USER-002",
+      "anchor": "parts.USER-002",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-002"
+      ]
+    },
+    {
+      "id": "USER-003",
+      "anchor": "parts.USER-003",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-003"
+      ]
+    },
+    {
+      "id": "USER-004",
+      "anchor": "parts.USER-004",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-004"
+      ]
+    },
+    {
+      "id": "USER-005",
+      "anchor": "parts.USER-005",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-005"
+      ]
+    },
+    {
+      "id": "USER-006",
+      "anchor": "parts.USER-006",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-006"
+      ]
+    },
+    {
+      "id": "USER-007",
+      "anchor": "parts.USER-007",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-007"
+      ]
+    },
+    {
+      "id": "USER-008",
+      "anchor": "parts.USER-008",
+      "type": "hydraulic_user",
+      "svg_ids": [
+        "inst-USER-008"
+      ]
+    }
+  ],
+  "ports": [
+    {
+      "id": "TANK-001.bootstrap_pressure_in",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.bootstrap_pressure_in",
+      "catalog_anchor": "bootstrap_reservoir.ports.bootstrap_pressure_in",
+      "svg_ids": [
+        "port-TANK-001-bootstrap_pressure_in"
+      ]
+    },
+    {
+      "id": "TANK-001.suction_out",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.suction_out",
+      "catalog_anchor": "bootstrap_reservoir.ports.suction_out",
+      "svg_ids": [
+        "port-TANK-001-suction_out"
+      ]
+    },
+    {
+      "id": "TANK-001.return_in",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.return_in",
+      "catalog_anchor": "bootstrap_reservoir.ports.return_in",
+      "svg_ids": [
+        "port-TANK-001-return_in"
+      ]
+    },
+    {
+      "id": "TANK-001.body_sense_tap",
+      "component": "TANK-001",
+      "anchor": "parts.TANK-001.ports.body_sense_tap",
+      "catalog_anchor": "bootstrap_reservoir.ports.body_sense_tap",
+      "svg_ids": [
+        "port-TANK-001-body_sense_tap"
+      ]
+    },
+    {
+      "id": "FSOV-001.main_upper",
+      "component": "FSOV-001",
+      "anchor": "parts.FSOV-001.ports.main_upper",
+      "catalog_anchor": "firewall_shutoff_valve.ports.main_upper",
+      "svg_ids": [
+        "port-FSOV-001-main_upper"
+      ]
+    },
+    {
+      "id": "FSOV-001.main_lower",
+      "component": "FSOV-001",
+      "anchor": "parts.FSOV-001.ports.main_lower",
+      "catalog_anchor": "firewall_shutoff_valve.ports.main_lower",
+      "svg_ids": [
+        "port-FSOV-001-main_lower"
+      ]
+    },
+    {
+      "id": "EDP-001.suction",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.suction",
+      "catalog_anchor": "engine_driven_pump.ports.suction",
+      "svg_ids": [
+        "port-EDP-001-suction"
+      ]
+    },
+    {
+      "id": "EDP-001.pressure_out",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.pressure_out",
+      "catalog_anchor": "engine_driven_pump.ports.pressure_out",
+      "svg_ids": [
+        "port-EDP-001-pressure_out"
+      ]
+    },
+    {
+      "id": "EDP-001.case_drain",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.case_drain",
+      "catalog_anchor": "engine_driven_pump.ports.case_drain",
+      "svg_ids": [
+        "port-EDP-001-case_drain"
+      ]
+    },
+    {
+      "id": "EDP-001.drive_shaft",
+      "component": "EDP-001",
+      "anchor": "parts.EDP-001.ports.drive_shaft",
+      "catalog_anchor": "engine_driven_pump.ports.drive_shaft",
+      "svg_ids": [
+        "port-EDP-001-drive_shaft"
+      ]
+    },
+    {
+      "id": "EMP-001.suction",
+      "component": "EMP-001",
+      "anchor": "parts.EMP-001.ports.suction",
+      "catalog_anchor": "electric_motor_driven_pump.ports.suction",
+      "svg_ids": [
+        "port-EMP-001-suction"
+      ]
+    },
+    {
+      "id": "EMP-001.pressure_out",
+      "component": "EMP-001",
+      "anchor": "parts.EMP-001.ports.pressure_out",
+      "catalog_anchor": "electric_motor_driven_pump.ports.pressure_out",
+      "svg_ids": [
+        "port-EMP-001-pressure_out"
+      ]
+    },
+    {
+      "id": "EMP-001.case_drain",
+      "component": "EMP-001",
+      "anchor": "parts.EMP-001.ports.case_drain",
+      "catalog_anchor": "electric_motor_driven_pump.ports.case_drain",
+      "svg_ids": [
+        "port-EMP-001-case_drain"
+      ]
+    },
+    {
+      "id": "EMP-001.elec_power",
+      "component": "EMP-001",
+      "anchor": "parts.EMP-001.ports.elec_power",
+      "catalog_anchor": "electric_motor_driven_pump.ports.elec_power",
+      "svg_ids": [
+        "port-EMP-001-elec_power"
+      ]
+    },
+    {
+      "id": "PF-001.inlet",
+      "component": "PF-001",
+      "anchor": "parts.PF-001.ports.inlet",
+      "catalog_anchor": "filter_line_shutoff_dp.ports.inlet",
+      "svg_ids": [
+        "port-PF-001-inlet"
+      ]
+    },
+    {
+      "id": "PF-001.outlet",
+      "component": "PF-001",
+      "anchor": "parts.PF-001.ports.outlet",
+      "catalog_anchor": "filter_line_shutoff_dp.ports.outlet",
+      "svg_ids": [
+        "port-PF-001-outlet"
+      ]
+    },
+    {
+      "id": "CDF-001.inlet",
+      "component": "CDF-001",
+      "anchor": "parts.CDF-001.ports.inlet",
+      "catalog_anchor": "filter_line_shutoff_dp_case_drain.ports.inlet",
+      "svg_ids": [
+        "port-CDF-001-inlet"
+      ]
+    },
+    {
+      "id": "CDF-001.outlet",
+      "component": "CDF-001",
+      "anchor": "parts.CDF-001.ports.outlet",
+      "catalog_anchor": "filter_line_shutoff_dp_case_drain.ports.outlet",
+      "svg_ids": [
+        "port-CDF-001-outlet"
+      ]
+    },
+    {
+      "id": "RF-001.inlet",
+      "component": "RF-001",
+      "anchor": "parts.RF-001.ports.inlet",
+      "catalog_anchor": "filter_line_shutoff_dp_return_bypass.ports.inlet",
+      "svg_ids": [
+        "port-RF-001-inlet"
+      ]
+    },
+    {
+      "id": "RF-001.outlet",
+      "component": "RF-001",
+      "anchor": "parts.RF-001.ports.outlet",
+      "catalog_anchor": "filter_line_shutoff_dp_return_bypass.ports.outlet",
+      "svg_ids": [
+        "port-RF-001-outlet"
+      ]
+    },
+    {
+      "id": "PRV-001.inlet",
+      "component": "PRV-001",
+      "anchor": "parts.PRV-001.ports.inlet",
+      "catalog_anchor": "priority_valve.ports.inlet",
+      "svg_ids": [
+        "port-PRV-001-inlet"
+      ]
+    },
+    {
+      "id": "PRV-001.outlet",
+      "component": "PRV-001",
+      "anchor": "parts.PRV-001.ports.outlet",
+      "catalog_anchor": "priority_valve.ports.outlet",
+      "svg_ids": [
+        "port-PRV-001-outlet"
+      ]
+    },
+    {
+      "id": "PRV-002.inlet",
+      "component": "PRV-002",
+      "anchor": "parts.PRV-002.ports.inlet",
+      "catalog_anchor": "priority_valve.ports.inlet",
+      "svg_ids": [
+        "port-PRV-002-inlet"
+      ]
+    },
+    {
+      "id": "PRV-002.outlet",
+      "component": "PRV-002",
+      "anchor": "parts.PRV-002.ports.outlet",
+      "catalog_anchor": "priority_valve.ports.outlet",
+      "svg_ids": [
+        "port-PRV-002-outlet"
+      ]
+    },
+    {
+      "id": "ACC-001.hydraulic_port",
+      "component": "ACC-001",
+      "anchor": "parts.ACC-001.ports.hydraulic_port",
+      "catalog_anchor": "hydro_pneumatic_accumulator.ports.hydraulic_port",
+      "svg_ids": [
+        "port-ACC-001-hydraulic_port"
+      ]
+    },
+    {
+      "id": "ACC-001.gas_port",
+      "component": "ACC-001",
+      "anchor": "parts.ACC-001.ports.gas_port",
+      "catalog_anchor": "hydro_pneumatic_accumulator.ports.gas_port",
+      "svg_ids": [
+        "port-ACC-001-gas_port"
+      ]
+    },
+    {
+      "id": "ACV-001.accumulator_gas",
+      "component": "ACV-001",
+      "anchor": "parts.ACV-001.ports.accumulator_gas",
+      "catalog_anchor": "air_charging_valve.ports.accumulator_gas",
+      "svg_ids": [
+        "port-ACV-001-accumulator_gas"
+      ]
+    },
+    {
+      "id": "ACV-001.charge_port",
+      "component": "ACV-001",
+      "anchor": "parts.ACV-001.ports.charge_port",
+      "catalog_anchor": "air_charging_valve.ports.charge_port",
+      "svg_ids": [
+        "port-ACV-001-charge_port"
+      ]
+    },
+    {
+      "id": "PG-001.pressure_sense",
+      "component": "PG-001",
+      "anchor": "parts.PG-001.ports.pressure_sense",
+      "catalog_anchor": "pressure_gauge.ports.pressure_sense",
+      "svg_ids": [
+        "port-PG-001-pressure_sense"
+      ]
+    },
+    {
+      "id": "QDP-001.ground_side",
+      "component": "QDP-001",
+      "anchor": "parts.QDP-001.ports.ground_side",
+      "catalog_anchor": "quick_disconnect_coupling_disconnected.ports.ground_side",
+      "svg_ids": [
+        "port-QDP-001-ground_side"
+      ]
+    },
+    {
+      "id": "QDP-001.aircraft_side",
+      "component": "QDP-001",
+      "anchor": "parts.QDP-001.ports.aircraft_side",
+      "catalog_anchor": "quick_disconnect_coupling_disconnected.ports.aircraft_side",
+      "svg_ids": [
+        "port-QDP-001-aircraft_side"
+      ]
+    },
+    {
+      "id": "QDR-001.ground_side",
+      "component": "QDR-001",
+      "anchor": "parts.QDR-001.ports.ground_side",
+      "catalog_anchor": "quick_disconnect_coupling_disconnected_return.ports.ground_side",
+      "svg_ids": [
+        "port-QDR-001-ground_side"
+      ]
+    },
+    {
+      "id": "QDR-001.aircraft_side",
+      "component": "QDR-001",
+      "anchor": "parts.QDR-001.ports.aircraft_side",
+      "catalog_anchor": "quick_disconnect_coupling_disconnected_return.ports.aircraft_side",
+      "svg_ids": [
+        "port-QDR-001-aircraft_side"
+      ]
+    },
+    {
+      "id": "CV-002.inlet",
+      "component": "CV-002",
+      "anchor": "parts.CV-002.ports.inlet",
+      "catalog_anchor": "check_valve_refuel.ports.inlet",
+      "svg_ids": [
+        "port-CV-002-inlet"
+      ]
+    },
+    {
+      "id": "CV-002.outlet",
+      "component": "CV-002",
+      "anchor": "parts.CV-002.ports.outlet",
+      "catalog_anchor": "check_valve_refuel.ports.outlet",
+      "svg_ids": [
+        "port-CV-002-outlet"
+      ]
+    },
+    {
+      "id": "USER-001.pressure_in",
+      "component": "USER-001",
+      "anchor": "parts.USER-001.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-001-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-001.return_out",
+      "component": "USER-001",
+      "anchor": "parts.USER-001.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-001-return_out"
+      ]
+    },
+    {
+      "id": "USER-002.pressure_in",
+      "component": "USER-002",
+      "anchor": "parts.USER-002.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-002-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-002.return_out",
+      "component": "USER-002",
+      "anchor": "parts.USER-002.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-002-return_out"
+      ]
+    },
+    {
+      "id": "USER-003.pressure_in",
+      "component": "USER-003",
+      "anchor": "parts.USER-003.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-003-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-003.return_out",
+      "component": "USER-003",
+      "anchor": "parts.USER-003.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-003-return_out"
+      ]
+    },
+    {
+      "id": "USER-004.pressure_in",
+      "component": "USER-004",
+      "anchor": "parts.USER-004.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-004-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-004.return_out",
+      "component": "USER-004",
+      "anchor": "parts.USER-004.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-004-return_out"
+      ]
+    },
+    {
+      "id": "USER-005.pressure_in",
+      "component": "USER-005",
+      "anchor": "parts.USER-005.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-005-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-005.return_out",
+      "component": "USER-005",
+      "anchor": "parts.USER-005.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-005-return_out"
+      ]
+    },
+    {
+      "id": "USER-006.pressure_in",
+      "component": "USER-006",
+      "anchor": "parts.USER-006.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-006-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-006.return_out",
+      "component": "USER-006",
+      "anchor": "parts.USER-006.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-006-return_out"
+      ]
+    },
+    {
+      "id": "USER-007.pressure_in",
+      "component": "USER-007",
+      "anchor": "parts.USER-007.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-007-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-007.return_out",
+      "component": "USER-007",
+      "anchor": "parts.USER-007.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-007-return_out"
+      ]
+    },
+    {
+      "id": "USER-008.pressure_in",
+      "component": "USER-008",
+      "anchor": "parts.USER-008.ports.pressure_in",
+      "catalog_anchor": "hydraulic_user.ports.pressure_in",
+      "svg_ids": [
+        "port-USER-008-pressure_in"
+      ]
+    },
+    {
+      "id": "USER-008.return_out",
+      "component": "USER-008",
+      "anchor": "parts.USER-008.ports.return_out",
+      "catalog_anchor": "hydraulic_user.ports.return_out",
+      "svg_ids": [
+        "port-USER-008-return_out"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "anchor": "paths[0][0->1]",
+      "endpoints": [
+        "TANK-001.suction_out",
+        "EMP-001.suction"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-0-0"
+      ]
+    },
+    {
+      "anchor": "paths[1][0->1]",
+      "endpoints": [
+        "TANK-001.suction_out",
+        "FSOV-001.main_upper"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-1-0"
+      ]
+    },
+    {
+      "anchor": "paths[1][1->2]",
+      "endpoints": [
+        "FSOV-001.main_lower",
+        "EDP-001.suction"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-2-0"
+      ]
+    },
+    {
+      "anchor": "paths[2][0->1]",
+      "endpoints": [
+        "EDP-001.pressure_out",
+        "@PRESS"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-3-0"
+      ]
+    },
+    {
+      "anchor": "paths[3][0->1]",
+      "endpoints": [
+        "EMP-001.pressure_out",
+        "@PRESS"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-4-0"
+      ]
+    },
+    {
+      "anchor": "paths[4][0->1]",
+      "endpoints": [
+        "@PRESS",
+        "PF-001.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-5-0",
+        "wire-5-1",
+        "bridge-0"
+      ]
+    },
+    {
+      "anchor": "paths[4][1->2]",
+      "endpoints": [
+        "PF-001.outlet",
+        "@MANIFOLD"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-6-0"
+      ]
+    },
+    {
+      "anchor": "paths[5][0->1]",
+      "endpoints": [
+        "@MANIFOLD",
+        "PRV-001.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-7-0"
+      ]
+    },
+    {
+      "anchor": "paths[5][1->2]",
+      "endpoints": [
+        "PRV-001.outlet",
+        "@USR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-8-0"
+      ]
+    },
+    {
+      "anchor": "paths[6][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-001.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-9-0"
+      ]
+    },
+    {
+      "anchor": "paths[7][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-002.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-10-0"
+      ]
+    },
+    {
+      "anchor": "paths[8][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-003.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-11-0"
+      ]
+    },
+    {
+      "anchor": "paths[9][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-004.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-12-0"
+      ]
+    },
+    {
+      "anchor": "paths[10][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-005.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-13-0"
+      ]
+    },
+    {
+      "anchor": "paths[11][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-006.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-14-0"
+      ]
+    },
+    {
+      "anchor": "paths[12][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-007.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-15-0"
+      ]
+    },
+    {
+      "anchor": "paths[13][0->1]",
+      "endpoints": [
+        "@USR",
+        "USER-008.pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-16-0"
+      ]
+    },
+    {
+      "anchor": "paths[14][0->1]",
+      "endpoints": [
+        "PRV-002.outlet",
+        "ACC-001.hydraulic_port"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-17-0"
+      ]
+    },
+    {
+      "anchor": "paths[15][0->1]",
+      "endpoints": [
+        "@PRESS",
+        "PRV-002.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-18-0"
+      ]
+    },
+    {
+      "anchor": "paths[15][1->2]",
+      "endpoints": [
+        "PRV-002.outlet",
+        "TANK-001.bootstrap_pressure_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-19-0"
+      ]
+    },
+    {
+      "anchor": "paths[16][0->1]",
+      "endpoints": [
+        "@MANIFOLD",
+        "QDP-001.aircraft_side"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-20-0"
+      ]
+    },
+    {
+      "anchor": "paths[17][0->1]",
+      "endpoints": [
+        "USER-001.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-21-0"
+      ]
+    },
+    {
+      "anchor": "paths[18][0->1]",
+      "endpoints": [
+        "USER-002.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-22-0"
+      ]
+    },
+    {
+      "anchor": "paths[19][0->1]",
+      "endpoints": [
+        "USER-003.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-23-0"
+      ]
+    },
+    {
+      "anchor": "paths[20][0->1]",
+      "endpoints": [
+        "USER-004.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-24-0"
+      ]
+    },
+    {
+      "anchor": "paths[21][0->1]",
+      "endpoints": [
+        "USER-005.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-25-0"
+      ]
+    },
+    {
+      "anchor": "paths[22][0->1]",
+      "endpoints": [
+        "USER-006.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-26-0"
+      ]
+    },
+    {
+      "anchor": "paths[23][0->1]",
+      "endpoints": [
+        "USER-007.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-27-0"
+      ]
+    },
+    {
+      "anchor": "paths[24][0->1]",
+      "endpoints": [
+        "USER-008.return_out",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-28-0"
+      ]
+    },
+    {
+      "anchor": "paths[25][0->1]",
+      "endpoints": [
+        "@USERR",
+        "RF-001.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-29-0"
+      ]
+    },
+    {
+      "anchor": "paths[25][1->2]",
+      "endpoints": [
+        "RF-001.outlet",
+        "@RET"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-30-0"
+      ]
+    },
+    {
+      "anchor": "paths[26][0->1]",
+      "endpoints": [
+        "CV-002.outlet",
+        "@USERR"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-31-0"
+      ]
+    },
+    {
+      "anchor": "paths[27][0->1]",
+      "endpoints": [
+        "@RET",
+        "TANK-001.return_in"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-32-0"
+      ]
+    },
+    {
+      "anchor": "paths[28][0->1]",
+      "endpoints": [
+        "@RET",
+        "QDR-001.aircraft_side"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-33-0"
+      ]
+    },
+    {
+      "anchor": "paths[29][0->1]",
+      "endpoints": [
+        "EDP-001.case_drain",
+        "@CASE"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-34-0"
+      ]
+    },
+    {
+      "anchor": "paths[30][0->1]",
+      "endpoints": [
+        "EMP-001.case_drain",
+        "@CASE"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-35-0"
+      ]
+    },
+    {
+      "anchor": "paths[31][0->1]",
+      "endpoints": [
+        "@CASE",
+        "CDF-001.inlet"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-36-0"
+      ]
+    },
+    {
+      "anchor": "paths[31][1->2]",
+      "endpoints": [
+        "CDF-001.outlet",
+        "@RET"
+      ],
+      "kind": "path",
+      "svg_ids": [
+        "wire-37-0"
+      ]
+    },
+    {
+      "anchor": "taps[0]",
+      "endpoints": [
+        "PG-001.pressure_sense",
+        "ACC-001.gas_port"
+      ],
+      "kind": "tap",
+      "svg_ids": [
+        "wire-44-0"
+      ]
+    },
+    {
+      "anchor": "taps[1]",
+      "endpoints": [
+        "ACV-001.accumulator_gas",
+        "PG-001.pressure_sense"
+      ],
+      "kind": "tap",
+      "svg_ids": [
+        "wire-45-0"
+      ]
+    }
+  ],
+  "buses": [
+    {
+      "id": "@CASE",
+      "anchor": "buses.CASE",
+      "input_anchors": [
+        "paths[29][0->1]",
+        "paths[30][0->1]",
+        "paths[31][0->1]"
+      ],
+      "svg_ids": [
+        "wire-43-0"
+      ]
+    },
+    {
+      "id": "@MANIFOLD",
+      "anchor": "buses.MANIFOLD",
+      "input_anchors": [
+        "paths[4][1->2]",
+        "paths[5][0->1]",
+        "paths[16][0->1]"
+      ],
+      "svg_ids": [
+        "wire-39-0"
+      ]
+    },
+    {
+      "id": "@PRESS",
+      "anchor": "buses.PRESS",
+      "input_anchors": [
+        "paths[2][0->1]",
+        "paths[3][0->1]",
+        "paths[4][0->1]",
+        "paths[15][0->1]"
+      ],
+      "svg_ids": [
+        "wire-38-0"
+      ]
+    },
+    {
+      "id": "@RET",
+      "anchor": "buses.RET",
+      "input_anchors": [
+        "paths[25][1->2]",
+        "paths[27][0->1]",
+        "paths[28][0->1]",
+        "paths[31][1->2]"
+      ],
+      "svg_ids": [
+        "wire-42-0"
+      ]
+    },
+    {
+      "id": "@USERR",
+      "anchor": "buses.USERR",
+      "input_anchors": [
+        "paths[17][0->1]",
+        "paths[18][0->1]",
+        "paths[19][0->1]",
+        "paths[20][0->1]",
+        "paths[21][0->1]",
+        "paths[22][0->1]",
+        "paths[23][0->1]",
+        "paths[24][0->1]",
+        "paths[25][0->1]",
+        "paths[26][0->1]"
+      ],
+      "svg_ids": [
+        "wire-41-0"
+      ]
+    },
+    {
+      "id": "@USR",
+      "anchor": "buses.USR",
+      "input_anchors": [
+        "paths[5][1->2]",
+        "paths[6][0->1]",
+        "paths[7][0->1]",
+        "paths[8][0->1]",
+        "paths[9][0->1]",
+        "paths[10][0->1]",
+        "paths[11][0->1]",
+        "paths[12][0->1]",
+        "paths[13][0->1]"
+      ],
+      "svg_ids": [
+        "wire-40-0"
+      ]
+    }
+  ],
+  "externs": [],
+  "assemblies": [],
+  "unknown": [
+    "ETP-selector-valve-not-in-catalog",
+    "ETP-unit-not-in-catalog",
+    "ground-refuel-assembly-not-in-catalog",
+    "priority-valve-internal-check-flow-pending",
+    "quick-disconnect-port-semantics-pending",
+    "filter-line-shutoff-dp-standard-page-pending",
+    "return-filter-bypass-assembly-constructed",
+    "return-filter-bypass-cracking-flow-pending",
+    "return-filter-bypass-branch-position-assumed",
+    "air-charging-valve-port-sides-user-confirmed",
+    "pressure-gauge-medium-pneumatic-assumed",
+    "hydraulic-user-symbol-provisional",
+    "FSOV-001-suction-side-placement-assumed",
+    "TANK-001-return-port-count-unconfirmed",
+    "system-relief-valve-not-declared",
+    "pump-isolation-check-valves-not-declared",
+    "EDP-001-drive-shaft-destination",
+    "EMP-001-elec-power-destination",
+    "FSOV-001-command-destination",
+    "QD-open-ends-are-disconnected-position",
+    "accumulator-charge-source-not-declared",
+    "system-pressure-class",
+    "EDP-001-rated-flow",
+    "EMP-001-rated-flow",
+    "ACC-001-precharge-pressure",
+    "ACC-001-volume",
+    "PF-001-filtration-rating",
+    "RF-001-filtration-rating",
+    "CDF-001-filtration-rating",
+    "operating-modes"
+  ],
+  "fragments": [
+    {
+      "id": "wire-0-0",
+      "anchor": "paths[0][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-1-0",
+      "anchor": "paths[1][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-2-0",
+      "anchor": "paths[1][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-3-0",
+      "anchor": "paths[2][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-4-0",
+      "anchor": "paths[3][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-5-0",
+      "anchor": "paths[4][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-5-1",
+      "anchor": "paths[4][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-6-0",
+      "anchor": "paths[4][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-7-0",
+      "anchor": "paths[5][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-8-0",
+      "anchor": "paths[5][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-9-0",
+      "anchor": "paths[6][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-10-0",
+      "anchor": "paths[7][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-11-0",
+      "anchor": "paths[8][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-12-0",
+      "anchor": "paths[9][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-13-0",
+      "anchor": "paths[10][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-14-0",
+      "anchor": "paths[11][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-15-0",
+      "anchor": "paths[12][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-16-0",
+      "anchor": "paths[13][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-17-0",
+      "anchor": "paths[14][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-18-0",
+      "anchor": "paths[15][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-19-0",
+      "anchor": "paths[15][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-20-0",
+      "anchor": "paths[16][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-21-0",
+      "anchor": "paths[17][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-22-0",
+      "anchor": "paths[18][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-23-0",
+      "anchor": "paths[19][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-24-0",
+      "anchor": "paths[20][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-25-0",
+      "anchor": "paths[21][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-26-0",
+      "anchor": "paths[22][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-27-0",
+      "anchor": "paths[23][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-28-0",
+      "anchor": "paths[24][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-29-0",
+      "anchor": "paths[25][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-30-0",
+      "anchor": "paths[25][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-31-0",
+      "anchor": "paths[26][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-32-0",
+      "anchor": "paths[27][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-33-0",
+      "anchor": "paths[28][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-34-0",
+      "anchor": "paths[29][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-35-0",
+      "anchor": "paths[30][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-36-0",
+      "anchor": "paths[31][0->1]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-37-0",
+      "anchor": "paths[31][1->2]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-38-0",
+      "anchor": "buses.PRESS",
+      "kind": "run"
+    },
+    {
+      "id": "wire-39-0",
+      "anchor": "buses.MANIFOLD",
+      "kind": "run"
+    },
+    {
+      "id": "wire-40-0",
+      "anchor": "buses.USR",
+      "kind": "run"
+    },
+    {
+      "id": "wire-41-0",
+      "anchor": "buses.USERR",
+      "kind": "run"
+    },
+    {
+      "id": "wire-42-0",
+      "anchor": "buses.RET",
+      "kind": "run"
+    },
+    {
+      "id": "wire-43-0",
+      "anchor": "buses.CASE",
+      "kind": "run"
+    },
+    {
+      "id": "wire-44-0",
+      "anchor": "taps[0]",
+      "kind": "run"
+    },
+    {
+      "id": "wire-45-0",
+      "anchor": "taps[1]",
+      "kind": "run"
+    },
+    {
+      "id": "bridge-0",
+      "anchor": "paths[4][0->1]",
+      "kind": "bridge"
+    }
+  ]
+}

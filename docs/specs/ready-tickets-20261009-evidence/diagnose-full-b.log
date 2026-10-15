@@ -1,0 +1,89 @@
+test_actual_png_width_ratios_at_normal_and_double_scale (test_display_widths.DisplayWidths) ... FAIL
+test_both_gas_tap_ends_follow_sense_width_and_keep_internal_strokes (test_display_widths.DisplayWidths) ... ok
+test_browser_unavailable_is_unchecked_and_stale_sidecar_is_not_reused (test_display_widths.DisplayWidths) ... ok
+test_css_overrides_and_extra_scale_cannot_hide_behind_correct_class (test_display_widths.DisplayWidths) ... ok
+test_current_leads_have_complete_browser_measurement_coverage (test_display_widths.DisplayWidths) ... ok
+test_equivalent_source_path_and_polyline_leads_follow_network (test_display_widths.DisplayWidths) ... ok
+test_gas_css_polyline_and_extra_scale_corruption_are_localized (test_display_widths.DisplayWidths) ... ok
+test_gas_source_path_polyline_and_compensated_scale_are_equivalent (test_display_widths.DisplayWidths) ... ok
+test_inherited_width_and_compensated_nested_source_scale_are_valid (test_display_widths.DisplayWidths) ... ok
+test_pneumatic_pressure_gauge_12px_override_fails_with_fresh_png (test_display_widths.DisplayWidths) ... ok
+test_pressure_lead_cannot_extend_past_defined_body_boundary (test_display_widths.DisplayWidths) ... ok
+test_tampered_browser_measurements_are_invalidated_and_remeasured (test_display_widths.DisplayWidths) ... ok
+test_unannotated_curved_source_lead_cannot_disappear_from_coverage (test_display_widths.DisplayWidths) ... ok
+test_use_lead_is_explicitly_unchecked_with_object_location (test_display_widths.DisplayWidths) ... ok
+test_width_transition_in_blank_lead_is_rejected (test_display_widths.DisplayWidths) ... ok
+test_dashed_pressure_lead_is_not_a_continuous_measured_connection (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_each_body_primitive_rejects_a_12px_stroke (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_fat_symbol_body_fails_while_its_pressure_leads_keep_correct_width (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_nonuniform_body_primitives_are_explicitly_unchecked (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_percentage_stroke_preserves_report_and_discloses_unmeasured_width (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_source_scaled_body_primitives_keep_prescribed_display_width (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_supported_visible_color_passes_and_paint_servers_remain_unchecked (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_transparent_colored_body_cannot_supply_lead_transition_contact (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_transparent_colored_geometry_does_not_create_a_text_obstacle (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_transparent_colored_lead_has_no_png_ink_and_fails_width_checks (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_transparent_colored_pipe_has_no_png_ink_and_cannot_connect_terminals (test_paint_evidence.PaintEvidenceCLI) ... ok
+test_b7_measures_six_pixel_clearance_without_calling_near_text_overlap (test_text_display.TextDisplay) ... ok
+test_browser_unavailable_keeps_v12_and_b7_explicitly_unchecked (test_text_display.TextDisplay) ... ok
+test_driver_and_standalone_use_identical_text_evidence (test_text_display.TextDisplay) ... ok
+test_font_fallback_change_can_make_the_same_name_overflow (test_text_display.TextDisplay) ... ok
+test_generated_three_line_title_fits_without_smaller_font (test_text_display.TextDisplay) ... ok
+test_internal_text_uses_its_circular_container_not_only_its_box (test_text_display.TextDisplay) ... ok
+test_legend_text_cannot_overflow_its_frame (test_text_display.TextDisplay) ... ok
+test_long_cjk_user_name_is_checked_against_its_own_frame (test_text_display.TextDisplay) ... ok
+test_long_title_is_rejected_even_though_its_origin_and_frame_fit (test_text_display.TextDisplay) ... ok
+test_missing_declared_labels_and_title_text_cannot_look_complete (test_text_display.TextDisplay) ... ok
+test_multiline_cjk_name_and_motor_text_keep_their_own_containers (test_text_display.TextDisplay) ... ok
+test_pipeline_crossing_actual_glyphs_reports_text_box_and_connection (test_text_display.TextDisplay) ... ok
+test_real_png_ink_agrees_with_measured_rotated_cjk_text (test_text_display.TextDisplay) ... ok
+test_required_component_labels_hidden_by_stylesheet_fail (test_text_display.TextDisplay) ... ok
+test_rotated_scaled_anchor_and_left_viewport_clipping_use_actual_bounds (test_text_display.TextDisplay) ... ok
+test_two_independent_texts_overlapping_are_localized (test_text_display.TextDisplay) ... ok
+test_unowned_label_inside_a_symbol_is_not_an_internal_annotation (test_text_display.TextDisplay) ... ok
+test_unpainted_user_span_and_hidden_title_are_known_failures (test_text_display.TextDisplay) ... ok
+test_v17_and_v12_share_root_coordinates_for_suction_marks (test_text_display.TextDisplay) ... FAIL
+test_driver_does_not_deliver_automated_success_without_perceptual_review (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_geometry_success_discloses_unchecked_required_evidence (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_missing_required_symbol_keeps_diagnostics_but_cannot_verify_current (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_parse_failure_replaces_old_success_report (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_review_is_bound_to_content_and_report_not_filenames (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_same_size_replaced_png_is_unchecked_after_revalidation (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_standalone_validator_accepts_explicit_workdir (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_windows_symbol_reference_binds_the_selected_catalog_asset (test_proofreading_evidence.ProofreadingEvidenceCLI) ... ok
+test_canvas_mismatch_writes_an_explicit_not_comparable_report (test_sheet_diff.SheetDiffCLI) ... ok
+test_changed_installed_fonts_block_local_masks_but_not_global_png_comparison (test_sheet_diff.SheetDiffCLI) ... ok
+test_changed_tspan_paint_is_attributed_to_its_declared_label_node (test_sheet_diff.SheetDiffCLI) ... ok
+test_driver_compares_after_full_validation_and_preserves_pending_delivery (test_sheet_diff.SheetDiffCLI) ... ok
+test_explicit_topology_transition_is_checked_against_both_input_and_actual_edges (test_sheet_diff.SheetDiffCLI) ... ok
+test_freeze_preserves_tool_and_symbol_versions_independent_of_live_workspace (test_sheet_diff.SheetDiffCLI) ... ok
+test_frozen_local_font_resources_survive_source_removal_and_scope_mask_relocation (test_sheet_diff.SheetDiffCLI) ... ok
+test_global_font_change_is_explicit_and_needs_no_scope_rasterizations (test_sheet_diff.SheetDiffCLI) ... ok
+test_legacy_frozen_package_with_unbound_required_symbol_is_rejected (test_sheet_diff.SheetDiffCLI) ... ok
+test_local_lead_repair_reports_unchanged_topology_and_local_pixels (test_sheet_diff.SheetDiffCLI) ... ok
+test_port_swap_inside_target_and_adjacent_edge_scope_is_unexpected_topology (test_sheet_diff.SheetDiffCLI) ... ok
+test_removed_input_port_anchor_is_reported_even_when_pixels_and_connections_match (test_sheet_diff.SheetDiffCLI) ... ok
+test_rotating_target_allows_its_connected_routes_without_granting_topology_changes (test_sheet_diff.SheetDiffCLI) ... ok
+test_stale_png_and_rectangular_ignore_masks_cannot_produce_a_pass (test_sheet_diff.SheetDiffCLI) ... ok
+test_unrelated_object_change_is_reported_outside_the_declared_node (test_sheet_diff.SheetDiffCLI) ... ok
+
+======================================================================
+FAIL: test_actual_png_width_ratios_at_normal_and_double_scale (test_display_widths.DisplayWidths)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_display_widths.py", line 200, in test_actual_png_width_ratios_at_normal_and_double_scale
+    self.assertAlmostEqual(lead/pipe,1,delta=.12)
+AssertionError: 1.2215686274509805 != 1 within 0.12 delta (0.2215686274509805 difference)
+
+======================================================================
+FAIL: test_v17_and_v12_share_root_coordinates_for_suction_marks (test_text_display.TextDisplay)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/file/comac/组件库/.scratch/ready-work/integration/.agents/skills/hydraulic-schematic/scripts/test_text_display.py", line 196, in test_v17_and_v12_share_root_coordinates_for_suction_marks
+    self.assertTrue(any(c['id']=='V17' and '文字 H' in c['detail'] for c in report['checks']))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 68 tests in 511.971s
+
+FAILED (failures=2)

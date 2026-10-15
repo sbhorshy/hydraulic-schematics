@@ -1,0 +1,24 @@
+{
+  "actor": "Codex root",
+  "at": "2026-10-10T04:05:22.055607+00:00",
+  "observations": [
+    {
+      "case": "small",
+      "artifact_sha256": "cd902a33f5f57966b65c2d6f117e1c36c50e43f5cfaf6d3a8993def221e3fff7",
+      "scope": "Full PNG visual spot-check only; item-by-item perceptual review and engineering signature not supplied.",
+      "observation": "Viewed full PNG: supply line, five-stroke suction groups, terminal leads, labels and panels readable. Red ports correspond to intentionally unmodeled connections."
+    },
+    {
+      "case": "assembly",
+      "artifact_sha256": "78f2885ce17ca3eb6b38d4726aabb29137dc5b93a736ba39aa1aed2bf5d5f46c",
+      "scope": "Full PNG visual spot-check only; item-by-item perceptual review and engineering signature not supplied.",
+      "observation": "Viewed full PNG: enclosure contains both members and labels; main line is aligned and crosses frame at declared member leads. The existing flow-confirmation label remains pending."
+    },
+    {
+      "case": "project",
+      "artifact_sha256": "cef54e36ab128ec34165322c08ce26cab7f6aa19eb59528dc5928bac0be241bb",
+      "scope": "Full PNG visual spot-check only; item-by-item perceptual review and engineering signature not supplied.",
+      "observation": "Viewed full PNG: migrated layout and PRV-downstream accumulator/gas branch visible; priority-valve lead widths and FSOV lead ends look consistent. CASE/PRESS contact and recorded six failures remain; this is a residual concept drawing, not a qualified arrival sheet."
+    }
+  ]
+}

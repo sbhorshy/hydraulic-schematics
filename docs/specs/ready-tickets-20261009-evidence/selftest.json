@@ -1,0 +1,14 @@
+{
+  "commit": "f426711e304da07b4243f8a84fc2e3ed2eeb7489",
+  "scope": "selftest",
+  "command": [
+    "/usr/bin/python",
+    "-u",
+    ".agents/skills/hydraulic-schematic/scripts/selftest.py"
+  ],
+  "started_at": "2026-10-10T04:51:24.588142+00:00",
+  "finished_at": "2026-10-10T05:16:53.967374+00:00",
+  "elapsed_seconds": 1529.379,
+  "exit_code": 0,
+  "unit_log": "/mnt/d/file/comac/组件库/.scratch/ready-work/final-evidence/selftest-units-f426711e304d-1791607884588300854.log"
+}

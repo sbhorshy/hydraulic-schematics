@@ -1,0 +1,13 @@
+{
+  "component": "PF-001.inlet",
+  "visible": true,
+  "stroke": "rgba(255, 0, 0, 0)",
+  "width_coverage": {
+    "V15": "pass",
+    "V16": "pass"
+  },
+  "width_failures": [],
+  "all_failures": [
+    "V17"
+  ]
+}
