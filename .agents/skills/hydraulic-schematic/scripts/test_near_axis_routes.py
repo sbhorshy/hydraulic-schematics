@@ -88,4 +88,3 @@ class NearAxisCLI(unittest.TestCase):
                     self.assertTrue(abs(a[0]-b[0])<1e-7 or abs(a[1]-b[1])<1e-7,(a,b))
 
 if __name__=='__main__':unittest.main()
-
