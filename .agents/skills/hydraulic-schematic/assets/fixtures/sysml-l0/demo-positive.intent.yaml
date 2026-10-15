@@ -1,0 +1,47 @@
+# DEMO-SYS-1 手写参照 intent（拓扑对账夹具）。
+# 与 demo-positive.sysml 同一拓扑，但书写风格不同：部分边方向反转、
+# 桥接路径写成三 token 链——用于验证 topology_diff 的无向归一化，
+# 不是转换器输出，禁止冒充转换成功。
+# 端口枢纽（@PRESS/@MANIFOLD/@USR/@RET）的对账 oracle：每个已声明枢纽
+# 都必须连回真实端口（桥接等价合并或显式辐条），不允许吞边。
+catalog: comac-hydraulic-components@0.7-draft
+extern: {}
+l0_version: '1.1'
+maturity: concept
+parts:
+  CDF-001: filter_line_shutoff_dp_case_drain
+  EDP-001: engine_driven_pump
+  PF-001: filter_line_shutoff_dp
+  PRV-001: priority_valve
+  SW-001: pressure_switch
+  TANK-001: bootstrap_reservoir
+  USER-001: hydraulic_user
+paths:
+- - EDP-001.suction
+  - TANK-001.suction_out
+- - '@PRESS'
+  - EDP-001.pressure_out
+- - '@MANIFOLD'
+  - PRV-001.inlet
+- - USER-001.pressure_in
+  - '@USR'
+- - '@RET'
+  - USER-001.return_out
+- - EDP-001.case_drain
+  - CDF-001.inlet
+- - '@RET'
+  - CDF-001.outlet
+- - '@PRESS'
+  - PF-001
+  - '@MANIFOLD'
+- - PRV-001.outlet
+  - '@USR'
+- - TANK-001.return_in
+  - '@RET'
+system: DEMO-SYS-1
+taps:
+- at: CDF-001.inlet
+  sensor: SW-001.pressure_sense
+unknown:
+- DEMO-bootstrap-source-not-declared
+- handwritten-reference-omits-pending-and-unconnected-disclosure

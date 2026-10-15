@@ -34,6 +34,7 @@ REQUIRED_SECTIONS = ('l0_version', 'system', 'catalog', 'maturity',
 
 def default_schema_path():
     cands = (
+        os.path.join(HERE, 'assets', 'contracts', SCHEMA_NAME),                # 自包含驱动沙箱
         os.path.join(HERE, '..', 'assets', 'contracts', SCHEMA_NAME),          # skill 快照侧
         os.path.join(HERE, '..', '..', '.agents', 'skills', 'hydraulic-schematic',
                      'assets', 'contracts', SCHEMA_NAME),                      # 规范源侧
@@ -140,6 +141,58 @@ def semantic_findings(intent, catalog, source_text):
                 "类型 %s 不在目录 %s 内，其端口集合无从谈起" % (typ, intent.get('catalog')),
                 "改用目录内类型，或先把类型登记进 component-catalog.json 再引用")
 
+    # Assembly is a grouping declaration, never a synthetic part or port.
+    assemblies = intent.get('assemblies', {})
+    if not isinstance(assemblies, dict):
+        add('E-ASSEMBLY-SHAPE', 'ERROR', None, 'assemblies',
+            'assemblies 必须是装配声明映射', '按装配 id 声明 label 与 members')
+        assemblies = {}
+    owners = {}
+    if isinstance(assemblies, dict):
+        for aid, assembly in assemblies.items():
+            anchor = 'assemblies.' + str(aid)
+            if not isinstance(aid, str) or not re.fullmatch(r'[A-Z][A-Za-z0-9_-]*', aid):
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 必须以大写字母开头，仅含字母、数字、下划线或连字符', '修正装配 id')
+            if not isinstance(assembly, dict):
+                add('E-ASSEMBLY-SHAPE', 'ERROR', None, anchor,
+                    '装配声明必须包含 label 与 members', '改为装配声明映射')
+                continue
+            label = assembly.get('label')
+            if not isinstance(label, str) or not label.strip():
+                add('E-ASSEMBLY-LABEL', 'ERROR', None, anchor,
+                    '装配 label 必须是非空文本', '提供可读的装配名称')
+            if aid in parts or aid in externs:
+                add('E-ASSEMBLY-ID', 'ERROR', None, anchor,
+                    '装配 id 与 part/extern 重名', '使用独立装配 id')
+            members = assembly.get('members')
+            if not isinstance(members, list):
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配 members 必须是至少两个成员的列表', '列出已声明的组件实例')
+                continue
+            if len(members) < 2:
+                add('E-ASSEMBLY-MEMBERS', 'ERROR', None, anchor,
+                    '装配至少包含两个成员', '列出至少两个不同的已声明组件实例')
+            for member in members:
+                if not isinstance(member, str) or not member:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '装配成员必须是非空组件实例名称', '使用 parts 中的组件实例名称')
+                    continue
+                if member not in parts or member in assemblies:
+                    add('E-ASSEMBLY-MEMBER', 'ERROR', None, anchor,
+                        '成员 %s 必须是已声明 part，禁止装配嵌套' % member,
+                        '仅引用 parts 中的组件实例')
+                if member in owners:
+                    add('E-ASSEMBLY-OWNER', 'ERROR', None, anchor,
+                        '成员 %s 重复归属 %s / %s' % (member, owners[member], aid),
+                        '每个成员仅属于一个装配且只列一次')
+                owners[member] = aid
+        for pi, path in enumerate(intent.get('paths') or []):
+            for token in path:
+                if str(token).split('.')[0] in assemblies:
+                    add('E-ASSEMBLY-ENDPOINT', 'ERROR', None, 'paths[%d]' % pi,
+                        '装配不是管线端点: %s' % token, '连接实际成员端口或 extern')
+
     # 逐 path 核对：引用 / 裸实例 / 端口存在性 / medium / role / terminal 端点合法性
     for pi, path in enumerate(intent.get('paths') or []):
         line = lm['paths'][pi] if pi < len(lm['paths']) else None
@@ -188,6 +241,36 @@ def semantic_findings(intent, catalog, source_text):
                     "medium 兼容: paths 属液压主路，%s 的 medium=%s"
                     % (tok, ports[pid].get('medium')),
                     "该端口属电气/气侧，走 taps 或专线，不入 paths")
+
+    # taps 语义核对：两端都必须是「已声明实例.已登记端口」。本体感测口
+    # （role=measurement/kind=body_tap，挂油箱壁等本体安装座）与网络锚
+    # （at 为被测网络的流口）在此同权存在性核对——渲染期 wire_taps 都按
+    # 端口锚点画专线，差别只在布局规则与悬空豁免，不在合法性。
+    for ti, t in enumerate(intent.get('taps') or []):
+        for key in ('sensor', 'at'):
+            tok = str(t.get(key) or '')
+            inst, _, pid = tok.partition('.')
+            if inst in externs:
+                add('E-TAP-%d-%s-EXT' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 引用边界标记 %s：传感支路两端须是元件端口"
+                    % (key, inst),
+                    "把 %s 改为 parts 中已声明实例的显式端口" % tok)
+                continue
+            if inst not in parts or not pid:
+                add('E-TAP-%d-%s-TOK' % (ti, key), 'ERROR', None, tok,
+                    "taps %s 不是「实例.端口」形，或实例未在 parts 声明: %s"
+                    % (key, tok),
+                    "写成已声明实例的显式端口，如 TANK-001.body_sense_tap")
+                continue
+            ct = types.get(parts[inst])
+            if ct is None:
+                continue
+            ports = {p['id']: p for p in ct.get('ports', [])}
+            if pid not in ports:
+                add('E-TAP-%d-%s-PORT' % (ti, key), 'ERROR', None, tok,
+                    "端口存在性: 类型 %s 无端口 %s（可用: %s）"
+                    % (parts[inst], pid, ', '.join(sorted(ports))),
+                    "改成列出的真实端口 id")
     return findings
 
 
