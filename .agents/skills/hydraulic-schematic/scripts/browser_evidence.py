@@ -222,7 +222,24 @@ SCRIPT = r'''
         });
       }).map(b=>b.key));
     }
-    document.getElementById('evidence').textContent=JSON.stringify({status:'pass',viewbox:[vb.x,vb.y,vb.width,vb.height],elements:rows});
+    // Probe declared interface coordinates against actual native body paint.
+    // Metadata supplies a location only; red markers cannot be contact evidence.
+    const portContacts=[];
+    for(const meta of svg.querySelectorAll('metadata[data-port]')) {
+      const inst=meta.closest('[id^="inst-"]');
+      const x=Number(meta.getAttribute('data-x')), y=Number(meta.getAttribute('data-y'));
+      if(!inst || !meta.hasAttribute('data-x') || !meta.hasAttribute('data-y') || !Number.isFinite(x) || !Number.isFinite(y)) continue;
+      const m=rootInverse.multiply(inst.getScreenCTM()), p=xy(m,x,y);
+      const instance=inst.id.slice(5);
+      const contacts=bodies.filter(b=>{
+        if(b.instance!==instance || b.attrs['data-port'] || b.attrs['data-port-id']) return false;
+        const el=all[b.key], local=new DOMPoint(...p).matrixTransform(new DOMMatrix(b.matrix).inverse());
+        return (foreground(b.style,'stroke') && el.isPointInStroke(local)) ||
+          (foreground(b.style,'fill') && el.isPointInFill(local));
+      }).map(b=>b.key);
+      portContacts.push({port:meta.getAttribute('data-port'),position:p,contacts});
+    }
+    document.getElementById('evidence').textContent=JSON.stringify({status:'pass',viewbox:[vb.x,vb.y,vb.width,vb.height],elements:rows,port_contacts:portContacts});
   } catch(error) {document.getElementById('evidence').textContent=JSON.stringify({status:'not_checked',reason:String(error)});}
 })();
 '''.replace('__COLOR_RGBA__', COLOR_RGBA_JS)
