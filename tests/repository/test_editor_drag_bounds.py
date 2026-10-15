@@ -327,17 +327,115 @@ class EditorDragBounds(unittest.TestCase):
         self.assertEqual(self.layout()['layout_version'], '1.1')
         self.assertIn('render_l0_sheet.py', self.calls)
 
-    def test_http_delta_nan_displacement_rejected_without_write(self):
-        port = self._serve()
+    def post_delta(self, port, fields):
         req = urllib.request.Request(
             'http://127.0.0.1:%d/api/delta' % port,
-            data=json.dumps({'node': 'EDP-001', 'dx': float('nan')}).encode(),
+            data=json.dumps({'node': 'EDP-001', **fields}).encode(),
             headers={'Content-Type': 'application/json'})
-        result = json.load(urllib.request.urlopen(req, timeout=60))
-        self.assertFalse(result['ok'])
-        self.assertEqual(result['stage'], 'delta')
+        with urllib.request.urlopen(req, timeout=60) as response:
+            self.assertEqual(response.status, 200)
+            return json.load(response)
+
+    def assert_invalid_displacement(self, port, fields):
+        self.restore()
+        self.calls.clear()
+        direct = server.apply_delta(str(self.work), 'EDP-001',
+                                    fields.get('dx', 0), fields.get('dy', 0))
+        self.assertFalse(direct['ok'], direct)
+        self.assertEqual(direct['stage'], 'delta')
         self.assert_transaction_unchanged(self.baseline)
         self.assertEqual(self.calls, [])
+        result = self.post_delta(port, fields)
+        self.assertEqual(result, direct)
+        self.assertIn('非有限/非法数值', result['error'])
+        self.assert_transaction_unchanged(self.baseline)
+        self.assertEqual(self.calls, [], 'Invalid HTTP transaction started rendering')
+
+    def test_http_boolean_axes_reject_the_whole_transaction(self):
+        port = self._serve()
+        for axis, other in (('dx', 'dy'), ('dy', 'dx')):
+            for bad in (True, False):
+                for valid_peer in (None, 10):
+                    fields = {axis: bad}
+                    if valid_peer is not None:
+                        fields[other] = valid_peer
+                    with self.subTest(fields=fields):
+                        self.assert_invalid_displacement(port, fields)
+
+    def test_http_non_numeric_types_match_direct_contract(self):
+        port = self._serve()
+        for axis, other in (('dx', 'dy'), ('dy', 'dx')):
+            for bad in (None, '1.5', [], {}):
+                with self.subTest(axis=axis, value=bad):
+                    self.assert_invalid_displacement(port, {axis: bad, other: 10})
+
+    def test_http_delta_nan_displacement_rejected_without_write(self):
+        port = self._serve()
+        for axis, other in (('dx', 'dy'), ('dy', 'dx')):
+            for bad in (float('nan'), float('inf'), float('-inf')):
+                with self.subTest(axis=axis, value=bad):
+                    self.assert_invalid_displacement(port, {axis: bad, other: 10})
+
+    def test_http_valid_numbers_and_omitted_axis_match_direct_write(self):
+        port = self._serve()
+        for fields in ({'dx': 10, 'dy': -2}, {'dx': 1.25, 'dy': -.5},
+                       {'dx': 10}, {'dy': -2.5}):
+            with self.subTest(fields=fields):
+                self.restore()
+                direct = server.apply_delta(str(self.work), 'EDP-001',
+                                            fields.get('dx', 0), fields.get('dy', 0))
+                self.assertTrue(direct['ok'], direct)
+                expected = (self.work / LAYOUT_NAME).read_bytes()
+                self.restore()
+                self.calls.clear()
+                result = self.post_delta(port, fields)
+                self.assertTrue(result['ok'], result)
+                self.assertEqual((self.work / LAYOUT_NAME).read_bytes(), expected)
+                node = self.layout()['nodes']['EDP-001']
+                original = json.loads(self.baseline)['nodes']['EDP-001']
+                self.assertEqual(node['x'], original['x'] + fields.get('dx', 0))
+                self.assertEqual(node['y'], original['y'] + fields.get('dy', 0))
+                self.assertEqual(self.layout()['layout_version'], '1.1')
+                self.assertEqual(len(self.layout()['revision_log']),
+                                 len(json.loads(self.baseline)['revision_log']) + 1)
+                self.assertEqual(self.calls, ['render_l0_sheet.py',
+                                             'rasterize_sheet.py', 'validate_sheet.py'])
+
+    def test_http_omitted_displacements_keep_default_zero_behavior(self):
+        port = self._serve()
+        result = self.post_delta(port, {})
+        self.assertFalse(result['ok'])
+        self.assertEqual(result['stage'], 'delta')
+        self.assertEqual(result['error'], '零位移')
+        self.assert_transaction_unchanged(self.baseline)
+        self.assertEqual(self.calls, [])
+
+
+class EditorNumericDeltaFullChain(unittest.TestCase):
+    def test_fractional_http_move_uses_real_render_and_validation(self):
+        with tempfile.TemporaryDirectory(prefix='numeric-delta-chain-') as directory:
+            work = make_render_workspace(Path(directory), SMALL)
+            server.Handler.workdir = str(work)
+            http = server.ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
+            worker = threading.Thread(target=http.serve_forever, daemon=True)
+            worker.start()
+            try:
+                req = urllib.request.Request(
+                    'http://127.0.0.1:%d/api/delta' % http.server_port,
+                    data=json.dumps({'node':'EDP-001', 'dx':1.25}).encode(),
+                    headers={'Content-Type':'application/json'})
+                with urllib.request.urlopen(req, timeout=90) as response:
+                    result = json.load(response)
+                self.assertTrue(result['ok'], result)
+                self.assertEqual(result['evidence']['status'], 'current')
+                self.assertFalse(result['passed'])  # No human review invented.
+                node = json.loads((work / LAYOUT_NAME).read_text())['nodes']['EDP-001']
+                self.assertEqual((node['x'], node['y']), (571.25, 490))
+                self.assertTrue((work / 'sheet-readback.png').is_file())
+            finally:
+                http.shutdown()
+                http.server_close()
+                worker.join()
 
 
 if __name__ == '__main__':

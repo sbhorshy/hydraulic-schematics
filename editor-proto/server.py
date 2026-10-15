@@ -470,7 +470,9 @@ class Handler(BaseHTTPRequestHandler):
             n = int(self.headers.get('Content-Length', 0))
             req = json.loads(self.rfile.read(n).decode('utf-8'))
             node = req['node']
-            dx, dy = float(req.get('dx', 0)), float(req.get('dy', 0))
+            # Preserve JSON types until apply_delta validates both axes.
+            # float(True) would erase the evidence needed to reject bool.
+            dx, dy = req.get('dx', 0), req.get('dy', 0)
             rot = req.get('rot')
             rot = int(rot) if rot is not None else None
             mirror = req.get('mirror')
