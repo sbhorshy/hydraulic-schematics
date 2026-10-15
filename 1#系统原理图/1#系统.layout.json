@@ -30,7 +30,8 @@
     "root-coordinate migration: content x +30; panels unchanged; canvas right 1680→1710; edge_margin=30",
     "2026-10-12 #23: bridge_policy 显式选择登记政策 current-1-verified-single-bridge-20261012（内容绑定 intent SHA-256，放行最多 1 处经验证跳线；非平面证据 research/glm-followup-20261012/whole-graph-planarity.md）",
     "2026-10-12 #23 候选落盘（2.3）: 单跳线布局——EMP-001 mirror=y（case_drain 移顶；镜像经 1# 工作目录 catalog 两泵 #63 登记授权，未提升 provisional 成熟度）; CDF-001 (450,100)→(730,430) rot270/100x158 不变（RET 上端下移，原 PF 进线跨 RET 消失，CDF.out 跨 @PRESS 单处）; @CASE x 650→700（CASE 主干置于两泵中间，不再贴压力口）; EMP 标签 above→right、CDF right→below(drop 20) 避让端口出线。Codex 临时沙箱实测仅旧 B1(=0) 失败、其余 hardfail 0（../layout-probe-summary.json、../bridge-second-review.json），本政策 allowance=1 下预期 fail0，待 Codex 完整实跑确认后冻结。",
-    "2026-10-12 #23 第二轮间距候选落盘（2.4）: 在 2.3 单跳线候选上仅微调布局六处——FSOV-001 x 332→352、EDP-001 x 570→610、EMP-001 (570,610)→(610,606)、ACC-001 x 730→726、ACV-001 y 937→939、CV-002 y 1120→1128；不改算法/阈值/符号/intent/标签/母线/走廊，note 坐标摘要同步刷为当前值。Codex 实跑 render+raster+validate（../layout-budget-probe-summary.json）：fail0；B1 raw1/pass（allowance=1，verified=1）、B2 total24/max3、B3 max1.281、B4 18、B5 44——满足原票到站口径 fail0/B3≤1.447/B4≥16/B5≥43（原始验收依据 docs/specs/ready-tickets-20261009-review.md:30，#22 决议原值 1.447/16/43；近期残差 10/24 档不可作关票基线）；B6 avoid_corridor 6/over、B7 min_clearance 2.101（1 violation）/over 仍按事实披露。"
+    "2026-10-12 #23 第二轮间距候选落盘（2.4）: 在 2.3 单跳线候选上仅微调布局六处——FSOV-001 x 332→352、EDP-001 x 570→610、EMP-001 (570,610)→(610,606)、ACC-001 x 730→726、ACV-001 y 937→939、CV-002 y 1120→1128；不改算法/阈值/符号/intent/标签/母线/走廊，note 坐标摘要同步刷为当前值。Codex 实跑 render+raster+validate（../layout-budget-probe-summary.json）：fail0；B1 raw1/pass（allowance=1，verified=1）、B2 total24/max3、B3 max1.281、B4 18、B5 44——满足原票到站口径 fail0/B3≤1.447/B4≥16/B5≥43（原始验收依据 docs/specs/ready-tickets-20261009-review.md:30，#22 决议原值 1.447/16/43；近期残差 10/24 档不可作关票基线）；B6 avoid_corridor 6/over、B7 min_clearance 2.101（1 violation）/over 仍按事实披露。",
+    "#88 hard-routing clearance: EMP label below +20; CDF label drop 40; ACC label lift 64; RET bus x 970→980. Component positions, port identities and topology unchanged."
   ],
   "canvas": {
     "width": 1710,
@@ -120,7 +121,7 @@
       "rot": 0
     },
     "ACV-001": {
-      "x": 830.0,
+      "x": 830,
       "y": 939,
       "symbol": "symbols/air-charging-valve.svg",
       "w": 134,
@@ -235,7 +236,7 @@
     },
     "RET": {
       "kind": "v",
-      "x": 970.0
+      "x": 980
     },
     "CASE": {
       "kind": "v",
@@ -270,7 +271,7 @@
     "TANK-001": "below",
     "FSOV-001": "below",
     "EDP-001": "below",
-    "EMP-001": "right",
+    "EMP-001": "below",
     "PF-001": "right",
     "CDF-001": "below",
     "RF-001": "below",
@@ -285,7 +286,8 @@
   "label_drop": {
     "TANK-001": 100,
     "EDP-001": 40,
-    "CDF-001": 20
+    "CDF-001": 40,
+    "EMP-001": 20
   },
   "lanes_note": "#46 水平走廊 1010: @RET->油箱 支路从油箱西侧下绕，越过 PRV-002 下游 ACC/PG/ACV 支路底缘(994)，从图例顶缘(1020)上方接入 @RET；原890会穿新气侧件/支路。仅更改候选走廊，不改任何连接与其他节点坐标。",
   "lanes": [
@@ -311,7 +313,7 @@
     "h": 56
   },
   "label_lift": {
-    "ACC-001": 19
+    "ACC-001": 64
   },
   "boundary_terminals": [
     [

@@ -2,7 +2,7 @@
 
 只测参数面：--list-suites 纯 JSON 清单与 F 组必需套件集合完全一致
 （不写死绝对数，按显式必需模块清单对账：原 24 套件 + #63 的
-test_mirror_policy / test_mirror_render + #23 的 test_bridge_allowance，
+test_mirror_policy / test_mirror_render + #23 的 test_bridge_allowance + #83–#88 的 6 个回归套件，
 新增/移除套件须同步本清单）；
 无效 --jobs、NaN/Inf 或非正 --suite-timeout、未知参数一律退出码 2 且
 不启动任何检查；已有 --report/--log-dir 输出路径保留不覆盖。逐套件
@@ -38,6 +38,10 @@ REQUIRED_SUITES = frozenset({
     'test_mirror_policy', 'test_mirror_render',
     # ---- #23 跳线许可（B1 放行）----
     'test_bridge_allowance',
+    # ---- #83–#88 可见几何检验与路由硬约束 ----
+    'test_near_axis_routes', 'test_orphan_port_geometry',
+    'test_suction_continuity', 'test_unintended_cycles',
+    'test_upright_text', 'test_route_obstacles',
 })
 
 

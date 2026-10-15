@@ -47,7 +47,7 @@
 本组不属于 selftest.py 的 F 组固定清单。那份清单以 selftest.py 的
 L0_SUITES 注册表为准，成员完整性由 test_selftest_cli.py 以显式必需模块
 集合对账（存量 24 套件 + #63 的 test_mirror_policy / test_mirror_render
-+ #23 的 test_bridge_allowance，须齐全、无多余、无重复）；本文件不写死
++ #23 的 test_bridge_allowance + #83–#88 的回归套件，须齐全、无多余、无重复）；本文件不写死
 套件绝对数。
 """
 from pathlib import Path

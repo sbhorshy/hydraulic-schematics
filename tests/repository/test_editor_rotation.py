@@ -18,6 +18,10 @@ class EditorRotation(unittest.TestCase):
     def test_rotation_persists_and_runs_canonical_chain_without_legacy_scripts(self):
         with tempfile.TemporaryDirectory() as directory:
             work = make_render_workspace(Path(directory), SKILL / 'assets/fixtures/l0-small-seed')
+            layout_path=work/'1#系统.layout.json'
+            layout=json.loads(layout_path.read_text())
+            layout['label_pos']['PF-001']='right'  # Leave the rotated inlet unobstructed.
+            layout_path.write_text(json.dumps(layout))
             server.Handler.workdir = str(work)
             http = server.ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
             worker = threading.Thread(target=http.serve_forever, daemon=True)
@@ -31,11 +35,14 @@ class EditorRotation(unittest.TestCase):
                 self.assertFalse(result['passed'])  # no perceptual signoff
                 self.assertEqual(result['evidence']['status'], 'current')
                 self.assertTrue((work / 'sheet-readback.png').exists())
-                # Invalid manual geometry is kept and accurately shown red.
+                # Invalid manual geometry remains persisted, but the hard router
+                # refuses to emit a drawing that crosses the overlapping node.
                 req.data = json.dumps({'node':'PF-001','dx':-280}).encode()
                 result = json.load(urllib.request.urlopen(req, timeout=90))
-                self.assertFalse(result['passed'])
-                self.assertTrue(any(i['sev']=='red' for i in result['issues']), result)
+                self.assertFalse(result['ok'],result)
+                self.assertEqual(result['stage'],'render')
+                self.assertIn('Routing blocked',result['render_stderr'])
+                self.assertFalse((work/'1#系统原理图.svg').exists())
                 self.assertEqual(json.loads((work / '1#系统.layout.json').read_text())['nodes']['PF-001']['x'], 570)
             finally:
                 http.shutdown(); http.server_close(); worker.join()
