@@ -23,7 +23,7 @@ def make_render_workspace(root, fixture):
     """Copy templates before running, using only packaged catalog/symbol assets."""
     work = root / 'run'
     work.mkdir()
-    for name in ('layout_contract.py', 'assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
+    for name in ('route_obstacles.py', 'layout_contract.py', 'assembly_checks.py', 'render_l0_sheet.py', 'preflight.py', 'validate_sheet.py',
                  'topology_confirm.py', 'endpoint_usage.py', 'proofreading_evidence.py',
                  'browser_evidence.py', 'lead_geometry.py', 'stroke_checks.py', 'text_checks.py', 'svg_paint.py',
                  'sheet_geometry.py', 'mirror_policy.py', 'endpoint_checks.py', 'topology_reconciliation.py', 'layout_clearance.py', 'junction_semantics.py',
@@ -132,8 +132,12 @@ class LayoutEntrypoints(unittest.TestCase):
             layout = json.loads(output.read_text(encoding='utf-8'))
             self.assertEqual(len(layout['nodes']), 23)
             self.assertEqual(len(layout['labels']), 23)
-            self.run_script(work / 'render_l0_sheet.py', work)
-            self.assertTrue((work / '1#系统原理图.svg').is_file())
+            # This rule layout historically routes through its own FSOV label.
+            # Hard routing must now reject it; the seed below remains renderable.
+            self.run_script(work / 'render_l0_sheet.py', work, expected=1)
+            diagnostic = json.loads((work / 'routing-error.json').read_text())
+            self.assertTrue(diagnostic['obstacles'])
+            self.assertFalse((work / '1#系统原理图.svg').exists())
 
     def test_cli_rejects_reference_layout_with_active_mirror(self):
         # 真实 CLI 证明:参照布局带活跃 mirror 时 fail-closed 退出且不
@@ -165,13 +169,11 @@ class LayoutEntrypoints(unittest.TestCase):
             self.run_script(work / 'validate_sheet.py', work, expected=1)
             report = json.loads((work / 'validation-report.json').read_text(encoding='utf-8'))
             failures = {c['id'] for c in report['checks'] if c['result'] == 'fail'}
-            # 短净距出桩修复已消除原 V17；此未修正种子仍有气侧穿本体，
-            # 且 V3/V13 独立检查会抓住同一支路原先漏检的反向折返。
-            # V19 also retains the documented B1 zero-crossing gate: the real
-            # PRESS/RET crossing at root (970,368) counts even with its bridge.
-            self.assertEqual(failures, {'V2', 'V3', 'V10', 'V13', 'V14', 'V19'})
-            self.assertTrue(any(c['id'] == 'V13' and '自身折返' in c['detail']
-                                and 'ln-sense' in c['detail'] for c in report['checks']))
+            # #88 prevents body penetration and the former gas-side foldback.
+            # The residual nonconnected crossings still fail the zero budget.
+            self.assertEqual(failures, {'V19'})
+            self.assertFalse([c for c in report['checks'] if c['result']=='fail'
+                              and c['id'] in ('V2','V3','V10','V13','V14')])
             self.assertEqual(report['visual_review'], 'pending')
 
     def test_small_seed_passes_preflight_render_and_geometry(self):

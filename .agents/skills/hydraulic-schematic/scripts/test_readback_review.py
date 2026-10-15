@@ -192,7 +192,7 @@ class ReadbackCLI(unittest.TestCase):
         manifest=self.generate()
         ids={o['id'] for o in manifest['objects']}
         self.assertTrue({'component:PRV-001','port:PRV-001.inlet','component:FSOV-001','port:FSOV-001.main_lower'}<=ids)
-        self.assertTrue(any(o['kind']=='intersection' and o.get('position')==[320,686] for o in manifest['objects']))
+        self.assertTrue(any(o['kind']=='intersection' and o.get('position')==[298,686] for o in manifest['objects']))
         def region_for(oid,x,y):
             obj=next(o for o in manifest['objects'] if o['id']==oid)
             return next(r for r in manifest['regions'] if r['id'] in obj['region_ids'] and r['pixel_box'][0]<=x<r['pixel_box'][2] and r['pixel_box'][1]<=y<r['pixel_box'][3])

@@ -44,8 +44,8 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         root=ET.parse(self.svg).getroot()
         dots=[e for g in root.iter() if g.get('id')=='junctions' for e in g
-              if e.get('class')=='jn' and abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1]
-        self.assertEqual(len(dots),1,'The actual suction fork at root(320,686) needs one junction dot')
+              if e.get('class')=='jn' and abs(float(e.get('cx'))-298)<.1 and abs(float(e.get('cy'))-686)<.1]
+        self.assertEqual(len(dots),1,'The actual suction fork at root(298,686) needs one junction dot')
         self.assertIn('paths[0][0->1]',dots[0].get('data-edges',''))
         self.assertIn('paths[1][0->1]',dots[0].get('data-edges',''))
 
@@ -53,10 +53,10 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         def erase(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            group.remove(next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1))
+            group.remove(next(e for e in group if abs(float(e.get('cx'))-298)<.1 and abs(float(e.get('cy'))-686)<.1))
         self.edit(erase)
         findings=[c for c in self.validate()['checks'] if c['id']=='V4' and c['result']=='fail']
-        finding=next(c for c in findings if c.get('kind')=='missing_junction' and c.get('position')==[320.0,686.0])
+        finding=next(c for c in findings if c.get('kind')=='missing_junction' and c.get('position')==[298.0,686.0])
         self.assertEqual(finding['input_anchors'],['paths[0][0->1]','paths[1][0->1]'])
 
     # Injections retain their original final/root positions after removal of the sheet x transform.
@@ -131,12 +131,12 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         def offset(root):
             group=next(e for e in root.iter() if e.get('id')=='junctions')
-            dot=next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1)
-            dot.set('cx','323')
+            dot=next(e for e in group if abs(float(e.get('cx'))-298)<.1 and abs(float(e.get('cy'))-686)<.1)
+            dot.set('cx','301')
         self.edit(offset)
         findings=[c for c in self.validate()['checks'] if c['id']=='V4']
-        self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[320,686] for c in findings),findings)
-        self.assertTrue(any(c.get('kind')=='unexpected_junction' and c.get('position')==[323,686] for c in findings),findings)
+        self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[298,686] for c in findings),findings)
+        self.assertTrue(any(c.get('kind')=='unexpected_junction' and c.get('position')==[301,686] for c in findings),findings)
 
     def test_outline_only_transparent_and_css_hidden_fork_dots_are_missing(self):
         for style in ('fill:none;stroke:black;stroke-width:2','fill-opacity:0','opacity:0'):
@@ -144,12 +144,12 @@ class JunctionCLI(unittest.TestCase):
                 self.current()
                 def hide(root):
                     group=next(e for e in root.iter() if e.get('id')=='junctions')
-                    dot=next(e for e in group if abs(float(e.get('cx'))-320)<.1 and abs(float(e.get('cy'))-686)<.1)
+                    dot=next(e for e in group if abs(float(e.get('cx'))-298)<.1 and abs(float(e.get('cy'))-686)<.1)
                     style_node=next(e for e in root.iter() if e.tag.endswith('style'))
                     style_node.text += '\n#'+dot.get('id')+' {'+style+';}'
                 self.edit(hide)
                 findings=[c for c in self.validate()['checks'] if c['id']=='V4']
-                self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[320,686] for c in findings),findings)
+                self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[298,686] for c in findings),findings)
 
     def test_correct_branches_buses_and_bridges_have_complete_coverage(self):
         self.current()
@@ -176,15 +176,15 @@ class JunctionCLI(unittest.TestCase):
             group=next(e for e in root.iter() if e.get('id')=='lines')
             trunk=next(e for e in group if e.get('data-edge')=='paths[0][0->1]')
             tail=trunk.get('points').split()[1:]
-            trunk.set('points','308,686 315,686')
-            ET.SubElement(group,trunk.tag,{**trunk.attrib,'id':'fork-tail','points':'325,686 '+' '.join(tail)})
+            trunk.set('points','278,686 293,686')
+            ET.SubElement(group,trunk.tag,{**trunk.attrib,'id':'fork-tail','points':'303,686 '+' '.join(tail)})
             arcs=next(e for e in root.iter() if e.get('id')=='bridges')
             ET.SubElement(arcs,'{http://www.w3.org/2000/svg}path',{
-                'class':'brg-lo','id':'fork-bridge','d':'M315 686 A5 5 0 0 1 325 686',
+                'class':'brg-lo','id':'fork-bridge','d':'M293 686 A5 5 0 0 1 303 686',
                 'data-edge':'paths[0][0->1]','data-input-anchor':'paths[0][0->1]'})
         self.edit(bridge)
         findings=[c for c in self.validate()['checks'] if c['id']=='V14']
-        self.assertTrue(any(c.get('kind')=='bridge_breaks_connection' and c.get('position')==[320,686] for c in findings),findings)
+        self.assertTrue(any(c.get('kind')=='bridge_breaks_connection' and c.get('position')==[298,686] for c in findings),findings)
 
     def test_inherited_marker_clip_is_explicitly_not_checked(self):
         self.current()
@@ -202,7 +202,7 @@ class JunctionCLI(unittest.TestCase):
         self.current()
         self.edit(lambda root:next(e for e in root.iter() if e.get('id')=='junctions').set('style','opacity:0'))
         findings=[c for c in self.validate()['checks'] if c['id']=='V4']
-        self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[320,686] for c in findings),findings)
+        self.assertTrue(any(c.get('kind')=='missing_junction' and c.get('position')==[298,686] for c in findings),findings)
 
     def test_bridge_claim_cannot_change_its_actual_pipe_owner(self):
         self.crossing()
@@ -275,7 +275,7 @@ class JunctionCLI(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         self.assertFalse((self.work/'browser-evidence.json').exists(),'Candidate B1 needs no browser measurements')
         candidate=json.loads((self.work/'candidate-opt-log.json').read_text())
-        self.assertEqual(candidate['seed_bp']['b1'],1)
+        self.assertEqual(candidate['seed_bp']['b1'],4)
         report=self.validate()
         budget=next(item for item in report['composition_budget']['items'] if item['id']=='B1')
         self.assertEqual(candidate['seed_bp']['b1'],budget['measured'])

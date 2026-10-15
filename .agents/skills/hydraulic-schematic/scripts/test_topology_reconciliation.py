@@ -97,6 +97,24 @@ class TopologyCLI(unittest.TestCase):
         for name in ('1#系统.intent.yaml', '1#系统.layout.json'):
             shutil.copy2(SKILL / 'assets/fixtures/l0-current' / name, self.work / name)
         self.render()
+        # Introduce real shorts explicitly; the hard router no longer creates
+        # these errors as a side effect of a historical illegal layout.
+        import render_l0_sheet as renderer
+        layout=json.loads((self.work/'1#系统.layout.json').read_text())
+        intent=renderer.load_yaml(str(self.work/'1#系统.intent.yaml'))
+        catalog=json.loads((self.work/'component-catalog.json').read_text())
+        sheet=renderer.Sheet(intent,layout,catalog,cat_dir=str(self.work/'symbols'),workdir=str(self.work))
+        sheet.place()
+        def damage(root):
+            group=next(e for e in root.iter() if e.get('id')=='lines')
+            for index,(a,b) in enumerate((('EDP-001.pressure_out','EDP-001.case_drain'),
+                                         ('ACV-001.charge_port','ACV-001.accumulator_gas'))):
+                pa,pb=sheet.port(a),sheet.port(b)
+                ET.SubElement(group,'{http://www.w3.org/2000/svg}polyline',{
+                    'class':'ln-pressure' if index==0 else 'ln-sense',
+                    'id':'injected-short-%d'%index,'data-edge':'paths[0][0->1]',
+                    'points':'%g,%g %g,%g %g,%g'%(pa[0],pa[1],pb[0],pa[1],pb[0],pb[1])})
+        self.edit(damage)
         report = self.validate()
         joins = [c for c in report['topology']['findings'] if c['kind'] == 'wrong_network_join']
         self.assertTrue(any('@CASE' in c['endpoints'] and '@PRESS' in c['endpoints'] for c in joins))

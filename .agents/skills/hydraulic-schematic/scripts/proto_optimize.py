@@ -119,8 +119,12 @@ def bpanel(L, intent, catalog):
                 cat_dir=os.path.join(HERE, '..', 'assets', 'component-library'))
     s.place()
     s.build_textboxes()
-    _segs, junc, _bus, _polys = s.wire()
-    s.wire_taps()
+    try:
+        _segs, junc, _bus, _polys = s.wire()
+        s.wire_taps()
+    except R.RO.RoutingError as error:
+        return dict(b1=0,b2tot=0,b2max=0,b3=0,b3_exempt=[],b4=8,b5=0,
+                    v2=1000000,v13=0,length=0,routing_error=error.report)
     cross = s.find_crossings(junc, s.polys)
     polys = []
     for lt, pts in s.polys:
