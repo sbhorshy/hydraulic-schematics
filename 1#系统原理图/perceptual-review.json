@@ -1,0 +1,8 @@
+{
+  "schema": "sheet-perceptual-review-v1",
+  "reviewer": "Codex-independent-review",
+  "decision": "confirmed",
+  "note": "Regenerated at original workspace path; full PNG and all 62 crop hashes match the images actually viewed by Codex in the integration version. Concept only, existing B6/B7 warnings and unknowns preserved.",
+  "artifact_fingerprint": "1792dd0dea36484567c6fe1c36c6790ab40245d79f86f1e45d7b579a54006939",
+  "validation_fingerprint": "aa1c8ce3508230224fcf9578a3b72fc298e13eeb31c304512499b0cc7458885a"
+}

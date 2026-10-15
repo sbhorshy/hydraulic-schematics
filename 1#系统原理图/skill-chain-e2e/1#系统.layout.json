@@ -57,14 +57,14 @@
    "y": 254,
    "symbol": "symbols/filter-line-shutoff-dp.svg",
    "w": 80,
-   "h": 112
+   "h": 158
   },
   "CDF-001": {
    "x": 420,
    "y": 100,
    "symbol": "symbols/filter-line-shutoff-dp.svg",
    "w": 60,
-   "h": 80,
+   "h": 120,
    "rot": 270
   },
   "RF-001": {
@@ -72,7 +72,7 @@
    "y": 1012,
    "symbol": "symbols/filter-line-shutoff-dp.svg",
    "w": 80,
-   "h": 112,
+   "h": 158,
    "rot": 180
   },
   "PRV-001": {

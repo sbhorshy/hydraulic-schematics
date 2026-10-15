@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 218 564"
+     width="218"
+     height="564"
+     id="bootstrap-reservoir-draft"
+     data-component-type="bootstrap_reservoir"
+     data-symbol-form="stroke_geometry"
+     data-symbol-status="draft"
+     data-stroke-rule="1.5T"
+     data-mirror-allowed="false"
+     data-allowed-rotations="0 90 180 270"
+     data-rotation="0">
+  <title>自增压液压油箱——开放描边重画（draft）</title>
+  <desc>仅将可判定的油箱外壳和接口几何重画为开放描边；活塞/隔离机构、弹簧、液位计仍标记为 unknown，未作为已确认标准符号。</desc>
+
+  <style>
+    /* 渲染器必须注入 --sym-outline-width = 1.5T；本文件不写死绝对线宽。 */
+    .sym-outline {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: var(--sym-outline-width);
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .sym-unknown {
+      opacity: 0.72;
+    }
+  </style>
+
+  <metadata id="machine-readable-metadata"><![CDATA[
+{
+  "status": "draft",
+  "geometry": "stroke_geometry",
+  "strokeRule": "1.5T",
+  "mirrorAllowed": false,
+  "allowedRotations": [0, 90, 180, 270],
+  "canonicalCanvas": {"rotation": 0, "width": 218, "height": 564},
+  "ports": [
+    {
+      "id": "return_in",
+      "medium": "hydraulic",
+      "role": "return",
+      "flowCapability": "in",
+      "certainty": "provisional",
+      "anchor": {"x": 0, "y": 410, "direction": "left"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":0,"y":410,"direction":"left"},
+        "90":  {"width":564,"height":218,"x":154,"y":0,"direction":"up"},
+        "180": {"width":218,"height":564,"x":218,"y":154,"direction":"right"},
+        "270": {"width":564,"height":218,"x":410,"y":218,"direction":"down"}
+      }
+    },
+    {
+      "id": "suction_out",
+      "medium": "hydraulic",
+      "role": "suction",
+      "flowCapability": "out",
+      "certainty": "provisional",
+      "anchor": {"x": 218, "y": 410, "direction": "right"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":218,"y":410,"direction":"right"},
+        "90":  {"width":564,"height":218,"x":154,"y":218,"direction":"down"},
+        "180": {"width":218,"height":564,"x":0,"y":154,"direction":"left"},
+        "270": {"width":564,"height":218,"x":410,"y":0,"direction":"up"}
+      }
+    },
+    {
+      "id": "bootstrap_pressure_in",
+      "medium": "hydraulic",
+      "role": "pressure",
+      "flowCapability": "in",
+      "certainty": "provisional",
+      "anchor": {"x": 155, "y": 564, "direction": "down"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":155,"y":564,"direction":"down"},
+        "90":  {"width":564,"height":218,"x":0,"y":155,"direction":"left"},
+        "180": {"width":218,"height":564,"x":63,"y":0,"direction":"up"},
+        "270": {"width":564,"height":218,"x":564,"y":63,"direction":"right"}
+      }
+    },
+    {
+      "id": "body_sense_tap",
+      "medium": "hydraulic",
+      "role": "measurement",
+      "flowCapability": "none",
+      "kind": "body_tap",
+      "certainty": "provisional",
+      "anchor": {"x": 50, "y": 564, "direction": "down"},
+      "rotations": {
+        "0":   {"width":218,"height":564,"x":50,"y":564,"direction":"down"},
+        "90":  {"width":564,"height":218,"x":0,"y":50,"direction":"left"},
+        "180": {"width":218,"height":564,"x":168,"y":0,"direction":"up"},
+        "270": {"width":564,"height":218,"x":564,"y":168,"direction":"right"}
+      }
+    }
+  ],
+  "unknown": [
+    {"id":"bootstrap_internal_mechanism","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"spring","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"liquid_level_gauge","status":"unknown","reason":"standard_page_not_provided"},
+    {"id":"isolation_mechanism","status":"unknown","reason":"standard_page_not_provided"}
+  ]
+}
+  ]]></metadata>
+
+  <!-- 已确认/可直接重画的外壳与分隔线：全部为开放描边，无黑色填充轮廓。 -->
+  <g id="confirmed-shell" class="sym-outline" fill="none" stroke="#000000"
+     stroke-linecap="round" stroke-linejoin="round" data-certainty="confirmed-from-source-geometry">
+    <path id="tank-shell" d="M 8 327 L 8 95 Q 108 52 207 95 L 207 327" />
+    <line id="separator-upper" x1="8" y1="231" x2="207" y2="231" />
+    <line id="separator-lower-left" x1="8" y1="253" x2="98" y2="253" />
+    <line id="separator-lower-right" x1="118" y1="253" x2="207" y2="253" />
+    <line id="tank-bottom-left" x1="8" y1="327" x2="98" y2="327" />
+    <line id="tank-bottom-right" x1="119" y1="327" x2="207" y2="327" />
+  </g>
+
+  <!-- 符号接口几何：属于符号本体，按 .sym-outline = 1.5T；外部管线从边界 anchor 起由渲染器绘制。
+       body-sense-interface 为本体感测口（2026-09-07 签认 B 类方案）：沉淀仓底安装座，
+       立管 x=50 取回油立管(x=25)与内部机构(x=76)之间的余隙；传感器经 taps
+       本体锚挂接，不走 paths。不锚左/右壁：西侧是回油走廊、东侧是吸油引线，
+       壁锚会逼 tap 线与主干道共线(V13)或交叉(B1 预算 0)。 -->
+  <g id="port-interface-geometry" class="sym-outline" fill="none" stroke="#000000"
+     stroke-linecap="round" stroke-linejoin="round" data-certainty="provisional">
+    <path id="return-interface" d="M 25 327 L 25 410 M 0 410 25 410" />
+    <path id="suction-interface" d="M 190 327 L 190 410 M 190 410 218 410" />
+    <path id="pressure-interface" d="M 155 380 L 155 564 M155 380 140 380" />
+    <path id="body-sense-interface" d="M 50 327 L 50 564" />
+  </g>
+
+  <!-- 以下机构未经标准页核对，仅以 unknown/draft 表示；不得解释为已确认标准几何。 -->
+  <g id="unknown-geometry" class="sym-outline sym-unknown" fill="none" stroke="#000000"
+     stroke-linecap="round" stroke-linejoin="round" data-certainty="unknown">
+    <!-- 自增压内部活塞/隔离机构：仅保留源图大致占位关系。 -->
+    <g id="bootstrap-internal-mechanism" data-status="unknown">
+      <path d="M 76 327 L 76 444 L 98 444 L 98 253" />
+      <path d="M 118 253 L 118 444 L 140 444 L 140 327" />
+      <path d="M 76 444 L 76 535 L 140 535 L 140 444" />
+      <line x1="76" y1="468" x2="140" y2="468" />
+    </g>
+
+    <!-- 顶部液位计：unknown。全部为描边，不使用黑色填充。 -->
+    <g id="liquid-level-gauge" data-status="unknown">
+      <circle cx="108" cy="49" r="24" />
+      <line x1="85" y1="39" x2="131" y2="39" />
+      <line x1="85" y1="58" x2="131" y2="58" />
+      <path d="M 84 24 Q 108 9 132 24" />
+      <polyline points="145,3 135,20 150,17 137,35 153,28" />
+    </g>
+  </g>
+
+  <!-- 标准端口组（#21 修通：方言组 port-anchors 冒充 connection-points 即
+       TANK-001.suction_out 崩溃根源，转正为标准组；pressure 口旧元数据
+       x=172 与图面引线 x=155 不一致，统一到图面几何 155）。
+       body_sense_tap：本体感测口（2026-09-07 签认 B 类），role=measurement、
+       flow=none、kind=body_tap；专供 taps 本体锚，不得串入 paths。 -->
+  <g id="connection-points" fill="#ff0000">
+    <circle id="port-return-in" cx="0" cy="410" r="2"
+            data-port-id="return_in"
+            data-medium="hydraulic"
+            data-anchor-direction="left"
+            data-port-role="return" data-flow-capability="in" data-certainty="provisional" />
+    <circle id="port-suction-out" cx="218" cy="410" r="2"
+            data-port-id="suction_out"
+            data-medium="hydraulic"
+            data-anchor-direction="right"
+            data-port-role="suction" data-flow-capability="out" data-certainty="provisional" />
+    <circle id="port-bootstrap-pressure-in" cx="155" cy="564" r="2"
+            data-port-id="bootstrap_pressure_in"
+            data-medium="hydraulic"
+            data-anchor-x="155" data-anchor-y="564" data-anchor-direction="down"
+            data-port-role="pressure" data-flow-capability="in" data-certainty="provisional" />
+    <circle id="port-body-sense-tap" cx="50" cy="564" r="2"
+            data-port-id="body_sense_tap"
+            data-medium="hydraulic"
+            data-anchor-direction="down"
+            data-port-role="measurement" data-flow-capability="none"
+            data-port-kind="body_tap" data-certainty="provisional" />
+  </g>
+</svg>
