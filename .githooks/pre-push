@@ -1,0 +1,19 @@
+#!/bin/sh
+# 推送前闸门（#92）：skill 库结构校验（XML 合法 / connection-points 端口组 /
+# 白名单挂账 / catalog 交叉校验）。库结构不过即拒绝推送。
+# 安装：git config core.hooksPath .githooks（见 .githooks/README.md）
+root=$(git rev-parse --show-toplevel) || exit 1
+
+py=$(command -v python3 || command -v python)
+if [ -z "$py" ]; then
+  echo "[pre-push] 找不到 python/python3，无法校验库结构，拒绝推送。" >&2
+  echo "  确要强行越过: git push --no-verify (不建议，须披露)" >&2
+  exit 1
+fi
+
+"$py" "$root/.agents/skills/hydraulic-schematic/scripts/check_library.py" || {
+  echo "" >&2
+  echo "[pre-push] 库结构校验未过，修符号或登记 WHITELIST 后重推。" >&2
+  echo "  确要强行越过: git push --no-verify (不建议，须披露)" >&2
+  exit 1
+}

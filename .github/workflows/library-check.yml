@@ -1,0 +1,16 @@
+name: library-check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  library-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: 库结构校验
+        run: python .agents/skills/hydraulic-schematic/scripts/check_library.py
