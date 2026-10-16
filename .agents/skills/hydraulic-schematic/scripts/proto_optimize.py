@@ -16,8 +16,9 @@ render_l0_sheet（与 frozen proto_render 同源，方法级兼容）。
 能量取字典序三元组（违限项数, B3 超预算量, 走线总长）：
 B1 交叉、B2 折返超限、B3 非豁免超 1.5、B4<8、B5<40 各记一项违限；
 B3 预算边界豁免（边界端子走廊 ≤4）与 validate 同判，豁免线不驱动寻优。
-边界端子判点：布局 json 可给 "boundary_terminals": [[x,y],...] 覆写；
-缺省值为 1# 系统实测知识（披露：新系统接入时应在布局中显式给出）。
+边界端子判点：布局 json 给 "boundary_terminals": [[x,y],...]；缺省无豁免。
+只有旧布局迁移（migrate_layout.py）会回退到 1# 系统的值，并在 stderr 与
+revision_log 披露；新系统应在布局中显式给出。
 
 用法:
   python proto_optimize.py <种子.layout.json> [--intent INTENT.yaml]
