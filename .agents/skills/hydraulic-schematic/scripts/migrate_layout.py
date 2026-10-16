@@ -9,12 +9,13 @@ import copy
 import json
 import math
 from pathlib import Path
+import sys
 from layout_contract import EDGE_MARGIN, drawable_bounds, make_contract, number, pipe_half_width
 
 LEGACY_BOUNDARY_TERMINALS = [[1480.0,300.0],[1480.0,700.0],[60.0,514.4]]
 
 
-def migrate(layout, margin=EDGE_MARGIN, declare_root=False):
+def migrate(layout, margin=EDGE_MARGIN, declare_root=False, strict_boundary=False):
     result = copy.deepcopy(layout)
     if result.get('coordinate_system') not in (None, 'root_svg_user_units'):
         raise ValueError('Unsupported coordinate_system; recover a layout with known coordinates before migration')
@@ -28,6 +29,14 @@ def migrate(layout, margin=EDGE_MARGIN, declare_root=False):
         drawable_bounds(result)
         return result
     shift = number(result.pop('canvas_shift_x',0), 'legacy shift')
+    defaulted_boundary = 'boundary_terminals' not in result
+    if defaulted_boundary:
+        if strict_boundary:
+            raise ValueError('legacy layout declares no boundary_terminals; refusing to fall back to the '
+                             '1# system defaults under --strict-boundary (declare them in the layout)')
+        print('warning: legacy layout declares no boundary_terminals; applying the 1# system defaults %s. '
+              'Declare boundary_terminals explicitly for any other system.' % LEGACY_BOUNDARY_TERMINALS,
+              file=sys.stderr)
     for section in ('nodes','externs','buses'):
         for obj in (result.get(section) or {}).values():
             obj['x'] += shift
@@ -55,6 +64,9 @@ def migrate(layout, margin=EDGE_MARGIN, declare_root=False):
     result.setdefault('revision_log',[]).append(
         'root-coordinate migration: content x %+g; panels unchanged; canvas right %g→%g; edge_margin=%g'
         % (shift, layout['canvas']['width'], width, margin))
+    if defaulted_boundary:
+        result['revision_log'].append(
+            'boundary_terminals not declared in the legacy layout: defaulted to the 1# system values')
     return result
 
 
@@ -64,9 +76,12 @@ def main():
     parser.add_argument('--edge-margin',type=float,default=EDGE_MARGIN)
     parser.add_argument('--declare-root',action='store_true',
                         help='explicitly confirm an undeclared drawable layout already uses root SVG units; preserve geometry')
+    parser.add_argument('--strict-boundary',action='store_true',
+                        help='reject a legacy layout without boundary_terminals instead of defaulting to the 1# values')
     args=parser.parse_args()
     try:
-        output=migrate(json.loads(Path(args.input).read_text(encoding='utf-8')),args.edge_margin,declare_root=args.declare_root)
+        output=migrate(json.loads(Path(args.input).read_text(encoding='utf-8')),args.edge_margin,
+                       declare_root=args.declare_root,strict_boundary=args.strict_boundary)
         Path(args.output).write_text(json.dumps(output,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     except (OSError,ValueError,KeyError,TypeError) as error:
         parser.exit(1,str(error)+'\n')

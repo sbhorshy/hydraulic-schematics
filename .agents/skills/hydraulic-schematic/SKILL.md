@@ -63,7 +63,9 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 L0 链路「人工给坐标」可由三件工具接管（驱动器自带沙箱复制纪律，可直接原位运行）：
 
-- **布局引擎 `layout_engine.py`**：`python layout_engine.py <intent> <catalog> <ref|-> -o <out.layout.json> [--guard-report R.json] [--param KEY=VAL] [--optimize]`。两段式：规则定行位（自由度全收参数表 `P`，`--param` 可覆写；**缺省值按 1# 系统调校，披露**）+ kiwi REQUIRED 守门（规则解自洽即零漂移，不可满足则报错退出，绝不静默出图）。`--optimize` 叠加第三阶段寻优（B1–B5 指标 + V2/V13 硬缺陷 + 不劣化下限，固定种子首改进下降）。B3 边界走廊豁免判点可由布局 json 的 `boundary_terminals` 键给出（`[[x,y],...]`），缺省为 1# 实测值——新系统接入应在布局中显式给出。
+- **布局引擎 `layout_engine.py`**：`python layout_engine.py <intent> <catalog> <ref|-> -o <out.layout.json> [--guard-report R.json] [--param KEY=VAL] [--optimize]`。两段式：规则定行位（自由度全收参数表 `P`，`--param` 可覆写；**缺省值按 1# 系统调校，披露**）+ kiwi REQUIRED 守门（规则解自洽即零漂移，不可满足则报错退出，绝不静默出图）。`--optimize` 叠加第三阶段寻优（B1–B5 指标 + V2/V13 硬缺陷 + 不劣化下限，固定种子首改进下降）。B3 边界走廊豁免判点由布局 json 的 `boundary_terminals` 键给出（`[[x,y],...]`），缺省**无豁免**；布局引擎与装配布局都从 `externs` 派生该键。只有 `migrate_layout.py` 迁移旧布局时缺该键会回退到 1# 的值：stderr 告警并写入 `revision_log`，加 `--strict-boundary` 则直接拒绝。
+
+  **新系统接入清单**（这些缺省按 1# 调校，换系统须逐项确认）：参数表 `P` 全部取值（含画布 `CANVAS_W/H`、`LEGEND`、`TITLE` 的位置与行距）；布局的 `boundary_terminals`；旧布局迁移时用 `--strict-boundary`。
 - **拓扑确认单 `topology_confirm.py`**：`python topology_confirm.py <intent> <受控模板.yaml> -o <确认单.md>`——分段拓扑逐行签认 + 三向机器对账（intent↔受控模板互为背书，对账差异=退出码 1，确认单仍生成供工程师签认或退回）。
 - **模板门禁**：preflight（渲染器钩子与 CLI 同源）在 intent 同目录发现唯一 `*受控模板.yaml` 即启用三向对账；签认按 maturity 分级——**concept 未签认=WARN 披露放行，其余 maturity 未签认=ERROR 扣留产物**（正式出图必须先逐行签认确认单并在模板签认区登记 signed）。
 - **校核驱动器 `validate_driver.py`**：`python validate_driver.py --intent <intent> [--layout-seed S.json] [--ref R.json] [--optimize] [--workdir DIR] [--readback-w W]`——preflight 门禁 → 布局（种子或引擎）→ 渲染 → 校核，按处方表有界收敛（默认两轮）：**P1** 纯传感链误入 paths 自动降级 taps；**P3** 几何硬缺陷（V2/V13/V19）引擎重推+寻优；其余残差上报不烧轮次。退出码 0 完整证据通过 / 1 轮次耗尽 / 2 preflight 残差 / 3 工具链故障 / 4 必检证据或感知签认未齐备。每轮渲染后由 `rasterize_sheet.py` 自动选择本机 Inkscape 或 Chrome，重出 1:1 PNG；无可用转换工具则报告故障，不能收敛。沙箱包含脚本、符号、catalog 和 schema。驱动器的 `converged` 保留已执行检查零失败的兼容含义；覆盖状态、版本验证和感知签认按 [校验闭环](references/validation.md) 执行，以 `delivery.ready` 判定交付。
