@@ -44,6 +44,8 @@ REQUIRED_SUITES = frozenset({
     'test_upright_text', 'test_route_obstacles',
     # ---- #51/#52 SysML 主链路（窄文法）----
     'test_sysml_parser', 'test_sysml_to_intent', 'test_validate_sysml',
+    # ---- #90 环境诊断、#91 迁移边界守卫、#94 库校验摘要 ----
+    'test_doctor', 'test_boundary_guard', 'test_check_library_json',
 })
 
 
