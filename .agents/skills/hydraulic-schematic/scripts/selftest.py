@@ -308,7 +308,7 @@ def check_template_gate():
 L0_SUITES = ('test_upright_text', 'test_unintended_cycles', 'test_suction_continuity', 'test_orphan_port_geometry', 'test_near_axis_routes', 'test_route_obstacles', 'test_coordinate_contract', 'test_assembly_layout', 'test_assemblies', 'test_entrypoints', 'test_optimizer_budget', 'test_driver', 'test_proofreading_evidence',
           'test_route_pruning', 'test_rasterize_sheet', 'test_priority_valve_leads', 'test_display_widths', 'test_paint_evidence',
           'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_bridge_allowance', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli',
-          'test_mirror_policy', 'test_mirror_render', 'test_doctor')
+          'test_mirror_policy', 'test_mirror_render', 'test_doctor', 'test_check_library_json')
 
 
 def check_l0_regressions(jobs=1, suite_timeout=RUNNER.DEFAULT_SUITE_TIMEOUT,
