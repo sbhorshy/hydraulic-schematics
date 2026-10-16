@@ -315,11 +315,19 @@ def workspace_path(wd, name):
     return dest
 
 
-def setup_workdir(wd, keep=False):
+def isolated_workspace(wd):
+    """工作目录解析与隔离判定：skill 源目录树、其全部祖先及 symlink 别名
+    （resolve 后同判）一律拒绝。setup_workdir 与 SysML 薄入口
+    validate_sysml 共用同一实现，先于任何写入或清理调用。"""
     root, skill_root = Path(wd).resolve(), Path(SKILL).resolve()
     # 包括符号库等所有子目录、祖先及其符号链接，先检查再做任何写入。
     if root == skill_root or root in skill_root.parents or skill_root in root.parents:
         raise ValueError('工作区必须独立于整个 skill 规范源目录树及其父目录')
+    return str(root)
+
+
+def setup_workdir(wd, keep=False):
+    root = Path(isolated_workspace(wd))
     wd = str(root)
     manifest = workspace_path(wd, MANAGED_FILES)
     previous = json.loads(manifest.read_text()) if manifest.is_file() else []

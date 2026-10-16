@@ -42,6 +42,8 @@ REQUIRED_SUITES = frozenset({
     'test_near_axis_routes', 'test_orphan_port_geometry',
     'test_suction_continuity', 'test_unintended_cycles',
     'test_upright_text', 'test_route_obstacles',
+    # ---- #51/#52 SysML 主链路（窄文法）----
+    'test_sysml_parser', 'test_sysml_to_intent', 'test_validate_sysml',
 })
 
 

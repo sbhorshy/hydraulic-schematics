@@ -31,12 +31,15 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 
 ### Phase 0 · 选定链路
 
-| 链路 | 输入 | 模板脚本（skill 自带 `scripts/`） | 范例输入（`assets/examples/`） |
+| 链路 | 输入 | 入口脚本（skill 自带 `scripts/`） | 范例输入 |
 |---|---|---|---|
-| 整机/SysML | `*.sysml`（SysML v2：part/port/connect） | `render_aircraft_schematic.py` | `aircraft_hydraulic_system.sysml` |
-| 分系统/L0 | `intent.yaml` + `*.layout.json` | `render_l0_sheet.py`（内置 `preflight.py` 预检） | `assets/fixtures/l0-current/` 当前 23 部件；`assets/fixtures/l0-small-seed/` 最小通过基准 |
+| **主链路 · 分系统 SysML→L0** | `*.sysml`（窄文法，见 [references/sysml-l0.md](references/sysml-l0.md)） | `validate_sysml.py`（内置 `sysml_to_intent.py` 转换 → preflight → `validate_driver.py`，不要求先手工生成 intent） | `assets/fixtures/sysml-l0/l0-small-seed.sysml`（配 l0-small-seed 布局 seed） |
+| 分系统/L0（手写 intent，主链路的下游） | `intent.yaml` + `*.layout.json` | `validate_driver.py` / `render_l0_sheet.py`（内置 `preflight.py` 预检） | `assets/fixtures/l0-current/` 当前 23 部件；`assets/fixtures/l0-small-seed/` 最小通过基准 |
+| 整机 SysML（旧模板，非主链路） | `*.sysml`（SysML v2：part/port/connect） | `render_aircraft_schematic.py` | `assets/examples/aircraft_hydraulic_system.sysml` |
 
-两条链路共享符号库、视觉常量与校验理念。L0 链路在渲染器 parse 后、布局前强制跑 `scripts/preflight.py` 预检（JSON Schema 形状层 + 端口/role/medium 语义层，一次报齐）：任何 ERROR 即扣留 layout/svg/topology 并以退出码 1 终止；也可独立同源调用：`python scripts/preflight.py <intent.yaml>`（0 过 / 1 拦，`--json` 出结构化 findings）。已有模型就用对应链路，不要混用。
+**主链路是 SysML 窄文法 → intent → L0 全链**：SysML 模型是唯一输入定义，intent 是其转换产物。窄文法只覆盖已登记的类型与写法；模型里出现目录没有的类型或端口时，转换被准确拒绝（fail-closed），不得靠删节点、假造目录或手写 intent 顶替。真实 1# 模型目前仍因工程事实被拒绝（ECO/接通位 QD 无目录类型、EMP overflow 端口不存在），详见 reference 的 blocked 夹具；这是已披露的限制，不是链路通过。整机旧模板与 `validate_sysml.py` 是两套东西，不要混用。
+
+三条链路共享符号库、视觉常量与校验理念。L0 链路在渲染器 parse 后、布局前强制跑 `scripts/preflight.py` 预检（JSON Schema 形状层 + 端口/role/medium 语义层，一次报齐）：任何 ERROR 即扣留 layout/svg/topology 并以退出码 1 终止；也可独立同源调用：`python scripts/preflight.py <intent.yaml>`（0 过 / 1 拦，`--json` 出结构化 findings）。已有模型就用对应链路，不要混用。
 
 L0 链路运行口径（#21 起）：`render_l0_sheet.py` 与 `validate_sheet.py` 都接受可选**工作目录**参数——
 
