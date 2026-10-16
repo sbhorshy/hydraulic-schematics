@@ -28,7 +28,7 @@ python <skill>/scripts/validate_sheet.py <workdir>           # 出 <workdir>/val
 
 ## Phase 1 · 符号准备
 
-组件库**只有一处**：本 skill 的 `assets/component-library/` 即唯一规范源（单源化，#20/#21 定案；旧"已标注规范源→快照"两处库教义随规范源归档作废）。文件按文件名在其中定位，catalog 0.6-draft 登记 22 个组件类型（0.6 增油箱本体感测口 body_sense_tap 与 port_kind 枚举，2026-09-07 签认 B 类）。
+组件库**只有一处**：本 skill 的 `assets/component-library/` 即唯一规范源（单源化，#20/#21 定案；旧"已标注规范源→快照"两处库教义随规范源归档作废）。文件按文件名在其中定位；catalog 版本见 `component-catalog.json` 的 `catalog_revision`，符号文件数、端口组数、组件类型数、未被 catalog 引用的符号一律以 `check_library.py --json` 的输出为准（文档不再写死这些计数）。
 
 **新建/重绘符号一律复制 `assets/component-library/_template.svg` 起稿**（技术规范 §6.3.1 的可拷贝实现，占位符 `{{...}}`），填完过符号入库门禁 `scripts/check_symbol.py <file.svg>`（6.4 第 1–12 条 + C13 方框基准；#31 已归位 skill scripts：默认库与 catalog 锚定本 skill 自带 `assets/component-library/`，任意 cwd 可用，`--all` 全量扫默认库（与显式文件互斥），退出码 0 过 / 1 ERROR，文件/库目录/catalog 缺失或畸形一律 fail-closed——空/坏 JSON/类型重复/端口 id 重复同拦）再入库；模板与规范条文两处同步修订。
 
@@ -72,7 +72,8 @@ L0 链路「人工给坐标」可由三件工具接管（驱动器自带沙箱�
 （油箱事件：符号编辑丢失 `connection-points`）——由**库结构校验器**承接：
 
 ```bash
-python .agents/skills/hydraulic-schematic/scripts/check_library.py     # 0 过 / 1 断
+python .agents/skills/hydraulic-schematic/scripts/check_library.py          # 0 过 / 1 断
+python .agents/skills/hydraulic-schematic/scripts/check_library.py --json   # 同判，stdout 只出机器可读摘要
 ```
 
 - **L1** 每个 SVG 必须是合法 XML；**L2** 必须含 `connection-points` 端口组且
@@ -86,7 +87,7 @@ python .agents/skills/hydraulic-schematic/scripts/check_library.py     # 0 过 /
   catalog `main_upper/main_lower` 双向失配，待工程处置）与接通位
   `quick-disconnect-coupling.svg`（无端口组/无类型标注/尺寸带 mm 单位，B-2 挂账
   [#22](https://github.com/sbhorshy/hydraulic-schematics/issues/22)）两件 ERROR、
-  退出码 1；「22 只存量符号全量绿跑」仍是 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)
+  退出码 1；「存量符号（库内 SVG 去掉 `_template.svg`）全量绿跑」仍是 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)
   未完成验收项，不得以跳过、白名单或 WARN 冒充通过（WARN 只披露，不构成工程签认）。
 - 改动符号/catalog 后先跑 `check_library.py`（库结构校验器），再跑 selftest
   （见下）。**pre-push 钩子**（`.git/hooks/pre-push`，不入库）接的是

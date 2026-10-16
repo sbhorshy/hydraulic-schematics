@@ -86,6 +86,8 @@ def main(argv=None):
                     default=True, help='L3 catalog 交叉校验硬失败（#21 起默认）')
     ap.add_argument('--lenient-catalog', dest='strict_catalog', action='store_false',
                     help='L3 临时降宽容档：解析不到/缺端口只报 INFO')
+    ap.add_argument('--json', action='store_true',
+                    help='stdout 只输出一份机器可读摘要（计数与结论），退出码语义不变')
     a = ap.parse_args(argv)
 
     cat_path = a.catalog or os.path.join(a.lib, 'component-catalog.json')
@@ -121,9 +123,16 @@ def main(argv=None):
                          % (name, dups))
 
     # ---- L3 catalog 交叉校验 ----
+    catalog_components = catalog_assets = unreferenced = None
     if os.path.isfile(cat_path):
         with open(cat_path, encoding='utf-8') as f:
             cat = json.load(f)
+        referenced = {os.path.basename(((c.get('symbol') or {}).get('asset') or '').replace('\\', '/'))
+                      for c in cat.get('components', [])} - {''}
+        catalog_components = len(cat.get('components', []))
+        catalog_assets = len(referenced)
+        unreferenced = sorted(os.path.basename(p) for p in svgs
+                              if os.path.basename(p) not in referenced)
         for c in cat.get('components', []):
             asset = (c.get('symbol') or {}).get('asset')
             target = resolve_asset(asset, a.lib)
@@ -146,6 +155,15 @@ def main(argv=None):
         fails.append('catalog 不存在: %s' % cat_path)
 
     # ---- 出口 ----
+    if a.json:
+        print(json.dumps({
+            'ok': not fails, 'fails': fails, 'infos': infos,
+            'svg_files': len(svgs), 'port_groups': len(port_index),
+            'whitelisted': sorted(WHITELIST),
+            'catalog_components': catalog_components, 'catalog_assets': catalog_assets,
+            'unreferenced_svgs': unreferenced,
+        }, ensure_ascii=False, indent=2))
+        return 1 if fails else 0
     print('== check_library ==')
     print('库: %s（SVG %d，端口组 %d，白名单 %d）'
           % (a.lib, len(svgs), len(port_index), len(WHITELIST)))

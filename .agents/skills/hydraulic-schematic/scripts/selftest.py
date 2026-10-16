@@ -310,7 +310,7 @@ L0_SUITES = ('test_upright_text', 'test_unintended_cycles', 'test_suction_contin
           'test_rotation_routes', 'test_route_terminals', 'test_dangling_ports', 'test_port_geometry', 'test_topology_reconciliation', 'test_text_display', 'test_layout_clearance', 'test_junction_semantics', 'test_bridge_allowance', 'test_sheet_diff', 'test_readback_review', 'test_symbol_gate', 'test_check_symbol_cli',
           'test_mirror_policy', 'test_mirror_render',
           'test_sysml_parser', 'test_sysml_to_intent', 'test_validate_sysml', 'test_doctor',
-          'test_boundary_guard')
+          'test_boundary_guard', 'test_check_library_json')
 
 
 def check_l0_regressions(jobs=1, suite_timeout=RUNNER.DEFAULT_SUITE_TIMEOUT,
