@@ -19,13 +19,31 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 要求冲突时从高到低裁决：用户显式要求 > 符号/风格约定 > 图类布局规则 > 通用默认。
 正式交付须满足 Phase 4 三层校验；修正受两轮上限约束。未收敛时提交残差清单；若用户要求概念图，则逐条披露未通过/未校核项，不标为校验通过。
 
+## 入口决策表
+
+按手上的输入选命令（`<skill>` = 本 skill 目录）。退出码一栏标注核实方式：**实测** = 在本分支上实际运行得到；**源码** = 只读自脚本文档字符串或实现，未单独运行。
+
+| 手上有什么 | 命令 | 退出码 |
+|---|---|---|
+| SysML 模型（**主链路**） | `python <skill>/scripts/validate_sysml.py --sysml IN.sysml [--layout-seed SEED] --workdir DIR` | 0 交付证据齐备 / 1 轮次耗尽仍有 fail / 2 转换被拦或 preflight 残差 / 3 工具链故障（含追溯链核验不成立）/ 4 零失败但交付证据未齐备 / 5 用法、IO、路径拒绝。**实测**：2（blocked 夹具）、5（缺 `--sysml`）、4（`l0-small-seed.sysml` 正例：已执行校核零失败、追溯链 current，但感知签认与局部回读清单缺，`delivery.ready=False`——正例在无人工感知签认时到不了 0）；0、1、3 为 **源码**（见 reference），本次未触发 |
+| 手写 intent | `python <skill>/scripts/validate_driver.py --intent INTENT.yaml [--layout-seed SEED] --workdir DIR` | 0 完整证据通过 / 1 轮次耗尽 / 2 preflight 残差 / 3 工具链故障 / 4 必检证据或感知签认未齐备。**实测**：缺 `--intent` 得 2（argparse 用法错误，与"preflight 残差"同码，需看输出区分）；其余 **源码** |
+| 已有工作目录，只渲染 / 只校核 | `render_l0_sheet.py <workdir>`；`validate_sheet.py <workdir>` | 失败均为 1（**实测**：目录不存在得 1）；`validate_sheet` 校核失败也是 1（**源码**） |
+| 只想预检 intent | `python <skill>/scripts/preflight.py INTENT.yaml [--json]` | 0 过 / 1 拦截 / 2 缺参数。**实测**：正例 0、文件不存在 1 |
+| 只想把 SysML 转 intent | `python <skill>/scripts/sysml_to_intent.py IN.sysml [-o OUT]` | 0 成功 / 1 被诊断拦截 / 2 用法或 IO。**实测**：blocked 夹具 1 |
+| 核验已有 SysML 追溯链 | `python <skill>/scripts/validate_sysml.py --verify WORKDIR` | 0 链 current / 1 不成立或与当前产物不符（**实测**：目录不存在得 1） |
+| 改了符号或 catalog | `check_library.py`；单件用 `check_symbol.py FILE.svg` | check_library：0 过 / 1 断（**实测** 0）。check_symbol：0 过 / 1 ERROR / 2 用法（**实测** 1、2） |
+| 改了脚本、符号、模板，要回归 | `python <skill>/scripts/selftest.py` | 0 过 / 1 断 / 2 用法或输出路径预检失败（**实测**：`--list-suites` 0、未知选项 2） |
+| 整机 SysML（旧模板，非主链路） | 复制 `render_aircraft_schematic.py` 到工作目录再运行 | 以脚本自检输出为准（本表未核实） |
+
 ## 运行纪律
 
-- L0 优先使用原位 `validate_driver.py`，显式传入独立 `--workdir`；驱动器复制执行依赖并刷新本轮产物。未传工作目录时使用新的临时目录。
-- 已有布局传 `--layout-seed`；只有主动要求重新寻优才加 `--optimize`（该参数优先于 seed）。已有布局仍需完成本轮渲染与校验。
-- 单独渲染/校核可原位调用 `render_l0_sheet.py <workdir>` 和 `validate_sheet.py <workdir>`。需要定制模板代码时先复制；SysML 模板仍先复制到工作目录运行。
-- `--keep` 只复用未变化的依赖；输入重新读取，旧 SVG/PNG/校验报告失效后重建。种子引用的本地符号按实际文件复制，来源写入报告；端口坐标不同的旧符号不可仅改文件名替换。
-- 路径按脚本/输入文件位置解析；守门工具、布局引擎与确认单原位运行。驱动器工作目录不能位于 skill 规范源内。
+以下约定对上表所有 L0 入口通用，**只在此处定义**，别处只引用：
+
+- **工作目录**：显式传独立 `--workdir`；驱动器复制执行依赖并刷新本轮产物，未传时用新的临时目录。工作目录不能位于 skill 规范源内，SysML 入口还拒绝输入与工作目录重叠。
+- **布局来源**：已有布局传 `--layout-seed`；只有主动要求重新寻优才加 `--optimize`（该参数优先于 seed）。已有布局仍需完成本轮渲染与校验。
+- **复用**：`--keep` 只复用未变化的依赖；输入重新读取，旧 SVG/PNG/校验报告失效后重建。
+- **定制模板代码**时先复制到工作目录再改，不要改 skill 原位文件。
+- **符号与路径**：种子引用的本地符号按实际文件复制，来源写入报告；端口坐标不同的旧符号不可仅改文件名替换。路径按脚本/输入文件位置解析；守门工具、布局引擎与确认单原位运行。
 
 ## 工作流
 
@@ -73,10 +91,7 @@ L0 链路「人工给坐标」可由三件工具接管（驱动器自带沙箱�
 
 **搜索预算与进度**：布局引擎/驱动器共享 `--max-evals`、`--max-steps`、`--max-seconds`、`--polish-steps`，默认 200 次评估 / 50 个改善步 / 30 秒 / 不额外抛光。时间限在两次评估之间检查；每个评估本身不可中断，驱动器另设子进程上限。预算耗尽保留最佳候选并继续全量校核，停止原因不代表通过；仍有缺陷则返回残差，勿反复加大预算盲搜。`convergence-report.json` 记录每阶段耗时和寻优停止原因，stderr 实时显示进度。
 
-```bash
-python <skill>/scripts/validate_driver.py --intent <intent.yaml> --layout-seed <layout.json> --workdir <独立工作目录>
-# 无可复用布局时省略 --layout-seed；需要重新寻优时显式加 --optimize。
-```
+驱动器的完整命令行与退出码见上文「入口决策表」；工作目录、`--layout-seed` / `--optimize` 的优先关系、`--keep` 语义见「运行纪律」，此处不再重复。
 
 ### Phase 3 · 追溯清单
 
