@@ -94,7 +94,7 @@ python <skill>/scripts/validate_driver.py --intent <intent.yaml> --layout-seed <
 | `scripts/` | 两链路渲染模板、`preflight.py` L0 输入预检器（含模板门禁）、`validate_sheet.py` 几何校核、`check_library.py` 库结构校验器、`check_symbol.py` 符号入库门禁（6.4 第 1–12 条 + C13 方框基准，#31 归位）、`layout_engine.py` 布局引擎（规则+守门+寻优）、`proto_optimize.py` 寻优层、`validate_driver.py` 校核驱动器、`topology_confirm.py` 拓扑确认单、`test_suction_markers.py` 专项测试范例 |
 | `assets/examples/` | SysML 模型范例、L0 intent+layout 范例、校验负例（负例 expected-report 配对；`negative-mixed-violations` 为七类违规混样、`positive-preflight-cleared` 为预检正例，供 preflight 回归） |
 
-依赖提示：L0 需要 `ruamel.yaml`；形状预检需要 `jsonschema`（缺失时披露 WARN）；布局守门需要 `kiwisolver`。PNG 回读需要本机 Inkscape 或 Chrome，像素检查需要 Pillow 与 NumPy。
+依赖：Python 包固定版本见 `requirements.txt`。首次使用或换机器先跑 `python scripts/doctor.py`（`--json` 出结构化结果），一次报齐缺失的 Python 包与本机光栅化工具（Inkscape 或 Chrome 任一），退出码 0 齐备 / 1 有缺项。
 
 本 skill 即组件库的**唯一规范源**（单源化，2026-09-01）：`assets/component-library/`、
 `scripts/`、`assets/examples/` 不再是对外副本，没有「规范源→快照」的镜像同步。
