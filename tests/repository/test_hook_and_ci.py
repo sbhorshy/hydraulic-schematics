@@ -35,6 +35,16 @@ class HookTests(unittest.TestCase):
         self.assertTrue(HOOK.is_file())
         self.assertTrue(os.stat(HOOK).st_mode & 0o111, 'pre-push 必须带执行位')
 
+    def test_hook_is_executable_in_git_not_just_on_disk(self):
+        # core.fileMode=false 的环境（如 WSL 的 /mnt/d）下，磁盘上的执行位不会被提交；
+        # 克隆出来的钩子会被 git 忽略，推送无人把关。必须查 git 记录的模式。
+        out = subprocess.run(['git', 'ls-files', '-s', '--', '.githooks/pre-push'],
+                             cwd=REPO, capture_output=True, text=True)
+        if out.returncode != 0 or not out.stdout.strip():
+            self.skipTest('pre-push 尚未被 git 跟踪')
+        self.assertEqual(out.stdout.split()[0], '100755',
+                         'git 中 pre-push 模式应为 100755，实际 %s' % out.stdout.split()[0])
+
     def test_passing_library_check_allows_push(self):
         self.assertEqual(run_hook(0).returncode, 0)
 
