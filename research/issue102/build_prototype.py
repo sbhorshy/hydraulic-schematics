@@ -48,19 +48,23 @@ def run(report, browser, reference, reference_browser):
         problem['context_reach'] = {key: t.crops(problem, ctx, px) for key, px in REACH.items()}
     for item in result['items']:
         item.pop('rows', None)
-    # Enough for the page to re-derive a path when a kind's destination is tried another way: the
-    # module's rule is "new failing findings in the problem win over its aim, except the label symptoms
-    # of a layout cause".
+    # Enough for the page to re-derive a path when a kind's destination is tried another way: failures
+    # outrank hints, and a node_gap cause outranks the label symptoms it produced — regardless of when
+    # the row first appeared. symptom_kinds lets the page turn cause-first off for comparison.
     items = {i['id']: i for i in result['items']}
     for problem in result['problems']:
         aim = items[problem['suggestion']['aim']]
-        fresh = {(i['class'], i['kind'], i['result']): _own(t, i) for i in result['items']
-                 if i['problem'] == problem['id'] and i.get('state') == 'new' and i['result'] == 'fail'}
-        cause = aim['kind'] == 'node_gap' and any(k[0] == 'label' for k in fresh)
-        problem['suggestion'].update({'aim_kind': [aim['class'], aim['kind'], aim['result']], 'fresh_kinds': sorted(fresh), 'cause': cause})
-        kept = [k for k in fresh if not (cause and k[0] == 'label')]
-        again = max((fresh[k] for k in kept), key=WEIGHT.get, default=_own(t, aim))
+        group = [items[i] for i in problem['items']]
+        fails = [i for i in group if i['result'] == 'fail']
+        cause = aim['kind'] == 'node_gap' and any(i['class'] == 'label' for i in group)
+        pool = ([aim] + [i for i in fails if i['class'] != 'label']) if cause else (fails or group)
+        again = max((_own(t, i) for i in pool), key=WEIGHT.get)
         assert again == problem['suggestion']['fix_path'], (problem['title'], again, problem['suggestion']['fix_path'])
+        problem['suggestion'].update({
+            'aim_kind': [aim['class'], aim['kind'], aim['result']],
+            'fresh_kinds': sorted({(i['class'], i['kind'], i['result']) for i in pool}),
+            'symptom_kinds': sorted({(i['class'], i['kind'], i['result']) for i in group if cause and i['class'] == 'label'}),
+            'cause': cause})
     return ctx, result
 
 
