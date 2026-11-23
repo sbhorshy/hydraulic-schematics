@@ -59,7 +59,9 @@ RULE_LABEL = {
     'impact': '先修一条动作消掉最多条目的',
 }
 # 主线折返 is a read-back hint only (图面可读性评分, #101): it sorts last inside its rule.
-LOW_SIGNAL = ('foldback',)
+# The low-signal tail is for the main-line foldback hint (ticket 101, M2), which is not yet in the
+# official report. B2's own `foldback` check is a budget item and sorts in its normal place.
+LOW_SIGNAL = ()
 PERSISTING = ('inline', 'after')
 NOTES = ('inline', 'tail')
 MERGE_PAD = 48.0      # two findings this close are treated as one problem
@@ -690,7 +692,7 @@ def _suggest(item, group, nodes, edges):
     if len(group) > 1 and kind == 'node_gap':
         covered = sorted({i.get('text') for i in group if i['class'] == 'label' and i.get('text')})
         fails = sum(i['result'] == 'fail' for i in group if i['class'] == 'label')
-        symptoms = '；%s 的 %d 个标签（%s）压在上面（%d 条失败）随之消除' % (
+        symptoms = '；预计 %s 的 %d 个标签（%s）压在上面（%d 条失败）会消除，修后由官方链复核' % (
             part, len(covered), '、'.join(covered[:2]), fails)
     if kind == 'crossing':
         spot = (item.get('new_crossings') or item.get('crossings') or [{}])[0].get('label', '走线')
@@ -892,10 +894,16 @@ def _problem(group, ctx, seen, changed):
     state = ('unknown' if seen is None else 'persisting' if all(s == 'persisting' for s in states)
              else 'moved' if all(s in ('persisting', 'moved') for s in states) else 'new')
     suspects = _suspects(box, lead['nodes'], nodes, edges, ctx, changed) if state == 'new' else []
-    fresh = [i for i in group if i.get('state') == 'new' and i['result'] == 'fail' and not (aim['kind'] == 'node_gap' and i['class'] == 'label')]
+    # Where a problem goes is a property of its findings, not of when they were first seen: a row
+    # still present in round two must keep its tier. Failures outrank hints; a node_gap cause outranks
+    # the label symptoms it produced.
+    fails = [i for i in group if i['result'] == 'fail']
+    if aim['kind'] == 'node_gap' and any(i['class'] == 'label' for i in group):
+        pool = [aim] + [i for i in fails if i['class'] != 'label']
+    else:
+        pool = fails or group
     weight = {'agent': 4, 'route': 3, 'local': 2, 'recheck': 1, 'disclose': 0}
-    if fresh:
-        path = max((_suggest(_fix_lead([i]), [i], sorted(i['nodes']), sorted(i['edges']))[2] for i in fresh), key=weight.get)
+    path = max((_suggest(i, [i], sorted(i['nodes']), sorted(i['edges']))[2] for i in pool), key=weight.get)
     lead_in = ''
     strong = [c for c in suspects if c['level'] == 2]
     rewire = [c for c in suspects if c['why'] == 'rerouted']
@@ -1009,7 +1017,8 @@ def order(problems, rule='class', persisting='inline', notes='inline'):
         if problem['class'] in ('disclosure', 'unchecked'):
             return (9, cls, 0, 0.0, 0)
         tail = 8 if notes == 'tail' and problem['severity'] == 'warn' and problem['suggestion']['fix_path'] == 'disclose' else 0
-        head = (SEVERITY[problem['severity']], 1 if persisting == 'after' and problem['state'] == 'persisting' else 0)
+        moved = problem['state'] in ('persisting', 'moved')   # 'moved' is a persisting subcase
+        head = (SEVERITY[problem['severity']], 1 if persisting == 'after' and moved else 0)
         low = problem['kind'] in LOW_SIGNAL
         if rule == 'location':
             return (tail,) + head + place + (low,)

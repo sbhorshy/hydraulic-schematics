@@ -89,8 +89,8 @@
   function pathOf(p) {
     const s = p.suggestion;
     if (!s.fresh_kinds) return s.fix_path;
-    const fresh = S.cause && s.cause ? s.fresh_kinds.filter(k => k[0] !== 'label') : s.fresh_kinds;
-    return fresh.length ? fresh.map(solo).sort((a, b) => WEIGHT[b] - WEIGHT[a])[0] : solo(s.aim_kind);
+    const kinds = !S.cause && s.cause ? s.fresh_kinds.concat(s.symptom_kinds || []) : s.fresh_kinds;
+    return kinds.map(solo).sort((a, b) => WEIGHT[b] - WEIGHT[a])[0];
   }
   const chip = x => '<span class="chip">' + esc(x) + '</span>';
 
@@ -403,7 +403,7 @@
       '<div style="height:6px"></div>' +
       '<label class="ctl"><input type="checkbox" data-k="persisting"' + (S.persisting === 'after' ? ' checked' : '') + '>同一级里「新增」排在「仍在」前面</label>' +
       '<label class="ctl"><input type="checkbox" data-k="notes"' + (S.notes === 'tail' ? ' checked' : '') + '>「只是提示、不必修」的条目放到末尾</label>' +
-      '<div class="small">固定不变：主线折返这类低信号提示排在同类最后；披露和连带未校核永远在最后，不进修图单。</div></fieldset>' +
+      '<div class="small">固定不变：主线折返这类低信号提示进入官方报告后排在同类最后（B2 折返是预算项，按正常位置排）；披露和连带未校核永远在最后，不进修图单。</div></fieldset>' +
       '<h3>这张图的顺序（' + esc(L.rule[S.rule]) + '）</h3><ol class="olist">' + list.map((p, i) => '<li><span class="num">' + (i + 1) + '</span><div>' + sev(p.severity) + ' ' + cls(p.class) + ' ' + st(p.state) + ' ' + esc(p.title) +
       '<div class="r">' + esc(why(p, i + 1)) + (HELD.includes(p.class) ? '' : ' · ' + esc(L.path[pathOf(p)])) + '</div></div></li>').join('') + '</ol>' +
       '<h3>同图换成别的规则，前三名是</h3><table><tr><th>规则</th><th>第 1</th><th>第 2</th><th>第 3</th></tr>' +
@@ -484,7 +484,7 @@
       '<div class="kv"><b>修图单</b>每轮一份，顺序就是修的顺序；每项带 <code>action</code>、<code>fix_path</code>、<code>scope</code>（节点、连线、是否含相邻管线）和三级局部图的坐标。去向是 <code>local</code> / <code>route</code> 的才有 <code>scope</code>，可以自动执行；<code>agent</code> 只拿文字建议；<code>disclose</code> / <code>recheck</code> 不进单。</div>' +
       '<div class="kv"><b>差分范围</b>整轮一份，取自修图单里各项 <code>scope</code> 的并集，按 <code>sheet_diff</code> 收的字段（nodes、edges、include_adjacent_edges、note）。母线锚点并进 edges。</div>' +
       '<div class="kv"><b>两轮</b>修正最多两轮，每轮只修上一轮列出的缺陷。第 ' + r.round + ' 轮修不完的进第 2 轮；第 2 轮后还有，就停手，出未收敛项清单。</div>' +
-      '<div class="kv"><b>图像差分</b>现在' + (d.diff_ready ? '<span class="ok">可用</span>' : '<span class="no">不可用</span>：拓扑覆盖' + (d.coverage === 'pass' ? '已通过，但几何或浏览器证据有问题' : '未通过（' + esc(d.coverage) + '）')) + '。<code>sheet_diff</code> 要求拓扑覆盖通过、几何无问题，所以连接语义的失败必须先修完，差分才能用。</div>' +
+      '<div class="kv"><b>图像差分</b>现在' + (d.diff_ready ? '<span class="ok">可用</span>' : '<span class="no">不可用</span>：拓扑覆盖' + (d.coverage === 'pass' ? '已通过，但几何或浏览器证据有问题' : '未通过（' + esc(d.coverage) + '）')) + '。<code>sheet_diff._model</code> 另要求浏览器证据当前、渲染器与字体环境一致；页面这里只按前三项算，所以「可用」偏乐观。连接语义失败本身不是差分门禁；它通过 V10 → V4/V14 未校核、B1 不放行挡住交付。</div>' +
       '<h3>这张图的第 ' + r.round + ' 轮修图单（' + esc(L.rule[S.rule]) + '）</h3>' +
       (queue.length ? '<table><tr><th>顺序</th><th>问题</th><th>去向</th><th>第 1 轮修掉了？</th></tr>' + queue.map(p => '<tr><td class="c">' + p.order + '</td><td>' + sev(p.severity) + ' ' + st(p.state) + ' ' + esc(p.title) + '<div class="small">' + esc(fullText(p).slice(0, 140)) + '</div></td><td>' + pathTag(p) + '</td><td class="c"><input type="checkbox" data-fixed="' + p.id + '"' + (fixed[p.id] ? ' checked' : '') + '></td></tr>').join('') + '</table>' : '<p class="small">这张图没有要修的问题，修图单是空的。</p>') +
       '<div class="box"><h4>按上面的勾选，第 2 轮</h4>' +
