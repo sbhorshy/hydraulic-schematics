@@ -95,7 +95,7 @@ if pipeline_arrows or arrow_layers:
 ### 3.2 证据链
 
 1. **V18 的前史**：`archive/已标注/docs/superpowers/plans/2026-08-10-pipeline-arrows-suction-s.md`——管线箭头层（`.arw`/`arrows` layer）是渲染器早年**自拟**的约定，该计划将其拆除（"Remove renderer-added pipeline flow arrows while preserving component-internal directional symbols"），V18 是防回潮回归闸门。即 V18 不是标准条文的转录，而是「不自拟非标准图元」纪律的执行器。
-2. **现行产物零箭头且校核全绿**：`1#系统原理图/CDF-001装配图/case_drain_filter装配图.svg` 与 `1#系统原理图/1#系统原理图.svg` 的 `marker-end` 计数均为 0；CDF `validation-report.json` V18 证据 `pipeline_arrows: 0, arrow_layers: 0`，fail 0。
+2. **样图来源**：当时用于比对的 CDF 装配图、1# 系统图和校核报告可从 [归档索引](../docs/archive.md) 查阅。
 3. **在库存在另一条合法的流向表达通道**：rendering-rules.md:31「流体边带 `marker-end="url(#ah)"` 箭头，机械边不带」——SysML 链路渲染器在用（`render_aircraft_schematic.py:333` 及多处），L0 链路渲染器未实现（grep 无 marker-end）。**边线 marker-end 与独立箭头层是两种机制，V18 只禁后者。**
 4. **条文本身不含箭头要求**：条文页（Enclosure 定义）只字未提流向箭头；示例页的箭头画在进口管线上、指向装配体，属 application example 的流向图解，与吸油斜杠组、图解标签同类——是「示例怎么画」，不是「条文要求画」。
 5. **内容冗余性佐证**：流向方向已由 path 顺序（intent paths 的端点次序）、单向阀三角朝向等受控几何承载；再叠一层渲染器箭头属重复编码，且正是当年被拆除的自拟物。

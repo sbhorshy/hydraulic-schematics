@@ -83,12 +83,8 @@ python .agents/skills/hydraulic-schematic/scripts/check_library.py --json   # �
   解析不到库内文件或 catalog 声明端口缺于符号端口组，**默认即硬失败**
   （#21 回登记完成后转正；`--lenient-catalog` 可临时降宽容档出清单）。
 - 逐件入库门禁 `scripts/check_symbol.py` 与 check_library 同款锚定（默认库=catalog=
-  skill 自带资产）。当前全量基线**未绿**：旧 `fsov-provisional-stroke.svg`（端口与
-  catalog `main_upper/main_lower` 双向失配，待工程处置）与接通位
-  `quick-disconnect-coupling.svg`（无端口组/无类型标注/尺寸带 mm 单位，B-2 挂账
-  [#22](https://github.com/sbhorshy/hydraulic-schematics/issues/22)）两件 ERROR、
-  退出码 1；「存量符号（库内 SVG 去掉 `_template.svg`）全量绿跑」仍是 [#31](https://github.com/sbhorshy/hydraulic-schematics/issues/31)
-  未完成验收项，不得以跳过、白名单或 WARN 冒充通过（WARN 只披露，不构成工程签认）。
+  skill 自带资产）。用无位置参数的 `check_symbol.py` 检查存量符号，以本次报告和
+  退出码判定结果。跳过、白名单或 WARN 均不能代替逐件通过，WARN 不构成工程签认。
 - 改动符号/catalog 后先跑 `check_library.py`（库结构校验器），再跑 selftest
   （见下）。**pre-push 钩子**（`.git/hooks/pre-push`，不入库）接的是
   check_library.py，#31 未改钩子；check_symbol.py 的全量扫描不在 pre-push

@@ -25,19 +25,19 @@ description: Draw or update hydraulic system schematic sheets from a single inpu
 
 ## 入口决策表
 
-`<skill>` = 本 skill 目录。退出码核实方式：**实测** = 实际运行得到；**源码** = 只读自脚本，未运行。
+`<skill>` = 本 skill 目录。
 
 | 手上有什么 | 命令 | 退出码 |
 |---|---|---|
-| SysML 模型（**主链路**） | `python <skill>/scripts/validate_sysml.py --sysml IN.sysml [--layout-seed SEED] --workdir DIR` | 0 交付证据齐备 / 1 轮次耗尽仍有 fail / 2 转换被拦或 preflight 残差 / 3 工具链故障（含追溯链核验不成立）/ 4 零失败但交付证据未齐备 / 5 用法、IO、路径拒绝。**实测**：2（blocked 夹具）、5（缺 `--sysml`）、4（`l0-small-seed.sysml` 正例：追溯链 current、校核零失败，但缺感知签认，`delivery.ready=False`，无人工签认到不了 0）；0、1、3 为 **源码**，未触发 |
-| 手写 intent | `python <skill>/scripts/validate_driver.py --intent INTENT.yaml [--layout-seed SEED] --workdir DIR` | 0 完整证据通过 / 1 轮次耗尽 / 2 preflight 残差 / 3 工具链故障 / 4 必检证据或感知签认未齐备。**实测**：缺 `--intent` 得 2（argparse 用法错误，与"preflight 残差"同码，需看输出区分）；其余 **源码** |
-| 已有工作目录，只渲染 / 只校核 | `render_l0_sheet.py <workdir>`；`validate_sheet.py <workdir>` | 失败均为 1（**实测**：目录不存在得 1）；`validate_sheet` 校核失败也是 1（**源码**） |
-| 只想预检 intent | `python <skill>/scripts/preflight.py INTENT.yaml [--json]` | 0 过 / 1 拦截 / 2 缺参数。**实测**：正例 0、文件不存在 1 |
-| 只想把 SysML 转 intent | `python <skill>/scripts/sysml_to_intent.py IN.sysml [-o OUT]` | 0 成功 / 1 被诊断拦截 / 2 用法或 IO。**实测**：blocked 夹具 1 |
-| 核验已有 SysML 追溯链 | `python <skill>/scripts/validate_sysml.py --verify WORKDIR` | 0 链 current / 1 不成立或与当前产物不符（**实测**：目录不存在得 1） |
-| 改了符号或 catalog | `check_library.py`；单件用 `check_symbol.py FILE.svg` | check_library：0 过 / 1 断（**实测** 0）。check_symbol：0 过 / 1 ERROR / 2 用法（**实测** 1、2） |
-| 改了脚本、符号、模板，要回归 | `python <skill>/scripts/selftest.py` | 0 过 / 1 断 / 2 用法或输出路径预检失败（**实测**：`--list-suites` 0、未知选项 2） |
-| 整机 SysML（旧模板，非主链路） | 复制 `render_aircraft_schematic.py` 到工作目录再运行 | 以脚本自检输出为准（本表未核实） |
+| SysML 模型（**主链路**） | `python <skill>/scripts/validate_sysml.py --sysml IN.sysml [--layout-seed SEED] --workdir DIR` | 0 交付证据齐备 / 1 轮次耗尽仍有 fail / 2 转换被拦或 preflight 残差 / 3 工具链故障（含追溯链核验不成立）/ 4 零失败但交付证据未齐备 / 5 用法、IO、路径拒绝 |
+| 手写 intent | `python <skill>/scripts/validate_driver.py --intent INTENT.yaml [--layout-seed SEED] --workdir DIR` | 0 完整证据通过 / 1 轮次耗尽 / 2 preflight 残差或命令用法错误（看输出区分）/ 3 工具链故障 / 4 必检证据或感知签认未齐备 |
+| 已有工作目录，只渲染 / 只校核 | `render_l0_sheet.py <workdir>`；`validate_sheet.py <workdir>` | 失败均为 1 |
+| 只想预检 intent | `python <skill>/scripts/preflight.py INTENT.yaml [--json]` | 0 过 / 1 拦截 / 2 缺参数 |
+| 只想把 SysML 转 intent | `python <skill>/scripts/sysml_to_intent.py IN.sysml [-o OUT]` | 0 成功 / 1 被诊断拦截 / 2 用法或 IO |
+| 核验已有 SysML 追溯链 | `python <skill>/scripts/validate_sysml.py --verify WORKDIR` | 0 链 current / 1 不成立或与当前产物不符 |
+| 改了符号或 catalog | `check_library.py`；单件用 `check_symbol.py FILE.svg` | check_library：0 过 / 1 断。check_symbol：0 过 / 1 ERROR / 2 用法 |
+| 改了脚本、符号、模板，要回归 | `python <skill>/scripts/selftest.py` | 0 过 / 1 断 / 2 用法或输出路径预检失败 |
+| 整机 SysML（旧模板，非主链路） | 复制 `render_aircraft_schematic.py` 到工作目录再运行 | 以脚本自检输出为准 |
 
 ## 运行纪律
 
