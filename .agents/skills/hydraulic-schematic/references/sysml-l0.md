@@ -324,8 +324,8 @@ SysML 源（sha256, hash_scope=file-bytes, declared 行号清单/extern 声明�
 系统 part 内 `port 'USR-001';` 实体声明 + 注释 `extern: USR-001=outlet`
 补 L0 角色，拓扑对应 l0-small-seed 夹具，布局 seed 直接复用
 `assets/fixtures/l0-small-seed/1#系统.layout.json`，真实走转换→preflight→
-`validate_driver`→SVG→PNG→校核→追溯链合并；控制端 WSL 环境实测自动
-fail 0 / exit 4，缺感知签认时 `delivery.ready=false`）。
+`validate_driver`→SVG→PNG→校核→追溯链合并；该正例的回归要求见 §9，
+缺感知签认时 `delivery.ready=false`）。
 
 未决（实现前不得静默放行）：
 
