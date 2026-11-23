@@ -37,9 +37,9 @@ TASKS = [
               '不画元件框，也不画它到元件的连线。'),
     dict(id='joint', name='3 · 三通与跨线桥',
          intro='三通点挤在一起、跨线桥贴着别的节点，都会让「这里到底通不通」难以判断。'
-              '「标出要看的部分」投票前只圈出要看的范围，不标间距；揭晓后才加粗那两条走线。'),
+              '「标出要看的部分」投票前只圈出要看的范围，不标间距；揭晓后才标出所问的距离。'),
     dict(id='parallel', name='4 · 并行走线',
-         intro='不同管网的两条线贴着走，容易被读成一条。「标出要看的部分」只加粗那两条走线，不标间距。'),
+         intro='不同管网的两条线贴着走，容易被读成一条。「标出要看的部分」投票前只圈出要看的范围；揭晓后才加粗那两条走线并标出间距。'),
 ]
 
 # id, task, metric, 变体 key, 原图是否更好, 标题, 任务说明, 测量名, 高亮, 缩放, 焦点, 圈选半径
@@ -149,7 +149,7 @@ DISPERSION = [
     ('m4_n', 'M4 16 px 带内并行处数', '+0.08', '原图 0 处，离最近一对还有 39.4 px；同类图里有 4 px、10 px 的贴线'),
     ('m5_min', 'M5 端口末段 · 最短', None, '同类图里是常量 18 px；全部 538 张里有 2 张是 17 px'),
     ('m6_jg', 'M6 最近的两个三通点', '−0.12', '22 px 挤在一起和 58 px 分开都保持着与原图相同的 B1–B7 状态；盲投里看不出差别'),
-    ('m6_jb', 'M6 三通旁最短线段', '+0.33', '18 px 与 30 px 都在预算内；盲投里 18 px 那张更难看清'),
+    ('m6_jb', 'M6 三通旁最短线段', '+0.33', '18 px 与 30 px 都过 B4 的 8 px 下限；按定案的 30 px 下限，18 px 正是原图那 1 条越线；盲投里 18 px 那张更难看清'),
     ('m6_br', 'M6 跨线桥到最近节点', '+0.01', '贴到 4 px 仍是 fail 0、与原图同样的 B1–B7 状态；盲投里看不出差别'),
 ]
 
@@ -477,6 +477,19 @@ def confounds(pair, a, b, rows, details):
     """两张图之间除了本对指标之外还变了什么：标量、别的主线、B7 越线数、总线长。"""
     fa, fb = flat_of(a, rows), flat_of(b, rows)
     out = []
+    for mid, name in (('m1', '主线折点越线'), ('m3', '标签越线'), ('m6', '三通旁段越线')):
+        da, db = details[a]['full'], details[b]['full']
+        if mid == 'm1':
+            oa = sum(1 for v in da['lines'].values() if v[0] > 6)
+            ob = sum(1 for v in db['lines'].values() if v[0] > 6)
+        elif mid == 'm3':
+            far = lambda d: sum(1 for v in d['labels'].values() if v[0] > 40 or (v[2] is not None and v[2] < v[0]))
+            oa, ob = far(da), far(db)
+        else:
+            oa = sum(1 for p in da['jbpairs'] if p[0] < 30)
+            ob = sum(1 for p in db['jbpairs'] if p[0] < 30)
+        if oa != ob:
+            out.append('%s %d → %d' % (name, oa, ob))
     for k, name in FLAT_NAMES.items():
         if k in OWN_KEYS[pair[2]]:
             continue
@@ -589,24 +602,33 @@ def build():
                          over=over_budget(k, rows), length=details[k]['length'],
                          d=dict(details[k]['full'], show=details[k]['show']))
 
+    def bridge_focus(key):
+        bs = details[key]['full']['bridges']
+        if not bs:
+            return None
+        b = bs[0]
+        near = b[4]
+        return [(b[0] + near[0]) / 2, (b[1] + near[1]) / 2] if near else [b[0], b[1]]
+
     gallery = []
-    def gal(metric, tag, key, text, overlay, zoom=1.8, value=None):
+    def gal(metric, tag, key, text, overlay, zoom=1.8, value=None, focus=None):
         if key is None:
             return
         d = details[key]['full']
-        focus = [855, 695]
-        if overlay['type'] == 'label':
-            v = d['labels'].get(overlay['owner'])
-            if v:
-                focus = [(v[3][0] + v[4][0]) / 2, (v[3][1] + v[4][1]) / 2]
-        elif overlay['type'] == 'junction':
-            p = d['jpairs'][0] if d['jpairs'] else (d['bridges'][0] if d['bridges'] else None)
-            if p:
-                focus = [(p[1] + p[3]) / 2, (p[2] + p[4]) / 2]
-        elif overlay['type'] == 'corridor':
-            e = d['corridor'][0]
-            if e:
-                focus = [(e[3] + e[7]) / 2, (e[4] + e[8]) / 2]
+        if focus is None:
+            focus = [855, 695]
+            if overlay['type'] == 'label':
+                v = d['labels'].get(overlay['owner'])
+                if v:
+                    focus = [(v[3][0] + v[4][0]) / 2, (v[3][1] + v[4][1]) / 2]
+            elif overlay['type'] == 'junction':
+                p = d['jpairs'][0] if d['jpairs'] else (d['bridges'][0] if d['bridges'] else None)
+                if p:
+                    focus = [(p[1] + p[3]) / 2, (p[2] + p[4]) / 2]
+            elif overlay['type'] == 'corridor':
+                e = d['corridor'][0]
+                if e:
+                    focus = [(e[3] + e[7]) / 2, (e[4] + e[8]) / 2]
         gallery.append(dict(metric=metric, tag=tag, key=key, text=text, value=value, overlay=overlay,
                             zoom=zoom, focus=[round(x) for x in focus]))
 
@@ -633,7 +655,8 @@ def build():
         v = flat_of(k, rows)[field]
         unit = ' 个' if field.startswith('m1_') else ' 次' if field.startswith('m2_') else ' px'
         gal(metric, tag, k, text or '%s %g%s（原图 %g%s）' % (desc, v, unit, flat_cache['base'][field], unit),
-            ov, zoom, '%g%s' % (v, unit))
+            ov, zoom, '%g%s' % (v, unit),
+            focus=bridge_focus(k) if field == 'm6_br' else None)
     gal('M1 主线折点', '折点最少', BASE_KEY, '原图已经是八条主线折点合计的下限（43），合法布局里没有一张更少',
         {'type': 'line', 'name': '壳体回油 EDP→油箱'}, 0.6)
     gal('M2 主线折返', '折返最少', BASE_KEY, '原图已经是同类图里折返合计的下限（15 次，422 / 445 张并列）',
@@ -647,7 +670,8 @@ def build():
     gal('M5 端口末段', '接近恒定', BASE_KEY, '538 张官方出图里 536 张最短 18 px、2 张 17 px',
         {'type': 'line', 'name': '吸油 油箱→EMP'}, 0.9)
     gal('M6 三通与跨线桥', '单步里桥最远', 'r1:node_move-CDF-001-0-20' if 'r1:node_move-CDF-001-0-20' in rows else None,
-        '跨线桥到最近节点 64 px（单步变体里最远；同类图最远 70 px）', {'type': 'junction'}, 2.0)
+        '跨线桥到最近节点 64 px（单步变体里最远；同类图最远 70 px）', {'type': 'junction'}, 2.0,
+        focus=bridge_focus('r1:node_move-CDF-001-0-20') if 'r1:node_move-CDF-001-0-20' in rows else None)
 
     dispersion = []
     for field, label, rho, meaning in DISPERSION:

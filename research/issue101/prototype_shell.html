@@ -147,7 +147,7 @@ __SHEET_CSS__
 <section id="s2">
   <h2>读图任务：先投票，再看指标</h2>
   <p>每个任务给你两版图，只差一处布局。A/B 哪个是原图是打乱的，投完才揭晓。两张图共用一个滚动窗口，拖动一张另一张跟着走。
-    「标出要看的部分」在投票前只描走向、圈范围或框出要找的标签，不画元件框，不提示答案。</p>
+    「标出要看的部分」在投票前只描走向、圈范围或框出要找的标签，不画元件框，不提示答案。题面里的两个数值按「原图 / 变体」写，与 A / B 面板顺序无关。</p>
   <div class="p-tabs" id="tabs" role="tablist"></div>
   <div id="tasks"></div>
 </section>
@@ -155,12 +155,12 @@ __SHEET_CSS__
 <section id="s3">
   <h2>自由摆弄</h2>
   <h3>1. 每项指标的两极</h3>
-  <p class="p-mute">在 B1–B7 不可区分的这些图里，每项指标最小 / 最大的那一张。点开看图，开关高亮。</p>
+  <p class="p-mute">在 B1–B7 不可区分的这些图里，每项指标最小 / 最大的那一张。点开即带高亮；只有投票区的「标出要看的部分」需要点开关。</p>
   <div id="gallery"></div>
 
   <h3>2. 把指标放进优化器的排序</h3>
   <p>布局寻优层按字典序的能量元组挑图：前面的项分出胜负就不再看后面的。今天它只看三样：违限项数（交叉、V2 穿体、V13 共线重叠各按处数计，B2–B5 超限和不劣化键变差各记一项）、B3 超出 1.5 的量、总线长；其中没有任何可读性指标。
-    下表是 <span id="pool-n"></span> 张真实出过的图（含原图、同类图、预算变差的图、带硬缺陷的图）。
+    下表是 <span id="pool-n"></span> 张真实出过的图（含原图、同类图、预算变差的图、带硬缺陷的图）。模拟里暂不接 B3 超出项，只有违限项数、可读性去向、总线长。
     你在「我的判断」里选的去向会直接改变排序——<strong>看被选中的是哪张图</strong>。</p>
   <div class="p-note" id="tuple-note"></div>
   <div class="p-tools">
@@ -215,8 +215,8 @@ const Readability = (() => {
     {id:"m5", short:"M5", name:"端口末段", unit:"px", constant:true,
      what:"从端口沿画线直走到第一个转角的长度。渲染器引出段默认 20 px（母线支路 18 px），相向端口会取净距的一半，所以不是常量，只是在同类图里恰好都是 18 px。"},
     {id:"m6", short:"M6", name:"三通与跨线桥", unit:"px",
-     what:"三通旁那一小段走线（三通点到同一条走线上相邻转角的距离）；另记三通互距和跨线桥到最近的其他走线三通点或转角的距离，只供回读。B4 只给单条线段 ≥8 px 的预算。",
-     th:{label:"三通旁线段下限", min:8, max:64, step:2, def:30}},
+     what:"三通旁那一小段走线（三通点到最近的转角；在 30 px 定案阈值下，这些最近对都在同一条走线上）；另记三通互距和跨线桥到最近的其他走线三通点或转角的距离，只供回读。B4 只给单条线段 ≥8 px 的预算。",
+     th:{label:"三通旁线段下限", min:8, max:40, step:2, def:30}},
   ];
   const PLACEMENTS = {
     hint:  {name:"仅回读提示", note:"自动测量，写进回读清单，由人决定改不改；不参与寻优"},
@@ -323,7 +323,7 @@ const Readability = (() => {
     const head = v.agree+" 次一致，"+v.against+" 次相反，"+v.same+" 次差不多";
     if (v.against > v.agree && !v.same) return head+"；多数相反，建议改定义或降为提示";
     if (v.agree && !v.against && !v.same) return head+"；投票支持这项指标";
-    if (v.same > v.agree + v.against) return head+"；差别都在察觉阈以下，建议只作提示";
+    if (v.same && !v.agree && !v.against) return head+"；差别都在察觉阈以下，建议只作提示";
     return head+"；有分歧，阈值或定义还要校准";
   }
   function exportText(pairs, s, meta) {
@@ -332,7 +332,7 @@ const Readability = (() => {
       const v = s.votes[p.id];
       const r = !v ? "未投" : v === "same" ? "差不多"
               : v === p.better ? "与指标方向一致" : "与指标方向相反";
-      L.push("- "+p.taskName+"｜"+p.title+"："+(v ? v.toUpperCase()+" 更容易" : "—")+"（"+r+"）");
+      L.push("- "+p.taskName+"｜"+p.title+"："+(v ? (v==="same"?"差不多":v.toUpperCase()+" 更容易") : "—")+"（"+r+"）");
     }
     L.push("指标去向：");
     for (const m of METRICS) {
@@ -528,6 +528,10 @@ function drawOverlay(g, sheet, spec, reveal, pair, th) {
       for (const hop of ln[2]) linePts(g,hop,{stroke:A,"stroke-width":8,opacity:0.22});
       for (const b of ln[3]) svgEl("circle",{cx:b[0],cy:b[1],r:5,fill:A,stroke:"#fff","stroke-width":1.5},g);
     }
+    if (used("m2")) for (const ln of Object.values(d.lines)) {
+      if (ln[1] <= th.m2) continue;
+      for (const hop of ln[2]) linePts(g,hop,{stroke:"var(--warn)","stroke-width":5,"stroke-dasharray":"3 6",opacity:0.5});
+    }
     if (used("m3")) for (const o in d.labels) {
       const v=d.labels[o];
       if (!(v[0]>th.m3 || (v[2]!==null && v[2]<v[0]))) continue;
@@ -703,6 +707,7 @@ function buildSim(ranked) {
     const v=h("div",{class:"p-view"});$("#winner").appendChild(v);return v;})();
   const usedIn=id=>state.placement[id]!=="hint"&&state.placement[id]!=="drop", caps=[];
   if (usedIn("m1")) caps.push("折点超限的主线");
+  if (usedIn("m2")) caps.push("折返超限的主线");
   if (usedIn("m3")) caps.push("越线标签"+(state.placement.m3==="gate"?"（金色细虚线 = 名单内豁免）":""));
   if (usedIn("m6")) caps.push("短于下限的三通旁线段");
   if (usedIn("m4")) caps.push("阅读带内的异网并行");
