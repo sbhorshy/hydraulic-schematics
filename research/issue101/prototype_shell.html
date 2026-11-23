@@ -1,0 +1,825 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>图面可读性指标 · 决策原型</title>
+<style>
+:root{--ink:#1c1c1c;--mute:#6b6b66;--line:#dcdcd4;--soft:#f3f3ee;--accent:#0f6e6e;--accent-soft:#e1efee;
+      --warn:#b3261e;--warn-soft:#fbe9e7;--gold:#9a6b00;
+      --font:"Noto Sans CJK SC","Microsoft YaHei","PingFang SC",-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:15px/1.7 var(--font);color:var(--ink);background:#fbfbf8}
+h1{font-size:23px;line-height:1.3;margin:0 0 3px}
+h2{font-size:20px;line-height:1.35;margin:0 0 8px}
+h3{font-size:16px;line-height:1.4;margin:0 0 6px}
+p{margin:0 0 10px}
+small,.p-mute{color:var(--mute)}
+button{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 12px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button[aria-pressed="true"],button.p-on{background:var(--accent);border-color:var(--accent);color:#fff}
+button.p-danger[aria-pressed="true"]{background:var(--warn);border-color:var(--warn)}
+.p-top{position:sticky;top:0;z-index:6;background:#fff;border-bottom:1px solid var(--line);padding:10px 24px;
+       display:flex;gap:20px;align-items:baseline;flex-wrap:wrap}
+.p-top nav{display:flex;gap:4px;flex-wrap:wrap}
+.p-top nav a{color:var(--mute);text-decoration:none;padding:2px 9px;border-radius:6px}
+.p-top nav a:hover{background:var(--soft);color:var(--accent)}
+.p-tag{display:inline-block;font-size:12px;line-height:1.5;padding:0 8px;border-radius:4px;background:var(--warn-soft);
+       color:var(--warn);border:1px solid #efc7c3;vertical-align:2px}
+.p-wrap{display:grid;grid-template-columns:292px minmax(0,1fr);gap:26px;max-width:1440px;margin:0 auto;padding:22px 24px 80px;align-items:start}
+.p-state{position:sticky;top:62px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;font-size:14px}
+.p-state h2{font-size:16px}
+.p-state dl{margin:0 0 10px}
+.p-state dt{font-weight:600;margin-top:9px}
+.p-state dd{margin:0}
+.p-chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:0 9px;font-size:12.5px;line-height:1.75;background:#fff;white-space:nowrap}
+.p-chip.p-hint{border-color:#c9c9c0;background:var(--soft)}
+.p-chip.p-guard{border-color:#e0c98a;background:#fff6dc;color:var(--gold)}
+.p-chip.p-energy{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.p-chip.p-gate{border-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.p-chip.p-drop{border-color:var(--line);color:var(--mute);text-decoration:line-through}
+.p-tuple{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.p-tuple i{font-style:normal;color:var(--mute)}
+.p-note{background:var(--soft);border-left:3px solid var(--accent);padding:8px 12px;margin:0 0 12px}
+.p-note.p-warn{border-left-color:var(--warn);background:var(--warn-soft)}
+main{min-width:0}
+section{margin:0 0 46px;scroll-margin-top:74px}
+.p-lead{font-size:16px}
+.p-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.p-card{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:#fff}
+.p-card b{display:block;font-size:21px;line-height:1.3;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mute);font-size:13px;white-space:nowrap}
+td.n,th.n{text-align:right;white-space:nowrap}
+.p-bar{position:relative;height:14px;background:var(--soft);border-radius:3px;min-width:150px}
+.p-bar i{position:absolute;top:0;bottom:0;background:var(--accent-soft);border-radius:3px}
+.p-bar b{position:absolute;top:-4px;width:3px;height:22px;background:var(--ink);border-radius:2px}
+.p-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.p-tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.p-task{border:1px solid var(--line);border-radius:10px;background:#fff;padding:16px}
+.p-pair{border-top:1px solid var(--line);padding:18px 0 8px}
+.p-pair:first-of-type{border-top:0;padding-top:4px}
+.p-panes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.p-pane{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.p-pane figcaption,.p-viewer>div.cap{padding:5px 10px;border-bottom:1px solid var(--line);font-size:14px;background:var(--soft)}
+.p-view{height:430px;overflow:auto;background:#fff;position:relative}
+.p-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.p-vote{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+.p-vote button{padding:6px 18px}
+.p-reveal{border-left:3px solid var(--accent);background:var(--soft);padding:10px 14px;margin:0 0 10px}
+.p-reveal.p-against{border-left-color:var(--warn)}
+.p-viewer{border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.p-viewer .p-view{height:520px}
+.p-pick{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 14px}
+.p-pick button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.p-pick button span{color:var(--mute);font-variant-numeric:tabular-nums}
+.p-opts{display:grid;gap:6px;margin:10px 0}
+.p-opts label{display:grid;grid-template-columns:auto 7.5em 1fr;gap:10px;align-items:baseline;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+.p-opts label:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.p-opts input{margin:0;accent-color:var(--accent)}
+.p-metric{border:1px solid var(--line);border-radius:10px;background:#fff;padding:14px 18px;margin:0 0 14px}
+.p-metric h3{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.p-facts{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;font-size:14px;margin:0 0 6px}
+.p-facts dt{color:var(--mute)}
+.p-facts dd{margin:0}
+.p-th{display:grid;grid-template-columns:max-content 1fr max-content;gap:12px;align-items:center;font-size:14px}
+.p-th input{width:100%;accent-color:var(--accent)}
+.p-th output{font-variant-numeric:tabular-nums;min-width:5em;text-align:right;font-weight:600}
+.p-out{width:100%;min-height:270px;font:13px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;border:1px solid var(--line);
+       border-radius:8px;padding:10px;background:#fff}
+.sheet{display:block}
+.sheet .ov{display:none;pointer-events:none}
+.show-ov .sheet .ov{display:inline}
+.sheet .ov text{font-family:var(--font);font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:4;stroke-linejoin:round}
+@media (max-width:1080px){.p-wrap{grid-template-columns:1fr}.p-state{position:static}.p-cards{grid-template-columns:1fr}.p-panes{grid-template-columns:1fr}}
+@media (max-width:640px){.p-top,.p-wrap{padding-left:14px;padding-right:14px}.p-view{height:360px}.p-opts label{grid-template-columns:auto 1fr}.p-opts label span{grid-column:2}}
+.p-fix{margin:0 0 20px;padding:14px 18px;border:1px solid var(--gold);border-radius:10px;background:#fbf5e4;color:var(--ink);font-size:14px;line-height:1.75}
+.p-fix ol{margin:6px 0 0;padding-left:22px}.p-fix li{margin:5px 0}
+@media print{.p-top,.p-state{display:none}}
+</style>
+<style>
+__SHEET_CSS__
+</style>
+</head>
+<body>
+<header class="p-top">
+  <div><h1>图面可读性指标 · 决策原型</h1><small>一次性原型，不合并到 main · 全部图面由同一份 1# 输入经官方出图链重新出图</small></div>
+  <nav>
+    <a href="#q">要回答的问题</a><a href="#s1">B1–B7 看不见什么</a><a href="#s2">读图任务</a><a href="#s3">自由摆弄</a><a href="#s4">我的判断</a>
+  </nav>
+</header>
+<div class="p-wrap">
+  <aside class="p-state" id="state" aria-live="polite"></aside>
+  <main>
+
+<section id="q">
+  <p class="p-lead"><b>要回答的问题：</b>B1–B7 状态相同的图，读起来未必一样顺。哪些读图任务能说明预算之外还有改进空间？
+    六项候选指标里，哪些值得进入布局评价——自动测量、只作回读提示、不劣化下限，还是进优化器能量函数 / 预算门槛？</p>
+  <div class="p-note"><b>怎么用</b>（约 10–15 分钟）：先到「读图任务」盲投——只看图，不看指标，投完才揭晓；
+    再到「自由摆弄」看每项指标的两极，试一次把可读性排到硬缺陷之前的反例；
+    最后在「我的判断」里逐项定去向，点「复制我的判断」贴回对话。</div>
+  <div class="p-cards" id="facts"></div>
+  <aside class="p-fix">
+    <b>更正与定案（独立复核后补记）</b>　投票是在揭晓前盲投的。第 1–5 条改的是事实卡、揭晓表、题面文字和模拟器，不在投票时看的图上；第 6 条涉及投票时可用的高亮。
+    <ol>
+      <li><b>M2 的事实卡方向写反。</b>原文「折返从不单独变化」不对：同类图里有 17 张八条主线的折点与原图逐项相同而折返变了（13 张合计 15→16，4 张只是换了主线），折点变了而折返没变的是 90 张（原文写 19 张）。M2 仍定为「仅回读提示」，理由改为「还没有单独隔离它的投票」。同一张卡片里「唯一一组折返也跟着变了的对比」也不对，实际是两组（压力线绕回钩，合计 15→21；吸油线与 @CASE 母线并行，15→16）。</li>
+      <li><b>M4「原图 64 px 带内也没有异网并行」不对。</b>原图 64 px 带内有 3 处（最近 39.4 px）；16 px 门槛下仍是 0 处，门槛不受影响。</li>
+      <li><b>M5 不是渲染器常量。</b>538 张里有 2 张是 17 px，同类图里恒为 18 px。「不采纳」的理由改为「差别最大 1 px，且只与 B5 超限重合（那两张的 B4 仍 pass）」。</li>
+      <li><b>揭晓表与题面的错处。</b>前三组主线对比的揭晓表取错了字段，显示的是没变的回油线（实际压力线 6→10、8→6，自增压线 5→7）；「三通到转角」那组标题写的 30 px 是别处没变的一对，所问位置实际是 18→38 px；「两张都贴近主人」那组原图的标签其实离主人 108 / 28 px，贴回去的那张多出 1 处 B7 越线。</li>
+      <li><b>模拟器按定案更新。</b>M6 只管三通旁线段（同一对三通不再来回各记一次）；M3 门槛按名单豁免原图 5 条，名单外的越线计入预算，预算与不劣化打平时越线少的优先。</li>
+      <li><b>高亮的两处逻辑错。</b>「标出要看的部分」在两个标签的那组（标签找主第 3 组）里，投票前就把两个标签的所属元件框画了出来，现已改为揭晓后才画——那一票有没有受影响无从确认；模拟器高亮里的金色「名单内豁免」只在 M3 取「预算门槛」时成立，原先改成别的去向也照画。</li>
+    </ol>
+  </aside>
+</section>
+
+<section id="s1">
+  <h2>B1–B7 看不见什么</h2>
+  <p>下表每一行统计的都是与人工认可的原图<strong>同一份输入、同样 fail 0、B1–B7 七项状态逐项相同、B7 越线条目也相同</strong>的同类图——按现有预算它们不可区分
+    （原图 B7 本身就有 1 处越线，所以这是「与原图同状态」，不是「全部通过」；七项状态相同但 B7 越线条目不同的图不在表内）。
+    六项候选指标在这些图里有宽有窄：<strong>能取到不同的值，说明同一预算状态下这项指标确实有变化，而 B1–B7 看不见</strong>；
+    但范围宽窄不能跨指标比较——样本是为找极值做的定向搜索，多数图仍停在原图值，像素和次数也不可比。</p>
+  <table id="dispersion"></table>
+  <p class="p-mute" id="dispersion-note"></p>
+</section>
+
+<section id="s2">
+  <h2>读图任务：先投票，再看指标</h2>
+  <p>每个任务给你两版图，只差一处布局。A/B 哪个是原图是打乱的，投完才揭晓。两张图共用一个滚动窗口，拖动一张另一张跟着走。
+    「标出要看的部分」在投票前只描走向、圈范围或框出要找的标签，不画元件框，不提示答案。</p>
+  <div class="p-tabs" id="tabs" role="tablist"></div>
+  <div id="tasks"></div>
+</section>
+
+<section id="s3">
+  <h2>自由摆弄</h2>
+  <h3>1. 每项指标的两极</h3>
+  <p class="p-mute">在 B1–B7 不可区分的这些图里，每项指标最小 / 最大的那一张。点开看图，开关高亮。</p>
+  <div id="gallery"></div>
+
+  <h3>2. 把指标放进优化器的排序</h3>
+  <p>布局寻优层按字典序的能量元组挑图：前面的项分出胜负就不再看后面的。今天它只看三样：违限项数（交叉、V2 穿体、V13 共线重叠各按处数计，B2–B5 超限和不劣化键变差各记一项）、B3 超出 1.5 的量、总线长；其中没有任何可读性指标。
+    下表是 <span id="pool-n"></span> 张真实出过的图（含原图、同类图、预算变差的图、带硬缺陷的图）。
+    你在「我的判断」里选的去向会直接改变排序——<strong>看被选中的是哪张图</strong>。</p>
+  <div class="p-note" id="tuple-note"></div>
+  <div class="p-tools">
+    <button id="danger" class="p-danger" aria-pressed="false">反例：把可读性排到硬缺陷之前</button>
+    <span class="p-mute">用来看「为了降低评分而破坏预算 / 语义」是怎么发生的</span>
+  </div>
+  <div class="p-note" id="winner-note"></div>
+  <div class="p-tools">
+    <button data-z="out">缩小</button><button data-z="in">放大</button><button id="winner-ov" aria-pressed="false">高亮越线处</button>
+    <span class="p-mute" id="winner-zoom"></span>
+  </div>
+  <div class="p-viewer" id="winner"></div>
+  <table id="rank"></table>
+</section>
+
+<section id="s4">
+  <h2>我的判断</h2>
+  <p>每项指标选一个去向。去向的含义写在每个选项后面；阈值滑块只影响用到阈值的三种去向（不劣化下限、能量项、预算门槛），选「仅回读提示」或「不采纳」时阈值和越线一行会隐藏。</p>
+  <div id="metrics"></div>
+  <h3>护栏</h3>
+  <p class="p-mute">无论上面怎么选，这三条是固定前提，会原样写进你的判断：</p>
+  <ol id="guards"></ol>
+  <div class="p-tools"><button id="reset">清空投票、恢复建议</button><button id="copy" class="p-on">复制我的判断</button><span class="p-mute" id="copy-note"></span></div>
+  <textarea class="p-out" id="out" readonly></textarea>
+</section>
+
+  </main>
+</div>
+
+__SHEET_TEMPLATES__
+<script id="data" type="application/json">__DATA_JSON__</script>
+<script>
+"use strict";
+// ============================================================================
+// 纯逻辑模块：可读性指标以什么方式进入布局评价。不碰 DOM。
+// 一项指标 = 一个阈值 + 一组越线条目；去向决定这个数被放在能量元组的哪一层。
+// ============================================================================
+const Readability = (() => {
+  const METRICS = [
+    {id:"m1", short:"M1", name:"主线折点", unit:"个",
+     what:"沿一条读图主线（跨元件、跨母线，例如「EDP 壳体回油口 → 油箱」）累计的真实转角数。B2 按单条走线管 ≤3 折点、全图 ≤40（预算表里叫「折返次数」，校核数的是方向变化次数），串成读图主线之后的总数（原图 43）它看不见。",
+     th:{label:"单条主线折点上限", min:3, max:12, step:1, def:6}},
+    {id:"m2", short:"M2", name:"主线折返", unit:"次",
+     what:"同一条读图主线上，同一轴（横或竖）上先后两段方向相反的次数——两段之间隔着正交段也算。它按整条主线累计，所以 B2 / B3 的单条走线口径看不到它；B2 虽然也叫「折返次数」，数的却是单条走线的方向变化，和这里的折返不是一回事。",
+     th:{label:"单条主线折返上限", min:1, max:8, step:1, def:3}},
+    {id:"m3", short:"M3", name:"标签归属", unit:"px",
+     what:"标签墨迹框到所属元件足迹（布局声明框）的净距，以及它是否离别的元件更近。B7 管文字到管线、符号轮廓和其他文字的净空 ≥6 px，不管它离「主人」多远。",
+     th:{label:"标签到所属元件的净距上限", min:10, max:120, step:5, def:40}},
+    {id:"m4", short:"M4", name:"并行走线", unit:"px",
+     what:"不同管网的两条同向直走线，中心距不超过阅读带（默认 16 px）且并行至少 24 px 的次数。V13 只管近共线重叠（偏移 ≤1.2 px、重叠 >6 px），不管 4 px、10 px 这种贴线。",
+     th:{label:"并行阅读带宽度", min:8, max:64, step:4, def:16}},
+    {id:"m5", short:"M5", name:"端口末段", unit:"px", constant:true,
+     what:"从端口沿画线直走到第一个转角的长度。渲染器引出段默认 20 px（母线支路 18 px），相向端口会取净距的一半，所以不是常量，只是在同类图里恰好都是 18 px。"},
+    {id:"m6", short:"M6", name:"三通与跨线桥", unit:"px",
+     what:"三通旁那一小段走线（三通点到同一条走线上相邻转角的距离）；另记三通互距和跨线桥到最近的其他走线三通点或转角的距离，只供回读。B4 只给单条线段 ≥8 px 的预算。",
+     th:{label:"三通旁线段下限", min:8, max:64, step:2, def:30}},
+  ];
+  const PLACEMENTS = {
+    hint:  {name:"仅回读提示", note:"自动测量，写进回读清单，由人决定改不改；不参与寻优"},
+    guard: {name:"不劣化下限", note:"候选在这一项上的越线条目比原图多时记一条「比原图差」，排在硬缺陷和预算超项之后；不主动改善"},
+    energy:{name:"能量项",     note:"硬缺陷和预算分出胜负之后才比较，排在总线长之前——允许用线长换可读性"},
+    gate:  {name:"预算门槛",   note:"名单外的越线条目加进「预算超项」；原图登记豁免名单，名单内的越线不计预算，但额度内越线少的候选排在总线长之前"},
+    drop:  {name:"不采纳",     note:"量到了也不用于评价：差别太小，或与既有预算重合"},
+  };
+  const ORDER = ["hint","guard","energy","gate","drop"];
+  const GUARDS = [
+    "可读性指标永远排在硬缺陷（V2 穿符号、V13 共线重叠、多出的交叉）之后，不许用「更好读」换「连错线」；页里的「反例」按钮是有意违反这条的演示。",
+    "B1–B7 与不劣化约束原样保留；可读性只在 fail 0、B1–B7 状态与原图相同、B7 越线条目也相同的图之间再分高下。",
+    "动标签、挪元件只改布局，不改输入声明——管网、端口、连接关系一个不动。",
+  ];
+  // 门槛类指标的原图豁免名单：名单内的越线条目不计预算，名单外的一律计入。
+  const EXEMPT = {m3:["ACC-001","CDF-001","EDP-001","EMP-001","TANK-001"]};
+  const TERM_NAME = {fail:"硬缺陷", budget:"预算超项", guard:"比原图差", length:"总线长"};
+  const measured = METRICS.filter(m => !m.constant).map(m => m.id);
+  const put = (o,k,v) => Object.assign({}, o, {[k]:v});
+
+  function initial(placement) {
+    return {votes:{}, placement:Object.assign({}, placement),
+            exempt:JSON.parse(JSON.stringify(EXEMPT)),
+            th:Object.fromEntries(METRICS.filter(m=>m.th).map(m=>[m.id,m.th.def])),
+            danger:false};
+  }
+  const vote = (s,id,c) => put(s,"votes",put(s.votes,id,c));
+  const place = (s,id,w) => put(s,"placement",put(s.placement,id,w));
+  const threshold = (s,id,v) => put(s,"th",put(s.th,id,v));
+  const danger = (s,on) => put(s,"danger",on);
+
+  // d 可以是完整证据，也可以是同类图的紧凑数组；下标约定相同。
+  function offending(d, id, t) {
+    if (id === "m1") return Object.values(d.lines).filter(v => v[0] > t).length;
+    if (id === "m2") return Object.values(d.lines).filter(v => v[1] > t).length;
+    if (id === "m3") return Object.values(d.labels).filter(v => v[0] > t || (v[2] !== null && v[2] < v[0])).length;
+    if (id === "m4") return d.corridor.filter(e => e[0] <= t).length;
+    if (id === "m6") return d.jbpairs.filter(p => p[0] < t).length;   // 定案：只管三通旁线段
+    return 0;
+  }
+  function order(s) {
+    const t = [], active = measured.filter(id => s.placement[id] !== "hint" && s.placement[id] !== "drop");
+    if (s.danger) for (const id of active) t.push({key:"off_"+id, metric:id, layer:"反例"});
+    t.push({key:"fail",layer:"硬"},{key:"budget",layer:"硬"},{key:"guard",layer:"硬"});
+    for (const id of measured) if (s.placement[id] === "gate") t.push({key:"in_"+id, metric:id, layer:"额度内"});
+    for (const id of measured) if (s.placement[id] === "energy") t.push({key:id, metric:id, layer:"能量"});
+    t.push({key:"length",layer:"末尾"});
+    return t;
+  }
+  function exempted(d, id, t, s) {                      // 名单内、仍然越线的条目数
+    if (id !== "m3") return 0;
+    return ((s.exempt && s.exempt[id]) || []).filter(o => {
+      const v = d.labels[o];
+      return v && (v[0] > t || (v[2] !== null && v[2] < v[0]));
+    }).length;
+  }
+  function values(sheet, s, seed) {
+    const v = {fail:sheet.fail, budget:sheet.over, guard:0, length:sheet.length};
+    for (const id of measured) {
+      const p = s.placement[id];
+      if (p === "hint" || p === "drop") continue;
+      const o = offending(sheet.d,id,s.th[id]), o0 = offending(seed.d,id,s.th[id]);
+      v["off_"+id] = o;                                  // 反例演示直接比较越线条目数
+      if (p === "gate") {
+        v.budget += Math.max(0, o - exempted(sheet.d,id,s.th[id],s));   // 名单外的越线条目计入预算
+        v["in_"+id] = o;                                 // 预算与不劣化打平时，越线少的优先
+      } else if (p === "guard") v.guard += (o > o0 ? 1 : 0);
+      else if (p === "energy") v[id] = o;
+    }
+    return v;
+  }
+  function rank(pool, s, seed) {
+    const terms = order(s);
+    return pool.map(key => ({sheet:key, v:values(key,s,seed)}))
+      .sort((x,y) => {
+        for (const t of terms) if (x.v[t.key] !== y.v[t.key]) return x.v[t.key] - y.v[t.key];
+        return x.sheet.key < y.sheet.key ? -1 : 1;
+      })
+      .map(r => Object.assign(r, {terms}));
+  }
+  const byId = id => METRICS.find(m => m.id === id);
+  function termName(t) {
+    if (t.metric) return byId(t.metric).name + (t.key.indexOf("in_") === 0 ? "额度内越线" : "越线");
+    return TERM_NAME[t.key];
+  }
+  function termValue(t,v) { return t.key === "length" ? Math.round(v)+" px" : String(v); }
+  function decider(a,b,terms) {
+    if (!a || !b) return null;
+    return terms.find(t => a.v[t.key] !== b.v[t.key]) || null;
+  }
+  function verdict(pairs, s) {
+    const out = Object.fromEntries(METRICS.map(m => [m.id,{agree:0,against:0,same:0}]));
+    for (const p of pairs) {
+      const v = s.votes[p.id];
+      if (!v) continue;
+      if (v === "same") out[p.metric].same++;
+      else if (v === p.better) out[p.metric].agree++;
+      else out[p.metric].against++;
+    }
+    return out;
+  }
+  function verdictNote(v) {
+    if (!v.agree && !v.against && !v.same) return "还没有投票";
+    const head = v.agree+" 次一致，"+v.against+" 次相反，"+v.same+" 次差不多";
+    if (v.against > v.agree && !v.same) return head+"；多数相反，建议改定义或降为提示";
+    if (v.agree && !v.against && !v.same) return head+"；投票支持这项指标";
+    if (v.same > v.agree + v.against) return head+"；差别都在察觉阈以下，建议只作提示";
+    return head+"；有分歧，阈值或定义还要校准";
+  }
+  function exportText(pairs, s, meta) {
+    const L = ["【图面可读性指标 · 我的判断】","投票："];
+    for (const p of pairs) {
+      const v = s.votes[p.id];
+      const r = !v ? "未投" : v === "same" ? "差不多"
+              : v === p.better ? "与指标方向一致" : "与指标方向相反";
+      L.push("- "+p.taskName+"｜"+p.title+"："+(v ? v.toUpperCase()+" 更容易" : "—")+"（"+r+"）");
+    }
+    L.push("指标去向：");
+    for (const m of METRICS) {
+      const p = s.placement[m.id];
+      L.push("- "+m.short+" "+m.name+" = "+PLACEMENTS[p].name
+        + (m.th && p !== "hint" && p !== "drop" ? "（"+m.th.label+" "+s.th[m.id]+" "+m.unit+"）" : ""));
+    }
+    if (s.placement.m3 === "gate")
+      L.push("门槛豁免：原图 M3 的 5 条越线按名单登记（"+EXEMPT.m3.join("、")+"）；名单外的越线计入预算，预算与不劣化打平时越线少的优先。");
+    if (s.placement.m6 === "guard") L.push("M6 只管三通旁线段；三通互距与跨线桥距离留在回读清单。");
+    L.push("反例演示："+(s.danger ? "开启，被选中："+(meta.winner||"") : "未开启"));
+    L.push("护栏：");
+    for (const g of GUARDS) L.push("- "+g);
+    return L.join("\n");
+  }
+  return {METRICS,PLACEMENTS,ORDER,GUARDS,measured,initial,vote,place,threshold,danger,offending,
+          order,values,rank,termName,termValue,decider,verdict,verdictNote,exportText};
+})();
+</script>
+<script>
+"use strict";
+// ============================================================================
+// 页面外壳：把状态画出来、把点击交给纯逻辑模块。
+// ============================================================================
+const DATA = JSON.parse(document.getElementById("data").textContent);
+const NS = "http://www.w3.org/2000/svg", W = 1710, HH = 1390;
+const $ = (s,r) => (r||document).querySelector(s);
+const $$ = (s,r) => Array.from((r||document).querySelectorAll(s));
+const esc = s => String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const h = (tag,attrs,html) => {
+  const n = document.createElement(tag);
+  for (const k in attrs||{}) if (attrs[k]!==undefined && attrs[k]!==null) n.setAttribute(k,attrs[k]);
+  if (html!==undefined) n.innerHTML = html;
+  return n;
+};
+const svgEl = (tag,attrs,parent) => {
+  const n = document.createElementNS(NS,tag);
+  for (const k in attrs||{}) n.setAttribute(k,attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const inClass = k => k===DATA.base || DATA.classList.indexOf(k)>=0;
+DATA.pairs.forEach((p,i) => p.no = i+1);
+let state = Readability.initial(DATA.recommended);
+let tab = DATA.tasks[0].id;
+let galleryPick = DATA.gallery[0];
+let winnerZoom = 0.6, winnerOv = false;
+const ui = {};                 // 每对图的缩放 / 高亮 / 滚动位置，重建时保留
+
+// ---------- 图面 ----------
+function makeSheet(key) {
+  const tpl = $('template.sheet-tpl[data-key="'+CSS.escape(key)+'"]');
+  const svg = tpl.content.firstElementChild.cloneNode(true);
+  svg.setAttribute("class","sheet");
+  svgEl("g",{class:"ov"},svg);
+  return svg;
+}
+function setZoom(view, zoom, center) {
+  const svg = $("svg",view), old = parseFloat(svg.getAttribute("width"))/W || zoom;
+  const cx = center ? center[0] : (view.scrollLeft+view.clientWidth/2)/old;
+  const cy = center ? center[1] : (view.scrollTop+view.clientHeight/2)/old;
+  svg.setAttribute("width",W*zoom); svg.setAttribute("height",HH*zoom);
+  view.scrollLeft = cx*zoom - view.clientWidth/2;
+  view.scrollTop  = cy*zoom - view.clientHeight/2;
+}
+function mountSheet(view, key, zoom, focus, overlay, reveal, spec, scroll) {
+  view.innerHTML = "";
+  const svg = makeSheet(key);
+  svg.setAttribute("width",W*zoom); svg.setAttribute("height",HH*zoom);
+  if (overlay) drawOverlay($(".ov",svg), DATA.sheets[key], overlay, reveal, spec, state.th);
+  view.appendChild(svg);
+  view.dataset.key = key;
+  if (scroll) { view.scrollLeft = scroll[0]; view.scrollTop = scroll[1]; }
+  else { view.scrollLeft = focus[0]*zoom - view.clientWidth/2;
+         view.scrollTop  = focus[1]*zoom - view.clientHeight/2; }
+}
+function linePts(g,pts,attrs) {
+  return svgEl("polyline",Object.assign({fill:"none",points:pts.map(p=>p[0]+","+p[1]).join(" ")},attrs),g);
+}
+function tag(g,x,y,str,color,size) {
+  const t = svgEl("text",{x,y,fill:color||"var(--accent)","font-size":size||14,"text-anchor":"middle"},g);
+  t.textContent = str; return t;
+}
+function rect(g,b,attrs) {
+  if (!b) return;
+  svgEl("rect",Object.assign({x:b[0],y:b[1],width:b[2]-b[0],height:b[3]-b[1]},attrs),g);
+}
+function nearest(a,b) {
+  const c=[(a[0]+a[2])/2,(a[1]+a[3])/2];
+  const p=[Math.min(Math.max(c[0],b[0]),b[2]),Math.min(Math.max(c[1],b[1]),b[3])];
+  const q=[Math.min(Math.max(p[0],a[0]),a[2]),Math.min(Math.max(p[1],a[1]),a[3])];
+  return [q,p];
+}
+function drawOverlay(g, sheet, spec, reveal, pair, th) {
+  const A="var(--accent)", R="var(--warn)", d=sheet.d;
+  if (spec.type==="line") {
+    const ln=d.lines[spec.name]; if(!ln) return;
+    for (const hop of ln[2]) linePts(g,hop,{stroke:A,"stroke-width":10,opacity:0.22});
+    const s0=ln[2][0][0], s1=ln[2][ln[2].length-1], e1=s1[s1.length-1];
+    for (const p of [s0,e1]) svgEl("circle",{cx:p[0],cy:p[1],r:8,fill:"#fff",stroke:A,"stroke-width":3},g);
+    tag(g,s0[0],s0[1]-14,"起点",A); tag(g,e1[0],e1[1]-14,"终点",A);
+    if (reveal) {
+      for (const b of ln[3]) svgEl("circle",{cx:b[0],cy:b[1],r:5,fill:A,stroke:"#fff","stroke-width":1.5},g);
+      for (const r of ln[4]) linePts(g,[[r[0],r[1]],[r[2],r[3]]],{stroke:R,"stroke-width":9,opacity:0.55});
+      tag(g,(s0[0]+e1[0])/2,s0[1]-34,spec.name+"："+ln[0]+" 个折点，"+ln[1]+" 次折返",A,16);
+    }
+  } else if (spec.type==="label") {
+    const owners=spec.owners||[spec.owner];
+    if (owners.length>1) {
+      for (const name of owners) {
+        const v=d.labels[name]; if(!v) continue;
+        rect(g,v[3],{fill:A,opacity:0.14});
+        rect(g,v[3],{fill:"none",stroke:A,"stroke-width":2});
+      }
+      if (!reveal) { const v0=d.labels[owners[0]]; if (v0) tag(g,(v0[3][0]+v0[3][2])/2,v0[3][1]-8,"找它们的主人",A); return; }
+      for (const name of owners) {
+        const v=d.labels[name]; if(!v) continue;
+        rect(g,v[4],{fill:"none",stroke:A,"stroke-width":2.5,"stroke-dasharray":"5 4"});
+        const [qa,po]=nearest(v[3],v[4]); linePts(g,[qa,po],{stroke:A,"stroke-width":2});
+        tag(g,(qa[0]+po[0])/2,(qa[1]+po[1])/2-8,name+" "+v[0]+" px",A);
+        if (v[2]!==null && v[2]<v[0]) {
+          rect(g,v[5],{fill:"none",stroke:R,"stroke-width":2,"stroke-dasharray":"6 4"});
+          tag(g,(v[5][0]+v[5][2])/2,(v[5][1]+v[5][3])/2,"离 "+v[1]+" 更近",R,12);
+        }
+      }
+      return;
+    }
+    const v=d.labels[spec.owner]; if(!v) return;
+    rect(g,v[3],{fill:A,opacity:0.14});
+    rect(g,v[3],{fill:"none",stroke:A,"stroke-width":2});
+    if (!reveal) { tag(g,(v[3][0]+v[3][2])/2,v[3][1]-8,"找它的主人",A); return; }
+    rect(g,v[4],{fill:"none",stroke:A,"stroke-width":2.5});
+    const [qa,po]=nearest(v[3],v[4]);
+    linePts(g,[qa,po],{stroke:A,"stroke-width":2});
+    tag(g,(qa[0]+po[0])/2,(qa[1]+po[1])/2-8,"所属 "+v[0]+" px",A);
+    if (v[2]!==null && v[2]<v[0]) {
+      rect(g,v[5],{fill:"none",stroke:R,"stroke-width":2,"stroke-dasharray":"6 4"});
+      const [qb,pr]=nearest(v[3],v[5]);
+      linePts(g,[qb,pr],{stroke:R,"stroke-width":2,"stroke-dasharray":"6 4"});
+      tag(g,(qb[0]+pr[0])/2,(qb[1]+pr[1])/2+18,"离 "+v[1]+" 更近："+v[2]+" px",R);
+    }
+  } else if (spec.type==="junction") {
+    if (!reveal) {
+      if (pair && pair.focus) {
+        svgEl("circle",{cx:pair.focus[0],cy:pair.focus[1],r:pair.radius||140,fill:"none",
+                        stroke:A,"stroke-width":2,"stroke-dasharray":"8 6"},g);
+        tag(g,pair.focus[0],pair.focus[1]-(pair.radius||140)-10,"看这一片",A,15);
+      }
+      return;
+    }
+    for (const j of d.junctions) svgEl("circle",{cx:j[0],cy:j[1],r:6,fill:"none",stroke:A,"stroke-width":1.6},g);
+    // 定案：下限只管三通旁线段（红）；三通互距与跨线桥距离只供回读（青）
+    for (const p of d.jbpairs) {
+      if (p[0] >= 80) continue;
+      linePts(g,[[p[1],p[2]],[p[3],p[4]]],{stroke:R,"stroke-width":2.5,"stroke-dasharray":"6 4"});
+      svgEl("circle",{cx:p[1],cy:p[2],r:5,fill:R},g);
+      tag(g,(p[1]+p[3])/2,(p[2]+p[4])/2-8,p[0]+" px",R,13);
+    }
+    for (const p of d.jpairs) {
+      if (p[0] >= 80) continue;
+      linePts(g,[[p[1],p[2]],[p[3],p[4]]],{stroke:A,"stroke-width":2,"stroke-dasharray":"3 5"});
+      svgEl("circle",{cx:p[1],cy:p[2],r:5,fill:"none",stroke:A,"stroke-width":2},g);
+      tag(g,(p[1]+p[3])/2,(p[2]+p[4])/2-8,p[0]+" px",A,13);
+    }
+    for (const b of d.bridges) {
+      svgEl("circle",{cx:b[0],cy:b[1],r:11,fill:"none",stroke:A,"stroke-width":2.5},g);
+      if (b[4]) {
+        linePts(g,[[b[0],b[1]],b[4]],{stroke:A,"stroke-width":2,"stroke-dasharray":"3 5"});
+        tag(g,(b[0]+b[4][0])/2,(b[1]+b[4][1])/2+20,"跨线桥到节点 "+b[3]+" px",A,13);
+      }
+    }
+  } else if (spec.type==="corridor") {
+    if (!reveal) {
+      if (pair && pair.focus) {
+        svgEl("circle",{cx:pair.focus[0],cy:pair.focus[1],r:pair.radius||170,fill:"none",
+                        stroke:A,"stroke-width":2,"stroke-dasharray":"8 6"},g);
+        tag(g,pair.focus[0],pair.focus[1]-(pair.radius||170)-10,"看这一片",A,15);
+      }
+      return;
+    }
+    for (const e of d.corridor) {
+      if (e[0] > Math.max(th.m4,48)) continue;
+      linePts(g,[[e[3],e[4]],[e[5],e[6]]],{stroke:A,"stroke-width":9,opacity:0.5});
+      linePts(g,[[e[7],e[8]],[e[9],e[10]]],{stroke:R,"stroke-width":9,opacity:0.5});
+      tag(g,(e[3]+e[7])/2,(e[4]+e[8])/2,"并行 "+e[0]+" px，长 "+Math.round(e[1]),R,14);
+    }
+    if (!d.corridor.length) tag(g,(pair&&pair.focus?pair.focus[0]:855),(pair&&pair.focus?pair.focus[1]:695)-40,"这里没有带内并行",A,15);
+  } else if (spec.type==="all") {
+    // 只画「我的判断」里真正参与排序的指标；提示 / 不采纳的不画
+    const P=state.placement, used=id=>P[id]!=="hint"&&P[id]!=="drop", G="var(--gold)";
+    if (used("m1")) for (const ln of Object.values(d.lines)) {
+      if (ln[0] <= th.m1) continue;
+      for (const hop of ln[2]) linePts(g,hop,{stroke:A,"stroke-width":8,opacity:0.22});
+      for (const b of ln[3]) svgEl("circle",{cx:b[0],cy:b[1],r:5,fill:A,stroke:"#fff","stroke-width":1.5},g);
+    }
+    if (used("m3")) for (const o in d.labels) {
+      const v=d.labels[o];
+      if (!(v[0]>th.m3 || (v[2]!==null && v[2]<v[0]))) continue;
+      const ex=P.m3==="gate"&&(state.exempt.m3||[]).indexOf(o)>=0;  // 金色细虚线 = 名单内，越线但豁免（只在「预算门槛」下成立）
+      rect(g,v[3],ex?{fill:"none",stroke:G,"stroke-width":1.5,"stroke-dasharray":"2 4"}
+                    :{fill:"none",stroke:R,"stroke-width":2.5});
+    }
+    if (used("m6")) for (const p of d.jbpairs)
+      if (p[0] < th.m6) linePts(g,[[p[1],p[2]],[p[3],p[4]]],{stroke:R,"stroke-width":2,"stroke-dasharray":"6 4"});
+    if (used("m4")) for (const e of d.corridor) if (e[0] <= th.m4) {
+      linePts(g,[[e[3],e[4]],[e[5],e[6]]],{stroke:A,"stroke-width":9,opacity:0.5});
+      linePts(g,[[e[7],e[8]],[e[9],e[10]]],{stroke:R,"stroke-width":9,opacity:0.5});
+    }
+  }
+}
+
+// ---------- 概览 / 离散度 ----------
+$("#facts").innerHTML = [
+  ["同类图", DATA.meta.cls+" 张", "fail 0，B1–B7 七项状态与原图逐项相同，B7 越线条目也相同（原图 1 处）"],
+  ["单步邻域", "189 / 254 张", "六项指标与原图完全一样：原图在局部是稳的"],
+  ["改动的自由度", "4 类改动", "挪元件 / 母线 / 走廊 / 标签；输入声明一个字没动"],
+].map(f=>'<div class="p-card"><b>'+f[1]+'</b>'+f[0]+'<div class="p-mute">'+f[2]+'</div></div>').join("");
+$("#dispersion").innerHTML = "<tr><th>指标</th><th class=\"n\">原图</th><th class=\"n\">同类图最小</th><th class=\"n\">最大</th><th>范围</th><th class=\"n\">取值种数</th><th>与总线长的秩相关</th><th>意味着</th></tr>" +
+  DATA.dispersion.map(r => {
+    const lo=Math.min(r.base,r.min,r.max), hi=Math.max(r.base,r.max), span=hi-lo||1;
+    return "<tr><td>"+esc(r.label)+"</td><td class=\"n\"><b>"+r.base+"</b></td><td class=\"n\">"+r.min+"</td><td class=\"n\">"+r.max+"</td>"+
+      "<td><div class=\"p-bar\"><i style=\"left:0;width:100%\"></i><b style=\"left:calc("+((r.base-lo)/span*100)+"% - 1px)\"></b></div></td>"+
+      "<td class=\"n\">"+r.nval+" / "+r.n+"</td><td>"+(r.rho===null?"—":r.rho)+"</td><td>"+esc(r.meaning)+"</td></tr>";
+  }).join("");
+$("#dispersion-note").textContent = DATA.dispersion_note;
+
+// ---------- 读图任务 ----------
+function buildTabs() {
+  $("#tabs").innerHTML = "";
+  for (const t of DATA.tasks) {
+    const b=h("button",{role:"tab","aria-selected":String(t.id===tab)},esc(t.name));
+    b.addEventListener("click",()=>{ tab=t.id; buildTabs(); buildTasks(); });
+    $("#tabs").appendChild(b);
+  }
+}
+function capturePair(pair) {
+  const art=$("#pair-"+pair.id); if(!art) return;
+  const u=ui[pair.id]; if(!u) return;
+  $$(".p-view",art).forEach((v,i)=>u.scroll[i?"b":"a"]=[v.scrollLeft,v.scrollTop]);
+}
+function buildPair(pair) {
+  const u=ui[pair.id]||(ui[pair.id]={zoom:pair.zoom,ov:false,scroll:{}});
+  const voted=!!state.votes[pair.id];
+  const art=h("article",{class:"p-pair"+(voted?" voted":"")+(u.ov?" show-ov":""),id:"pair-"+pair.id});
+  art.appendChild(h("h3",{},"对比 "+pair.no+" · "+esc(pair.title)));
+  art.appendChild(h("p",{},pair.prompt));
+  const panes=h("div",{class:"p-panes"}), views={};
+  for (const side of ["a","b"]) {
+    const fig=h("figure",{class:"p-pane"});
+    fig.appendChild(h("figcaption",{},"<b>"+side.toUpperCase()+"</b>"+(voted?"　"+esc(DATA.sheets[pair[side]].desc):"")));
+    const view=h("div",{class:"p-view"});
+    fig.appendChild(view); panes.appendChild(fig); views[side]=view;
+  }
+  art.appendChild(panes);
+  const tools=h("div",{class:"p-tools"});
+  const zl=h("span",{class:"p-mute"},Math.round(u.zoom*100)+"%");
+  const zoomBy=dz=>{
+    const z=Math.min(2.4,Math.max(0.25,parseFloat($("svg",views.a).getAttribute("width"))/W+dz));
+    for (const s of ["a","b"]) { setZoom(views[s],z); u.scroll[s]=[views[s].scrollLeft,views[s].scrollTop]; }
+    u.zoom=z; zl.textContent=Math.round(z*100)+"%";
+  };
+  tools.appendChild(h("button",{},"缩小")).addEventListener("click",()=>zoomBy(-0.15));
+  tools.appendChild(h("button",{},"放大")).addEventListener("click",()=>zoomBy(0.15));
+  tools.appendChild(zl);
+  if (pair.overlay) {
+    const ob=h("button",{"aria-pressed":String(u.ov)},"标出要看的部分");
+    ob.addEventListener("click",()=>{
+      u.ov=!u.ov; art.classList.toggle("show-ov",u.ov); ob.setAttribute("aria-pressed",String(u.ov));
+      for (const s of ["a","b"]) mountSheet(views[s],pair[s],u.zoom,pair.focus,pair.overlay,voted,pair,u.scroll[s]);
+    });
+    tools.appendChild(ob);
+  }
+  art.appendChild(tools);
+  const vote=h("div",{class:"p-vote"});
+  for (const [c,name] of [["a","A 更容易"],["same","差不多"],["b","B 更容易"]]) {
+    const b=h("button",{"aria-pressed":String(state.votes[pair.id]===c)},name);
+    b.addEventListener("click",()=>{
+      capturePair(pair);
+      state=Readability.vote(state,pair.id,c);
+      const fresh=buildPair(pair);
+      art.replaceWith(fresh); mountPair(pair,fresh);
+      updateAll();
+    });
+    vote.appendChild(b);
+  }
+  art.appendChild(vote);
+  if (voted) {
+    const sa=DATA.sheets[pair.a], sb=DATA.sheets[pair.b], v=state.votes[pair.id];
+    const same=inClass(pair.a)&&inClass(pair.b);
+    const rows=pair.show_rows.map(r=>"<tr><td>"+esc(r[0])+"</td><td class=\"n\">"+esc(r[1])+"</td><td class=\"n\">"+esc(r[2])+"</td></tr>").join("");
+    const rev=h("div",{class:"p-reveal"+((v===pair.better||v==="same")?"":" p-against")});
+    rev.innerHTML="<p><b>A</b> = "+esc(sa.desc)+"　<b>B</b> = "+esc(sb.desc)+"</p>"+
+      "<table><tr><th>"+esc(pair.measure)+"</th><th class=\"n\">A</th><th class=\"n\">B</th></tr>"+rows+"</table>"+
+      "<p>"+clsText(pair,sa,sb)+esc(pair.cls==="count"?pair.note.replace("、B7 越线条目 "+pair.b7[0]+" → "+pair.b7[1],""):pair.note)+"</p>"+
+      "<p><b>你的投票："+(v==="same"?"差不多":v===pair.better?"与指标方向一致":"与指标方向相反")+"。</b>"+
+      (v==="same"?"这项指标量到的差别，你的眼睛没有感觉到。":v===pair.better?"指标量到的差别，你的眼睛也感觉到了。":
+       "指标说 "+(pair.better==="a"?"A":"B")+" 更好，你选了另一张——要么指标定义要改，要么差别来自别处。")+"</p>";
+    art.appendChild(rev);
+  }
+  return art;
+}
+function clsText(pair,sa,sb) {
+  const f=sa.fail===sb.fail?"两张图 fail 都是 "+sa.fail+"；":"两张图 fail 分别是 "+sa.fail+" 和 "+sb.fail+"；";
+  if (pair.cls==="same") return f+"B1–B7 状态逐项相同。";
+  if (pair.cls==="count") return f+"B1–B7 七项状态逐项相同，只是 B7 越线条目 "+pair.b7[0]+" → "+pair.b7[1]+"；同类图还要求这一项也相同，所以这张不算同类图。";
+  return f+"B1–B7 状态并不完全相同，按本页口径不算同类图。";
+}
+function mountPair(pair, art) {
+  const allViews=$$(".p-view",art), views={a:allViews[0],b:allViews[1]}, u=ui[pair.id];
+  const voted=!!state.votes[pair.id];
+  for (const side of ["a","b"])
+    mountSheet(views[side],pair[side],u.zoom,pair.focus,pair.overlay,voted,pair,u.scroll[side]);
+  let lock=false;
+  for (const [x,y] of [[views.a,views.b],[views.b,views.a]]) x.addEventListener("scroll",()=>{
+    u.scroll[x===views.a?"a":"b"]=[x.scrollLeft,x.scrollTop];
+    if (lock) return; lock=true; y.scrollLeft=x.scrollLeft; y.scrollTop=x.scrollTop; lock=false;
+  });
+}
+function buildTasks() {
+  const host=$("#tasks"); host.innerHTML="";
+  const t=DATA.tasks.find(x=>x.id===tab), box=h("div",{class:"p-task"});
+  box.appendChild(h("p",{},t.intro));
+  const pairs=DATA.pairs.filter(p=>p.task===tab);
+  for (const pair of pairs) box.appendChild(buildPair(pair));
+  host.appendChild(box);
+  for (const pair of pairs) mountPair(pair,$("#pair-"+pair.id));
+}
+
+// ---------- 图库 ----------
+function buildGallery() {
+  const host=$("#gallery"); host.innerHTML="";
+  const groups={};
+  for (const g of DATA.gallery) (groups[g.metric]=groups[g.metric]||[]).push(g);
+  for (const m of Object.keys(groups)) {
+    const row=h("div",{class:"p-pick"});
+    row.appendChild(h("span",{class:"p-mute"},m+"　"));
+    for (const g of groups[m]) {
+      const b=h("button",{"aria-pressed":String(g===galleryPick)},g.tag+' <span>'+esc(g.value||"")+"</span>");
+      b.addEventListener("click",()=>{ galleryPick=g; buildGallery(); });
+      row.appendChild(b);
+    }
+    host.appendChild(row);
+  }
+  const g=galleryPick, s=DATA.sheets[g.key];
+  host.appendChild(h("div",{class:"p-tools"},"<span>"+(g.key===DATA.base?"人工认可的原图":"原图基础上："+esc(s.desc))+"　·　"+esc(g.text)+"</span>"));
+  const viewer=h("div",{class:"p-viewer show-ov"});
+  viewer.appendChild(h("div",{class:"cap"},"高亮：" + (g.overlay.type==="line"?"读图主线":g.overlay.type==="label"?"标签与主人":g.overlay.type==="corridor"?"并行走线":"三通旁线段 / 三通互距 / 跨线桥")));
+  const view=h("div",{class:"p-view"});
+  viewer.appendChild(view); host.appendChild(viewer);
+  mountSheet(view,g.key,g.zoom||0.6,g.focus,g.overlay,true,null);
+}
+
+// ---------- 模拟器 ----------
+function buildSim(ranked) {
+  const terms=ranked[0].terms, win=ranked[0], second=ranked[1], d=Readability.decider(win,second,terms);
+  $("#pool-n").textContent=DATA.pool.length;
+  $("#tuple-note").innerHTML="<b>当前比较顺序：</b>"+terms.map(t=>'<span class="p-chip">'+esc(Readability.termName(t))+"</span>").join('<i> › </i>')+
+    (state.danger?'　<span class="p-tag">反例：可读性排在硬缺陷之前</span>':"")+
+    "<br><small>预算超项 = 非 pass 的预算项数 + B7 越线条目相对原图多出的数量 + 门槛类指标里名单外的越线条目；比原图差 = 不劣化下限被突破的指标数；额度内越线 = 门槛类指标的越线条目总数，少的优先，排在总线长之前。</small>";
+  $("#winner-note").innerHTML="按这个顺序，寻优器选中：<b>"+(win.sheet.key===DATA.base?"人工认可的原图":esc(win.sheet.desc))+"</b>　"+
+    (win.v.fail?'<span class="p-tag">'+win.v.fail+" 处硬缺陷</span>":"fail 0")+"　预算超项 "+win.v.budget+
+    (d?"　·　分出胜负的是 <b>"+esc(Readability.termName(d))+"</b>":"　·　各项完全打平，最后按图名排序")+
+    (inClass(win.sheet.key)?"":'　<span class="p-tag">不是同类图：fail、B1–B7 状态或 B7 越线条目与原图不同</span>')+
+    "<br><small>类别："+esc(win.sheet.kind)+"　总线长 "+Math.round(win.v.length)+" px</small>";
+  $("#danger").setAttribute("aria-pressed",String(state.danger));
+  const view=$("#winner .p-view")||(()=>{
+    const cap=h("div",{class:"cap",id:"winner-cap"});$("#winner").appendChild(cap);
+    const v=h("div",{class:"p-view"});$("#winner").appendChild(v);return v;})();
+  const usedIn=id=>state.placement[id]!=="hint"&&state.placement[id]!=="drop", caps=[];
+  if (usedIn("m1")) caps.push("折点超限的主线");
+  if (usedIn("m3")) caps.push("越线标签"+(state.placement.m3==="gate"?"（金色细虚线 = 名单内豁免）":""));
+  if (usedIn("m6")) caps.push("短于下限的三通旁线段");
+  if (usedIn("m4")) caps.push("阅读带内的异网并行");
+  $("#winner-cap").textContent="高亮（按「我的判断」里的去向）："+(caps.length?caps.join(" · "):"当前去向没有参与排序的越线项");
+  $("#winner").classList.toggle("show-ov",winnerOv);
+  mountSheet(view,win.sheet.key,winnerZoom,[855,695],winnerOv?{type:"all"}:null,true,null);
+  $("#winner-zoom").textContent=Math.round(winnerZoom*100)+"%";
+  $("#rank").innerHTML="<tr><th>#</th><th>图</th>"+terms.map(t=>"<th class=\"n\">"+esc(Readability.termName(t))+"</th>").join("")+"<th>类别</th></tr>"+
+    ranked.map((r,i)=>"<tr"+(i===0?' style="background:var(--accent-soft)"':"")+"><td class=\"n\">"+(i+1)+"</td><td>"+
+      (r.sheet.key===DATA.base?"<b>原图</b>":esc(r.sheet.desc))+"</td>"+r.terms.map(t=>"<td class=\"n\">"+Readability.termValue(t,r.v[t.key])+"</td>").join("")+
+      "<td>"+esc(r.sheet.kind)+"</td></tr>").join("");
+}
+
+// ---------- 我的判断 ----------
+function buildMetrics() {
+  const host=$("#metrics"); host.innerHTML="";
+  const seed=DATA.sheets[DATA.base];
+  for (const m of Readability.METRICS) {
+    const f=DATA.facts[m.id], box=h("div",{class:"p-metric",id:"m-"+m.id});
+    box.appendChild(h("h3",{},m.short+" "+esc(m.name)+' <span class="p-chip" id="chip-'+m.id+'"></span>'));
+    box.appendChild(h("p",{class:"p-mute"},esc(m.what)));
+    const dl=h("dl",{class:"p-facts"});
+    dl.innerHTML="<dt>原图</dt><dd>"+esc(seed.d.show[m.id])+"</dd>"+
+      "<dt>同类图范围</dt><dd>"+esc(f.range)+"</dd>"+
+      "<dt>你看到的事实</dt><dd>"+esc(f.support)+"</dd>"+
+      "<dt>你的投票</dt><dd id=\"vote-"+m.id+"\"></dd>"+
+      (m.th?"<dt>阈值下越线</dt><dd>原图 <b id=\"off-"+m.id+"\"></b> 条；同类图里 <b id=\"offcls-"+m.id+"\"></b> / "+DATA.meta.cls+" 张有越线</dd>":"")+
+      "<dt>建议</dt><dd>"+esc(f.rec)+"</dd>";
+    box.appendChild(dl);
+    const opts=h("div",{class:"p-opts"});
+    for (const key of Readability.ORDER) {
+      if (m.constant && key!=="hint" && key!=="drop") continue;
+      const lab=h("label",{},'<input type="radio" name="place-'+m.id+'" value="'+key+'"><b>'+Readability.PLACEMENTS[key].name+"</b><span>"+
+                 esc(Readability.PLACEMENTS[key].note)+"</span>");
+      lab.querySelector("input").addEventListener("change",()=>{ state=Readability.place(state,m.id,key); updateAll(); });
+      opts.appendChild(lab);
+    }
+    box.appendChild(opts);
+    if (m.th) {
+      const lab=h("label",{class:"p-th"},esc(m.th.label)+
+        '<input type="range" min="'+m.th.min+'" max="'+m.th.max+'" step="'+m.th.step+'"><output></output>');
+      lab.querySelector("input").addEventListener("input",e=>{
+        state=Readability.threshold(state,m.id,parseFloat(e.target.value)); updateAll();
+      });
+      box.appendChild(lab);
+    }
+    host.appendChild(box);
+  }
+  $("#guards").innerHTML=Readability.GUARDS.map(g=>"<li>"+esc(g)+"</li>").join("");
+}
+function updateMetrics() {
+  const ver=Readability.verdict(DATA.pairs,state), seed=DATA.sheets[DATA.base];
+  for (const m of Readability.METRICS) {
+    const p=state.placement[m.id], chip=$("#chip-"+m.id);
+    chip.textContent=Readability.PLACEMENTS[p].name; chip.className="p-chip p-"+p;
+    $("#vote-"+m.id).textContent=Readability.verdictNote(ver[m.id]);
+    if (m.th) {
+      const t=state.th[m.id], o=Readability.offending(seed.d,m.id,t);
+      let oc=0;
+      for (const k of DATA.classList) if (Readability.offending(DATA.clsOff[k],m.id,t)>0) oc++;
+      const a=$("#off-"+m.id), b=$("#offcls-"+m.id);
+      a.textContent=o; b.textContent=oc;
+      a.style.color=o?"var(--warn)":""; b.style.color=oc?"var(--warn)":"";
+      const row=$("#m-"+m.id), used=(p!=="hint"&&p!=="drop");
+      const dd=$("#off-"+m.id).closest("dd");
+      $("input[type=range]",row).closest("label").style.display=used?"":"none";
+      dd.style.display=used?"":"none"; dd.previousElementSibling.style.display=used?"":"none";
+      $("input[type=range]",row).value=t;
+      $("output",row).textContent=t+" "+m.unit;
+      $("input[name='place-"+m.id+"'][value='"+p+"']",row).checked=true;
+    }
+  }
+}
+function buildState(ranked) {
+  const n=DATA.pairs.filter(p=>state.votes[p.id]).length, win=ranked[0];
+  const terms=ranked[0].terms;
+  const dl=h("dl",{},"<dt>投票进度</dt><dd>"+n+" / "+DATA.pairs.length+" 对</dd>"+
+    "<dt>指标去向</dt><dd class=\"p-tuple\">"+Readability.METRICS.map(m=>'<span class="p-chip p-'+state.placement[m.id]+'">'+
+      m.short+" "+Readability.PLACEMENTS[state.placement[m.id]].name+"</span>").join("")+"</dd>"+
+    "<dt>比较顺序</dt><dd class=\"p-tuple\">"+terms.slice(0,6).map(t=>'<span class="p-chip">'+esc(Readability.termName(t))+"</span>").join("<i>›</i>")+
+      (terms.length>6?" …":"")+"</dd>"+
+    "<dt>寻优器现在会选</dt><dd>"+esc(win.sheet.key===DATA.base?"人工认可的原图":win.sheet.desc)+
+      (win.v.fail?' <span class="p-tag">'+win.v.fail+" 处硬缺陷</span>":"")+"</dd>");
+  const host=$("#state"); host.innerHTML="";
+  host.appendChild(h("h2",{},"当前判断")); host.appendChild(dl);
+  host.appendChild(h("p",{class:"p-mute"},"每次点击后这里都会刷新；投票、缩放和高亮留在原处。"));
+}
+function updateAll() {
+  const ranked=Readability.rank(DATA.pool.map(k=>Object.assign({key:k},DATA.sheets[k])),state,DATA.sheets[DATA.base]);
+  buildState(ranked); updateMetrics(); buildSim(ranked);
+  $("#out").value=Readability.exportText(DATA.pairs,state,{winner:ranked[0].sheet.desc});
+}
+
+// ---------- 事件 ----------
+$("#danger").addEventListener("click",()=>{ state=Readability.danger(state,!state.danger); updateAll(); });
+$("#reset").addEventListener("click",()=>{
+  for (const p of DATA.pairs) capturePair(p);
+  state=Readability.initial(DATA.recommended); tab=DATA.tasks[0].id;
+  for (const k in ui) delete ui[k];
+  buildTabs(); buildTasks(); buildMetrics(); updateAll();
+});
+$("#copy").addEventListener("click",async()=>{
+  try { await navigator.clipboard.writeText($("#out").value); $("#copy-note").textContent="已复制到剪贴板"; }
+  catch(e) { $("#out").select(); $("#copy-note").textContent="已选中全文，请按 Ctrl+C"; }
+});
+for (const b of $$("[data-z]")) b.addEventListener("click",()=>{
+  winnerZoom=Math.min(2.4,Math.max(0.25,winnerZoom+(b.dataset.z==="in"?0.15:-0.15)));
+  const view=$("#winner .p-view");
+  setZoom(view,winnerZoom,[855,695]);
+  $("#winner-zoom").textContent=Math.round(winnerZoom*100)+"%";
+});
+$("#winner-ov").addEventListener("click",e=>{
+  winnerOv=!winnerOv; e.currentTarget.setAttribute("aria-pressed",String(winnerOv));
+  const ranked=Readability.rank(DATA.pool.map(k=>Object.assign({key:k},DATA.sheets[k])),state,DATA.sheets[DATA.base]);
+  buildSim(ranked);
+});
+buildTabs(); buildTasks(); buildGallery(); buildMetrics(); updateAll();
+</script>
+</body>
+</html>

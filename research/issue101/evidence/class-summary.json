@@ -1,0 +1,1341 @@
+{
+ "sheets": 538,
+ "same_class": 445,
+ "same_class_by_kind": {
+  "r1": 254,
+  "r2": 190,
+  "r2x": 1
+ },
+ "fail0": 509,
+ "base": {
+  "m1_max": 9,
+  "m1_sum": 43,
+  "m2_rev": 15,
+  "m2_back": 0.296,
+  "m3_max": 108.0,
+  "m3_mean": 25.3,
+  "m3_far": 4,
+  "m3_amb": 2,
+  "m4_n": 0,
+  "m4_len": 0,
+  "m4_main": 0,
+  "m5_min": 18.0,
+  "m5_short": 0,
+  "m5_mis": 0,
+  "m6_jg": 22.2,
+  "m6_jb": 18.0,
+  "m6_br": 44.0,
+  "m6_n": 24
+ },
+ "base_fail": 0,
+ "base_warn": 6,
+ "base_over": 1,
+ "base_length": 9584.6,
+ "class_range": {
+  "m1_max": [
+   9,
+   10
+  ],
+  "m1_sum": [
+   43,
+   51
+  ],
+  "m2_rev": [
+   15,
+   22
+  ],
+  "m2_back": [
+   0.29,
+   0.304
+  ],
+  "m3_max": [
+   70.0,
+   168.2
+  ],
+  "m3_mean": [
+   18.5,
+   36.0
+  ],
+  "m3_far": [
+   3,
+   5
+  ],
+  "m3_amb": [
+   1,
+   3
+  ],
+  "m4_n": [
+   0,
+   1
+  ],
+  "m4_len": [
+   0,
+   70.0
+  ],
+  "m4_main": [
+   0,
+   1
+  ],
+  "m5_min": [
+   18.0,
+   18.0
+  ],
+  "m5_short": [
+   0,
+   0
+  ],
+  "m5_mis": [
+   0,
+   0
+  ],
+  "m6_jg": [
+   17.8,
+   57.8
+  ],
+  "m6_jb": [
+   8.2,
+   30.0
+  ],
+  "m6_br": [
+   4.0,
+   70.0
+  ],
+  "m6_n": [
+   24,
+   24
+  ]
+ },
+ "spearman_with_length": {
+  "m1_max": 0.23,
+  "m1_sum": 0.21,
+  "m2_rev": 0.35,
+  "m2_back": -0.09,
+  "m3_max": -0.01,
+  "m3_mean": -0.01,
+  "m3_far": -0.03,
+  "m3_amb": 0.13,
+  "m4_n": 0.08,
+  "m4_len": 0.08,
+  "m4_main": 0.08,
+  "m5_min": null,
+  "m5_short": null,
+  "m5_mis": null,
+  "m6_jg": -0.12,
+  "m6_jb": 0.33,
+  "m6_br": 0.01,
+  "m6_n": null
+ },
+ "spearman_m1_sum_m2_rev": 0.16,
+ "r1_class_identical_metrics": 189,
+ "lines": {
+  "吸油 油箱→EDP": {
+   "base_bends": 4,
+   "base_reversals": 0,
+   "class_bends": [
+    4,
+    4
+   ],
+   "class_reversals": [
+    0,
+    0
+   ],
+   "class_sheets": 445
+  },
+  "吸油 油箱→EMP": {
+   "base_bends": 2,
+   "base_reversals": 0,
+   "class_bends": [
+    2,
+    2
+   ],
+   "class_reversals": [
+    0,
+    0
+   ],
+   "class_sheets": 445
+  },
+  "压力 EDP→USER-005": {
+   "base_bends": 6,
+   "base_reversals": 2,
+   "class_bends": [
+    6,
+    10
+   ],
+   "class_reversals": [
+    0,
+    5
+   ],
+   "class_sheets": 445
+  },
+  "压力 EMP→USER-001": {
+   "base_bends": 6,
+   "base_reversals": 0,
+   "class_bends": [
+    6,
+    10
+   ],
+   "class_reversals": [
+    0,
+    4
+   ],
+   "class_sheets": 445
+  },
+  "回油 USER-003→油箱": {
+   "base_bends": 6,
+   "base_reversals": 3,
+   "class_bends": [
+    6,
+    8
+   ],
+   "class_reversals": [
+    3,
+    3
+   ],
+   "class_sheets": 445
+  },
+  "壳体回油 EDP→油箱": {
+   "base_bends": 9,
+   "base_reversals": 5,
+   "class_bends": [
+    9,
+    9
+   ],
+   "class_reversals": [
+    5,
+    6
+   ],
+   "class_sheets": 445
+  },
+  "自增压 @PRESS→油箱": {
+   "base_bends": 5,
+   "base_reversals": 2,
+   "class_bends": [
+    5,
+    7
+   ],
+   "class_reversals": [
+    2,
+    4
+   ],
+   "class_sheets": 445
+  },
+  "蓄压 @PRESS→ACC": {
+   "base_bends": 5,
+   "base_reversals": 3,
+   "class_bends": [
+    5,
+    7
+   ],
+   "class_reversals": [
+    3,
+    5
+   ],
+   "class_sheets": 445
+  }
+ },
+ "class_m1_m2_independence": {
+  "bends_same_reversals_changed": 17,
+  "bends_changed_reversals_same": 90,
+  "both_same": 328,
+  "both_changed": 10,
+  "reversal_total_changed": 23,
+  "reversal_total_unchanged_redistributed": 4
+ },
+ "sheets_any_line_fewer_bends": 0,
+ "lines_fewer_bends_sheets": {
+  "吸油 油箱→EDP": 0,
+  "吸油 油箱→EMP": 0,
+  "压力 EDP→USER-005": 0,
+  "压力 EMP→USER-001": 0,
+  "回油 USER-003→油箱": 0,
+  "壳体回油 EDP→油箱": 0,
+  "自增压 @PRESS→油箱": 0,
+  "蓄压 @PRESS→ACC": 0
+ },
+ "over_threshold": {
+  "m1 折点 > 6 的主线条数": {
+   "base": 1,
+   "class_sheets": {
+    "1": 345,
+    "2": 52,
+    "3": 47,
+    "4": 1
+   },
+   "all_sheets": {
+    "1": 411,
+    "2": 67,
+    "3": 59,
+    "4": 1
+   }
+  },
+  "m3 净距 > 40 px 或离别的元件更近的标签数": {
+   "base": 5,
+   "class_sheets": {
+    "4": 26,
+    "5": 403,
+    "6": 16
+   },
+   "all_sheets": {
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 40,
+    "5": 470,
+    "6": 25
+   }
+  },
+  "m3 其中名单外的标签数（名单 = ACC-001、CDF-001、EDP-001、EMP-001、TANK-001）": {
+   "base": 0,
+   "class_sheets": {
+    "0": 429,
+    "1": 16
+   }
+  },
+  "m4 16 px 带内异网并行处数": {
+   "base": 0,
+   "class_sheets": {
+    "0": 439,
+    "1": 6
+   },
+   "all_sheets": {
+    "0": 530,
+    "1": 8
+   }
+  },
+  "m6 短于 30 px 的三通旁线段条数": {
+   "base": 1,
+   "class_sheets": {
+    "0": 50,
+    "1": 349,
+    "2": 37,
+    "3": 9
+   },
+   "all_sheets": {
+    "0": 50,
+    "1": 409,
+    "2": 59,
+    "3": 20
+   }
+  }
+ },
+ "base_budget_items": [
+  {
+   "id": "B1",
+   "metric": "线线交叉",
+   "measured": 1,
+   "status": "pass"
+  },
+  {
+   "id": "B2",
+   "metric": "折返次数",
+   "measured": {
+    "total": 24,
+    "max_single": 3
+   },
+   "status": "pass"
+  },
+  {
+   "id": "B3",
+   "metric": "绕行比（路线长÷直角曼哈顿距）",
+   "measured": {
+    "max": 1.312,
+    "over_budget": []
+   },
+   "status": "pass"
+  },
+  {
+   "id": "B4",
+   "metric": "最短走线段(px)",
+   "measured": 18.0,
+   "status": "pass"
+  },
+  {
+   "id": "B5",
+   "metric": "节点盒最小净距(px)",
+   "measured": 44.0,
+   "status": "pass"
+  },
+  {
+   "id": "B6",
+   "metric": "容器走廊(px)",
+   "measured": {
+    "group_padding": null,
+    "avoid_corridor": 14.0
+   },
+   "status": "pass"
+  },
+  {
+   "id": "B7",
+   "metric": "标签净空(px)",
+   "measured": {
+    "min_clearance": 2.101,
+    "no_obstacles_within_budget": false,
+    "violations": 1
+   },
+   "status": "over"
+  }
+ ],
+ "label_variants": {
+  "round1": {
+   "attempted": 97,
+   "blocked": 23,
+   "rendered": 59,
+   "hard_defect_no_report": 15,
+   "same_class": 50
+  },
+  "round2": {
+   "candidates": 294,
+   "blocked": 36,
+   "walkable_in_process": 258,
+   "confirmed": 15,
+   "same_class": 9
+  },
+  "multi_label_extras": {
+   "attempted": 5,
+   "blocked": 1
+  },
+  "by_owner": {
+   "ACC-001": {
+    "blocked": 9,
+    "rendered": 6,
+    "base_px": 70.0,
+    "class_ops": [
+     [
+      "above",
+      40,
+      46.0,
+      false,
+      "r1:label_above_ACC-001_40"
+     ],
+     [
+      "above",
+      40,
+      46.0,
+      false,
+      "r2:lab_ACC-001_above_40"
+     ],
+     [
+      "above",
+      100,
+      106.0,
+      true,
+      "r1:label_above_ACC-001_100"
+     ],
+     [
+      "above",
+      140,
+      146.0,
+      true,
+      "r1:label_above_ACC-001_140"
+     ],
+     [
+      "above",
+      160,
+      166.0,
+      true,
+      "r2:lab_ACC-001_above_160"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（taps[0]）": 6,
+     "走线被挡（paths[14][0->1]）": 3,
+     "B1 1→2；B6 {'group_padding': None, 'avoid_corridor': 14.0}→{'group_padding': None, 'avoid_corridor': 13.699999999999989}；fail 0→1": 1
+    },
+    "base_ambiguous": false
+   },
+   "ACV-001": {
+    "blocked": 6,
+    "rendered": 6,
+    "base_px": 6.0,
+    "class_ops": [],
+    "non_class": {
+     "硬缺陷 3 处（V12；第一轮未保留报告）": 1,
+     "走线被挡（paths[15][0->1] -> buses.PRESS）": 4,
+     "硬缺陷 5 处（V12；第一轮未保留报告）": 1,
+     "硬缺陷 2 处（V12/V19；第一轮未保留报告）": 1,
+     "走线被挡（paths[31][1->2] -> buses.RET）": 2,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 2}；B7 越线条目 1→2": 2,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 0.0, 'no_obstacles_within_budget': False, 'violations': 4}；B7 越线条目 1→4；fail 0→3": 1,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': -0.9, 'no_obstacles_within_budget': False, 'violations': 8}；B7 越线条目 1→8；fail 0→5": 1,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': -0.9, 'no_obstacles_within_budget': False, 'violations': 12}；B7 越线条目 1→12；fail 0→10": 1,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': -0.9, 'no_obstacles_within_budget': False, 'violations': 7}；B7 越线条目 1→7；fail 0→2": 1
+    },
+    "base_ambiguous": false
+   },
+   "CDF-001": {
+    "blocked": 5,
+    "rendered": 9,
+    "base_px": 48.0,
+    "class_ops": [
+     [
+      "below",
+      60,
+      68.0,
+      false,
+      "r1:label_below_CDF-001_60"
+     ],
+     [
+      "above",
+      80,
+      87.0,
+      false,
+      "r2:lab_CDF-001_above_80"
+     ],
+     [
+      "below",
+      100,
+      108.0,
+      true,
+      "r2:lab_CDF-001_below_100"
+     ],
+     [
+      "above",
+      120,
+      127.0,
+      true,
+      "r2:lab_CDF-001_above_120"
+     ],
+     [
+      "below",
+      160,
+      168.0,
+      true,
+      "r1:label_below_CDF-001_160"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[31][1->2] -> buses.RET）": 3,
+     "走线被挡（paths[15][0->1] -> buses.PRESS）": 2,
+     "B4 18.0→4.3": 2,
+     "B2 {'total': 24, 'max_single': 3}→{'total': 26, 'max_single': 3}；B4 18.0→1.0": 1,
+     "B2 {'total': 24, 'max_single': 3}→{'total': 26, 'max_single': 3}；B4 18.0→5.0": 1
+    },
+    "base_ambiguous": false
+   },
+   "EMP-001": {
+    "blocked": 9,
+    "rendered": 3,
+    "base_px": 28.0,
+    "class_ops": [
+     [
+      "below",
+      120,
+      128.0,
+      true,
+      "r1:label_below_EMP-001_120"
+     ],
+     [
+      "below",
+      160,
+      168.0,
+      true,
+      "r1:label_below_EMP-001_160"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[30][0->1] -> buses.CASE）": 3,
+     "走线被挡（paths[15][0->1] -> buses.PRESS）": 4,
+     "走线被挡（paths[3][0->1] -> buses.PRESS）": 2,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 2}；B7 越线条目 1→2": 1
+    },
+    "base_ambiguous": true
+   },
+   "PG-001": {
+    "blocked": 14,
+    "rendered": 0,
+    "base_px": 6.0,
+    "class_ops": [],
+    "non_class": {
+     "走线被挡（paths[15][0->1] -> buses.PRESS）": 12,
+     "硬缺陷 3 处（V12；第一轮未保留报告）": 1,
+     "走线被挡（paths[31][1->2] -> buses.RET）": 2
+    },
+    "base_ambiguous": false
+   },
+   "RF-001": {
+    "blocked": 0,
+    "rendered": 6,
+    "base_px": 8.0,
+    "class_ops": [
+     [
+      "right",
+      0,
+      12.0,
+      false,
+      "r1:label_right_RF-001_0"
+     ],
+     [
+      "below",
+      20,
+      28.0,
+      false,
+      "r1:label_below_RF-001_20"
+     ],
+     [
+      "below",
+      40,
+      48.0,
+      false,
+      "r2:lab_RF-001_below_40"
+     ],
+     [
+      "below",
+      60,
+      68.0,
+      false,
+      "r1:label_below_RF-001_60"
+     ],
+     [
+      "below",
+      80,
+      88.0,
+      false,
+      "r1:label_below_RF-001_80"
+     ]
+    ],
+    "non_class": {
+     "硬缺陷 3 处（V12；第一轮未保留报告）": 2,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 2}；B7 越线条目 1→2": 1
+    },
+    "base_ambiguous": false
+   },
+   "EDP-001": {
+    "blocked": 8,
+    "rendered": 6,
+    "base_px": 48.0,
+    "class_ops": [
+     [
+      "below",
+      40,
+      48.0,
+      true,
+      "r2:lab_EDP-001_below_40"
+     ],
+     [
+      "below",
+      60,
+      68.0,
+      true,
+      "r1:label_below_EDP-001_60"
+     ],
+     [
+      "below",
+      80,
+      88.0,
+      true,
+      "r1:label_below_EDP-001_80"
+     ],
+     [
+      "below",
+      120,
+      128.0,
+      true,
+      "r1:label_below_EDP-001_120"
+     ],
+     [
+      "below",
+      160,
+      168.0,
+      true,
+      "r1:label_below_EDP-001_160"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[29][0->1] -> buses.CASE）": 4,
+     "走线被挡（paths[2][0->1] -> buses.PRESS）": 2,
+     "走线被挡（paths[30][0->1] -> buses.CASE）": 2,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 0.101, 'no_obstacles_within_budget': False, 'violations': 3}；B7 越线条目 1→3": 1
+    },
+    "base_ambiguous": true
+   },
+   "FSOV-001": {
+    "blocked": 3,
+    "rendered": 4,
+    "base_px": 8.0,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_FSOV-001_0"
+     ],
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r2:lab_FSOV-001_above_0"
+     ],
+     [
+      "below",
+      60,
+      68.0,
+      true,
+      "r1:label_below_FSOV-001_60"
+     ],
+     [
+      "below",
+      80,
+      88.0,
+      true,
+      "r1:label_below_FSOV-001_80"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[14][0->1]）": 3,
+     "硬缺陷 1 处（V13；第一轮未保留报告）": 1,
+     "硬缺陷 2 处（V10/V19；第一轮未保留报告）": 1,
+     "硬缺陷 2 处（V12；第一轮未保留报告）": 1
+    },
+    "base_ambiguous": false
+   },
+   "PRV-002": {
+    "blocked": 0,
+    "rendered": 6,
+    "base_px": 8.2,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_PRV-002_0"
+     ],
+     [
+      "below",
+      20,
+      28.2,
+      false,
+      "r1:label_below_PRV-002_20"
+     ],
+     [
+      "below",
+      60,
+      68.2,
+      false,
+      "r1:label_below_PRV-002_60"
+     ],
+     [
+      "below",
+      80,
+      88.2,
+      false,
+      "r1:label_below_PRV-002_80"
+     ],
+     [
+      "below",
+      160,
+      168.2,
+      true,
+      "r1:label_below_PRV-002_160"
+     ]
+    ],
+    "non_class": {
+     "硬缺陷 1 处（V19；第一轮未保留报告）": 1,
+     "B7 {'min_clearance': 2.101, 'no_obstacles_within_budget': False, 'violations': 1}→{'min_clearance': 2.0, 'no_obstacles_within_budget': False, 'violations': 2}；B7 越线条目 1→2": 1
+    },
+    "base_ambiguous": false
+   },
+   "QDR-001": {
+    "blocked": 3,
+    "rendered": 2,
+    "base_px": 8.0,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_QDR-001_0"
+     ],
+     [
+      "right",
+      0,
+      12.0,
+      false,
+      "r1:label_right_QDR-001_0"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[25][0->1] -> buses.USERR）": 3,
+     "硬缺陷 2 处（V12；第一轮未保留报告）": 1,
+     "硬缺陷 1 处（V12；第一轮未保留报告）": 1,
+     "硬缺陷 5 处（V12；第一轮未保留报告）": 1,
+     "硬缺陷 13 处（V12；第一轮未保留报告）": 1
+    },
+    "base_ambiguous": false
+   },
+   "TANK-001": {
+    "blocked": 0,
+    "rendered": 7,
+    "base_px": 108.0,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_TANK-001_0"
+     ],
+     [
+      "below",
+      0,
+      8.0,
+      false,
+      "r1:label_below_TANK-001_0"
+     ],
+     [
+      "right",
+      0,
+      12.0,
+      true,
+      "r1:label_right_TANK-001_0"
+     ],
+     [
+      "below",
+      20,
+      28.0,
+      false,
+      "r1:label_below_TANK-001_20"
+     ],
+     [
+      "below",
+      60,
+      68.0,
+      false,
+      "r1:label_below_TANK-001_60"
+     ],
+     [
+      "below",
+      80,
+      88.0,
+      false,
+      "r1:label_below_TANK-001_80"
+     ],
+     [
+      "below",
+      120,
+      128.0,
+      false,
+      "r1:label_below_TANK-001_120"
+     ]
+    ],
+    "non_class": {
+     "硬缺陷 1 处（V19；第一轮未保留报告）": 1
+    },
+    "base_ambiguous": false
+   },
+   "PRV-001": {
+    "blocked": 2,
+    "rendered": 5,
+    "base_px": 6.0,
+    "class_ops": [
+     [
+      "below",
+      0,
+      8.2,
+      false,
+      "r1:label_below_PRV-001_0"
+     ],
+     [
+      "above",
+      20,
+      26.0,
+      false,
+      "r1:label_above_PRV-001_20"
+     ],
+     [
+      "above",
+      40,
+      46.0,
+      false,
+      "r1:label_above_PRV-001_40"
+     ],
+     [
+      "above",
+      100,
+      106.0,
+      false,
+      "r1:label_above_PRV-001_100"
+     ],
+     [
+      "above",
+      140,
+      146.0,
+      true,
+      "r1:label_above_PRV-001_140"
+     ]
+    ],
+    "non_class": {
+     "走线被挡（paths[5][1->2] -> buses.USR）": 2
+    },
+    "base_ambiguous": false
+   },
+   "PF-001": {
+    "blocked": 0,
+    "rendered": 7,
+    "base_px": 12.0,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_PF-001_0"
+     ],
+     [
+      "below",
+      0,
+      8.0,
+      false,
+      "r1:label_below_PF-001_0"
+     ],
+     [
+      "right",
+      20,
+      12.0,
+      false,
+      "r1:label_right_PF-001_20"
+     ],
+     [
+      "right",
+      40,
+      12.0,
+      false,
+      "r1:label_right_PF-001_40"
+     ],
+     [
+      "right",
+      100,
+      12.0,
+      false,
+      "r1:label_right_PF-001_100"
+     ],
+     [
+      "right",
+      140,
+      12.0,
+      false,
+      "r1:label_right_PF-001_140"
+     ],
+     [
+      "above",
+      100,
+      106.0,
+      false,
+      "r2:lab_PF-001_above_100"
+     ]
+    ],
+    "non_class": {},
+    "base_ambiguous": false
+   },
+   "QDP-001": {
+    "blocked": 0,
+    "rendered": 7,
+    "base_px": 8.0,
+    "class_ops": [
+     [
+      "above",
+      0,
+      6.0,
+      false,
+      "r1:label_above_QDP-001_0"
+     ],
+     [
+      "right",
+      0,
+      12.0,
+      false,
+      "r1:label_right_QDP-001_0"
+     ],
+     [
+      "below",
+      20,
+      28.0,
+      false,
+      "r1:label_below_QDP-001_20"
+     ],
+     [
+      "below",
+      60,
+      68.0,
+      false,
+      "r1:label_below_QDP-001_60"
+     ],
+     [
+      "below",
+      80,
+      88.0,
+      false,
+      "r1:label_below_QDP-001_80"
+     ],
+     [
+      "below",
+      120,
+      128.0,
+      true,
+      "r1:label_below_QDP-001_120"
+     ],
+     [
+      "below",
+      160,
+      168.0,
+      true,
+      "r1:label_below_QDP-001_160"
+     ]
+    ],
+    "non_class": {},
+    "base_ambiguous": false
+   }
+  }
+ },
+ "screen": {
+  "candidates": 6438,
+  "ok": 4668,
+  "blocked": 1770,
+  "m5_min_counts": {
+   "17.0": 146,
+   "18.0": 4522
+  },
+  "m5_17_and_b5_under_40": 146
+ },
+ "in_process_fewer_bends": {
+  "count": 6,
+  "with_violation": 6,
+  "rows": [
+   {
+    "id": "node_move-EMP-001--80-40",
+    "fewer": {
+     "吸油 油箱→EMP": [
+      2,
+      0
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 22,
+     "b2max": 3,
+     "b3": 1.312,
+     "b4": 18.0,
+     "b5": 0.0,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B5 节点净距"
+    ]
+   },
+   {
+    "id": "node_move-EMP-001-20-40",
+    "fewer": {
+     "吸油 油箱→EMP": [
+      2,
+      0
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 24,
+     "b2max": 3,
+     "b3": 1.312,
+     "b4": 6.4,
+     "b5": 20.4,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B4 最短线段",
+     "B5 节点净距"
+    ]
+   },
+   {
+    "id": "node_move-EMP-001-40-40",
+    "fewer": {
+     "吸油 油箱→EMP": [
+      2,
+      0
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 24,
+     "b2max": 3,
+     "b3": 1.312,
+     "b4": 6.4,
+     "b5": 40.2,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B4 最短线段"
+    ]
+   },
+   {
+    "id": "node_move-EMP-001-60-40",
+    "fewer": {
+     "吸油 油箱→EMP": [
+      2,
+      0
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 24,
+     "b2max": 3,
+     "b3": 1.312,
+     "b4": 6.4,
+     "b5": 44.0,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B4 最短线段"
+    ]
+   },
+   {
+    "id": "node_move-EMP-001-80-40",
+    "fewer": {
+     "吸油 油箱→EMP": [
+      2,
+      0
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 24,
+     "b2max": 3,
+     "b3": 1.312,
+     "b4": 6.4,
+     "b5": 44.0,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B4 最短线段"
+    ]
+   },
+   {
+    "id": "node_move-TANK-001--20--80",
+    "fewer": {
+     "自增压 @PRESS→油箱": [
+      5,
+      3
+     ]
+    },
+    "panel": {
+     "b1": 1,
+     "b2tot": 24,
+     "b2max": 4,
+     "b3": 1.312,
+     "b4": 18.0,
+     "b5": 44.0,
+     "v2": 0,
+     "v13": 0
+    },
+    "violates": [
+     "B2 单条折点"
+    ]
+   }
+  ]
+ },
+ "m4": {
+  "base_events_within_64": [
+   39.4,
+   44.0,
+   50.0
+  ],
+  "class_gaps": [
+   4.0,
+   10.0,
+   19.4,
+   24.0,
+   30.0,
+   39.4,
+   40.0,
+   42.0,
+   44.0,
+   49.7,
+   50.0,
+   60.0,
+   62.0,
+   64.0
+  ],
+  "class_gap_counts": {
+   "4.0": 5,
+   "10.0": 1,
+   "19.4": 2,
+   "24.0": 15,
+   "30.0": 30,
+   "39.4": 410,
+   "40.0": 1,
+   "42.0": 1,
+   "44.0": 406,
+   "49.7": 9,
+   "50.0": 428,
+   "60.0": 1,
+   "62.0": 18,
+   "64.0": 5
+  }
+ },
+ "official_vs_in_process": {
+  "sheets": 245,
+  "by_metric": {
+   "m1_max": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m1_sum": {
+    "same": 233,
+    "differ": 12,
+    "not_comparable": 0
+   },
+   "m2_rev": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m3_max": {
+    "same": 0,
+    "differ": 245,
+    "not_comparable": 0
+   },
+   "m3_far": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m3_amb": {
+    "same": 226,
+    "differ": 19,
+    "not_comparable": 0
+   },
+   "m4_n": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m5_min": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m6_jg": {
+    "same": 245,
+    "differ": 0,
+    "not_comparable": 0
+   },
+   "m6_jb": {
+    "same": 242,
+    "differ": 3,
+    "not_comparable": 0
+   },
+   "m6_br": {
+    "same": 224,
+    "differ": 21,
+    "not_comparable": 0
+   }
+  },
+  "official_fail_over_0": 29,
+  "official_same_class": 190
+ },
+ "attempts": {
+  "round1": {
+   "candidates": 365,
+   "blocked": 50,
+   "rendered": 315,
+   "hard_defect_no_report": 27
+  },
+  "round2": {
+   "confirmed": 245
+  },
+  "extras": {
+   "attempted": 5
+  },
+  "with_report": 537
+ },
+ "extra": [
+  {
+   "id": "lab_TANK-001_below_0__lab_EMP-001_below_0",
+   "ok": true,
+   "fail": 0,
+   "warn": 7,
+   "b7_violations": 2,
+   "non_pass": [
+    "B7"
+   ],
+   "m3_far": [
+    "ACC-001",
+    "CDF-001",
+    "EDP-001"
+   ],
+   "m3_ambiguous": [
+    "EDP-001"
+   ],
+   "over": 2,
+   "same_class": false
+  },
+  {
+   "id": "lab_TANK-001_below_0__lab_EMP-001_below_0__lab_EDP-001_above_0",
+   "ok": true,
+   "fail": 0,
+   "warn": 9,
+   "b7_violations": 4,
+   "non_pass": [
+    "B7"
+   ],
+   "m3_far": [
+    "ACC-001",
+    "CDF-001"
+   ],
+   "m3_ambiguous": [],
+   "over": 4,
+   "same_class": false
+  },
+  {
+   "id": "lab_TANK-001_below_0__lab_EMP-001_below_0__lab_EDP-001_above_0__lab_CDF-001_below_0",
+   "ok": true,
+   "fail": 0,
+   "warn": 10,
+   "b7_violations": 4,
+   "non_pass": [
+    "B4",
+    "B7"
+   ],
+   "m3_far": [
+    "ACC-001"
+   ],
+   "m3_ambiguous": [],
+   "over": 5,
+   "same_class": false
+  },
+  {
+   "id": "lab_TANK-001_below_0__lab_EMP-001_below_0__lab_EDP-001_above_0__lab_CDF-001_below_0__lab_ACC-001_above_0",
+   "ok": false,
+   "error": "Routing blocked taps[0]: no legal orthogonal candidate; obstacles=label.ACC-001, ACC-001, TANK-001, PRV-002, label.PRV-002, label.TANK-001, CDF-001, label.CDF-001, label.EDP-001, FSOV-001, EDP-001, EMP-001, label.FSOV-001, label.EMP-001, ACV-001, legend, PG-001, label.PG-001, label.ACV-001, PF-001,  | taps[0]"
+  },
+  {
+   "id": "node_move-PRV-001-0-20__node_move-CV-002-0-20",
+   "ok": true,
+   "fail": 0,
+   "warn": 6,
+   "b7_violations": 1,
+   "non_pass": [
+    "B7"
+   ],
+   "m3_far": [
+    "ACC-001",
+    "CDF-001",
+    "EDP-001",
+    "TANK-001"
+   ],
+   "m3_ambiguous": [
+    "EDP-001",
+    "EMP-001"
+   ],
+   "over": 1,
+   "same_class": true
+  }
+ ]
+}
