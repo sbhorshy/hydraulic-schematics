@@ -1,0 +1,8 @@
+fixture	intent	parts	layout_rc	layout_s	layout_nodes	render_rc	render_s	svg	routing_error	raster_rc	raster_s	png	validate_rc	validate_s	validation_report	validate_fail_count
+l0-assembly-seed	1#系统.intent.yaml	2	1	0.196		1	0.258	no	no	NA	NA	no	NA	NA	no	NA
+l0-current	1#系统.intent.yaml	23	0	0.091	23	1	1.115	no	yes	NA	NA	no	NA	NA	no	NA
+l0-rotation	1#系统.intent.yaml	4	1	0.078		1	0.249	no	no	NA	NA	no	NA	NA	no	NA
+l0-small-seed	1#系统.intent.yaml	3	1	0.151		1	0.243	no	no	NA	NA	no	NA	NA	no	NA
+sysml-l0	demo-positive.intent.yaml	7	1	0.084		1	0.257	no	no	NA	NA	no	NA	NA	no	NA
+l0-assembly-seed-bare	1#系统.intent.yaml	2	0	1.381	2	0	1.324	yes	no	0	1.029	yes	0	1.260	yes	0
+activity1-rule-check	1#系统.intent.yaml	23	1	0.109		NA	NA	NA	NA	NA	NA	NA	NA	NA	NA	NA

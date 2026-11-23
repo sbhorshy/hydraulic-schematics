@@ -1,0 +1,82 @@
+{
+  "b1-cross": {
+    "path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/screen2/rf-rot0",
+    "fails": [
+      "V19"
+    ],
+    "fail_count": 1,
+    "warn_count": 6,
+    "b3": 1.312
+  },
+  "v13-overlap": {
+    "path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/screen2/fsov-rot90",
+    "fails": [
+      "V13"
+    ],
+    "fail_count": 1,
+    "warn_count": 6,
+    "b3": 1.391
+  },
+  "b3-v13-mixed": {
+    "path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/screen3/prv2-rot90",
+    "fails": [
+      "V13",
+      "V19"
+    ],
+    "fail_count": 2,
+    "warn_count": 6,
+    "b3": 1.916
+  },
+  "b7-text": {
+    "path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/screen/rf-up-400",
+    "fails": [
+      "V12",
+      "V12",
+      "V12",
+      "V12",
+      "V12",
+      "V12",
+      "V12",
+      "V12",
+      "V19"
+    ],
+    "fail_count": 9,
+    "warn_count": 12,
+    "b3": 1.312
+  },
+  "severe-multi": {
+    "path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/screen3/usr-bus-1470",
+    "fails": [
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V13",
+      "V10",
+      "V19"
+    ],
+    "fail_count": 27,
+    "warn_count": 8,
+    "b3": 1.855
+  }
+}

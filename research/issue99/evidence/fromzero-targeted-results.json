@@ -1,0 +1,295 @@
+{
+  "question": "从零开始画（规则生成布局，无 seed/参照）时，预算寻优与按失败项定向寻优是否仍有同样差异",
+  "fixture": "/root/orca/workspaces/组件库/issue-99/.agents/skills/hydraulic-schematic/assets/fixtures/l0-current",
+  "budget": {
+    "max_evals": 200,
+    "max_steps": 50,
+    "max_seconds": 30.0
+  },
+  "steps": {
+    "verify-active-intent": {
+      "exit": 1,
+      "seconds": 0.085,
+      "layout_written": false,
+      "mentions_ACC-001": true,
+      "mentions_ACV-001": true,
+      "mentions_PG-001": true,
+      "mentions_unplaced": true
+    },
+    "rule-fromzero": {
+      "generation": {
+        "exit": 0,
+        "seconds": 0.085,
+        "nodes": 23,
+        "buses": 6,
+        "lanes": 1,
+        "vlanes": 2,
+        "rotated": [
+          "CDF-001"
+        ],
+        "note": "方案乙:R1–R16 规则定行位 + kiwi 守门微调(#18);全部坐标由参数表+intent 拓扑推导,零手工坐标。"
+      },
+      "intent_part_count": 23,
+      "render": {
+        "render_exit": 1,
+        "render_seconds": 1.107,
+        "svg_written": false,
+        "validation_report": false,
+        "routing_error": true
+      },
+      "total_seconds": 1.996,
+      "renderable": false,
+      "seed_fast_panel": {
+        "b1": 0,
+        "b2tot": 0,
+        "b2max": 0,
+        "b3": 0,
+        "b4": 8,
+        "b5": 0,
+        "v2": 1000000,
+        "v13": 0,
+        "length": 0
+      },
+      "seed_fast_panel_routing_anchor": "paths[1][1->2]"
+    },
+    "formal-targeted": {
+      "blocked": true,
+      "render_exit": 1,
+      "reason": "渲染失败（RoutingError）→ render_l0_sheet 在落 SVG/报告前退出，validation-report.json 不存在；按原型定义定向策略没有官方 fail 可选目标、无法圈邻域——这是正式方法的阻塞点"
+    },
+    "besteffort-focused": {
+      "label": "尽力而为变体（非正式方法）：obstacles[].position 适配成 pseudo-findings",
+      "strict_finding_targets_on_routing_error": {
+        "targets": [],
+        "centers": [],
+        "verdict": "routing-error.json 无 checks 字段 → 原样调用提取不到坐标/目标"
+      },
+      "adapted_pseudo_findings": {
+        "checks": 39,
+        "targets": [
+          "other:ROUTING"
+        ],
+        "centers": [
+          [
+            565.0,
+            512.0
+          ],
+          [
+            682.5,
+            426.0
+          ],
+          [
+            292.5,
+            522.0
+          ],
+          [
+            410.0,
+            100.0
+          ],
+          [
+            565.0,
+            640.35
+          ],
+          [
+            565.0,
+            804.6
+          ],
+          [
+            416.6,
+            202.3
+          ],
+          [
+            416.6,
+            831.5
+          ],
+          [
+            416.6,
+            844.8
+          ],
+          [
+            830.0,
+            299.15
+          ],
+          [
+            830.0,
+            572.9
+          ],
+          [
+            845.0,
+            370.2
+          ],
+          [
+            845.0,
+            703.7
+          ],
+          [
+            1114.0,
+            299.15
+          ],
+          [
+            984.0,
+            376.2
+          ],
+          [
+            1268.0,
+            299.15
+          ],
+          [
+            1294.3,
+            299.15
+          ],
+          [
+            1314.3,
+            535.35
+          ],
+          [
+            1314.3,
+            742.9
+          ],
+          [
+            1328.0,
+            299.15
+          ],
+          [
+            1358.0,
+            767.6
+          ],
+          [
+            1368.0,
+            581.65
+          ],
+          [
+            1368.0,
+            745.35
+          ],
+          [
+            1378.7,
+            299.15
+          ],
+          [
+            1391.3,
+            870.35
+          ],
+          [
+            1394.3,
+            299.15
+          ],
+          [
+            1408.0,
+            299.15
+          ],
+          [
+            1409.5,
+            299.15
+          ],
+          [
+            1418.0,
+            299.15
+          ],
+          [
+            1534.3,
+            299.15
+          ],
+          [
+            1534.3,
+            299.15
+          ],
+          [
+            1534.3,
+            299.15
+          ],
+          [
+            1049.65,
+            522.0
+          ],
+          [
+            1534.3,
+            559.15
+          ],
+          [
+            1534.3,
+            604.1
+          ],
+          [
+            1534.3,
+            668.1
+          ],
+          [
+            1534.3,
+            704.15
+          ],
+          [
+            1561.0,
+            767.6
+          ],
+          [
+            1207.5,
+            1104.7
+          ]
+        ]
+      },
+      "targets": [
+        "other:ROUTING"
+      ],
+      "fallback": false,
+      "focus_move_count": 126,
+      "global_move_count": 271,
+      "focus_sizes": {
+        "nodes": 22,
+        "buses": 6,
+        "lanes": 1,
+        "vlanes": 1
+      },
+      "stop_reason": "max_seconds",
+      "evals": 34,
+      "steps": 0,
+      "elapsed_s": 30.727,
+      "seed_energy": [
+        1000001,
+        0.0,
+        0
+      ],
+      "final_energy": [
+        1000001,
+        0.0,
+        0
+      ],
+      "seed_v2": 1000000,
+      "final_v2": 1000000,
+      "seed_routing_anchor": "paths[1][1->2]",
+      "final_routing_anchor": "paths[1][1->2]",
+      "render": {
+        "render_exit": 1,
+        "render_seconds": 1.165,
+        "svg_written": false,
+        "validation_report": false,
+        "routing_error": true
+      },
+      "renderable": false
+    },
+    "budgeted-fromzero": {
+      "generation_plus_stage3_exit": 0,
+      "generation_plus_stage3_seconds": 31.801,
+      "stage3": {
+        "steps": 0,
+        "evals": 34,
+        "elapsed_s": 30.786928,
+        "energy": [
+          1000001,
+          0.0,
+          0
+        ],
+        "stop_reason": "max_seconds"
+      },
+      "stage3_note": "方案乙:R1–R16 规则定行位 + kiwi 守门微调(#18);全部坐标由参数表+intent 拓扑推导,零手工坐标。;阶段3 寻优叠加层 0 步(B3 0.000,违限 1000001)",
+      "render": {
+        "render_exit": 1,
+        "render_seconds": 1.212,
+        "svg_written": false,
+        "validation_report": false,
+        "routing_error": true
+      },
+      "renderable": false
+    }
+  }
+}

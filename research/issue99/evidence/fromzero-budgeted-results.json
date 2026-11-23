@@ -1,0 +1,80 @@
+{
+  "A_rule_no_optimize": {
+    "name": "A-rule-no-optimize",
+    "workspace": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/fromzero/budgeted/A-rule/run",
+    "generation_exit": 0,
+    "generation_seconds": 0.079,
+    "engine_stdout": "layout-engine: 23 nodes, 6 buses; guard 微调: ['ACC-001', 'ACV-001', 'CV-002', 'FSOV-001', 'PF-001', 'PG-001', 'PRV-001', 'QDP-001', 'QDR-001', 'RF-001', 'USER-001', 'USER-002', 'USER-003', 'USER-004', 'USER-005', 'USER-006', 'USER-007', 'USER-008', 'bus:MANIFOLD', 'bus:PRESS', 'bus:RET', 'bus:USERR', 'bus:USR']",
+    "nodes": 23,
+    "labels": 23,
+    "buses": 6,
+    "render_exit": 1,
+    "render_seconds": 1.101,
+    "svg_written": false,
+    "routing_error": {
+      "obstacles": 39,
+      "keys": [
+        "anchor",
+        "obstacles",
+        "reason",
+        "schema",
+        "status"
+      ],
+      "reason": "no legal orthogonal candidate"
+    },
+    "rasterize_exit": "skipped",
+    "rasterize_seconds": null,
+    "png_written": false,
+    "rasterize_skip_reason": "render 退出码 1，未产出 1#系统原理图.svg，rasterize 无输入",
+    "validate_exit": 1,
+    "validate_seconds": 0.209,
+    "validate_fail_ids": null,
+    "validate_no_report_reason": "validation-report.json 未产出",
+    "e2e_seconds": 1.391
+  },
+  "B_optimize_production_budget": {
+    "name": "B-optimize-budgeted",
+    "workspace": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/fromzero/budgeted/B-optimize/run",
+    "generation_exit": 0,
+    "generation_seconds": 31.788,
+    "engine_stdout": "optimize: 0 步, B3=0.000, 违限=1000001\nlayout-engine: 23 nodes, 6 buses; guard 微调: ['ACC-001', 'ACV-001', 'CV-002', 'FSOV-001', 'PF-001', 'PG-001', 'PRV-001', 'QDP-001', 'QDR-001', 'RF-001', 'USER-001', 'USER-002', 'USER-003', 'USER-004', 'USER-005', 'USER-006', 'USER-007', 'USER-008', 'bus:MANIFOLD', 'bus:PRESS', 'bus:RET', 'bus:USERR', 'bus:USR']",
+    "nodes": 23,
+    "labels": 23,
+    "buses": 6,
+    "optimization": {
+      "steps": 0,
+      "evals": 35,
+      "stop_reason": "max_seconds",
+      "elapsed_s": 30.815408,
+      "energy": [
+        1000001,
+        0.0,
+        0
+      ]
+    },
+    "search_seconds": 30.815408,
+    "render_exit": 1,
+    "render_seconds": 1.244,
+    "svg_written": false,
+    "routing_error": {
+      "obstacles": 39,
+      "keys": [
+        "anchor",
+        "obstacles",
+        "reason",
+        "schema",
+        "status"
+      ],
+      "reason": "no legal orthogonal candidate"
+    },
+    "rasterize_exit": "skipped",
+    "rasterize_seconds": null,
+    "png_written": false,
+    "rasterize_skip_reason": "render 退出码 1，未产出 1#系统原理图.svg，rasterize 无输入",
+    "validate_exit": 1,
+    "validate_seconds": 0.237,
+    "validate_fail_ids": null,
+    "validate_no_report_reason": "validation-report.json 未产出",
+    "e2e_seconds": 33.27
+  }
+}

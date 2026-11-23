@@ -1,0 +1,742 @@
+{
+  "strategy": "focused",
+  "budget": {
+    "max_evals": 200,
+    "max_steps": 50,
+    "max_seconds": 30.0
+  },
+  "method": "finding-targeted optimization; neighborhood limited to finding geometry; stop when targets clear without degradation",
+  "cases": {
+    "b1-cross": {
+      "injected_fails": [
+        "V19"
+      ],
+      "injected_fail_count": 1,
+      "injected_warn_count": 6,
+      "injected_b3": 1.312,
+      "injected_findings": [
+        {
+          "id": "V19",
+          "budget_id": null,
+          "detail": "构图预算 B1：交叉 2 处超出放行预算 1（交叉 2 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+        }
+      ],
+      "targets": [
+        "b1"
+      ],
+      "focus": {
+        "nodes": [
+          "CDF-001",
+          "PF-001",
+          "RF-001"
+        ],
+        "buses": [
+          "MANIFOLD",
+          "PRESS",
+          "RET"
+        ],
+        "lanes": [],
+        "vlanes": []
+      },
+      "fallback": false,
+      "focus_move_count": 24,
+      "global_move_count": 270,
+      "seed_bp": {
+        "b1": 2,
+        "b2tot": 28,
+        "b2max": 3,
+        "b3": 1.312,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 0,
+        "length": 10507.8
+      },
+      "final_bp": {
+        "b1": 1,
+        "b2tot": 28,
+        "b2max": 3,
+        "b3": 1.312,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 0,
+        "length": 10358.2
+      },
+      "seed_energy": [
+        2,
+        0.0,
+        10507.8
+      ],
+      "final_energy": [
+        1,
+        0.0,
+        10358.2
+      ],
+      "eval_count": 29,
+      "steps": 2,
+      "stop_reason": "target_cleared",
+      "search_seconds": 3.08,
+      "search_internal_seconds": 2.959,
+      "render_seconds": 0.387,
+      "rasterize_seconds": 1.414,
+      "validate_seconds": 3.411,
+      "total_seconds": 8.317,
+      "official": {
+        "fail_count": 0,
+        "warn_count": 6,
+        "fails": [],
+        "b3": 1.312
+      },
+      "png_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b1-cross/sheet-readback.png",
+      "report_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b1-cross/validation-report.json",
+      "accepted_moves": [
+        "('node_move', 'CDF-001', 0, 20)",
+        "('node_move', 'RF-001', 0, 20)"
+      ]
+    },
+    "v13-overlap": {
+      "injected_fails": [
+        "V13"
+      ],
+      "injected_fail_count": 1,
+      "injected_warn_count": 6,
+      "injected_b3": 1.391,
+      "injected_findings": [
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 268 单位:(308.0, 686.0)->(590.0, 686.0) 与 (308.0, 686.0)->(576.0, 686.0)"
+        }
+      ],
+      "targets": [
+        "v13"
+      ],
+      "focus": {
+        "nodes": [
+          "EMP-001",
+          "FSOV-001",
+          "PRV-002",
+          "TANK-001"
+        ],
+        "buses": [
+          "CASE"
+        ],
+        "lanes": [],
+        "vlanes": [
+          "0"
+        ]
+      },
+      "fallback": false,
+      "focus_move_count": 27,
+      "global_move_count": 270,
+      "seed_bp": {
+        "b1": 1,
+        "b2tot": 26,
+        "b2max": 4,
+        "b3": 1.392,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 1,
+        "length": 10182.4
+      },
+      "final_bp": {
+        "b1": 1,
+        "b2tot": 26,
+        "b2max": 4,
+        "b3": 1.392,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 1,
+        "length": 10082.4
+      },
+      "seed_energy": [
+        3,
+        0.0,
+        10182.4
+      ],
+      "final_energy": [
+        3,
+        0.0,
+        10082.4
+      ],
+      "eval_count": 69,
+      "steps": 5,
+      "stop_reason": "local_minimum",
+      "search_seconds": 6.886,
+      "search_internal_seconds": 6.799,
+      "render_seconds": 0.365,
+      "rasterize_seconds": 1.453,
+      "validate_seconds": 3.62,
+      "total_seconds": 12.341,
+      "official": {
+        "fail_count": 1,
+        "warn_count": 7,
+        "fails": [
+          "V13"
+        ],
+        "b3": 1.391
+      },
+      "png_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/v13-overlap/sheet-readback.png",
+      "report_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/v13-overlap/validation-report.json",
+      "accepted_moves": [
+        "('node_move', 'EMP-001', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)"
+      ]
+    },
+    "b3-v13-mixed": {
+      "injected_fails": [
+        "V13",
+        "V19"
+      ],
+      "injected_fail_count": 2,
+      "injected_warn_count": 6,
+      "injected_b3": 1.916,
+      "injected_findings": [
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 90 单位:(520.6, 870.0)->(520.6, 960.0) 与 (520.6, 870.0)->(520.6, 1010.0)"
+        },
+        {
+          "id": "V19",
+          "budget_id": null,
+          "detail": "构图预算 B1：交叉 2 处超出放行预算 1（交叉 2 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+        }
+      ],
+      "targets": [
+        "b1",
+        "v13"
+      ],
+      "focus": {
+        "nodes": [
+          "CDF-001",
+          "PF-001",
+          "PRV-002"
+        ],
+        "buses": [
+          "CASE",
+          "PRESS",
+          "RET"
+        ],
+        "lanes": [
+          "0"
+        ],
+        "vlanes": []
+      },
+      "fallback": false,
+      "focus_move_count": 31,
+      "global_move_count": 270,
+      "seed_bp": {
+        "b1": 2,
+        "b2tot": 23,
+        "b2max": 3,
+        "b3": 1.916,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 1,
+        "length": 9934.0
+      },
+      "final_bp": {
+        "b1": 1,
+        "b2tot": 23,
+        "b2max": 3,
+        "b3": 1.312,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 1,
+        "length": 9396.3
+      },
+      "seed_energy": [
+        4,
+        0.416,
+        9934.0
+      ],
+      "final_energy": [
+        2,
+        0.0,
+        9396.3
+      ],
+      "eval_count": 113,
+      "steps": 7,
+      "stop_reason": "local_minimum",
+      "search_seconds": 11.432,
+      "search_internal_seconds": 11.333,
+      "render_seconds": 0.396,
+      "rasterize_seconds": 1.413,
+      "validate_seconds": 3.385,
+      "total_seconds": 16.642,
+      "official": {
+        "fail_count": 1,
+        "warn_count": 5,
+        "fails": [
+          "V13"
+        ],
+        "b3": 1.312
+      },
+      "png_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b3-v13-mixed/sheet-readback.png",
+      "report_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b3-v13-mixed/validation-report.json",
+      "accepted_moves": [
+        "('lane_move', 0, -10)",
+        "('lane_move', 0, 20)",
+        "('node_move', 'CDF-001', 0, 20)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)",
+        "('node_move', 'PRV-002', 20, 0)"
+      ]
+    },
+    "b7-text": {
+      "injected_fails": [
+        "V12",
+        "V12",
+        "V12",
+        "V12",
+        "V12",
+        "V12",
+        "V12",
+        "V12",
+        "V19"
+      ],
+      "injected_fail_count": 9,
+      "injected_warn_count": 12,
+      "injected_b3": 1.312,
+      "injected_findings": [
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"地面压力快卸接头\" 与 symbol_body RF-001__filter-housing：净空 0.000，要求 6.0，位置 [1252, 645.5999755859375, 1339.984375, 658.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"地面压力快卸接头\" 与 symbol_outline RF-001__filter-housing：净空 -0.900，要求 6.0，位置 [1252, 645.5999755859375, 1339.984375, 658.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"地面压力快卸接头\" 与 symbol_outline RF-001__shutoff-centerline：净空 -0.900，要求 6.0，位置 [1252, 645.5999755859375, 1339.984375, 658.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"地面压力快卸接头\" 与 symbol_outline RF-001__bypass-branch-l：净空 -0.600，要求 6.0，位置 [1252, 645.5999755859375, 1339.984375, 658.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"QDP-001\" 与 symbol_outline RF-001__bypass-valve-seat：净空 -0.900，要求 6.0，位置 [1273.7890625, 635.5999755859375, 1318.1015625, 645.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"QDP-001\" 与 symbol_body RF-001__bypass-valve-ball：净空 0.000，要求 6.0，位置 [1273.7890625, 635.5999755859375, 1318.1015625, 645.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"QDP-001\" 与 symbol_outline RF-001__bypass-valve-ball：净空 -0.900，要求 6.0，位置 [1273.7890625, 635.5999755859375, 1318.1015625, 645.5999755859375]"
+        },
+        {
+          "id": "V12",
+          "budget_id": "B7",
+          "detail": "文字 \"QDP-001\" 与 symbol_outline RF-001__bypass-valve-spring：净空 -0.111，要求 6.0，位置 [1273.7890625, 635.5999755859375, 1318.1015625, 645.5999755859375]"
+        },
+        {
+          "id": "V19",
+          "budget_id": null,
+          "detail": "构图预算 B1：交叉 2 处超出放行预算 1（交叉 2 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+        }
+      ],
+      "targets": [
+        "b1",
+        "text"
+      ],
+      "focus": {
+        "nodes": [
+          "CDF-001",
+          "PF-001",
+          "QDP-001",
+          "RF-001",
+          "USER-004",
+          "USER-005",
+          "USER-006",
+          "USER-007"
+        ],
+        "buses": [
+          "MANIFOLD",
+          "PRESS",
+          "RET",
+          "USERR",
+          "USR"
+        ],
+        "lanes": [],
+        "vlanes": []
+      },
+      "fallback": false,
+      "focus_move_count": 52,
+      "global_move_count": 270,
+      "seed_bp": {
+        "b1": 2,
+        "b2tot": 26,
+        "b2max": 3,
+        "b3": 1.312,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 0.0,
+        "v2": 0,
+        "v13": 0,
+        "length": 9503.3
+      },
+      "final_bp": {
+        "b1": 2,
+        "b2tot": 26,
+        "b2max": 3,
+        "b3": 1.312,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 0,
+        "length": 9173.3
+      },
+      "seed_energy": [
+        3,
+        0.0,
+        9503.3
+      ],
+      "final_energy": [
+        2,
+        0.0,
+        9173.3
+      ],
+      "eval_count": 200,
+      "steps": 10,
+      "stop_reason": "max_evals",
+      "search_seconds": 19.245,
+      "search_internal_seconds": 19.158,
+      "render_seconds": 0.405,
+      "rasterize_seconds": 1.406,
+      "validate_seconds": 3.568,
+      "total_seconds": 24.639,
+      "official": {
+        "fail_count": 1,
+        "warn_count": 6,
+        "fails": [
+          "V19"
+        ],
+        "b3": 1.312
+      },
+      "png_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b7-text/sheet-readback.png",
+      "report_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/b7-text/validation-report.json",
+      "accepted_moves": [
+        "('bus_move', 'USR', 10)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'CDF-001', 0, 20)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('bus_move', 'USERR', -10)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'QDP-001', 0, -20)"
+      ]
+    },
+    "severe-multi": {
+      "injected_fails": [
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V13",
+        "V10",
+        "V19"
+      ],
+      "injected_fail_count": 27,
+      "injected_warn_count": 8,
+      "injected_b3": 1.855,
+      "injected_findings": [
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 18 单位:(1488.0, 275.1)->(1470.0, 275.1) 与 (1510.0, 275.1)->(1470.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 18 单位:(1488.0, 275.1)->(1470.0, 275.1) 与 (1510.0, 275.1)->(1470.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 26 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 400.0)->(1510.0, 261.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 20 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 505.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 26 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 610.0)->(1510.0, 250.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 26 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 715.0)->(1510.0, 248.0)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 20 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 820.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 26 单位:(1510.0, 295.0)->(1510.0, 268.8) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 40 单位:(1510.0, 268.8)->(1470.0, 268.8) 与 (1510.0, 268.8)->(1470.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 125 单位:(1510.0, 400.0)->(1510.0, 261.1) 与 (1510.0, 505.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 139 单位:(1510.0, 400.0)->(1510.0, 261.1) 与 (1510.0, 610.0)->(1510.0, 250.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 139 单位:(1510.0, 400.0)->(1510.0, 261.1) 与 (1510.0, 715.0)->(1510.0, 248.0)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 125 单位:(1510.0, 400.0)->(1510.0, 261.1) 与 (1510.0, 820.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 131 单位:(1510.0, 400.0)->(1510.0, 261.1) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 230 单位:(1510.0, 505.0)->(1510.0, 275.1) 与 (1510.0, 610.0)->(1510.0, 250.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 230 单位:(1510.0, 505.0)->(1510.0, 275.1) 与 (1510.0, 715.0)->(1510.0, 248.0)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 230 单位:(1510.0, 505.0)->(1510.0, 275.1) 与 (1510.0, 820.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 230 单位:(1510.0, 505.0)->(1510.0, 275.1) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 40 单位:(1510.0, 275.1)->(1470.0, 275.1) 与 (1510.0, 275.1)->(1470.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 360 单位:(1510.0, 610.0)->(1510.0, 250.1) 与 (1510.0, 715.0)->(1510.0, 248.0)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 335 单位:(1510.0, 610.0)->(1510.0, 250.1) 与 (1510.0, 820.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 341 单位:(1510.0, 610.0)->(1510.0, 250.1) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 440 单位:(1510.0, 715.0)->(1510.0, 248.0) 与 (1510.0, 820.0)->(1510.0, 275.1)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 446 单位:(1510.0, 715.0)->(1510.0, 248.0) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V13",
+          "budget_id": null,
+          "detail": "管线共线重叠 545 单位:(1510.0, 820.0)->(1510.0, 275.1) 与 (1510.0, 925.0)->(1510.0, 268.8)"
+        },
+        {
+          "id": "V10",
+          "budget_id": null,
+          "detail": "Visible network adds undeclared cycles: actual 4 > expected 0"
+        },
+        {
+          "id": "V19",
+          "budget_id": null,
+          "detail": "构图预算 B1：交叉 1 处在放行预算 1 内，证据不完整不予放行（交叉测量证据不完整）"
+        }
+      ],
+      "targets": [
+        "b1",
+        "other:V10",
+        "v13"
+      ],
+      "focus": {
+        "nodes": [
+          "CDF-001",
+          "PF-001",
+          "PRV-001",
+          "QDP-001",
+          "QDR-001",
+          "USER-001",
+          "USER-002",
+          "USER-003",
+          "USER-004",
+          "USER-005",
+          "USER-006",
+          "USER-007",
+          "USER-008"
+        ],
+        "buses": [
+          "PRESS",
+          "RET",
+          "USERR",
+          "USR"
+        ],
+        "lanes": [
+          "0"
+        ],
+        "vlanes": []
+      },
+      "fallback": false,
+      "focus_move_count": 75,
+      "global_move_count": 270,
+      "seed_bp": {
+        "b1": 1,
+        "b2tot": 40,
+        "b2max": 3,
+        "b3": 1.855,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 44.0,
+        "v2": 0,
+        "v13": 25,
+        "length": 11635.9
+      },
+      "final_bp": {
+        "b1": 1,
+        "b2tot": 30,
+        "b2max": 3,
+        "b3": 1.341,
+        "b3_exempt": [],
+        "b4": 18.0,
+        "b5": 0.0,
+        "v2": 0,
+        "v13": 1,
+        "length": 9780.0
+      },
+      "seed_energy": [
+        27,
+        0.355,
+        11635.9
+      ],
+      "final_energy": [
+        4,
+        0.0,
+        9780.0
+      ],
+      "eval_count": 191,
+      "steps": 26,
+      "stop_reason": "max_seconds",
+      "search_seconds": 30.552,
+      "search_internal_seconds": 30.341,
+      "render_seconds": 0.524,
+      "rasterize_seconds": 1.489,
+      "validate_seconds": 3.475,
+      "total_seconds": 36.056,
+      "official": {
+        "fail_count": 3,
+        "warn_count": 8,
+        "fails": [
+          "V13",
+          "V10",
+          "V19"
+        ],
+        "b3": 1.341
+      },
+      "png_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/severe-multi/sheet-readback.png",
+      "report_path": "/root/orca/workspaces/组件库/issue-99/.artifacts/issue99/faultcases-focused/severe-multi/validation-report.json",
+      "accepted_moves": [
+        "('bus_move', 'USR', -20)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'PRV-001', 0, 20)",
+        "('lane_move', 0, 40)",
+        "('node_move', 'PRV-001', 20, 0)",
+        "('node_move', 'QDP-001', 0, -20)",
+        "('node_move', 'CDF-001', 0, -20)",
+        "('node_move', 'USER-008', -20, 0)",
+        "('node_move', 'USER-004', 0, -20)",
+        "('node_move', 'USER-004', 0, -20)",
+        "('node_move', 'QDR-001', -20, 0)",
+        "('node_move', 'USER-002', 0, 20)",
+        "('node_move', 'QDR-001', -20, 0)",
+        "('node_move', 'USER-003', 0, 20)",
+        "('node_move', 'PF-001', 0, -20)",
+        "('node_move', 'CDF-001', 0, 20)",
+        "('node_move', 'QDR-001', -20, 0)",
+        "('node_move', 'CDF-001', 0, 20)",
+        "('bus_move', 'USERR', -10)",
+        "('node_move', 'QDR-001', -20, 0)"
+      ]
+    }
+  }
+}
