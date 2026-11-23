@@ -491,7 +491,7 @@
       (round2.length ? '<div>还剩 ' + round2.length + ' 项：' + round2.map(p => chip(p.title.slice(0, 18))).join('') + '</div><div class="small">第 2 轮的修图单 = 这些，顺序不变，重新编号。第 2 轮修完后还剩的进未收敛项清单（停手，交工程师）。</div>' : '<div class="ok">第 1 轮就清空了。剩下的只有披露和连带未校核，它们不进修图单。</div>') +
       '<div class="small">' + (noConn ? '<span class="ok">连接语义的失败已清，图像差分可用</span>：修完这一轮就能比。' : '<span class="no">连接语义还有失败</span>：图像差分还不能用。') + '</div></div>' +
       '<details><summary class="small">修图单和差分范围（JSON，模块算出来的原样，不含本页临时的改动）</summary><pre>' + esc(JSON.stringify({ repair_order: r }, null, 1)) + '</pre></details>' +
-      '<details><summary class="small">不进修图单的</summary>' + r.not_in_queue.map(x => '<div class="kv">' + sev(x.class === 'unchecked' ? 'not_checked' : 'warn') + ' ' + esc(x.title) + ' <span class="small">' + esc(HELD_TEXT[x.class]) + '</span></div>').join('') + '</details>' +
+      '<details><summary class="small">不进修图单的 ' + r.not_in_queue.length + ' 条</summary>' + r.not_in_queue.map(x => '<div class="kv">' + sev(x.class === 'unchecked' || x.path === 'recheck' ? 'not_checked' : 'warn') + ' ' + esc(x.title) + ' <span class="small">' + esc(x.reason) + '</span></div>').join('') + '</details>' +
       '<button class="small" data-copy="repair">复制修图单 JSON</button></section>';
   }
   function panelsView() {

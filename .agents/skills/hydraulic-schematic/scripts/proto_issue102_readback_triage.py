@@ -1028,27 +1028,40 @@ def flat(items):
 
 
 def repair_order(problems, rule='class', round_number=1, max_rounds=2, diff_ready=True, persisting='inline', notes='inline'):
-    """What the next fix round consumes: ordered problems plus one diff scope.
+    """What the next fix round consumes: ordered fixable problems plus one diff scope.
 
     ``diff_scope`` follows the keys ``sheet_diff`` accepts (nodes, edges, include_adjacent_edges,
     note); bus anchors ride inside ``edges`` because that is where sheet_diff knows them.
+
+    A row only becomes a work item when its finding has a fix. Hints that say "no change needed",
+    rows that recover with their upstream, input facts and not-checked rows are reported but never
+    enter the repair queue, and they do not inflate the diff scope.
     """
     ranked = order(problems, rule, persisting, notes)
-    queue = [p for p in ranked if p['class'] not in ('disclosure', 'unchecked')]
-    held = [p for p in ranked if p['class'] in ('disclosure', 'unchecked')]
+    def no_fix(p):
+        return (p['class'] in ('disclosure', 'unchecked')
+                or p['suggestion']['fix_path'] in ('disclose', 'recheck'))
+    queue = [p for p in ranked if not no_fix(p)]
+    held = [p for p in ranked if no_fix(p)]
     return {
         'round': round_number, 'max_rounds': max_rounds, 'rule': rule, 'diff_ready': diff_ready,
         'problems': [{'order': i + 1, 'id': p['id'], 'class': p['class'], 'severity': p['severity'], 'state': p['state'],
                       'title': p['title'], 'findings': p['items'], 'context': {k: p['context'][k] for k in ('finding', 'objects', 'route')},
                       'suggestion': p['suggestion'], 'suspects': p['suspects'],
+                      # Only structured items carry a machine-executable scope. Agent rows take the prose.
                       'scope': dict(p['scope'], note='第 %d 轮 · 第 %d 项：%s（%s）' % (
-                          round_number, i + 1, p['title'], CLASS_LABEL[p['class']]))}
+                          round_number, i + 1, p['title'], CLASS_LABEL[p['class']])) if p['suggestion']['structured'] else None}
                      for i, p in enumerate(queue)],
-        'not_in_queue': [{'id': p['id'], 'class': p['class'], 'title': p['title']} for p in held],
-        'diff_scope': {'nodes': sorted({n for p in queue for n in p['scope']['nodes']}),
-                       'edges': sorted({e for p in queue for e in p['scope']['edges']} |
-                                       {'buses.' + b for p in queue for b in p['scope']['buses']}),
-                       'include_adjacent_edges': any(p['scope']['include_adjacent_edges'] for p in queue),
+        'not_in_queue': [{'id': p['id'], 'class': p['class'], 'title': p['title'],
+                          'path': p['suggestion']['fix_path'],
+                          'reason': ('输入事实，布局改不了' if p['class'] == 'disclosure'
+                                     else '上游有未决项，修好后自动恢复校核' if p['class'] == 'unchecked'
+                                     else FIX_PATH[p['suggestion']['fix_path']])}
+                         for p in held],
+        'diff_scope': {'nodes': sorted({n for p in queue for n in (p['scope'] or {}).get('nodes', [])}),
+                       'edges': sorted({e for p in queue for e in (p['scope'] or {}).get('edges', [])} |
+                                       {'buses.' + b for p in queue for b in (p['scope'] or {}).get('buses', [])}),
+                       'include_adjacent_edges': any((p['scope'] or {}).get('include_adjacent_edges') for p in queue),
                        'note': '第 %d 轮：修复回读问题 %s；核对相邻管线的关联变化，保持端口连通关系不变。' % (
                            round_number, '、'.join(p['id'] for p in queue) or '无')},
     }
