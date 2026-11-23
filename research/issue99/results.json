@@ -1,0 +1,617 @@
+{
+  "budget": {
+    "max_evals": 200,
+    "max_steps": 50,
+    "max_seconds": 30.0
+  },
+  "cases": {
+    "clean": {
+      "injected_findings": [],
+      "strategies": {
+        "budgeted": {
+          "strategy": "budgeted",
+          "seed_bp": {
+            "b1": 1,
+            "b2tot": 24,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 9574.6
+          },
+          "final_bp": {
+            "b1": 1,
+            "b2tot": 24,
+            "b2max": 3,
+            "b3": 1.37,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 9236.3
+          },
+          "seed_e": [
+            1,
+            0.0,
+            9574.6
+          ],
+          "energy": [
+            1,
+            0.0,
+            9236.3
+          ],
+          "targets": [],
+          "focus": {},
+          "fallback": false,
+          "focus_move_count": null,
+          "global_move_count": 270,
+          "stop_reason": "max_evals",
+          "evals": 200,
+          "steps": 11,
+          "elapsed_s": 22.169,
+          "official": {
+            "fail_count": 2,
+            "warn_count": 8,
+            "fails": [
+              "V10",
+              "V19"
+            ],
+            "b3": 1.37,
+            "timings": {
+              "render_s": 0.352,
+              "rasterize_s": 1.145,
+              "validate_s": 0.985
+            }
+          },
+          "total_wall_s": 24.753,
+          "accepted_moves": [
+            "('node_move', 'PRV-001', 0, 20)",
+            "('bus_move', 'USERR', -10)",
+            "('lane_move', 0, 20)",
+            "('node_move', 'QDP-001', 0, -20)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PG-001', -20, 0)",
+            "('node_move', 'CV-002', 0, -20)",
+            "('node_move', 'CV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'EDP-001', 0, 20)"
+          ]
+        },
+        "focused": {
+          "strategy": "focused",
+          "seed_bp": {
+            "b1": 1,
+            "b2tot": 24,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 9574.6
+          },
+          "final_bp": {
+            "b1": 1,
+            "b2tot": 24,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 9574.6
+          },
+          "seed_e": [
+            1,
+            0.0,
+            9574.6
+          ],
+          "energy": [
+            1,
+            0.0,
+            9574.6
+          ],
+          "targets": [],
+          "focus": {},
+          "fallback": false,
+          "focus_move_count": 270,
+          "global_move_count": 270,
+          "stop_reason": "no_findings",
+          "evals": 1,
+          "steps": 0,
+          "elapsed_s": 0.0,
+          "official": {
+            "fail_count": 0,
+            "warn_count": 6,
+            "fails": [],
+            "b3": 1.312,
+            "timings": {
+              "render_s": 0.378,
+              "rasterize_s": 1.132,
+              "validate_s": 1.27
+            }
+          },
+          "total_wall_s": 2.867,
+          "accepted_moves": []
+        }
+      }
+    },
+    "v13-fsov": {
+      "injected_findings": [
+        {
+          "id": "V13",
+          "result": "fail",
+          "detail": "管线共线重叠 268 单位:(308.0, 686.0)->(590.0, 686.0) 与 (308.0, 686.0)->(576.0, 686.0)"
+        }
+      ],
+      "strategies": {
+        "budgeted": {
+          "strategy": "budgeted",
+          "seed_bp": {
+            "b1": 1,
+            "b2tot": 26,
+            "b2max": 4,
+            "b3": 1.392,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 1,
+            "length": 10182.4
+          },
+          "final_bp": {
+            "b1": 1,
+            "b2tot": 26,
+            "b2max": 4,
+            "b3": 1.392,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 1,
+            "length": 9904.1
+          },
+          "seed_e": [
+            3,
+            0.0,
+            10182.4
+          ],
+          "energy": [
+            3,
+            0.0,
+            9904.1
+          ],
+          "targets": [],
+          "focus": {},
+          "fallback": false,
+          "focus_move_count": null,
+          "global_move_count": 270,
+          "stop_reason": "max_evals",
+          "evals": 200,
+          "steps": 10,
+          "elapsed_s": 22.169,
+          "official": {
+            "fail_count": 3,
+            "warn_count": 8,
+            "fails": [
+              "V13",
+              "V10",
+              "V19"
+            ],
+            "b3": 1.391,
+            "timings": {
+              "render_s": 0.428,
+              "rasterize_s": 1.083,
+              "validate_s": 0.998
+            }
+          },
+          "total_wall_s": 24.781,
+          "accepted_moves": [
+            "('node_move', 'PRV-001', 0, 20)",
+            "('bus_move', 'USERR', -10)",
+            "('lane_move', 0, 20)",
+            "('node_move', 'QDP-001', 0, -20)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PG-001', -20, 0)",
+            "('node_move', 'CV-002', 0, -20)",
+            "('node_move', 'CV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)"
+          ]
+        },
+        "focused": {
+          "strategy": "focused",
+          "seed_bp": {
+            "b1": 1,
+            "b2tot": 26,
+            "b2max": 4,
+            "b3": 1.392,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 1,
+            "length": 10182.4
+          },
+          "final_bp": {
+            "b1": 1,
+            "b2tot": 26,
+            "b2max": 4,
+            "b3": 1.392,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 1,
+            "length": 10082.4
+          },
+          "seed_e": [
+            3,
+            0.0,
+            10182.4
+          ],
+          "energy": [
+            3,
+            0.0,
+            10082.4
+          ],
+          "targets": [
+            "v13"
+          ],
+          "focus": {
+            "nodes": [
+              "EMP-001",
+              "FSOV-001",
+              "PRV-002",
+              "TANK-001"
+            ],
+            "buses": [
+              "CASE"
+            ],
+            "lanes": [],
+            "vlanes": [
+              "0"
+            ]
+          },
+          "fallback": false,
+          "focus_move_count": 27,
+          "global_move_count": 270,
+          "stop_reason": "local_minimum",
+          "evals": 69,
+          "steps": 5,
+          "elapsed_s": 6.649,
+          "official": {
+            "fail_count": 1,
+            "warn_count": 7,
+            "fails": [
+              "V13"
+            ],
+            "b3": 1.391,
+            "timings": {
+              "render_s": 0.361,
+              "rasterize_s": 1.105,
+              "validate_s": 1.166
+            }
+          },
+          "total_wall_s": 9.381,
+          "accepted_moves": [
+            "('node_move', 'EMP-001', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)"
+          ]
+        }
+      }
+    },
+    "b1-rf": {
+      "injected_findings": [
+        {
+          "id": "V19",
+          "result": "fail",
+          "detail": "构图预算 B1：交叉 2 处超出放行预算 1（交叉 2 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+        }
+      ],
+      "strategies": {
+        "budgeted": {
+          "strategy": "budgeted",
+          "seed_bp": {
+            "b1": 2,
+            "b2tot": 28,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 10507.8
+          },
+          "final_bp": {
+            "b1": 2,
+            "b2tot": 28,
+            "b2max": 3,
+            "b3": 1.37,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 10129.5
+          },
+          "seed_e": [
+            2,
+            0.0,
+            10507.8
+          ],
+          "energy": [
+            2,
+            0.0,
+            10129.5
+          ],
+          "targets": [],
+          "focus": {},
+          "fallback": false,
+          "focus_move_count": null,
+          "global_move_count": 270,
+          "stop_reason": "max_evals",
+          "evals": 200,
+          "steps": 11,
+          "elapsed_s": 27.905,
+          "official": {
+            "fail_count": 1,
+            "warn_count": 8,
+            "fails": [
+              "V19"
+            ],
+            "b3": 1.37,
+            "timings": {
+              "render_s": 0.412,
+              "rasterize_s": 1.094,
+              "validate_s": 1.009
+            }
+          },
+          "total_wall_s": 30.533,
+          "accepted_moves": [
+            "('node_move', 'PRV-001', 0, 20)",
+            "('bus_move', 'USERR', -10)",
+            "('lane_move', 0, 20)",
+            "('node_move', 'QDP-001', 0, -20)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PG-001', -20, 0)",
+            "('node_move', 'EDP-001', 0, 20)",
+            "('node_move', 'CV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'PRV-002', 20, 0)",
+            "('node_move', 'EDP-001', 0, 20)"
+          ]
+        },
+        "focused": {
+          "strategy": "focused",
+          "seed_bp": {
+            "b1": 2,
+            "b2tot": 28,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 10507.8
+          },
+          "final_bp": {
+            "b1": 1,
+            "b2tot": 28,
+            "b2max": 3,
+            "b3": 1.312,
+            "b3_exempt": [],
+            "b4": 18.0,
+            "b5": 44.0,
+            "v2": 0,
+            "v13": 0,
+            "length": 10358.2
+          },
+          "seed_e": [
+            2,
+            0.0,
+            10507.8
+          ],
+          "energy": [
+            1,
+            0.0,
+            10358.2
+          ],
+          "targets": [
+            "b1"
+          ],
+          "focus": {
+            "nodes": [
+              "CDF-001",
+              "PF-001",
+              "RF-001"
+            ],
+            "buses": [
+              "MANIFOLD",
+              "PRESS",
+              "RET"
+            ],
+            "lanes": [],
+            "vlanes": []
+          },
+          "fallback": false,
+          "focus_move_count": 24,
+          "global_move_count": 270,
+          "stop_reason": "target_cleared",
+          "evals": 29,
+          "steps": 2,
+          "elapsed_s": 2.744,
+          "official": {
+            "fail_count": 0,
+            "warn_count": 6,
+            "fails": [],
+            "b3": 1.312,
+            "timings": {
+              "render_s": 0.37,
+              "rasterize_s": 1.197,
+              "validate_s": 1.034
+            }
+          },
+          "total_wall_s": 5.474,
+          "accepted_moves": [
+            "('node_move', 'CDF-001', 0, 20)",
+            "('node_move', 'RF-001', 0, 20)"
+          ]
+        }
+      }
+    }
+  },
+  "driver_baseline": {
+    "clean": {
+      "rounds": 1,
+      "elapsed_s": 7.334,
+      "exit_code": 4,
+      "tool_failure": null,
+      "stages": [
+        {
+          "stage": "setup",
+          "status": "completed",
+          "elapsed_s": 0.057031
+        },
+        {
+          "stage": "preflight",
+          "status": "completed",
+          "elapsed_s": 0.217253
+        },
+        {
+          "stage": "local_readback",
+          "status": "completed",
+          "object_count": 106,
+          "crop_count": 62,
+          "elapsed_s": 1.561909
+        }
+      ],
+      "round_summary": [
+        {
+          "round": 1,
+          "fails": [],
+          "warns": null,
+          "layout": null,
+          "readback": "regenerated"
+        }
+      ]
+    },
+    "clean-opt": {
+      "rounds": 1,
+      "elapsed_s": 0.392,
+      "exit_code": 3,
+      "tool_failure": "layout_engine 失败 rc=1\n\n规则引擎: 未布元件 ['ACC-001', 'ACV-001', 'PG-001']——intent 形态超出 R1–R16 覆盖\n",
+      "stages": [
+        {
+          "stage": "setup",
+          "status": "completed",
+          "elapsed_s": 0.059892
+        },
+        {
+          "stage": "preflight",
+          "status": "completed",
+          "elapsed_s": 0.216064
+        }
+      ],
+      "round_summary": [
+        {
+          "round": 1,
+          "fails": null,
+          "warns": null,
+          "layout": null,
+          "readback": null
+        }
+      ]
+    },
+    "v13-fsov": {
+      "rounds": 2,
+      "elapsed_s": 6.517,
+      "exit_code": 3,
+      "tool_failure": "layout_engine 失败 rc=1\n\n规则引擎: 未布元件 ['ACC-001', 'ACV-001', 'PG-001']——intent 形态超出 R1–R16 覆盖\n",
+      "stages": [
+        {
+          "stage": "setup",
+          "status": "completed",
+          "elapsed_s": 0.056968
+        },
+        {
+          "stage": "preflight",
+          "status": "completed",
+          "elapsed_s": 0.216197
+        }
+      ],
+      "round_summary": [
+        {
+          "round": 1,
+          "fails": [
+            {
+              "id": "V13",
+              "detail": "管线共线重叠 268 单位:(308.0, 686.0)->(590.0, 686.0) 与 (308.0, 686.0)->(576.0, 686.0)"
+            }
+          ],
+          "warns": null,
+          "layout": null,
+          "readback": "regenerated"
+        },
+        {
+          "round": 2,
+          "fails": null,
+          "warns": null,
+          "layout": null,
+          "readback": null
+        }
+      ]
+    },
+    "b1-rf": {
+      "rounds": 2,
+      "elapsed_s": 5.926,
+      "exit_code": 3,
+      "tool_failure": "layout_engine 失败 rc=1\n\n规则引擎: 未布元件 ['ACC-001', 'ACV-001', 'PG-001']——intent 形态超出 R1–R16 覆盖\n",
+      "stages": [
+        {
+          "stage": "setup",
+          "status": "completed",
+          "elapsed_s": 0.054598
+        },
+        {
+          "stage": "preflight",
+          "status": "completed",
+          "elapsed_s": 0.21581
+        }
+      ],
+      "round_summary": [
+        {
+          "round": 1,
+          "fails": [
+            {
+              "id": "V19",
+              "detail": "构图预算 B1：交叉 2 处超出放行预算 1（交叉 2 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+            }
+          ],
+          "warns": null,
+          "layout": null,
+          "readback": "regenerated"
+        },
+        {
+          "round": 2,
+          "fails": null,
+          "warns": null,
+          "layout": null,
+          "readback": null
+        }
+      ]
+    }
+  }
+}
