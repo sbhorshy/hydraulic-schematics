@@ -1,0 +1,360 @@
+{
+  "case": "v11-diagonal",
+  "spec": {
+    "svg": "v11-diagonal"
+  },
+  "edits": [
+    {
+      "file": "1#系统原理图.svg",
+      "edit": "v11-diagonal",
+      "class": "ln-suction",
+      "before_vertex": [
+        590.0,
+        686.0
+      ],
+      "after_vertex": [
+        601.0,
+        693.0
+      ]
+    }
+  ],
+  "official_chain": {
+    "render_rc": 0,
+    "rasterize_rc": 0,
+    "validate_rc": 1,
+    "render_stdout": "wrote /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v11-diagonal/1#系统原理图.svg\nmirror: EMP-001=y (逐组件镜像许可登记;端口身份不变,不提升成熟度)\nnets=38  segments=47  junctions=24  buses={'PRESS': 4, 'MANIFOLD': 3, 'USR': 9, 'USERR': 10, 'RET': 4, 'CASE': 3}",
+    "rasterize_stdout": "{\"renderer\": \"chrome\", \"width\": 1710, \"height\": 1390, \"output\": \"/root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v11-diagonal/sheet-readback.png\", \"elapsed_s\": 0.990514}",
+    "validate_stdout": "validation: failed   (fail 6, warn 5)\n  FAIL V3  接管方向违背旋转后端口锚向 TANK-001.suction_out (right): (308.0, 686.0) -> (601.0, 693.0)\n  FAIL V3  接管方向违背旋转后端口锚向 TANK-001.suction_out (right): (308.0, 686.0) -> (601.0, 693.0)\n  FAIL V11  Nonorthogonal system pipe wire-0-0: (308.0, 686.0) -> (601.0, 693.0); axis deltas=(293, 7)\n  FAIL V11  Nonorthogonal system pipe wire-0-0: (601.0, 693.0) -> (590.0, 646.0); axis deltas=(11, 47)\n  FAIL V4  Filled dot is offset from a real branch or lies on an ordinary corner/straight run\n  FAIL V19  构图预算 B1：交叉 1 处在放行预算 1 内，证据不完整不予放行（V4/V14 存在失败；交叉测量证据不完整）\n  WARN V19  文字 \"CV-002\" 与 graphic 450：净空 2.101，要求 6.0，位置 [1452.3984375, 1216, 1487.4921875, 1224]\n  WARN V13  共线重叠 20 单位但汇于同一端口,按连通处理: (470.0, 780.6)->(450.0, 780.6)\n  WARN V13  共线重叠 20 单位但汇于同一端口,按连通处理: (860.0, 864.0)->(840.0, 864.0)\n  WARN V5  悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap\n  WARN V9  非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)\nreport -> /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v11-diagonal/validation-report.json\n构图预算面板（rendering-rules.md concept 档 v1）:\n  FAIL  B1 线线交叉                      实测=1                        预算={\"budget\": 0}\n  pass  B2 折返次数                      实测={\"total\": 24, \"max_single\": 3} 预算={\"budget_max_single\": 3, \"budget_total\": 40}\n  pass  B3 绕行比（路线长÷直角曼哈顿距）           实测={\"max\": 1.312, \"over_budget\": []} 预算={\"budget\": 1.5, \"budget_boundary\": 4.0}\n  pass  B4 最短走线段(px)                 实测=18.0                     预算={\"budget\": 8.0}\n  pass  B5 节点盒最小净距(px)               实测=44.0                     预算={\"budget\": 40.0}\n  n/a   B6 容器走廊(px)                  实测={\"group_padding\": null, \"avoid_corridor\": 14.0} 预算={\"budget_group_padding\": 14.0, \"budget_avoid_corridor\": 12.0}\n  ?      B7 标签净空(px)                  实测={\"min_clearance\": 2.101, \"no_obstacles_within_budget\": false, \"violations\": 1} 预算={\"budget\": 6.0}\n  未测: B6.avoid_corridor（部分几何未测）",
+    "validate_stderr": ""
+  },
+  "fail_count": 6,
+  "warn_count": 5,
+  "fails": [
+    {
+      "id": "V3",
+      "result": "fail",
+      "detail": "接管方向违背旋转后端口锚向 TANK-001.suction_out (right): (308.0, 686.0) -> (601.0, 693.0)",
+      "component": "TANK-001",
+      "port": "suction_out",
+      "anchor": "paths[0][0->1]",
+      "position": [
+        308.0,
+        686.0
+      ],
+      "direction": [
+        1.0,
+        0.0
+      ],
+      "distance": 0.0,
+      "kind": "anchor_direction",
+      "actual_position": [
+        308.0,
+        686.0
+      ],
+      "neighbour": [
+        601.0,
+        693.0
+      ],
+      "pipe_index": 0
+    },
+    {
+      "id": "V3",
+      "result": "fail",
+      "detail": "接管方向违背旋转后端口锚向 TANK-001.suction_out (right): (308.0, 686.0) -> (601.0, 693.0)",
+      "component": "TANK-001",
+      "port": "suction_out",
+      "anchor": "paths[1][0->1]",
+      "position": [
+        308.0,
+        686.0
+      ],
+      "direction": [
+        1.0,
+        0.0
+      ],
+      "distance": 0.0,
+      "kind": "anchor_direction",
+      "actual_position": [
+        308.0,
+        686.0
+      ],
+      "neighbour": [
+        601.0,
+        693.0
+      ],
+      "pipe_index": 0
+    },
+    {
+      "id": "V11",
+      "result": "fail",
+      "detail": "Nonorthogonal system pipe wire-0-0: (308.0, 686.0) -> (601.0, 693.0); axis deltas=(293, 7)",
+      "kind": "nonorthogonal_pipe",
+      "svg_id": "wire-0-0",
+      "anchor": "paths[0][0->1]",
+      "segment": [
+        [
+          308.0,
+          686.0
+        ],
+        [
+          601.0,
+          693.0
+        ]
+      ],
+      "position": [
+        308.0,
+        686.0
+      ],
+      "axis_deltas": [
+        293.0,
+        7.0
+      ]
+    },
+    {
+      "id": "V11",
+      "result": "fail",
+      "detail": "Nonorthogonal system pipe wire-0-0: (601.0, 693.0) -> (590.0, 646.0); axis deltas=(11, 47)",
+      "kind": "nonorthogonal_pipe",
+      "svg_id": "wire-0-0",
+      "anchor": "paths[0][0->1]",
+      "segment": [
+        [
+          601.0,
+          693.0
+        ],
+        [
+          590.0,
+          646.0
+        ]
+      ],
+      "position": [
+        601.0,
+        693.0
+      ],
+      "axis_deltas": [
+        11.0,
+        47.0
+      ]
+    },
+    {
+      "id": "V4",
+      "result": "fail",
+      "detail": "Filled dot is offset from a real branch or lies on an ordinary corner/straight run",
+      "kind": "unexpected_junction",
+      "position": [
+        328.0,
+        686.0
+      ],
+      "input_anchors": [
+        "paths[1][0->1]"
+      ],
+      "svg_id": "junction-0"
+    },
+    {
+      "id": "V19",
+      "result": "fail",
+      "detail": "构图预算 B1：交叉 1 处在放行预算 1 内，证据不完整不予放行（V4/V14 存在失败；交叉测量证据不完整）"
+    }
+  ],
+  "warns": [
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "文字 \"CV-002\" 与 graphic 450：净空 2.101，要求 6.0，位置 [1452.3984375, 1216, 1487.4921875, 1224]",
+      "kind": "text_clearance",
+      "budget_id": "B7",
+      "element": 485,
+      "text": "CV-002",
+      "bbox": [
+        1452.3984375,
+        1216,
+        1487.4921875,
+        1224
+      ],
+      "obstacle": 450,
+      "obstacle_kind": "graphic",
+      "distance": 2.1007,
+      "required_clearance": 6.0,
+      "shortfall": 3.8993
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (470.0, 780.6)->(450.0, 780.6)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (860.0, 864.0)->(840.0, 864.0)"
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "V1",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V2",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V3",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "V4",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "V5",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V6",
+      "status": "not_checked",
+      "required": true
+    },
+    {
+      "id": "V7",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V8",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V9",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V10",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V11",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "V12",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V13",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V14",
+      "status": "not_checked",
+      "required": true
+    },
+    {
+      "id": "V15",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V16",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V17",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V18",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V19",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "V20",
+      "status": "not_applicable",
+      "required": true
+    },
+    {
+      "id": "B6.avoid_corridor",
+      "status": "not_checked",
+      "required": true
+    },
+    {
+      "id": "B7",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "B1",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "B2",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B3",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B4",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B5",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B6.group_padding",
+      "status": "not_applicable",
+      "required": true
+    },
+    {
+      "id": "PNG",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "PERCEPTUAL",
+      "status": "not_checked",
+      "required": true
+    },
+    {
+      "id": "READBACK_ITEMS",
+      "status": "not_checked",
+      "required": true
+    }
+  ],
+  "topology_coverage": "pass",
+  "geometry_issues": []
+}

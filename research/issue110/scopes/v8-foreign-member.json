@@ -1,0 +1,9 @@
+{
+  "nodes": [
+    "ACC-001",
+    "PG-001",
+    "ACV-001"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V8 group ZONE frame (members ACC-001, PG-001) encloses nonmember ACV-001; declaration anchor assemblies.ZONE is not a sheet_diff node id, so member nodes and adjacent edges are declared."
+}

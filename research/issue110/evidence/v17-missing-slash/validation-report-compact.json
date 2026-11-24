@@ -1,0 +1,742 @@
+{
+  "report_schema": "proofreading-evidence-v1",
+  "fail_count": 1,
+  "warn_count": 6,
+  "checks": [
+    {
+      "id": "V17",
+      "result": "fail",
+      "detail": "吸油斜杠组 0 含 4 根,标准要求完整 5 根"
+    },
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "文字 \"CV-002\" 与 graphic 449：净空 2.101，要求 6.0，位置 [1452.3984375, 1216, 1487.4921875, 1224]",
+      "kind": "text_clearance",
+      "budget_id": "B7",
+      "element": 484,
+      "text": "CV-002",
+      "bbox": [
+        1452.3984375,
+        1216,
+        1487.4921875,
+        1224
+      ],
+      "obstacle": 449,
+      "obstacle_kind": "graphic",
+      "distance": 2.1007,
+      "required_clearance": 6.0,
+      "shortfall": 3.8993
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (308.0, 686.0)->(590.0, 686.0)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (470.0, 780.6)->(450.0, 780.6)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (860.0, 864.0)->(840.0, 864.0)"
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "V1",
+      "status": "pass",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V2",
+      "status": "pass",
+      "required": true,
+      "detail": "Final SVG segments clipped against transformed symbol footprints"
+    },
+    {
+      "id": "V3",
+      "status": "pass",
+      "required": true,
+      "detail": "Declared terminals checked against final SVG pipe endpoints"
+    },
+    {
+      "id": "V4",
+      "status": "pass",
+      "required": true,
+      "detail": "Input networks reconciled against actual visible system junctions and continuous bridges."
+    },
+    {
+      "id": "V5",
+      "status": "warn",
+      "required": true,
+      "detail": "Actual browser marker visibility, red paint and placement checked."
+    },
+    {
+      "id": "V6",
+      "status": "pass",
+      "required": true,
+      "detail": "Final component footprints, visible symbol paint and pipe stroke bounds checked in root SVG units against the explicit drawable rectangle (or the SVG viewBox)."
+    },
+    {
+      "id": "V7",
+      "status": "pass",
+      "required": true,
+      "detail": "Actual browser frame rectangles checked against normalized component footprints and visible pipe runs."
+    },
+    {
+      "id": "V8",
+      "status": "pass",
+      "required": true,
+      "detail": "Actual browser frame rectangles checked against normalized component footprints and visible pipe runs."
+    },
+    {
+      "id": "V9",
+      "status": "warn",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V10",
+      "status": "pass",
+      "required": true,
+      "detail": "Input edges reconciled against browser-visible SVG geometry and catalog ports"
+    },
+    {
+      "id": "V11",
+      "status": "pass",
+      "required": true,
+      "detail": "Final root-SVG system segments checked for strict H/V alignment."
+    },
+    {
+      "id": "V12",
+      "status": "pass",
+      "required": true,
+      "detail": "Browser glyph ink bounds and containment checked."
+    },
+    {
+      "id": "V13",
+      "status": "warn",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V14",
+      "status": "pass",
+      "required": true,
+      "detail": "Input networks reconciled against actual visible system junctions and continuous bridges."
+    },
+    {
+      "id": "V15",
+      "status": "pass",
+      "required": true,
+      "detail": "Computed network/lead widths in root SVG units; symbol body styling is preserved."
+    },
+    {
+      "id": "V16",
+      "status": "pass",
+      "required": true,
+      "detail": "Browser-computed strokes across complete source-defined external leads and body contacts."
+    },
+    {
+      "id": "V17",
+      "status": "fail",
+      "required": true,
+      "detail": "Input-derived suction chains compared with actual pipe and interface paint."
+    },
+    {
+      "id": "V18",
+      "status": "pass",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V19",
+      "status": "warn",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "V20",
+      "status": "not_applicable",
+      "required": true,
+      "detail": "The checker executed for this SVG."
+    },
+    {
+      "id": "B6.avoid_corridor",
+      "status": "pass",
+      "required": true,
+      "detail": "Measured straight runs and visible semicircular bridges against transformed component footprints; only own outward terminal runs exempt."
+    },
+    {
+      "id": "B7",
+      "status": "warn",
+      "required": true,
+      "detail": "Actual glyph-to-contour and text-to-text clearance measured."
+    },
+    {
+      "id": "B1",
+      "status": "pass",
+      "required": true,
+      "detail": "经验证跳线 1 处 ≤ 登记 current-1-verified-single-bridge-20261012 放行 1 处（#23 定案；其余交叉仍禁止）"
+    },
+    {
+      "id": "B2",
+      "status": "pass",
+      "required": true,
+      "detail": "Composition budget measured by the validator."
+    },
+    {
+      "id": "B3",
+      "status": "pass",
+      "required": true,
+      "detail": "Composition budget measured by the validator."
+    },
+    {
+      "id": "B4",
+      "status": "pass",
+      "required": true,
+      "detail": "Composition budget measured by the validator."
+    },
+    {
+      "id": "B5",
+      "status": "pass",
+      "required": true,
+      "detail": "Composition budget measured by the validator."
+    },
+    {
+      "id": "B6.group_padding",
+      "status": "not_applicable",
+      "required": true,
+      "detail": "No group frames apply to this input."
+    },
+    {
+      "id": "PNG",
+      "status": "pass",
+      "required": true,
+      "detail": "PNG matches the current SVG and rasterization receipt."
+    },
+    {
+      "id": "PERCEPTUAL",
+      "status": "not_checked",
+      "required": true,
+      "detail": "No perceptual review has been recorded."
+    },
+    {
+      "id": "READBACK_ITEMS",
+      "status": "not_checked",
+      "required": true,
+      "detail": "Local image reviews are independent of whole-sheet signoff."
+    }
+  ],
+  "artifacts": {
+    "fingerprint": "27b4b0cc110b096ee36784c8f187af7341eb81486fa0d1293ae1676ecc5ac4e7",
+    "files": {
+      "input": {
+        "path": "1#系统.intent.yaml",
+        "sha256": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888"
+      },
+      "layout": {
+        "path": "1#系统.layout.json",
+        "sha256": "e41f0c02caf3a474127003304624323a3f7eef23a0ebf761cb61f2fad7ab852c"
+      },
+      "svg": {
+        "path": "1#系统原理图.svg",
+        "sha256": "19495e633e5d53c1d5d3dd45f1a52ea2e180c364d7959d2715d2c612b3643303"
+      },
+      "png": {
+        "path": "sheet-readback.png",
+        "sha256": "a6fc5a73587177fe46fc2186afb378f6e10cdce55c323085af91ad8a7e48ae00"
+      },
+      "topology_manifest": {
+        "path": "1#系统原理图-topology.json",
+        "sha256": "7b9a7a73134e737de6c052f4d81cd4866bc182be30e0cebbe7bffe727f7c437a"
+      },
+      "browser_evidence": {
+        "path": "browser-evidence.json",
+        "sha256": "9a15b5e95f4201e3c72a610dc09cbc571d7997dd07a13566f63a1b54c91e8b5a"
+      }
+    }
+  },
+  "topology": {
+    "coverage_status": "pass",
+    "nodes": [
+      {
+        "id": "TANK-001",
+        "type": "bootstrap_reservoir"
+      },
+      {
+        "id": "FSOV-001",
+        "type": "firewall_shutoff_valve"
+      },
+      {
+        "id": "EDP-001",
+        "type": "engine_driven_pump"
+      },
+      {
+        "id": "EMP-001",
+        "type": "electric_motor_driven_pump"
+      },
+      {
+        "id": "PF-001",
+        "type": "filter_line_shutoff_dp"
+      },
+      {
+        "id": "CDF-001",
+        "type": "filter_line_shutoff_dp_case_drain"
+      },
+      {
+        "id": "RF-001",
+        "type": "filter_line_shutoff_dp_return_bypass"
+      },
+      {
+        "id": "PRV-001",
+        "type": "priority_valve"
+      },
+      {
+        "id": "PRV-002",
+        "type": "priority_valve"
+      },
+      {
+        "id": "ACC-001",
+        "type": "hydro_pneumatic_accumulator"
+      },
+      {
+        "id": "ACV-001",
+        "type": "air_charging_valve"
+      },
+      {
+        "id": "PG-001",
+        "type": "pressure_gauge"
+      },
+      {
+        "id": "QDP-001",
+        "type": "quick_disconnect_coupling_disconnected"
+      },
+      {
+        "id": "QDR-001",
+        "type": "quick_disconnect_coupling_disconnected_return"
+      },
+      {
+        "id": "CV-002",
+        "type": "check_valve_refuel"
+      },
+      {
+        "id": "USER-001",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-002",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-003",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-004",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-005",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-006",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-007",
+        "type": "hydraulic_user"
+      },
+      {
+        "id": "USER-008",
+        "type": "hydraulic_user"
+      }
+    ],
+    "expected_edges": [
+      {
+        "anchor": "paths[0][0->1]",
+        "endpoints": [
+          "TANK-001.suction_out",
+          "EMP-001.suction"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[1][0->1]",
+        "endpoints": [
+          "TANK-001.suction_out",
+          "FSOV-001.main_upper"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[1][1->2]",
+        "endpoints": [
+          "FSOV-001.main_lower",
+          "EDP-001.suction"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[2][0->1]",
+        "endpoints": [
+          "EDP-001.pressure_out",
+          "@PRESS"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[3][0->1]",
+        "endpoints": [
+          "EMP-001.pressure_out",
+          "@PRESS"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[4][0->1]",
+        "endpoints": [
+          "@PRESS",
+          "PF-001.inlet"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[4][1->2]",
+        "endpoints": [
+          "PF-001.outlet",
+          "@MANIFOLD"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[5][0->1]",
+        "endpoints": [
+          "@MANIFOLD",
+          "PRV-001.inlet"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[5][1->2]",
+        "endpoints": [
+          "PRV-001.outlet",
+          "@USR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[6][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-001.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[7][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-002.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[8][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-003.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[9][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-004.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[10][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-005.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[11][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-006.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[12][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-007.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[13][0->1]",
+        "endpoints": [
+          "@USR",
+          "USER-008.pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[14][0->1]",
+        "endpoints": [
+          "PRV-002.outlet",
+          "ACC-001.hydraulic_port"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[15][0->1]",
+        "endpoints": [
+          "@PRESS",
+          "PRV-002.inlet"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[15][1->2]",
+        "endpoints": [
+          "PRV-002.outlet",
+          "TANK-001.bootstrap_pressure_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[16][0->1]",
+        "endpoints": [
+          "@MANIFOLD",
+          "QDP-001.aircraft_side"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[17][0->1]",
+        "endpoints": [
+          "USER-001.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[18][0->1]",
+        "endpoints": [
+          "USER-002.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[19][0->1]",
+        "endpoints": [
+          "USER-003.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[20][0->1]",
+        "endpoints": [
+          "USER-004.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[21][0->1]",
+        "endpoints": [
+          "USER-005.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[22][0->1]",
+        "endpoints": [
+          "USER-006.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[23][0->1]",
+        "endpoints": [
+          "USER-007.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[24][0->1]",
+        "endpoints": [
+          "USER-008.return_out",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[25][0->1]",
+        "endpoints": [
+          "@USERR",
+          "RF-001.inlet"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[25][1->2]",
+        "endpoints": [
+          "RF-001.outlet",
+          "@RET"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[26][0->1]",
+        "endpoints": [
+          "CV-002.outlet",
+          "@USERR"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[27][0->1]",
+        "endpoints": [
+          "@RET",
+          "TANK-001.return_in"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[28][0->1]",
+        "endpoints": [
+          "@RET",
+          "QDR-001.aircraft_side"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[29][0->1]",
+        "endpoints": [
+          "EDP-001.case_drain",
+          "@CASE"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[30][0->1]",
+        "endpoints": [
+          "EMP-001.case_drain",
+          "@CASE"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[31][0->1]",
+        "endpoints": [
+          "@CASE",
+          "CDF-001.inlet"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "paths[31][1->2]",
+        "endpoints": [
+          "CDF-001.outlet",
+          "@RET"
+        ],
+        "kind": "path"
+      },
+      {
+        "anchor": "taps[0]",
+        "endpoints": [
+          "PG-001.pressure_sense",
+          "ACC-001.gas_port"
+        ],
+        "kind": "tap"
+      },
+      {
+        "anchor": "taps[1]",
+        "endpoints": [
+          "ACV-001.accumulator_gas",
+          "PG-001.pressure_sense"
+        ],
+        "kind": "tap"
+      }
+    ],
+    "buses": [
+      {
+        "anchor": "buses.CASE"
+      },
+      {
+        "anchor": "buses.MANIFOLD"
+      },
+      {
+        "anchor": "buses.PRESS"
+      },
+      {
+        "anchor": "buses.RET"
+      },
+      {
+        "anchor": "buses.USERR"
+      },
+      {
+        "anchor": "buses.USR"
+      }
+    ],
+    "findings": []
+  },
+  "geometry": {
+    "issues": [],
+    "coordinate_system": "root_svg_user_units"
+  },
+  "phases": {
+    "automated": {
+      "status": "failed"
+    },
+    "perceptual": {
+      "status": "pending",
+      "detail": "No perceptual review has been recorded."
+    },
+    "local_readback": {
+      "status": "not_generated",
+      "complete": false,
+      "required": true,
+      "detail": "Local readback manifest is missing."
+    }
+  },
+  "delivery": {
+    "ready": false,
+    "status": "incomplete",
+    "blocking_checks": [
+      "V17",
+      "PERCEPTUAL",
+      "READBACK_ITEMS"
+    ]
+  }
+}

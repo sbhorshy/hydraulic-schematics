@@ -1,0 +1,8 @@
+{
+  "nodes": [
+    "EDP-001",
+    "EMP-001"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V20 assembly PUMPZONE (members EDP-001, EMP-001) has illegal boundary crossings; assemblies.PUMPZONE is not a sheet_diff node id, so declared members and adjacent edges are scoped."
+}

@@ -1,0 +1,12 @@
+{
+  "edges": [
+    "paths[0][0->1]",
+    "paths[1][0->1]",
+    "paths[1][1->2]"
+  ],
+  "nodes": [
+    "TANK-001"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V17 one suction marker slash removed from group 0 on the TANK-001 -> EDP-001 suction chain."
+}

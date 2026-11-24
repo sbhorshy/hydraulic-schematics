@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    "USER-001"
+  ],
+  "edges": [
+    "paths[6][0->1]"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V16 inline lead stroke-width 1.80 on USER-001__port-stub-left vs pressure network 3.60; one component/port and its input edge."
+}

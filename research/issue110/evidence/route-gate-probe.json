@@ -1,0 +1,2673 @@
+[
+  {
+    "probe": "ACC-001-y+170",
+    "edit": "ACC-001.y: 840 -> 1010",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[14][0->1]",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            372.2,
+            1012.2,
+            927.8,
+            1317.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              450.0,
+              780.6
+            ],
+            [
+              450.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            450.0,
+            955.3
+          ]
+        },
+        {
+          "obstacle": "TANK-001",
+          "kind": "body",
+          "bounds": [
+            75.3,
+            261.3,
+            322.7,
+            854.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              450.0,
+              780.6
+            ],
+            [
+              320.0,
+              780.6
+            ]
+          ],
+          "position": [
+            385.0,
+            780.6
+          ]
+        },
+        {
+          "obstacle": "FSOV-001",
+          "kind": "body",
+          "bounds": [
+            337.3,
+            269.0,
+            570.703,
+            660.7032896118399
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              450.0,
+              780.6
+            ],
+            [
+              450.0,
+              145.1
+            ]
+          ],
+          "position": [
+            450.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "label.FSOV-001",
+          "kind": "label",
+          "bounds": [
+            405.70149999999995,
+            641.204,
+            502.3015,
+            686.8039999999999
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              450.0,
+              780.6
+            ],
+            [
+              450.0,
+              145.1
+            ]
+          ],
+          "position": [
+            450.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "label.TANK-001",
+          "kind": "label",
+          "bounds": [
+            161.7,
+            935.2,
+            236.3,
+            980.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              450.0,
+              943.0
+            ],
+            [
+              32.0,
+              943.0
+            ]
+          ],
+          "position": [
+            241.0,
+            943.0
+          ]
+        },
+        {
+          "obstacle": "PRV-002",
+          "kind": "body",
+          "bounds": [
+            455.3,
+            715.3,
+            624.7,
+            822.4778
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              497.0,
+              145.1
+            ],
+            [
+              497.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            497.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.PRV-002",
+          "kind": "label",
+          "bounds": [
+            497.2,
+            803.2,
+            582.8,
+            848.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              502.5,
+              145.1
+            ],
+            [
+              502.5,
+              1130.0
+            ]
+          ],
+          "position": [
+            502.5,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "EDP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            275.3,
+            704.7,
+            384.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              607.0,
+              145.1
+            ],
+            [
+              607.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            607.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            591.3,
+            704.7,
+            700.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              607.0,
+              145.1
+            ],
+            [
+              607.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            607.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            607.2,
+            405.2,
+            692.8,
+            450.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              618.8,
+              145.1
+            ],
+            [
+              618.8,
+              1130.0
+            ]
+          ],
+          "position": [
+            618.8,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.EMP-001",
+          "kind": "label",
+          "bounds": [
+            619.0250000000001,
+            701.2,
+            680.975,
+            746.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              624.9,
+              145.1
+            ],
+            [
+              624.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            624.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            711.3,
+            995.3,
+            800.7,
+            1124.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              715.1,
+              145.1
+            ],
+            [
+              715.1,
+              1130.0
+            ]
+          ],
+          "position": [
+            715.1,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "CDF-001",
+          "kind": "body",
+          "bounds": [
+            715.3,
+            415.3,
+            902.7,
+            544.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              718.5,
+              145.1
+            ],
+            [
+              718.5,
+              1130.0
+            ]
+          ],
+          "position": [
+            718.5,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            718.7,
+            904.2,
+            793.3,
+            949.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              769.0,
+              145.1
+            ],
+            [
+              769.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            769.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.CDF-001",
+          "kind": "label",
+          "bounds": [
+            769.2,
+            565.2,
+            843.8,
+            610.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              793.5,
+              145.1
+            ],
+            [
+              793.5,
+              1130.0
+            ]
+          ],
+          "position": [
+            793.5,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            815.3,
+            924.3,
+            978.7,
+            1010.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              145.1
+            ],
+            [
+              844.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            844.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "PG-001",
+          "kind": "body",
+          "bounds": [
+            845.3,
+            817.3,
+            941.7,
+            909.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              856.0,
+              145.1
+            ],
+            [
+              856.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            856.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.PG-001",
+          "kind": "label",
+          "bounds": [
+            856.2,
+            790.2,
+            930.8,
+            835.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              865.0,
+              145.1
+            ],
+            [
+              865.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            865.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.ACV-001",
+          "kind": "label",
+          "bounds": [
+            865.2,
+            897.2,
+            928.8,
+            942.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              902.9,
+              145.1
+            ],
+            [
+              902.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            902.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "PF-001",
+          "kind": "body",
+          "bounds": [
+            1015.3,
+            239.3,
+            1144.7,
+            426.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1132.0,
+              145.1
+            ],
+            [
+              1132.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            1132.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.PF-001",
+          "kind": "label",
+          "bounds": [
+            1132.2,
+            249.2,
+            1195.8,
+            294.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              1144.9,
+              145.1
+            ],
+            [
+              1144.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1144.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "QDP-001",
+          "kind": "body",
+          "bounds": [
+            1201.3,
+            545.3,
+            1390.7,
+            642.3056
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1215.1,
+              145.1
+            ],
+            [
+              1215.1,
+              1130.0
+            ]
+          ],
+          "position": [
+            1215.1,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "RF-001",
+          "kind": "body",
+          "bounds": [
+            1215.3,
+            997.3,
+            1344.7,
+            1220.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1242.0,
+              145.1
+            ],
+            [
+              1242.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            1242.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "QDR-001",
+          "kind": "body",
+          "bounds": [
+            1215.3,
+            885.3,
+            1404.7,
+            982.3056
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1242.0,
+              145.1
+            ],
+            [
+              1242.0,
+              1130.0
+            ]
+          ],
+          "position": [
+            1242.0,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.QDP-001",
+          "kind": "label",
+          "bounds": [
+            1242.2,
+            622.8100000000001,
+            1349.8,
+            668.41
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              1251.8,
+              145.1
+            ],
+            [
+              1251.8,
+              1130.0
+            ]
+          ],
+          "position": [
+            1251.8,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.RF-001",
+          "kind": "label",
+          "bounds": [
+            1252.05,
+            1201.2,
+            1307.9499999999998,
+            1246.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              450.0,
+              1203.0
+            ],
+            [
+              1256.0,
+              1203.0
+            ]
+          ],
+          "position": [
+            853.0,
+            1203.0
+          ]
+        },
+        {
+          "obstacle": "label.QDR-001",
+          "kind": "label",
+          "bounds": [
+            1256.2,
+            962.8100000000001,
+            1363.8,
+            1008.41
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              1308.2,
+              145.1
+            ],
+            [
+              1308.2,
+              1130.0
+            ]
+          ],
+          "position": [
+            1308.2,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "PRV-001",
+          "kind": "body",
+          "bounds": [
+            1315.3,
+            275.3,
+            1484.7,
+            382.4778
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1344.9,
+              145.1
+            ],
+            [
+              1344.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1344.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.PRV-001",
+          "kind": "label",
+          "bounds": [
+            1369.025,
+            248.2,
+            1430.975,
+            293.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              1390.9,
+              145.1
+            ],
+            [
+              1390.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1390.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "CV-002",
+          "kind": "body",
+          "bounds": [
+            1415.3,
+            1113.3,
+            1524.7,
+            1222.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1431.2,
+              145.1
+            ],
+            [
+              1431.2,
+              1130.0
+            ]
+          ],
+          "position": [
+            1431.2,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "label.CV-002",
+          "kind": "label",
+          "bounds": [
+            1442.05,
+            1203.2,
+            1497.9499999999998,
+            1235.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              450.0,
+              1220.9
+            ],
+            [
+              1484.9,
+              1220.9
+            ]
+          ],
+          "position": [
+            967.45,
+            1220.9
+          ]
+        },
+        {
+          "obstacle": "USER-001",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            145.3,
+            1662.7,
+            234.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-002",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            250.3,
+            1662.7,
+            339.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-003",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            355.3,
+            1662.7,
+            444.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-004",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            460.3,
+            1662.7,
+            549.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-005",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            565.3,
+            1662.7,
+            654.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-006",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            670.3,
+            1662.7,
+            759.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-007",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            775.3,
+            1662.7,
+            864.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        },
+        {
+          "obstacle": "USER-008",
+          "kind": "body",
+          "bounds": [
+            1513.3,
+            880.3,
+            1662.7,
+            969.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              1524.9,
+              145.1
+            ],
+            [
+              1524.9,
+              1130.0
+            ]
+          ],
+          "position": [
+            1524.9,
+            637.55
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": " label.TANK-001, PRV-002, label.PRV-002, EDP-001, EMP-001, label.EDP-001, label.EMP-001, ACC-001, CDF-001, label.ACC-001, label.CDF-001, ACV-001, PG-001, label.PG-001, label.ACV-001, PF-001, label.PF-001, QDP-001, RF-001, QDR-001, label.QDP-001, label.RF-001, label.QDR-001, PRV-001, label.PRV-001, CV-002, label.CV-002, USER-001, USER-002, USER-003, USER-004, USER-005, USER-006, USER-007, USER-008\n"
+  },
+  {
+    "probe": "PRV-002-y-60",
+    "edit": "PRV-002.y: 730 -> 670",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[15][0->1] -> buses.PRESS",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "label.EMP-001",
+          "kind": "label",
+          "bounds": [
+            619.0250000000001,
+            701.2,
+            680.975,
+            746.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              610.0,
+              720.6
+            ],
+            [
+              628.0,
+              720.6
+            ]
+          ],
+          "position": [
+            619.0,
+            720.6
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            815.3,
+            924.3,
+            978.7,
+            1010.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              1010
+            ],
+            [
+              910.0,
+              1010
+            ]
+          ],
+          "position": [
+            769.0,
+            1010.0
+          ]
+        },
+        {
+          "obstacle": "PG-001",
+          "kind": "body",
+          "bounds": [
+            845.3,
+            817.3,
+            941.7,
+            909.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              720.6
+            ]
+          ],
+          "position": [
+            910.0,
+            865.3
+          ]
+        },
+        {
+          "obstacle": "label.ACV-001",
+          "kind": "label",
+          "bounds": [
+            865.2,
+            897.2,
+            928.8,
+            942.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              720.6
+            ]
+          ],
+          "position": [
+            910.0,
+            865.3
+          ]
+        },
+        {
+          "obstacle": "label.PG-001",
+          "kind": "label",
+          "bounds": [
+            856.2,
+            790.2,
+            930.8,
+            835.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              720.6
+            ]
+          ],
+          "position": [
+            910.0,
+            865.3
+          ]
+        },
+        {
+          "obstacle": "EDP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            275.3,
+            704.7,
+            384.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              720.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            432.85
+          ]
+        },
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            591.3,
+            704.7,
+            700.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              720.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            432.85
+          ]
+        },
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            607.2,
+            405.2,
+            692.8,
+            450.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              720.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            432.85
+          ]
+        },
+        {
+          "obstacle": "CDF-001",
+          "kind": "body",
+          "bounds": [
+            715.3,
+            415.3,
+            902.7,
+            544.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              426.9
+            ],
+            [
+              910.0,
+              426.9
+            ]
+          ],
+          "position": [
+            769.0,
+            426.9
+          ]
+        },
+        {
+          "obstacle": "label.CDF-001",
+          "kind": "label",
+          "bounds": [
+            769.2,
+            565.2,
+            843.8,
+            610.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              591.1
+            ],
+            [
+              910.0,
+              591.1
+            ]
+          ],
+          "position": [
+            769.0,
+            591.1
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            718.7,
+            734.2,
+            793.3,
+            779.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              743.0
+            ],
+            [
+              910.0,
+              743.0
+            ]
+          ],
+          "position": [
+            769.0,
+            743.0
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            711.3,
+            825.3,
+            800.7,
+            954.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              836.0
+            ],
+            [
+              910.0,
+              836.0
+            ]
+          ],
+          "position": [
+            769.0,
+            836.0
+          ]
+        },
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            372.2,
+            1012.2,
+            927.8,
+            1317.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              720.6
+            ],
+            [
+              628.0,
+              1113.1
+            ]
+          ],
+          "position": [
+            628.0,
+            916.8499999999999
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked paths[15][0->1] -> buses.PRESS: no legal orthogonal candidate; obstacles=label.EMP-001, ACV-001, PG-001, label.ACV-001, label.PG-001, EDP-001, EMP-001, label.EDP-001, CDF-001, label.CDF-001, label.ACC-001, ACC-001, legend\n"
+  },
+  {
+    "probe": "PG-001-x+60",
+    "edit": "PG-001.x: 860.0 -> 920.0",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[31][1->2] -> buses.RET",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "PG-001",
+          "kind": "body",
+          "bounds": [
+            906.5,
+            818.5,
+            1000.5,
+            908.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              980,
+              412.0
+            ],
+            [
+              980,
+              1092.0
+            ]
+          ],
+          "position": [
+            980.0,
+            752.0
+          ]
+        },
+        {
+          "obstacle": "label.PG-001",
+          "kind": "label",
+          "bounds": [
+            917.4,
+            791.4,
+            989.6,
+            834.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              980,
+              412.0
+            ],
+            [
+              980,
+              1092.0
+            ]
+          ],
+          "position": [
+            980.0,
+            752.0
+          ]
+        },
+        {
+          "obstacle": "TANK-001",
+          "kind": "body",
+          "bounds": [
+            76.5,
+            262.5,
+            321.5,
+            853.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              412.0
+            ],
+            [
+              320.0,
+              412.0
+            ]
+          ],
+          "position": [
+            582.0,
+            412.0
+          ]
+        },
+        {
+          "obstacle": "FSOV-001",
+          "kind": "body",
+          "bounds": [
+            338.5,
+            270.2,
+            569.5029999999999,
+            659.5032896118398
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              412.0
+            ],
+            [
+              320.0,
+              412.0
+            ]
+          ],
+          "position": [
+            582.0,
+            412.0
+          ]
+        },
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            608.4,
+            406.4,
+            691.6,
+            449.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              412.0
+            ],
+            [
+              320.0,
+              412.0
+            ]
+          ],
+          "position": [
+            582.0,
+            412.0
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked paths[31][1->2] -> buses.RET: no legal orthogonal candidate; obstacles=PG-001, label.PG-001, TANK-001, FSOV-001, label.EDP-001\n"
+  },
+  {
+    "probe": "ACV-001-y+60",
+    "edit": "ACV-001.y: 939 -> 999",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "taps[1]",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            373.4,
+            1013.4,
+            926.6,
+            1316.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              830.0,
+              1026.5
+            ],
+            [
+              810.0,
+              1026.5
+            ]
+          ],
+          "position": [
+            820.0,
+            1026.5
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            816.5,
+            985.5,
+            977.5,
+            1069.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              810.0,
+              1010
+            ],
+            [
+              840.0,
+              1010
+            ]
+          ],
+          "position": [
+            825.0,
+            1010.0
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            712.5,
+            826.5,
+            799.5,
+            953.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              320.0,
+              864.0
+            ],
+            [
+              840.0,
+              864.0
+            ]
+          ],
+          "position": [
+            580.0,
+            864.0
+          ]
+        },
+        {
+          "obstacle": "CDF-001",
+          "kind": "body",
+          "bounds": [
+            716.5,
+            416.5,
+            901.5,
+            543.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              810.0,
+              1026.5
+            ],
+            [
+              810.0,
+              146.3
+            ]
+          ],
+          "position": [
+            810.0,
+            586.4
+          ]
+        },
+        {
+          "obstacle": "label.CDF-001",
+          "kind": "label",
+          "bounds": [
+            770.4,
+            566.4,
+            842.6,
+            609.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              810.0,
+              1026.5
+            ],
+            [
+              810.0,
+              146.3
+            ]
+          ],
+          "position": [
+            810.0,
+            586.4
+          ]
+        },
+        {
+          "obstacle": "TANK-001",
+          "kind": "body",
+          "bounds": [
+            76.5,
+            262.5,
+            321.5,
+            853.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              33.2,
+              270.0
+            ],
+            [
+              840.0,
+              270.0
+            ]
+          ],
+          "position": [
+            436.6,
+            270.0
+          ]
+        },
+        {
+          "obstacle": "FSOV-001",
+          "kind": "body",
+          "bounds": [
+            338.5,
+            270.2,
+            569.5029999999999,
+            659.5032896118398
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              33.2,
+              276.3
+            ],
+            [
+              840.0,
+              276.3
+            ]
+          ],
+          "position": [
+            436.6,
+            276.3
+          ]
+        },
+        {
+          "obstacle": "EDP-001",
+          "kind": "body",
+          "bounds": [
+            596.5,
+            276.5,
+            703.5,
+            383.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              33.2,
+              292.8
+            ],
+            [
+              840.0,
+              292.8
+            ]
+          ],
+          "position": [
+            436.6,
+            292.8
+          ]
+        },
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            608.4,
+            406.4,
+            691.6,
+            449.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              416.3
+            ],
+            [
+              840.0,
+              416.3
+            ]
+          ],
+          "position": [
+            436.6,
+            416.3
+          ]
+        },
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            596.5,
+            592.5,
+            703.5,
+            699.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              33.2,
+              609.8
+            ],
+            [
+              840.0,
+              609.8
+            ]
+          ],
+          "position": [
+            436.6,
+            609.8
+          ]
+        },
+        {
+          "obstacle": "label.FSOV-001",
+          "kind": "label",
+          "bounds": [
+            406.90149999999994,
+            642.4039999999999,
+            501.1015,
+            685.6039999999999
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              653.7
+            ],
+            [
+              840.0,
+              653.7
+            ]
+          ],
+          "position": [
+            436.6,
+            653.7
+          ]
+        },
+        {
+          "obstacle": "label.EMP-001",
+          "kind": "label",
+          "bounds": [
+            620.225,
+            702.4,
+            679.7750000000001,
+            745.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              716.3
+            ],
+            [
+              840.0,
+              716.3
+            ]
+          ],
+          "position": [
+            436.6,
+            716.3
+          ]
+        },
+        {
+          "obstacle": "PRV-002",
+          "kind": "body",
+          "bounds": [
+            456.5,
+            716.5,
+            623.5,
+            821.2778
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              33.2,
+              735.2
+            ],
+            [
+              840.0,
+              735.2
+            ]
+          ],
+          "position": [
+            436.6,
+            735.2
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            719.9,
+            735.4,
+            792.1,
+            778.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              745.8
+            ],
+            [
+              840.0,
+              745.8
+            ]
+          ],
+          "position": [
+            436.6,
+            745.8
+          ]
+        },
+        {
+          "obstacle": "label.PRV-002",
+          "kind": "label",
+          "bounds": [
+            498.4,
+            804.4,
+            581.6,
+            847.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              818.3
+            ],
+            [
+              840.0,
+              818.3
+            ]
+          ],
+          "position": [
+            436.6,
+            818.3
+          ]
+        },
+        {
+          "obstacle": "label.TANK-001",
+          "kind": "label",
+          "bounds": [
+            162.9,
+            936.4,
+            235.1,
+            979.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              33.2,
+              953.7
+            ],
+            [
+              840.0,
+              953.7
+            ]
+          ],
+          "position": [
+            436.6,
+            953.7
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked taps[1]: no legal orthogonal candidate; obstacles=legend, ACV-001, ACC-001, CDF-001, label.CDF-001, TANK-001, FSOV-001, EDP-001, label.EDP-001, EMP-001, label.FSOV-001, label.EMP-001, PRV-002, label.ACC-001, label.PRV-002, label.TANK-001\n"
+  },
+  {
+    "probe": "EDP-001-x+60",
+    "edit": "EDP-001.x: 610.0 -> 670.0",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[31][0->1] -> buses.CASE",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            668.4,
+            406.4,
+            751.6,
+            449.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              700.0,
+              388.0
+            ],
+            [
+              700.0,
+              548.0
+            ]
+          ],
+          "position": [
+            700.0,
+            468.0
+          ]
+        },
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            596.5,
+            592.5,
+            703.5,
+            699.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              700.0,
+              1010
+            ],
+            [
+              700.0,
+              548.0
+            ]
+          ],
+          "position": [
+            700.0,
+            779.0
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            816.5,
+            925.5,
+            977.5,
+            1009.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              844.0,
+              1010
+            ]
+          ],
+          "position": [
+            844.0,
+            779.0
+          ]
+        },
+        {
+          "obstacle": "TANK-001",
+          "kind": "body",
+          "bounds": [
+            76.5,
+            262.5,
+            321.5,
+            853.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              320.0,
+              548.0
+            ]
+          ],
+          "position": [
+            582.0,
+            548.0
+          ]
+        },
+        {
+          "obstacle": "FSOV-001",
+          "kind": "body",
+          "bounds": [
+            338.5,
+            270.2,
+            569.5029999999999,
+            659.5032896118398
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              320.0,
+              548.0
+            ]
+          ],
+          "position": [
+            582.0,
+            548.0
+          ]
+        },
+        {
+          "obstacle": "label.CDF-001",
+          "kind": "label",
+          "bounds": [
+            770.4,
+            566.4,
+            842.6,
+            609.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              592.3
+            ],
+            [
+              700.0,
+              592.3
+            ]
+          ],
+          "position": [
+            772.0,
+            592.3
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            719.9,
+            735.4,
+            792.1,
+            778.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              745.8
+            ],
+            [
+              700.0,
+              745.8
+            ]
+          ],
+          "position": [
+            772.0,
+            745.8
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            712.5,
+            826.5,
+            799.5,
+            953.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              834.8
+            ],
+            [
+              700.0,
+              834.8
+            ]
+          ],
+          "position": [
+            772.0,
+            834.8
+          ]
+        },
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            373.4,
+            1013.4,
+            926.6,
+            1316.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              844.0,
+              1114.3
+            ]
+          ],
+          "position": [
+            844.0,
+            831.15
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked paths[31][0->1] -> buses.CASE: no legal orthogonal candidate; obstacles=label.EDP-001, EMP-001, ACV-001, TANK-001, FSOV-001, label.CDF-001, label.ACC-001, ACC-001, legend\n"
+  },
+  {
+    "probe": "EMP-001-y-60",
+    "edit": "EMP-001.y: 606 -> 546",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[31][0->1] -> buses.CASE",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            596.5,
+            532.5,
+            703.5,
+            639.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              700.0,
+              548.0
+            ]
+          ],
+          "position": [
+            772.0,
+            548.0
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            816.5,
+            925.5,
+            977.5,
+            1009.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              844.0,
+              1010
+            ]
+          ],
+          "position": [
+            844.0,
+            779.0
+          ]
+        },
+        {
+          "obstacle": "TANK-001",
+          "kind": "body",
+          "bounds": [
+            76.5,
+            262.5,
+            321.5,
+            853.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              320.0,
+              548.0
+            ]
+          ],
+          "position": [
+            582.0,
+            548.0
+          ]
+        },
+        {
+          "obstacle": "FSOV-001",
+          "kind": "body",
+          "bounds": [
+            338.5,
+            270.2,
+            569.5029999999999,
+            659.5032896118398
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              320.0,
+              548.0
+            ]
+          ],
+          "position": [
+            582.0,
+            548.0
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            719.9,
+            735.4,
+            792.1,
+            778.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              758.7
+            ],
+            [
+              700.0,
+              758.7
+            ]
+          ],
+          "position": [
+            772.0,
+            758.7
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            712.5,
+            826.5,
+            799.5,
+            953.5
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              844.0,
+              834.8
+            ],
+            [
+              700.0,
+              834.8
+            ]
+          ],
+          "position": [
+            772.0,
+            834.8
+          ]
+        },
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            373.4,
+            1013.4,
+            926.6,
+            1316.6
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              844.0,
+              548.0
+            ],
+            [
+              844.0,
+              1114.3
+            ]
+          ],
+          "position": [
+            844.0,
+            831.15
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked paths[31][0->1] -> buses.CASE: no legal orthogonal candidate; obstacles=EMP-001, ACV-001, TANK-001, FSOV-001, label.ACC-001, ACC-001, legend\n"
+  },
+  {
+    "probe": "CDF-001-x+60",
+    "edit": "CDF-001.x: 730.0 -> 790.0",
+    "render_rc": 1,
+    "svg_written": false,
+    "routing_error": {
+      "schema": "routing-error/1",
+      "status": "blocked",
+      "anchor": "paths[15][0->1] -> buses.PRESS",
+      "reason": "no legal orthogonal candidate",
+      "obstacles": [
+        {
+          "obstacle": "CDF-001",
+          "kind": "body",
+          "bounds": [
+            775.3,
+            415.3,
+            962.7,
+            544.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              910.0,
+              330.0
+            ],
+            [
+              910.0,
+              780.6
+            ]
+          ],
+          "position": [
+            910.0,
+            555.3
+          ]
+        },
+        {
+          "obstacle": "ACV-001",
+          "kind": "body",
+          "bounds": [
+            815.3,
+            924.3,
+            978.7,
+            1010.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              1010
+            ],
+            [
+              910.0,
+              1010
+            ]
+          ],
+          "position": [
+            769.0,
+            1010.0
+          ]
+        },
+        {
+          "obstacle": "PG-001",
+          "kind": "body",
+          "bounds": [
+            845.3,
+            817.3,
+            941.7,
+            909.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              780.6
+            ]
+          ],
+          "position": [
+            910.0,
+            895.3
+          ]
+        },
+        {
+          "obstacle": "label.ACV-001",
+          "kind": "label",
+          "bounds": [
+            865.2,
+            897.2,
+            928.8,
+            942.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              780.6
+            ]
+          ],
+          "position": [
+            910.0,
+            895.3
+          ]
+        },
+        {
+          "obstacle": "label.PG-001",
+          "kind": "label",
+          "bounds": [
+            856.2,
+            790.2,
+            930.8,
+            835.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              910.0,
+              1010
+            ],
+            [
+              910.0,
+              780.6
+            ]
+          ],
+          "position": [
+            910.0,
+            895.3
+          ]
+        },
+        {
+          "obstacle": "EDP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            275.3,
+            704.7,
+            384.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              780.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "EMP-001",
+          "kind": "body",
+          "bounds": [
+            595.3,
+            591.3,
+            704.7,
+            700.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              780.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "label.EDP-001",
+          "kind": "label",
+          "bounds": [
+            607.2,
+            405.2,
+            692.8,
+            450.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              780.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "label.EMP-001",
+          "kind": "label",
+          "bounds": [
+            619.0250000000001,
+            701.2,
+            680.975,
+            746.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              780.6
+            ],
+            [
+              628.0,
+              145.1
+            ]
+          ],
+          "position": [
+            628.0,
+            462.85
+          ]
+        },
+        {
+          "obstacle": "label.CDF-001",
+          "kind": "label",
+          "bounds": [
+            829.2,
+            565.2,
+            903.8,
+            610.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              591.1
+            ],
+            [
+              910.0,
+              591.1
+            ]
+          ],
+          "position": [
+            769.0,
+            591.1
+          ]
+        },
+        {
+          "obstacle": "label.ACC-001",
+          "kind": "label",
+          "bounds": [
+            718.7,
+            734.2,
+            793.3,
+            779.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              747.0
+            ],
+            [
+              910.0,
+              747.0
+            ]
+          ],
+          "position": [
+            769.0,
+            747.0
+          ]
+        },
+        {
+          "obstacle": "ACC-001",
+          "kind": "body",
+          "bounds": [
+            711.3,
+            825.3,
+            800.7,
+            954.7
+          ],
+          "clearance": 12.0,
+          "segment": [
+            [
+              628.0,
+              836.0
+            ],
+            [
+              910.0,
+              836.0
+            ]
+          ],
+          "position": [
+            769.0,
+            836.0
+          ]
+        },
+        {
+          "obstacle": "legend",
+          "kind": "label",
+          "bounds": [
+            372.2,
+            1012.2,
+            927.8,
+            1317.8
+          ],
+          "clearance": 6.0,
+          "segment": [
+            [
+              628.0,
+              780.6
+            ],
+            [
+              628.0,
+              1113.1
+            ]
+          ],
+          "position": [
+            628.0,
+            946.8499999999999
+          ]
+        }
+      ]
+    },
+    "render_stderr_tail": "Routing blocked paths[15][0->1] -> buses.PRESS: no legal orthogonal candidate; obstacles=CDF-001, ACV-001, PG-001, label.ACV-001, label.PG-001, EDP-001, EMP-001, label.EDP-001, label.EMP-001, label.CDF-001, label.ACC-001, ACC-001, legend\n"
+  },
+  {
+    "probe": "ACC-001-y-60",
+    "edit": "ACC-001.y: 840 -> 780",
+    "render_rc": 0,
+    "svg_written": true,
+    "routing_error": null,
+    "render_stderr_tail": ""
+  },
+  {
+    "probe": "PRV-002-y+60",
+    "edit": "PRV-002.y: 730 -> 790",
+    "render_rc": 0,
+    "svg_written": true,
+    "routing_error": null,
+    "render_stderr_tail": ""
+  }
+]

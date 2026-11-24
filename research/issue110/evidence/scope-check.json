@@ -1,0 +1,150 @@
+{
+  "v11-diagonal": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "EMP-001",
+        "TANK-001"
+      ],
+      "edges": [
+        "paths[0][0->1]"
+      ],
+      "allowed_edges": [
+        "paths[0][0->1]",
+        "paths[15][1->2]",
+        "paths[1][0->1]",
+        "paths[27][0->1]",
+        "paths[30][0->1]",
+        "paths[3][0->1]"
+      ]
+    }
+  },
+  "v15-single-width": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "EDP-001"
+      ],
+      "edges": [
+        "paths[2][0->1]"
+      ],
+      "allowed_edges": [
+        "paths[1][1->2]",
+        "paths[29][0->1]",
+        "paths[2][0->1]"
+      ]
+    }
+  },
+  "v16-single-lead": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "USER-001"
+      ],
+      "edges": [
+        "paths[6][0->1]"
+      ],
+      "allowed_edges": [
+        "paths[17][0->1]",
+        "paths[6][0->1]"
+      ]
+    }
+  },
+  "v17-missing-slash": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "TANK-001"
+      ],
+      "edges": [
+        "paths[0][0->1]",
+        "paths[1][0->1]",
+        "paths[1][1->2]"
+      ],
+      "allowed_edges": [
+        "paths[0][0->1]",
+        "paths[15][1->2]",
+        "paths[1][0->1]",
+        "paths[1][1->2]",
+        "paths[27][0->1]"
+      ]
+    }
+  },
+  "v2-through-body": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "PF-001",
+        "PRV-001"
+      ],
+      "edges": [
+        "paths[2][0->1]"
+      ],
+      "allowed_edges": [
+        "paths[2][0->1]",
+        "paths[4][0->1]",
+        "paths[4][1->2]",
+        "paths[5][0->1]",
+        "paths[5][1->2]"
+      ]
+    }
+  },
+  "v20-assembly-crossing": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "EDP-001",
+        "EMP-001"
+      ],
+      "edges": [],
+      "allowed_edges": [
+        "paths[0][0->1]",
+        "paths[1][1->2]",
+        "paths[29][0->1]",
+        "paths[2][0->1]",
+        "paths[30][0->1]",
+        "paths[3][0->1]"
+      ]
+    }
+  },
+  "v3-endpoint-gap": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "EMP-001"
+      ],
+      "edges": [
+        "paths[0][0->1]"
+      ],
+      "allowed_edges": [
+        "paths[0][0->1]",
+        "paths[30][0->1]",
+        "paths[3][0->1]"
+      ]
+    }
+  },
+  "v7-legend-title": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [],
+      "edges": [],
+      "allowed_edges": []
+    }
+  },
+  "v8-foreign-member": {
+    "status": "accepted",
+    "detail": {
+      "nodes": [
+        "ACC-001",
+        "ACV-001",
+        "PG-001"
+      ],
+      "edges": [],
+      "allowed_edges": [
+        "paths[14][0->1]",
+        "taps[0]",
+        "taps[1]"
+      ]
+    }
+  }
+}

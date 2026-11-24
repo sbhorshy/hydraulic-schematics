@@ -1,0 +1,239 @@
+{
+  "case": "v17-missing-slash",
+  "spec": {
+    "svg": "v17-missing-slash"
+  },
+  "edits": [
+    {
+      "file": "1#系统原理图.svg",
+      "edit": "v17-missing-slash",
+      "removed_slash": "<line class=\"suc-mark\" x1=\"320.0\" y1=\"632.8\" x2=\"336.0\" y2=\"642.1\"/>",
+      "before_count": 5,
+      "after_count": 4
+    }
+  ],
+  "official_chain": {
+    "render_rc": 0,
+    "rasterize_rc": 0,
+    "validate_rc": 1,
+    "render_stdout": "wrote /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v17-missing-slash/1#系统原理图.svg\nmirror: EMP-001=y (逐组件镜像许可登记;端口身份不变,不提升成熟度)\nnets=38  segments=47  junctions=24  buses={'PRESS': 4, 'MANIFOLD': 3, 'USR': 9, 'USERR': 10, 'RET': 4, 'CASE': 3}",
+    "rasterize_stdout": "{\"renderer\": \"chrome\", \"width\": 1710, \"height\": 1390, \"output\": \"/root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v17-missing-slash/sheet-readback.png\", \"elapsed_s\": 0.964076}",
+    "validate_stdout": "validation: failed   (fail 1, warn 6)\n  FAIL V17  吸油斜杠组 0 含 4 根,标准要求完整 5 根\n  WARN V19  文字 \"CV-002\" 与 graphic 449：净空 2.101，要求 6.0，位置 [1452.3984375, 1216, 1487.4921875, 1224]\n  WARN V13  共线重叠 20 单位但汇于同一端口,按连通处理: (308.0, 686.0)->(590.0, 686.0)\n  WARN V13  共线重叠 20 单位但汇于同一端口,按连通处理: (470.0, 780.6)->(450.0, 780.6)\n  WARN V13  共线重叠 20 单位但汇于同一端口,按连通处理: (860.0, 864.0)->(840.0, 864.0)\n  WARN V5  悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap\n  WARN V9  非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)\nreport -> /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue110/wt/.artifacts/issue110/cases/v17-missing-slash/validation-report.json\n构图预算面板（rendering-rules.md concept 档 v1）:\n  pass  B1 线线交叉                      实测=1                        预算={\"budget\": 0}\n  pass  B2 折返次数                      实测={\"total\": 24, \"max_single\": 3} 预算={\"budget_max_single\": 3, \"budget_total\": 40}\n  pass  B3 绕行比（路线长÷直角曼哈顿距）           实测={\"max\": 1.312, \"over_budget\": []} 预算={\"budget\": 1.5, \"budget_boundary\": 4.0}\n  pass  B4 最短走线段(px)                 实测=18.0                     预算={\"budget\": 8.0}\n  pass  B5 节点盒最小净距(px)               实测=44.0                     预算={\"budget\": 40.0}\n  pass  B6 容器走廊(px)                  实测={\"group_padding\": null, \"avoid_corridor\": 14.0} 预算={\"budget_group_padding\": 14.0, \"budget_avoid_corridor\": 12.0}\n  ?      B7 标签净空(px)                  实测={\"min_clearance\": 2.101, \"no_obstacles_within_budget\": false, \"violations\": 1} 预算={\"budget\": 6.0}\n  未测:",
+    "validate_stderr": ""
+  },
+  "fail_count": 1,
+  "warn_count": 6,
+  "fails": [
+    {
+      "id": "V17",
+      "result": "fail",
+      "detail": "吸油斜杠组 0 含 4 根,标准要求完整 5 根"
+    }
+  ],
+  "warns": [
+    {
+      "id": "V19",
+      "result": "warn",
+      "detail": "文字 \"CV-002\" 与 graphic 449：净空 2.101，要求 6.0，位置 [1452.3984375, 1216, 1487.4921875, 1224]",
+      "kind": "text_clearance",
+      "budget_id": "B7",
+      "element": 484,
+      "text": "CV-002",
+      "bbox": [
+        1452.3984375,
+        1216,
+        1487.4921875,
+        1224
+      ],
+      "obstacle": 449,
+      "obstacle_kind": "graphic",
+      "distance": 2.1007,
+      "required_clearance": 6.0,
+      "shortfall": 3.8993
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (308.0, 686.0)->(590.0, 686.0)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (470.0, 780.6)->(450.0, 780.6)"
+    },
+    {
+      "id": "V13",
+      "result": "warn",
+      "detail": "共线重叠 20 单位但汇于同一端口,按连通处理: (860.0, 864.0)->(840.0, 864.0)"
+    },
+    {
+      "id": "V5",
+      "result": "warn",
+      "detail": "悬空端口 7 个,须在图签栏计数并标红: ACV-001.charge_port CV-002.inlet EDP-001.drive_shaft EMP-001.elec_power QDP-001.ground_side QDR-001.ground_side TANK-001.body_sense_tap"
+    },
+    {
+      "id": "V9",
+      "result": "warn",
+      "detail": "非 annotated 符号 21 个,不可正式出图: ACV-001(draft) CDF-001(none) CV-002(none) EDP-001(provisional) EMP-001(provisional) PF-001(none) PG-001(draft) PRV-001(draft) PRV-002(draft) QDP-001(provisional) QDR-001(provisional) RF-001(provisional) TANK-001(draft) USER-001(provisional) USER-002(provisional) USER-003(provisional) USER-004(provisional) USER-005(provisional) USER-006(provisional) USER-007(provisional) USER-008(provisional)"
+    }
+  ],
+  "coverage": [
+    {
+      "id": "V1",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V2",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V3",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V4",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V5",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V6",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V7",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V8",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V9",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V10",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V11",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V12",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V13",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V14",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V15",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V16",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V17",
+      "status": "fail",
+      "required": true
+    },
+    {
+      "id": "V18",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "V19",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "V20",
+      "status": "not_applicable",
+      "required": true
+    },
+    {
+      "id": "B6.avoid_corridor",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B7",
+      "status": "warn",
+      "required": true
+    },
+    {
+      "id": "B1",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B2",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B3",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B4",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B5",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "B6.group_padding",
+      "status": "not_applicable",
+      "required": true
+    },
+    {
+      "id": "PNG",
+      "status": "pass",
+      "required": true
+    },
+    {
+      "id": "PERCEPTUAL",
+      "status": "not_checked",
+      "required": true
+    },
+    {
+      "id": "READBACK_ITEMS",
+      "status": "not_checked",
+      "required": true
+    }
+  ],
+  "topology_coverage": "pass",
+  "geometry_issues": []
+}

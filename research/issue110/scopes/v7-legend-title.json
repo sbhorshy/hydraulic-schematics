@@ -1,0 +1,4 @@
+{
+  "global": true,
+  "note": "V7 legend/title frame overlap is a whole-sheet presentation frame change: legend y 1020 -> 1060, overlap 20 units."
+}

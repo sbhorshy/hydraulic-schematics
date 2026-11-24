@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    "EMP-001"
+  ],
+  "edges": [
+    "paths[0][0->1]"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V3 endpoint of EMP-001.suction on paths[0][0->1] displaced 2.83 units from declared port."
+}

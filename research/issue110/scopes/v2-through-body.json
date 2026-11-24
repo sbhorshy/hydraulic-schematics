@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    "PF-001",
+    "PRV-001"
+  ],
+  "edges": [
+    "paths[2][0->1]"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V2 segment detour crosses PF-001 and PRV-001 footprints; single edited pressure edge paths[2][0->1] with adjacent edges as context."
+}

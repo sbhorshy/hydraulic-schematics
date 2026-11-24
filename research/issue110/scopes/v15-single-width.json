@@ -1,0 +1,10 @@
+{
+  "nodes": [
+    "EDP-001"
+  ],
+  "edges": [
+    "paths[2][0->1]"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V15 inline stroke-width 4.80 on wire-3-0 (paths[2][0->1]) vs expected 3 * base_T = 3.60; one pipe, one node."
+}

@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    "TANK-001",
+    "EMP-001"
+  ],
+  "edges": [
+    "paths[0][0->1]"
+  ],
+  "include_adjacent_edges": true,
+  "note": "V11 nonorthogonal segment on paths[0][0->1], axis deltas (293,7) and (11,47)."
+}
