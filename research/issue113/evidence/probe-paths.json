@@ -1,0 +1,168 @@
+{
+  "python": "3.10.12",
+  "head": "391200aa17a72717f458652f79d556cf7d92138e",
+  "script_sha256": {
+    "bridge_allowance.py": "0dcef16e828e73e705500450661004c38e4d6144a3fa78a39281caa8fd137826",
+    "render_l0_sheet.py": "d291ce5633f88791253545070be1fcda462a08a29571c9488ef2d4067ee7178b",
+    "sheet_diff.py": "5b0ef008ca4b31908a0de0d6948fd2240afb646286b71c20780a2ec411eaf507",
+    "validate_sheet.py": "606b4bc3bf8d452d134335a8ced3baf254e79fa04bec09d58aa4f4bc3b14c3ab"
+  },
+  "scenarios": {
+    "post-render-v2": {
+      "edit": {
+        "before": [
+          [
+            690.0,
+            330.0
+          ],
+          [
+            910.0,
+            330.0
+          ]
+        ],
+        "after": [
+          [
+            690.0,
+            330.0
+          ],
+          [
+            690.0,
+            320.0
+          ],
+          [
+            1400.0,
+            320.0
+          ],
+          [
+            1400.0,
+            330.0
+          ],
+          [
+            910.0,
+            330.0
+          ]
+        ],
+        "target": "PRV-001 x=1330..1470 y=290..368"
+      },
+      "render_rc": 0,
+      "rasterize_rc": 0,
+      "validate_rc": 1,
+      "fail_ids": [
+        "V14",
+        "V19",
+        "V2",
+        "V3"
+      ],
+      "v2_details": [
+        "管线穿越 PF-001 本体 99.80 单位,段 (690.0, 320.0)->(1400.0, 320.0)",
+        "管线穿越 PRV-001 本体 69.90 单位,段 (690.0, 320.0)->(1400.0, 320.0)",
+        "管线穿越 PRV-001 本体 10.00 单位,段 (1400.0, 320.0)->(1400.0, 330.0)",
+        "管线穿越 PF-001 本体 99.80 单位,段 (1400.0, 330.0)->(910.0, 330.0)",
+        "管线穿越 PRV-001 本体 69.90 单位,段 (1400.0, 330.0)->(910.0, 330.0)"
+      ]
+    },
+    "gate-pass-acc": {
+      "edit": {
+        "inst": "ACC-001",
+        "axis": "y",
+        "before": 840,
+        "after": 780
+      },
+      "render": {
+        "rc": 0,
+        "stdout": "wrote /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue113/wt/.artifacts/issue113/gate-pass-acc/1#系统原理图.svg\nmirror: EMP-001=y (逐组件镜像许可登记;端口身份不变,不提升成熟度)\nnets=38  segments=49  junctions=24  buses={'PRESS': 4, 'MANIFOLD': 3, 'USR': 9, 'USERR': 10, 'RET': 4, 'CASE': 3}",
+        "stderr": "",
+        "error_line": null
+      },
+      "rasterize": {
+        "rc": 0,
+        "stdout": "{\"renderer\": \"chrome\", \"width\": 1710, \"height\": 1390, \"output\": \"/root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue113/wt/.artifacts/issue113/gate-pass-acc/sheet-readback.png\", \"elapsed_s\": 1.022451}",
+        "stderr": "",
+        "error_line": null
+      },
+      "validate": {
+        "rc": 1,
+        "stdout": "dget_total\": 40}\n  pass  B3 绕行比（路线长÷直角曼哈顿距）           实测={\"max\": 1.302, \"over_budget\": []} 预算={\"budget\": 1.5, \"budget_boundary\": 4.0}\n  pass  B4 最短走线段(px)                 实测=15.5                     预算={\"budget\": 8.0}\n  pass  B5 节点盒最小净距(px)               实测=44.0                     预算={\"budget\": 40.0}\n  pass  B6 容器走廊(px)                  实测={\"group_padding\": null, \"avoid_corridor\": 14.0} 预算={\"budget_group_padding\": 14.0, \"budget_avoid_corridor\": 12.0}\n  ?      B7 标签净空(px)                  实测={\"min_clearance\": 2.101, \"no_obstacles_within_budget\": false, \"violations\": 1} 预算={\"budget\": 6.0}\n  未测:",
+        "stderr": "",
+        "error_line": null
+      },
+      "svg_written": true,
+      "fail_ids": [
+        "V19"
+      ],
+      "fail_count": 1,
+      "warn_count": 6,
+      "fails": [
+        {
+          "id": "V19",
+          "detail": "构图预算 B1：交叉 3 处超出放行预算 1（交叉 3 处 > 放行 1 处），须改道消除或按 #23 重新登记"
+        }
+      ]
+    },
+    "gate-pass-prv": {
+      "edit": {
+        "inst": "PRV-002",
+        "axis": "y",
+        "before": 730,
+        "after": 790
+      },
+      "render": {
+        "rc": 0,
+        "stdout": "wrote /root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue113/wt/.artifacts/issue113/gate-pass-prv/1#系统原理图.svg\nmirror: EMP-001=y (逐组件镜像许可登记;端口身份不变,不提升成熟度)\nnets=38  segments=47  junctions=24  buses={'PRESS': 4, 'MANIFOLD': 3, 'USR': 9, 'USERR': 10, 'RET': 4, 'CASE': 3}",
+        "stderr": "",
+        "error_line": null
+      },
+      "rasterize": {
+        "rc": 0,
+        "stdout": "{\"renderer\": \"chrome\", \"width\": 1710, \"height\": 1390, \"output\": \"/root/orca/workspaces/组件库/v2-v7-v8/.scratch/issue113/wt/.artifacts/issue113/gate-pass-prv/sheet-readback.png\", \"elapsed_s\": 1.150149}",
+        "stderr": "",
+        "error_line": null
+      },
+      "validate": {
+        "rc": 0,
+        "stdout": "dget_total\": 40}\n  pass  B3 绕行比（路线长÷直角曼哈顿距）           实测={\"max\": 1.312, \"over_budget\": []} 预算={\"budget\": 1.5, \"budget_boundary\": 4.0}\n  pass  B4 最短走线段(px)                 实测=18.0                     预算={\"budget\": 8.0}\n  pass  B5 节点盒最小净距(px)               实测=44.0                     预算={\"budget\": 40.0}\n  pass  B6 容器走廊(px)                  实测={\"group_padding\": null, \"avoid_corridor\": 14.0} 预算={\"budget_group_padding\": 14.0, \"budget_avoid_corridor\": 12.0}\n  ?      B7 标签净空(px)                  实测={\"min_clearance\": 2.101, \"no_obstacles_within_budget\": false, \"violations\": 1} 预算={\"budget\": 6.0}\n  未测:",
+        "stderr": "",
+        "error_line": null
+      },
+      "svg_written": true,
+      "fail_ids": [],
+      "fail_count": 0,
+      "warn_count": 6,
+      "fails": []
+    },
+    "v17-semantics": {
+      "intent_paths_append": [
+        "TANK-001.suction_out",
+        "USER-001.pressure_in"
+      ],
+      "render": {
+        "rc": 1,
+        "stdout": "",
+        "stderr": ", 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-004.pressure_in'}, {'endpoint': 'USER-002.pressure_in', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-002.pressure_in'}, {'endpoint': 'USER-003.pressure_in', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-003.pressure_in'}, {'endpoint': 'EMP-001.pressure_out', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal EMP-001.pressure_out'}, {'endpoint': 'USER-007.pressure_in', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-007.pressure_in'}, {'endpoint': 'EDP-001.pressure_out', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal EDP-001.pressure_out'}]",
+        "error_line": "ValueError: [{'endpoint': 'ACC-001.hydraulic_port', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal ACC-001.hydraulic_port'}, {'endpoint': 'USER-008.pressure_in', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-008.pressure_in'}, {'endpoint': 'USER-001.pressure_in', 'role': 'pressure', 'detail': 'Suc"
+      },
+      "render_error_line": "ValueError: [{'endpoint': 'ACC-001.hydraulic_port', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal ACC-001.hydraulic_port'}, {'endpoint': 'USER-008.pressure_in', 'role': 'pressure', 'detail': 'Suction network reaches an incompatible nontransparent terminal USER-008.pressure_in'}, {'endpoint': 'USER-001.pressure_in', 'role': 'pressure', 'detail': 'Suc",
+      "svg_written": false,
+      "routing_error_written": false
+    },
+    "bridge-binding": {
+      "baseline_fail_ids": [],
+      "intent_sha256_before": "8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888",
+      "intent_sha256_after": "2ee8f4be9182780a0a3b51ffd142d47bd4619f59e3bd3ba6c98bc0f92948f7d3",
+      "validate_rc": 1,
+      "fail_ids": [
+        "V19"
+      ],
+      "v19_details": [
+        "构图预算 B1：跳线许可解析失败（fail-closed，按未获准处理）：bridge_policy['current-1-verified-single-bridge-20261012']: 跳线登记已失效——intent 当前 sha256=2ee8f4be9182780a0a3b51ffd142d47bd4619f59e3bd3ba6c98bc0f92948f7d3,与登记 8acc1abe4d3959a8496e82ff03d80117ff88d6364a9e135d489af7915c59d888 不符;intent 内容变更后必须按新内容重新登记(fail-closed)"
+      ]
+    }
+  },
+  "registry_seam": {
+    "check_bridge_policy_signature": "(layout, intent_path)",
+    "resolve_policy_signature": "(policy_id, intent_sha256, registry=None)",
+    "production_policy_ids": [
+      "current-1-verified-single-bridge-20261012"
+    ]
+  }
+}
